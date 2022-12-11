@@ -1,4 +1,4 @@
-# Z5omes.
+# Z5omes
 
 It's a zome maker.
 
