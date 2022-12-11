@@ -1,6 +1,6 @@
 # Zomes.
 
-To make your own Zome, check the demo [here](https://florianwns.github.io/zomes/).
+To make your own Zome, check the demo [here](https://florianwns.github.io/z5omes/).
 
 ## Project history 
 
