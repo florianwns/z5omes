@@ -1,0 +1,52 @@
+              Zome habitat 7
+                                            Mes Valeurs
+Nombre d'Ordre       : 7            OK      7
+Nombre de Niveaux    : 5            OK      5
+Nombre de Faces      : 35           OK      35
+Nombre de Forme      : 1,19         OK      1,191754
+Angle de Forme       : 50,00 °      OK      50
+Arête du Zome        : 31,11        OK      31.11447653720824
+Diamètre Niveau 1    : 47,67
+Diamètre Maximal     : 107,11
+Diamètre au Sol      : 85,90
+Hauteur d'un niveau  : 20,00
+Hauteur au Sol       : 100,00
+Périmètre au Sol     : 260,89
+Surface d'Enveloppe  : 27462,35 mm2
+Surface au Sol       : 5047,70 mm2
+Volume du Zome       : 502943,11 mm3
+unité des longueurs  : millimètre
+unité des angles     : degrés
+
+     Diagonale                                      Angle
+ K   Hor   Vert   Ecart   Diam    Surf     Hor   Vert   Pente Los Sup
+ 1  20,68  58,69  19,51   47,67  606,96  141,17  38,83  42,96  145,60
+ 2  37,27  49,83  29,85   85,90  928,65  106,42  73,58  53,39  158,33
+ 3  46,47  41,38  30,91  107,11  961,63   83,37  96,63  75,15  148,42
+ 4  46,47  41,38  30,91  107,11  961,63   83,37  96,63  75,15  140,90
+ 5  37,27  24,92  29,85   85,90  464,32  106,42  73,58  53,39  148,42
+
+
+
+#		Width	Height	Top Height	Bottom Height	Top Edge	CCW Angles [↓, →, ↗]	θ (Slope angle)	σ (Dihedral angle)	Area	Ø
+1		20.68	58.69	29.35	    29.35	        31.11	    [38.83°, 141.17°]	    42.96°	        145.60°	            606.96	47.67
+2		37.27	49.83	24.92	    24.92	        31.11	    [73.58°, 106.42°]	    53.39°	        158.33°	            928.65	85.9
+3		46.47	41.38	20.69	    20.69	        31.11	    [96.63°, 83.37°]	    75.15°	        148.42°	            961.63	107.11
+4		46.47	41.38	20.69	    20.69	        31.11	    [96.63°, 83.37°]	    75.15°	        140.90°	            961.63	107.11
+5		37.27	24.92	24.92	    0	            31.11	    [73.58°, 53.21°]	    53.39°	        148.42°	            464.32	85.9
+
+
+From top to bottom:
+7 diamonds with width 20.692 mm and height 58.715 mm. Top angle: 38.826 degrees. Strut length: 31.1 mm.
+7 diamonds with width 37.285 mm and height 49.854 mm. Top angle: 73.585 degrees. Strut length: 31.1 mm.
+7 diamonds with width 46.494 mm and height 41.399 mm. Top angle: 96.634 degrees. Strut length: 31.1 mm.
+7 truncated diamonds with width 46.494 mm and top half height 20.700 mm and full bottom half height 20.700 mm reduced to 20.658 mm, leaving base of 0.093 mm. Top angle: 96.634 degrees. Top strut length: 31.1 mm.
+7 isosceles triangles with base 37.210 mm and height 24.877 mm. Top angle: 73.585 degrees. Top strut length: 31.1 mm.
+
+
+ANGLE OK with dimszome
+SLOPE OK (90 - slope ?) with dimszome
+WIDTH - HEIGHT OK with Tim Hutton (some imprecision)
+AIRE/SURFACE OK
+DIAMETRE OK
+

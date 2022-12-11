@@ -1,0 +1,35 @@
+              Zome habitat 9
+
+Nombre d'Ordre       : 9
+Nombre de Niveaux    : 5
+Nombre de Faces      : 45
+Nombre de Forme      : 0,58
+Angle de Forme       : 30,00 °
+Arête du Zome        : 23,09
+Diamètre Niveau 1    : 23,09
+Diamètre Maximal     : 66,50
+Diamètre au Sol      : 66,50
+Hauteur d'un niveau  : 20,00
+Hauteur au Sol       : 100,00
+Périmètre au Sol     : 204,69
+Surface d'Enveloppe  : 14457,64 mm2
+Surface au Sol       : 3197,56 mm2
+Volume du Zome       : 181023,39 mm3
+unité des longueurs  : millimètre
+unité des angles     : degrés
+
+     Diagonale                                     Angle
+ K   Hor   Vert   Ecart  Diam    Surf     Hor   Vert   Pente Los Sup
+ 1   7,90  45,51   7,78  23,09  179,72  160,31  19,69  61,52  145,01
+ 2  14,84  43,74  14,06  43,40  324,63  142,51  37,49  66,14  161,49
+ 3  20,00  41,63  18,03  58,48  416,33  128,68  51,32  73,90  159,70
+ 4  22,74  40,20  19,79  66,50  457,14  121,00  59,00  84,27  157,82
+ 5  22,74  20,10  19,79  66,50  228,57  121,00  59,00  84,27  156,98
+
+
+#		Width	Height	Top Height	Bottom  Height	Top Edge	CCW Angles [↓, →, ↗]	θ (Slope angle)	σ (Dihedral angle)	Area	Ø
+1		7.9	    45.51	22.75	    22.75	        23.09	    [19.69°, 160.31°]	    61.52°	        145.01°	            179.72	23.09
+2		14.84	43.74	21.87	    21.87	        23.09	    [37.49°, 142.51°]	    66.14°	        161.49°	            324.63	43.4
+3		20	    41.63	20.82	    20.82	        23.09	    [51.32°, 128.68°]	    73.90°	        159.70°	            416.33	58.48
+4		22.74	40.2	20.1	    20.1	        23.09	    [59.00°, 121.00°]	    84.27°	        157.82°	            457.14	66.5
+5		22.74	20.1	20.1	    0	            23.09	    [59.00°, 60.50°]	    84.27°	        156.98°	            228.57	66.5

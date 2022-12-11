@@ -1,0 +1,129 @@
+Bonjour,
+
+PRESENTATION
+Voici un outil pour les personnes intéressées par les Zomes.
+Ce logiciel calcule les dimensions nécessaires pour réaliser un zome. Une boite de dialogue permet de donner les paramètres nécessaires aux calculs.
+Il offre des options de choix des données à afficher ainsi que des vues du zome calculé, et bien sur la possibilité de sauver les résultats ou de les transférer vers d'autres applications via le presse-papier.
+Il n'y a pas de fichier d'aide. Les fonctionnalités du logiciel sont décrites dans "Aide" sous-menu "Utilisation"
+
+LICENCE
+Ce logiciel est gratuit et ne peut être vendu.Il est donné librement et sans contrepartie pécuniaire ou matérielle.
+L'auteur n'autorise pas de modification "hard" du présent produit.
+
+UTILISATION
+L'auteur n'a pas la responsabilité de l'usage qui sera fait des résultats issus du logiciel.
+D'autre part, cette 1ère version contient sans doute quelques "bogues". L'utilisateur est invité à communiquer les problèmes rencontrés à l'auteur, en les documentant le mieux possible.
+
+PRECISIONS
+Des documents sont disponibles - notamment les formules de calculs.
+Ceci est le résultat d'environ 2 années de formations, recherches, calculs, progammation et mise au point. C'est gratuit parce que c'est mon envie et parce que j'ai bénéficié gratuitement du travail et de l'aide de nombreuses personnes. Je pense que l'univers entier a contribué - directement ou non - à tout ceci.
+Si vous avez envie de soutenir ce travail - matériellement ou moralement - c'est bienvenu. J'étudierai également toute demande en vue de prolonger ce travail sans repartir à zéro.
+
+Voici mes coordonnées:
+	Olivier DUROSELLE - Le  Grand  Retour
+	24210   FOSSEMAGNE - FRANCE
+
+
+
+
+
+SOMMAIRE
+1 - Généralités
+2 - Démarrage
+3 - Boite de dialogue "Paramètres de Calculs du Zome"
+4 - Coudée
+5 - Format des Résultats & Dossiers
+6 - Vues du Zome
+7 - Enregistrement & Impression
+8 - Définitions des Paramètres
+9 - Signification des Résultats
+
+   **********
+
+1 - Généralités
+Ce logiciel permet de calculer les dimensions d'un zome à partir de 4 paramètres. Il est constitué d'une fenêtre principale et d'une boite de dialogue permettant la saisie des paramètres de calcul. Les calculs se font automatiquement lorsque tous les paramètres sont fournis et validés.
+Pour fournir les paramètres du zome, voir le paragraphe 3
+Pour utiliser une coudée, voir le paragraphe 4
+Pour choisir les données qui seront affichées, voir le paragraphe 5
+Pour afficher des vues du zome calculé, voir le paragraphe 6
+Pour enregistrer ou imprimer les résultats,  voir le paragraphe 7
+
+
+2 - Démarrage
+ Ouvrir la boite de dialogue "Paramètres de Calcul" en cliquant sur le menu "Paramètres" puis sur "Boite de Dialogue", ou appuyer sur F3. Puis, donner les paramètres (se reporter au paragraphe 3).
+
+3 - Boite de dialogue "Paramètres de Calculs du Zome"
+Le premier onglet "Paramètres" demande les caractéristiques du zome à savoir:
+ a - N, le nombre d'ordre - à choisir dans la liste déroulante
+ b - K, le nombre de niveau du zome. La valeur par défaut est modifiable: choisir dans la liste déroulante de "K"
+ c - 2 dimensions à choisir parmi une liste déroulante. Choisir 2 diamètres ou 2 hauteurs provoque une erreur
+ d - une valeur (un nombre réel) pour chacune des dimensions
+Les valeurs peuvent être entrées directement au clavier en tenant compte de l'unité correspondante affichée dans la barre d'état au bas de la boite. Les valeurs peuvent aussi être choisies dans la liste déroulante: les nouvelles valeurs y sont incorporées. VALIDER la dernière valeur entrée pour que les résultats apparaissent.
+
+Il existe une liste pour les longueurs et une liste pour les angles.L'onglet "Listes" permet d'effacer, de réinitialiser, de charger ou de sauver une liste. Le choix se fait dans la boite de boutons radio "Opération"
+Les unités de longueurs et d'angles peuvent être modifiées: cf onglet "Options"
+Le type du zome - onglet "Options" - détermine une partie des résultats fournis: certains angles sont nécessaires pour un habitat et pas pour un zome en verre.
+
+Dès que tous les paramètres sont entrés et validés, les résultats sont automatiquement affichés.
+
+4 - Coudée
+Il est possible de donner les longueurs en fonction de la valeur d'une coudée. L'onglet "Coudée" permet de fournir la valeur de la coudée à utiliser. Dans cet onglet, il est aussi possible de calculer la valeur de la coudée terrestre d'un lieu à partir de sa latitude.
+Dans cet onglet:
+- indiquer comment sera donné la coudée en cliquant sur le bouton radio correspondant de la boite "Coudée"
+- entrer la valeur - dans l'unité de longueur en cours - ou choisir cette valeur dans la liste déroulante
+- donner la latitude en degrés, minutes, secondes si c'est le choix qui a été fait. Valider en appuyant sur le bouton "Ok". La coudée du lieu s'affiche et est incorporée dans la liste des coudées.
+- cocher la case "dimensions en coudée": les longueurs seront alors des multiples de cette coudée.
+- à tout moment, il est possible de revenir aux longueurs vraies en effaçant la coche de "dimensions en coudée"
+
+De même que pour les longueurs et les angles, il existe une liste pour les différentes valeurs de coudée. Cette liste peut être aussi effacée, réinitialisée, rechargée ou sauvée dans l'onglet "Listes".
+
+5 - Format des Résultats & Dossiers
+Les résultats se mettent à jour automatiquement, dès qu'un paramètre est modifié. La précision affichée est modifiable - voir le menu "Options". Les résultats peuvent aussi être donnés en fonction de la coudée si une coudée a été fourni. Voir le menu "Options" de la page des résultats
+Les dossiers offrent à l'utilisateur la possibilité de choisir les données qui seront affichées. Pour chaque type de zome, 3 modèles de dossiers sont proposés. Chaque modèle est configurable selon les choix de l'utilisateur.
+Pour changer de dossier:
+- cliquer sur le bouton correspondant de la barre d'outils
+- cliquer sur le dossier choisi dans le menu "Options"
+Pour modifier les options d'un dossier, cliquer sur "Options dossiers..." du menu "Options"
+Dans cette boite de dialogue, il  est possible de sauver les options des dossiers personnalisés, de recharger un fichier "options dossiers", ou de remettre les options par défaut pour tous les dossiers.
+
+Le texte des résultats est modifiable à l'aide du clavier. Les fonctions habituelles de "Couper", "Copier", "Coller" sont disponibles - voir le menu "Edition". Elles permettent d'importer ou d'exporter tout ou partie du texte vers d'autres applications.
+Les résultats tels qu'ils sont affichés peuvent être sauvés dans un fichier texte - format MS-DOS - ou imprimés en utilisant les fonctions habituelles du menu "Fichier". cf paragraphe 7.
+
+
+6 - Vues du Zome
+Trois vues - à l'échelle - sont affichables. Simples, elles permettent de se rendre compte des proportions du zome. Du fait des symétries, les vues de face et profil se ressemblent. Elles sont identiques si N est mutiple de 4. Il n'y a pas de vue d'affichée au départ.Pour afficher une vue, cliquer sur le bouton correspondant de la barre d'outils.
+La largeur et la hauteur des vues est modifiable en étirant la zone à l'aide des "splitters" droit et bas. Leur valeur sont affichées dans la barre d'outils
+Deux boutons de la barre d'outils affichent une palette de couleur afin de choisir la couleur du trait et celle du fond des vues.
+Les 2 boutons "Plus" et "Moins" permettent de faire pivoter les vues.
+Les vues sont enregistrables dans un fichier au format BitMap. La palette peut être monochrome, de 16 ou 256 couleurs, suivant le type de l'enregistrement. Le fichier peut être lu par toute application acceptant le format BMP de MS-Windows.
+
+7 - Enregistrement & Impression
+Le texte est enregistrable dans un fichier au format texte ".txt" à partir du menu "Fichier"
+Les vues sont enregistrables ensembles dans un fichier auformat BitMap ".BMP". Le format du BitMap peut être au choix monochrome, 16 ou 256 couleurs. Le choix se fait dans la boite de dialogue demandant un nom de fichier
+
+Toujours dans le menu "Fichier", les fonctions d'impression offrent le choix d'imprimer texte et vues, ensembles ou séparement.
+
+8 - Définitions des Paramètres
+N - nombre d'ordre: nombre de symétrie de révolution autour de l'axe vertical
+K - nombre de niveaux: nombre d'étages du zome en partant du sommet
+Diamètre maximal: diamètre du plan équatorial du zome
+Hauteur d'un niveau: hauteur d'un étage - identique quel que soit l'étage
+Hauteur Totale  : hauteur du zome complet
+Arête : coté d'un losange - la même pour tous les losanges du zome
+Angle de Forme: angle entre l'axe vertical du zome et une arête du sommet
+Nombre de Forme: tangente de l'angle de forme
+
+
+9 - Signification des Résultats
+Résultats par niveaux
+K: numéro de l'étage en partant du sommet
+Diagonales: diagonales du losange de la couronne "K"
+La diagonale "Hor" (horizontale) est située dans un plan parralèle au sol. Ladiagonale "Vert" (verticale) est située dans un plan vertical (contenant l'axe du zome
+Ecart: distance entre 2 cotés parralèles d'un losange
+Diam : diamètre du cercle passant par les sommets du niveau
+Surf : surface d'un losange de la couronne
+Angle "Hor": angle du losange ayant la diagonale horizontale pour bissectrice
+Angle "Vert": angle du losange ayant la diagonale verticale pour bissectrice
+Angle "Pente": angle de la diagonale verticale du losange avec le sol
+Angle "Face Sup": angle dièdre entre 2 losanges ayant une arête commune - le losange considéré et celui de la couronne située au-dessus
+NOTA - au niveau 1, l'angle "Face Sup" est l'angle entre 2 losanges de la couronne 1 ayant une arête commune

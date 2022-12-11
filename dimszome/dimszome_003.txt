@@ -1,0 +1,28 @@
+              Zome habitat 7
+
+Nombre d'Ordre       : 7
+Nombre de Niveaux    : 6
+Nombre de Faces      : 42
+Nombre de Forme      : 1,19
+Angle de Forme       : 50,00 °
+Arête du Zome        : 25,93
+Diamètre Niveau 1    : 39,73
+Diamètre Maximal     : 89,26
+Diamètre au Sol      : 39,73
+Hauteur d'un niveau  : 16,67
+Hauteur au Sol       : 100,00
+Périmètre au Sol     : 120,65
+Surface d'Enveloppe  : 22803,47 mm2
+Surface au Sol       : 1079,57 mm2
+Volume du Zome       : 328522,07 mm3
+unité des longueurs  : millimètre
+unité des angles     : degrés
+
+     Diagonale                                     Angle
+ K   Hor   Vert   Ecart  Diam    Surf     Hor   Vert   Pente Los Sup
+ 1  17,24  48,91  16,26  39,73  421,50  141,17  38,83  42,96  145,60
+ 2  31,06  41,53  24,87  71,58  644,90  106,42  73,58  53,39  158,33
+ 3  38,73  34,49  25,76  89,26  667,80   83,37  96,63  75,15  148,42
+ 4  38,73  34,49  25,76  89,26  667,80   83,37  96,63  75,15  140,90
+ 5  31,06  41,53  24,87  71,58  644,90  106,42  73,58  53,39  148,42
+ 6  17,24  24,45  16,26  39,73  210,75  141,17  38,83  42,96  158,33
