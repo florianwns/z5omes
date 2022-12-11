@@ -1,4 +1,6 @@
-# Zomes.
+# Z5omes.
+
+It's a zome maker.
 
 To make your own Zome, check the demo [here](https://florianwns.github.io/z5omes/).
 
