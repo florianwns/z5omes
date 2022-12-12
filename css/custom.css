@@ -2,6 +2,10 @@
     filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .2));
 }
 
+.help-content li {
+    margin-bottom: 0.2rem;
+}
+
 .input-group .form-range {
     height: inherit !important;
 }
@@ -32,10 +36,6 @@
     max-width: 40%;
 }
 
-/*.input-group .form-control {*/
-/*    min-width: 20%;*/
-/*    max-width: 30%;*/
-/*}*/
 
 .d-flex > .btn-sm, .input-group .btn {
     width: 48px;
