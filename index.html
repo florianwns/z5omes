@@ -307,7 +307,8 @@
                             <tr>
                                 <td x-text="i + 1"></td>
                                 <td>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                         :fill="obj.color">
                                         <polygon :points="to_svg_polygon(obj, 32)"/>
                                     </svg>
                                 </td>

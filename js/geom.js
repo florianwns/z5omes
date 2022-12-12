@@ -149,7 +149,6 @@ function colorMap(value, start = '#FFFFFF', end = '#000000') {
     return `#${_.reduce([r, g, b], (res, v) => res + v.toString(16).toUpperCase().padStart(2, '0'), "")}`;
 }
 
-
 class ConvexPolygon {
     constructor(points) {
         // Consider that polygon is made by triangle,
@@ -245,6 +244,13 @@ class ConvexPolygon {
 
     get slope() {
         return 0;
+    }
+
+    get color() {
+        // the color is related to the slope
+        const ratio = Math.abs(rad2deg(this.slope) / 90);
+        return colorMap(ratio, "#e5555d", "#652ddd");
+        // TODO :  try #652ddd, #b037dd, #e5555d, #f2ac5f with https://github.com/gka/chroma.js
     }
 
     get θ() {
