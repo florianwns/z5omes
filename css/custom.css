@@ -6,6 +6,32 @@
     height: inherit !important;
 }
 
+
+.bg-orange {
+    background-color: #f77753;
+}
+
+.bg-purple {
+    background-color: #7753f7;
+}
+
+.bg-purple-light {
+    background-color: #ad95f5;
+}
+
+.small .badge {
+    font-size: 0.9em;
+}
+
+.bg-purple-dark {
+    background-color: #251a4d;
+}
+
+.bg-purple-medium {
+    background-color: #4e36a2;
+}
+
+
 .break-before {
     page-break-before: always;
 }

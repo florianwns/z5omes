@@ -28,6 +28,17 @@ unité des angles     : degrés
 
 
 
+#		Width	Height	CCW Edges	    CCW Angles	    θ (Slope angle)	σ (Dihedral angle)	Area	Ø
+1		2.07cm	5.87cm	3.11cm	        38.83°, 141.17°	42.96°	145.60°	6.07cm²	4.77cm
+2		3.73cm	4.98cm	3.11cm	        73.58°, 106.42°	53.39°	158.33°	9.29cm²	8.59cm
+3		4.65cm	4.14cm	3.11cm	        96.63°, 83.37°	75.15°	148.42°	9.62cm²	10.71cm
+4		4.65cm	4.14cm	3.11cm	        96.63°, 83.37°	75.15°	140.90°	9.62cm²	10.71cm
+5		3.73cm	2.49cm	3.11cm, 3.73cm	73.58°, 53.21°	53.39°	148.42°	4.64cm²	8.59cm
+
+
+6		8.37cm	8.16cm	3.73cm	128.57°			50.48cm²	8.59cm
+
+
 #		Width	Height	Top Height	Bottom Height	Top Edge	CCW Angles [↓, →, ↗]	θ (Slope angle)	σ (Dihedral angle)	Area	Ø
 1		20.68	58.69	29.35	    29.35	        31.11	    [38.83°, 141.17°]	    42.96°	        145.60°	            606.96	47.67
 2		37.27	49.83	24.92	    24.92	        31.11	    [73.58°, 106.42°]	    53.39°	        158.33°	            928.65	85.9

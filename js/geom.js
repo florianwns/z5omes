@@ -71,50 +71,81 @@ function rad2deg(rad) {
     return 180.0 * rad / Math.PI;
 }
 
-function plane_normal(a, b, c) {
-    return cross(normalize(sub(b, a)), normalize(sub(c, a)));
+function toDecimal(x, fractionDigits = 2) {
+    return parseFloat(x.toFixed(fractionDigits));
 }
 
-function intersect_line_and_plane(a, v, p, n) {
-    return add(a, mul(v, dot(sub(p, a), n) / dot(v, n)));
+function reprDistance(d) {
+    // d unit is in mm
+    if (d >= 1e6) {
+        return toDecimal(d / 1e6) + "km";
+    } else if (d >= 1e3) {
+        return toDecimal(d / 1e3) + "m";
+    } else if (d >= 10) {
+        return toDecimal(d / 10) + "cm";
+    } else {
+        return toDecimal(d) + "mm";
+    }
+};
+
+function to_mm(v, unit) {
+    switch (unit) {
+        case "m":
+            return v * 1000;
+        case "cm":
+            return v * 10;
+        case "mm":
+        default:
+            return v;
+    }
 }
 
-function toDecimal(x, num = 2) {
-    return parseFloat(x.toFixed(num));
+function reprArea(d) {
+    // d unit is in mm²
+    if (d >= 1e12) {
+        return toDecimal(d / 1e12) + "km²";
+    } else if (d >= 1e6) {
+        return toDecimal(d / 1e6) + "m²";
+    } else if (d >= 100) {
+        return toDecimal(d / 100) + "cm²";
+    } else {
+        return toDecimal(d) + "mm²";
+    }
+};
+
+function reprAngle(a, fractionDigits = 2) {
+    return a ? a.toFixed(fractionDigits) + "°" : "";
+}
+
+function reprArr(arr, unit = "") {
+    const res = _.join(_.map(arr, v => v + unit), ", ");
+    return `${res}`;
+}
+
+function uniqueArr(arr) {
+    const s = new Set(arr);
+    return [...s];
 }
 
 
 class ConvexPolygon {
     constructor(points) {
-        if (points.length < 3) {
-            console.log("Not enough points to make a ConvexPolygon for zome building");
-            return;
-        }
-
-        if (points.length > 5) {
-            console.log("Too much points to make a ConvexPolygon for zome building");
-            return;
-        }
-
         // Consider that polygon is made by triangle,
+        if (points.length < 3) {
+            console.error("Not enough points to make a polygon");
+            return;
+        }
+
         this.points = points;                       // 3D Points
     }
 
-    get num_points() {
-        return this.points.length;
-    }
-
-    get A() {
+    get O() {
         //  Consider first point like the origin
         return this.points[0];
     }
 
-    get B() {
-        return this.points[1];
-    }
-
-    get C() {
-        return this.points[this.num_points - 1];
+    get num_points() {
+        return this.points.length;
     }
 
     get faces() {
@@ -122,7 +153,7 @@ class ConvexPolygon {
         let faces = []
         for (let i = 1, j = 2; j < this.num_points; i++, j++) {
             faces.push(
-                new Triangle([this.A, this.points[i], this.points[j]])
+                new Triangle([this.points[0], this.points[i], this.points[j]])
             );
         }
         return faces
@@ -138,29 +169,102 @@ class ConvexPolygon {
         return _.map(this.points, (p, i) => [p, this.points[(i + 1) % this.num_points]]);
     }
 
-    get distances() {
+    get edge_distances() {
         // Compute edges distances
         return _.map(this.edges, (e, i) => dist(...e));
     }
 
     get perimeter() {
         // Compute perimeter from distances
-        return _.reduce(this.distances, (res, distance) => res + distance, 0);
+        return _.reduce(this.edge_distances, (res, distance) => res + distance, 0);
     }
 
-    get ccw_angles() {
-        return [
-            this.φ, this.ω
-        ];
+    get angles() {
+        return _.map(this.points, (p, i) => angle(
+            this.points[(this.num_points + i - 1) % this.num_points],
+            p,
+            this.points[(i + 1) % this.num_points]
+        ));
     }
 
-    get deg_ccw_angles() {
-        return _.map(this.ccw_angles, a => rad2deg(a));
+    get deg_angles() {
+        return _.map(this.angles, a => rad2deg(a));
     }
 
-    get ccw_angles_str() {
-        const res = _.join(_.map(this.deg_ccw_angles, a => a.toFixed(2) + "°"), ", ");
-        return `[${res}]`;
+    get diameter() {
+        return 2 * dist(this.O, [0, this.O[1], 0]);
+    }
+
+    get size() {
+        const points_2d = this.to_2D();
+
+        let xMin = Number.MAX_VALUE, xMax = Number.MIN_VALUE;
+        let yMin = Number.MAX_VALUE, yMax = Number.MIN_VALUE;
+        let x, y;
+
+        // Planar Polygon to Make 2D Representation, and compute parameters in one loop
+        for (let iP = 0; iP < points_2d.length; iP++) {
+            // Create the new 2D point
+            [x, y] = points_2d[iP];
+
+            // Save Boundaries
+            if (x < xMin) xMin = x;
+            if (x > xMax) xMax = x;
+            if (y < yMin) yMin = y;
+            if (y > yMax) yMax = y;
+        }
+
+        // Subtract xMin and yMin (because SVG viewBox is not updated with AlpineJs)
+        return {
+            width: Math.abs(xMax - xMin),
+            height: Math.abs(yMax - yMin)
+        };
+    }
+
+    to_2D() {
+        // Convert to 2D, compute Boundaries, and get width and height
+        let points_2d = []
+
+        // Make a reference to planar 3D points to 2D
+        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
+        const xRef = normalize(sub(C, O));
+        const yRef = normalize(sub(sub(B, O), mul(xRef, dot(sub(B, O), xRef))));
+        const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
+
+        let x, y;
+
+        // Planar Polygon to Make 2D Representation, and compute parameters in one loop
+        for (let iV = 0; iV < this.num_points; iV++) {
+            // Create the new 2D point
+            [x, y] = rot2d(
+                p2(
+                    dot(sub(this.points[iV], O), xRef),
+                    dot(sub(this.points[iV], O), yRef)
+                ),
+                ref_angle
+            )
+            points_2d.push([x, y]);
+        }
+        return points_2d;
+    }
+}
+
+
+class InclinedPolygon extends ConvexPolygon {
+    constructor(points) {
+        super(points);
+    }
+
+    get A() {
+        return this.O;
+    }
+
+    get B() {
+        return this.points[1];
+    }
+
+    get C() {
+        return this.points[this.num_points - 1];
     }
 
     get hat() {
@@ -192,14 +296,6 @@ class ConvexPolygon {
         return dist(this.A, this.B);
     }
 
-    get diameter() {
-        return 2 * dist(this.B, [0, this.B[1], 0]);
-    }
-
-    get Ø() {
-        return this.diameter;
-    }
-
     get I() {
         return mid(this.B, this.C);
     }
@@ -212,10 +308,6 @@ class ConvexPolygon {
         return 0;
     }
 
-    get width() {
-        return this.hat_triangle.width;
-    }
-
     get slope() {
         // Compute the slope of the hat
         return angle(this.A, this.I, [this.A[0], this.I[1], this.A[2]]);
@@ -226,73 +318,30 @@ class ConvexPolygon {
         return this.slope;
     }
 
-    to_2D(size = 100) {
-        let points_2d = []
-
-        // Make a reference to planar 3D points to 2D
-        const [O, B, C] = this.hat;
-        const xRef = normalize(sub(C, O));
-        const yRef = normalize(sub(sub(B, O), mul(xRef, dot(sub(B, O), xRef))));
-        const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
-        let xMin = Number.MAX_VALUE, xMax = Number.MIN_VALUE;
-        let yMin = Number.MAX_VALUE, yMax = Number.MIN_VALUE;
-        let x, y;
-
-        // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-        for (let iV = 0; iV < this.num_points; iV++) {
-            // Create the new 2D point
-            [x, y] = rot2d(
-                p2(
-                    dot(sub(this.points[iV], O), xRef),
-                    dot(sub(this.points[iV], O), yRef)
-                ),
-                ref_angle
-            )
-            points_2d.push([x, y]);
-
-            // Save Boundaries
-            if (x < xMin) xMin = x;
-            if (x > xMax) xMax = x;
-            if (y < yMin) yMin = y;
-            if (y > yMax) yMax = y;
-        }
-
-        // Subtract xMin and yMin (because SVG viewBox is not updated with AlpineJs)
-        const width = Math.abs(xMax - xMin);
-        const height = Math.abs(yMax - yMin);
-
-        // Recompute pixel positions
-        const center = size / 2;
-        const pixel_ratio = size / Math.max(height, width);
-        points_2d = points_2d.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
-
-        return points_2d;
+    get diameter() {
+        return 2 * dist(this.B, [0, this.B[1], 0]);
     }
 }
 
 
-class Triangle extends ConvexPolygon {
-    //  Consider Triangle like this        A
-    //  points = [A, B, C]               B ◇ C
-    //  A is top, B is left, C is right
-
+class Triangle extends InclinedPolygon {
     get area() {
         // Heron formula
         const s = this.perimeter / 2;
-        return Math.sqrt(_.reduce(this.distances, (res, d) => res * (s - d), s));
+        return Math.sqrt(_.reduce(this.edge_distances, (res, d) => res * (s - d), s));
     }
 
-    get width() {
+    get base() {
         const [, B, C] = this.points;
         return dist(B, C);
     }
 
     get height() {
-        return (2 * this.area) / this.width
+        return (2 * this.area) / this.base;
     }
 }
 
-class Kite extends ConvexPolygon {
+class Kite extends InclinedPolygon {
     //  Consider Kite like this       A
     //  points = [A, B, D, C]       B ◇ C
     //                                D
@@ -300,19 +349,10 @@ class Kite extends ConvexPolygon {
     // A, B, C Form the top_triangle
     // B, D, C Form the Base
 
-    get base() {
-        const [, B, D, C] = this.points;
-        return new Triangle([D, B, C]);
-    }
-
     get bottom_height() {
         const [, B, D, C] = this.points;
         const bottom_triangle = new Triangle([D, B, C]);
         return bottom_triangle.height;
-    }
-
-    get height() {
-        return this.top_height + this.bottom_height;
     }
 }
 
@@ -325,7 +365,7 @@ class TruncatedKite extends Kite {
     //  points = [A, B, E, F, C]         B ◇ C
     //                                    E F
 
-    get ccw_angles() {
+    get angles() {
         return [
             this.φ, this.ω, this.ψ
         ];
@@ -334,6 +374,17 @@ class TruncatedKite extends Kite {
     get bottom_height() {
         const [, B, E, F, C] = this.points;
         return dist(mid(B, C), mid(E, F))
+    }
+}
+
+
+class ZomeBase extends ConvexPolygon {
+    get top_height() {
+        return 0;
+    }
+
+    get bottom_height() {
+        return 0;
     }
 }
 
