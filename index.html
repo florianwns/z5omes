@@ -261,7 +261,7 @@
                         <span class="badge bg-primary rounded-pill" x-text="body_area"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center border-top"
-                        x-show.important="has_base" >
+                        x-show.important="has_base">
                         Base Ø
                         <span class="badge bg-primary rounded-pill" x-text="base_diameter"></span>
                     </li>
@@ -279,9 +279,9 @@
             </div>
 
             <div class="col-lg-6 col-xl-7 mb-3">
-<!--                <div class="card" style="min-height: 250px">-->
-<!--                    canvas-->
-<!--                </div>-->
+                <!--                <div class="card" style="min-height: 250px">-->
+                <!--                    canvas-->
+                <!--                </div>-->
             </div>
             <div class="col-12">
                 <div class="card mx-0 p-0 overflow-hidden">
@@ -292,8 +292,8 @@
                             <th></th>
                             <th>Width</th>
                             <th>Height</th>
-<!--                            <th>Top Height</th>-->
-<!--                            <th>Bottom Height</th>-->
+                            <!--                            <th>Top Height</th>-->
+                            <!--                            <th>Bottom Height</th>-->
                             <th>CCW Edges</th>
                             <th>CCW Angles</th>
                             <th>θ (Slope angle)</th>
@@ -314,8 +314,8 @@
                                 </td>
                                 <td x-text="reprDistance(obj.size.width)"></td>
                                 <td x-text="reprDistance(obj.size.height)"></td>
-<!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
-<!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
+                                <!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
+                                <!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
                                 <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
                                 <td x-text="reprArr(uniqueArr(_.map(obj.deg_angles, v => reprAngle(v))))"></td>
                                 <td x-text="reprAngle(rad2deg(obj.θ))"></td>
@@ -363,7 +363,7 @@
 
             return {
                 pieces: [],
-                body:[],
+                body: [],
                 has_base: false,
                 height: 100,                // Height
                 length_unit: "mm",          // Length unit by default is mm
@@ -379,30 +379,30 @@
 
                     this.$watch("length_unit", () => this.__to_real_world());
                 },
-                get base(){
+                get base() {
                     // Only the base
                     return this.has_base ? this.pieces[this.pieces.length - 1] : null;
                 },
-                get widest_diameter(){
+                get widest_diameter() {
                     const value = _.reduce(this.body, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return reprDistance(value);
                 },
-                get body_area(){
+                get body_area() {
                     const value = _.reduce(this.body, (res, p) => res + p.area * num, 0);
                     return reprArea(value);
                 },
-                get body_num_pieces(){
+                get body_num_pieces() {
                     return num * this.body.length;
                 },
-                get base_diameter(){
+                get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
                     return reprDistance(value);
                 },
-                get base_area(){
+                get base_area() {
                     const value = this.base ? this.base.area : 0
                     return reprArea(value);
                 },
-                get base_perimeter(){
+                get base_perimeter() {
                     const value = this.base ? this.base.perimeter : 0
                     return reprDistance(value);
                 },
@@ -433,7 +433,7 @@
                     }
 
                     virtual_pieces = zome.pieces;
-                    num =  zome.num;
+                    num = zome.num;
 
                     this.__to_real_world();
                 },
@@ -461,7 +461,7 @@
                         piece.points_2d = piece.to_2D();
 
                         // Compute σ, the Dihedral angle only for the Zome body
-                        if(piece instanceof PolygonWithHat){
+                        if (piece instanceof PolygonWithHat) {
                             if (iP == 0) {
                                 const next_piece = pieces[iP + 1];
                                 piece.σ = dihedral_angle(next_piece.φ, piece.ω, piece.ω);
@@ -581,7 +581,38 @@
                     }
 
                     // Draw faces
-                    {
+                    const color_face = false;
+                    if (color_face) {
+                        const points = [];
+                        const colors = [];
+                        const num_pieces = zome.pieces.length;
+                        for (let iP = 0; iP < num_pieces; iP++) {
+                            const faces = zome.pieces[iP].faces;
+                            const rgb = zome.pieces[iP].rgb;
+                            for (let iF = 0; iF < faces.length; iF++) {
+                                const vectors = _.map(faces[iF].points, p => new THREE.Vector3(...p));
+                                points.push(...vectors);
+                                colors.push(...rgb);  // r, g, b
+                                colors.push(...rgb);  // r, g, b
+                                colors.push(...rgb);  // r, g, b
+                            }
+                        }
+
+                        const material = new THREE.MeshBasicMaterial({
+                            side: THREE.DoubleSide,
+                            vertexColors: true,
+                        });
+
+                        const geometry = new THREE.BufferGeometry()
+                        geometry.setFromPoints(points)
+                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                        geometry.computeVertexNormals()
+
+                        // Add to group
+                        meshes.faces = new THREE.Mesh(geometry, material)
+                        meshes.faces.visible = this.draw_faces;
+                        meshes.zome.add(meshes.faces);
+                    } else {
                         const points = zome.faces.map(p => new THREE.Vector3(...p));
                         const material = new THREE.MeshNormalMaterial({side: THREE.DoubleSide})
                         const geometry = new THREE.BufferGeometry()
@@ -686,16 +717,17 @@
             let faces = [];
             let iTriangles = [];
             let pieces = [];
+            let colors = [];
 
             return {
                 // Shape Parameters
                 num: 7,                     // number of faces (kites or diamonds)
                 theta_deg: 50,              // In degrees, vertical angle of top struts
                 angle_unit: "deg",          // Degrees or Radians
-
                 height_ratio: 0.714286,           // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
                 kite_ratio: 1,                   // Kite ratio, lower half to upper half (1 => is rhombus else kites)
                 suggested_height_ratio: null,    // Value to magnetize the zome to the nearest cut
+                colors: [],
 
                 // Debouncers
                 __make_zome: null,
@@ -934,7 +966,7 @@
                             C = vertices[iC];
 
                             // Don't push base vertices if zome is entire
-                            if(this.height_ratio < 1){
+                            if (this.height_ratio < 1) {
                                 base_vertices.push(B);
                             }
 
@@ -950,7 +982,7 @@
                     }
 
                     // Finally add the base piece
-                    if(base_vertices.length >= 3){
+                    if (base_vertices.length >= 3) {
                         pieces.push(new ZomeBase(base_vertices));
                     }
 

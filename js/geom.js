@@ -136,17 +136,32 @@ function uniqueArr(arr) {
     return [...s];
 }
 
-function hex(value) {
-    const x = value.toString(16);
-    return (x.length == 1) ? '0' + x : x;
+function hsl2rgb(h, s, l) {
+    // output RGB have 0 to 1 value (not 255)
+    s /= 100;
+    l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n =>
+        l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return [f(0), f(8), f(4)];
 };
 
-function colorMap(value, start = '#FFFFFF', end = '#000000') {
+function rgb2hex(r, g, b) {
+    return `#${_.reduce([r, g, b], (res, v) => res + parseInt(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
+};
+
+function hsl2hex(h, s, l) {
+    return rgb2hex(...hsl2rgb(h, s, l));
+};
+
+
+function color_map(value, start = '#FFFFFF', end = '#000000') {
     const ratio = Math.max(0, Math.min(1, value));
     const r = Math.ceil(parseInt(end.substring(1, 3), 16) * ratio + parseInt(start.substring(1, 3), 16) * (1 - ratio));
     const g = Math.ceil(parseInt(end.substring(3, 5), 16) * ratio + parseInt(start.substring(3, 5), 16) * (1 - ratio));
     const b = Math.ceil(parseInt(end.substring(5, 7), 16) * ratio + parseInt(start.substring(5, 7), 16) * (1 - ratio));
-    return `#${_.reduce([r, g, b], (res, v) => res + v.toString(16).toUpperCase().padStart(2, '0'), "")}`;
+    return rgb2hex(r, g, b);
 }
 
 class ConvexPolygon {
@@ -157,7 +172,7 @@ class ConvexPolygon {
             return;
         }
 
-        this.points = points;                       // 3D Points
+        this.points = points;       // 3D Points
     }
 
     get O() {
@@ -178,6 +193,22 @@ class ConvexPolygon {
             );
         }
         return faces
+    }
+
+    get face_points() {
+        // Traverse the faces to get points
+        return _.reduce(this.faces, (res, f) => {
+            res.push(...f.points);
+            return res;
+        }, []);
+    }
+
+    get face_colors() {
+        // Traverse the faces to get points
+        return _.reduce(this.faces, (res, f) => {
+            res.push(this.color);
+            return res;
+        }, []);
     }
 
     get area() {
@@ -247,10 +278,14 @@ class ConvexPolygon {
     }
 
     get color() {
-        // the color is related to the slope
-        const ratio = Math.abs(rad2deg(this.slope) / 90);
-        return colorMap(ratio, "#e5555d", "#652ddd");
-        // TODO :  try #652ddd, #b037dd, #e5555d, #f2ac5f with https://github.com/gka/chroma.js
+        return rgb2hex(...this.rgb);
+    }
+
+    get rgb() {
+        // The color is related to the slope
+        const ratio = Math.abs((rad2deg(this.slope) % 90) / 90);
+        const hue = Math.floor(ratio * 360);
+        return hsl2rgb(hue, 90, 75)
     }
 
     get θ() {
@@ -288,10 +323,6 @@ class ConvexPolygon {
 
 
 class PolygonWithHat extends ConvexPolygon {
-    constructor(points) {
-        super(points);
-    }
-
     get A() {
         return this.O;
     }
