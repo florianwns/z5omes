@@ -7,18 +7,6 @@
 }
 
 
-.bg-orange {
-    background-color: #f77753;
-}
-
-.bg-purple {
-    background-color: #7753f7;
-}
-
-.bg-purple-light {
-    background-color: #ad95f5;
-}
-
 .small .badge {
     font-size: 0.9em;
 }
@@ -31,19 +19,23 @@
     background-color: #4e36a2;
 }
 
-
 .break-before {
     page-break-before: always;
 }
 
 .input-group > *:first-child {
-    min-width: 80px;
+    min-width: 60px;
 }
 
 .input-group .form-range {
-    min-width: 160px;
-    max-width: 160px;
+    min-width: 45%;
+    max-width: 45%;
 }
+
+/*.input-group .form-control {*/
+/*    min-width: 20%;*/
+/*    max-width: 30%;*/
+/*}*/
 
 .d-flex > .btn-sm, .input-group .btn {
     width: 48px;

@@ -63,7 +63,7 @@
                 <button class="btn btn-secondary text-start" type="button"
                         title="First Vertical Angle of Zome"
                         @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
-                        x-text="(angle_unit == 'tan') ? 'F=tan(Θ)' : 'Θ'">
+                        x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
                 </button>
                 </span>
                 <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
@@ -110,9 +110,9 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-6 col-xl-7 mb-3">
+    <div class="col-md-6 col-xl-7 mb-3">
         <div class="d-flex flex-column">
-            <nav class="navbar mx-auto mt-2 px-3">
+            <nav class="navbar mx-auto mt-2">
                 <ul class="nav nav-pills" id="nav-tab" role="tablist">
                     <li class="nav-item">
                         <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab"
@@ -142,39 +142,37 @@
                     </li>
                 </ul>
             </nav>
-            <div class="tab-content h-100 p-3">
+            <div class="tab-content h-100 mt-3">
                 <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                      tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
                      @zome-is-made.window="process($event.detail);">
                     <!-- Canvas for Zome 3D rendering -->
                     <div x-ref="canvas" style="height:326px; cursor: move;" class="shadow bg-dark rounded"></div>
                     <hr>
-                    <div class="d-flex justify-content-evenly">
+                    <div class="d-flex flex-wrap justify-content-evenly">
                         <!-- Draw Axis -->
-                        <div class="form-check form-switch">
+                        <div class="form-check form-switch me-2 mb-3">
                             <label class="form-check-label" for="draw-axis-switch">Axis</label>
                             <input class="form-check-input" type="checkbox" role="switch"
                                    id="draw-axis-switch" x-model="draw_axis">
                         </div>
 
                         <!-- Draw Vertices -->
-                        <div class="form-check form-switch">
+                        <div class="form-check form-switch me-2 mb-3">
                             <label class="form-check-label" for="draw-vertices-switch">Vertices</label>
                             <input class="form-check-input" type="checkbox" role="switch"
                                    id="draw-vertices-switch" x-model="draw_vertices">
                         </div>
 
                         <!-- Draw Faces -->
-                        <div class="form-check form-switch">
+                        <div class="form-check form-switch me-2 mb-3">
                             <label class="form-check-label" for="draw-faces-switch">Faces</label>
                             <input class="form-check-input" type="checkbox" role="switch"
                                    id="draw-faces-switch" x-model="draw_faces">
                         </div>
 
-                        <div class="vr"></div>
-
                         <!-- Spin -->
-                        <div class="form-check form-switch">
+                        <div class="form-check form-switch mb-3">
                             <label class="form-check-label" for="spin-switch">Spin</label>
                             <input class="form-check-input" type="checkbox" role="switch"
                                    id="spin-switch" x-model="is_spinning">
@@ -278,56 +276,58 @@
                 </ul>
             </div>
 
-            <div class="col-lg-6 col-xl-7 mb-3">
+            <div class="col-md-6 col-xl-7 mb-3">
                 <!--                <div class="card" style="min-height: 250px">-->
                 <!--                    canvas-->
                 <!--                </div>-->
             </div>
-            <div class="col-12">
+            <div class="col-12 mb-3">
                 <div class="card mx-0 p-0 overflow-hidden">
-                    <table x-ref="dim-table" class="table table-sm small table-striped-order m-0">
-                        <thead class="bg-primary text-white">
-                        <tr>
-                            <th>#</th>
-                            <th></th>
-                            <th>Width</th>
-                            <th>Height</th>
-                            <!--                            <th>Top Height</th>-->
-                            <!--                            <th>Bottom Height</th>-->
-                            <th>CCW Edges</th>
-                            <th>CCW Angles</th>
-                            <th>θ (Slope angle)</th>
-                            <th>σ (Dihedral angle)</th>
-                            <th>Area</th>
-                            <th>Ø</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <template x-for="(obj, i) in pieces" :key="i">
+                    <div class="table-responsive">
+                        <table x-ref="dim-table" class="table  table-sm small table-striped-order m-0">
+                            <thead class="bg-primary text-white">
                             <tr>
-                                <td x-text="i + 1"></td>
-                                <td>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="obj.color">
-                                        <polygon :points="to_svg_polygon(obj, 32)"/>
-                                    </svg>
-                                </td>
-                                <td x-text="reprDistance(obj.size.width)"></td>
-                                <td x-text="reprDistance(obj.size.height)"></td>
-                                <!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
-                                <!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
-                                <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
-                                <td x-text="reprArr(uniqueArr(_.map(obj.deg_angles, v => reprAngle(v))))"></td>
-                                <td x-text="reprAngle(rad2deg(obj.θ))"></td>
-                                <td x-text="reprAngle(rad2deg(obj.σ))"></td>
-                                <td x-text="reprArea(obj.area)"></td>
-                                <td x-text="reprDistance(obj.diameter)"></td>
+                                <th>#</th>
+                                <th></th>
+                                <th>Width</th>
+                                <th>Height</th>
+                                <!--                            <th>Top Height</th>-->
+                                <!--                            <th>Bottom Height</th>-->
+                                <th>CCW Edges</th>
+                                <th>CCW Angles</th>
+                                <th>θ (Slope angle)</th>
+                                <th>σ (Dihedral angle)</th>
+                                <th>Area</th>
+                                <th>Ø</th>
                             </tr>
-                        </template>
-                        </tbody>
-                        <tfoot>
-                        </tfoot>
-                    </table>
+                            </thead>
+                            <tbody>
+                            <template x-for="(obj, i) in pieces" :key="i">
+                                <tr>
+                                    <td x-text="i + 1"></td>
+                                    <td>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                             :fill="obj.color">
+                                            <polygon :points="to_svg_polygon(obj, 32)"/>
+                                        </svg>
+                                    </td>
+                                    <td x-text="reprDistance(obj.size.width)"></td>
+                                    <td x-text="reprDistance(obj.size.height)"></td>
+                                    <!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
+                                    <!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
+                                    <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
+                                    <td x-text="reprArr(uniqueArr(_.map(obj.deg_angles, v => reprAngle(v))))"></td>
+                                    <td x-text="reprAngle(rad2deg(obj.θ))"></td>
+                                    <td x-text="reprAngle(rad2deg(obj.σ))"></td>
+                                    <td x-text="reprArea(obj.area)"></td>
+                                    <td x-text="reprDistance(obj.diameter)"></td>
+                                </tr>
+                            </template>
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
