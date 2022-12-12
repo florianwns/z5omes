@@ -459,8 +459,8 @@
                         // Convert to 2D, compute Boundaries, and get width and height
                         piece.points_2d = piece.to_2D();
 
-                        // Compute σ, the Dihedral angle
-                        if(piece instanceof InclinedPolygon){
+                        // Compute σ, the Dihedral angle only for the Zome body
+                        if(piece instanceof PolygonWithHat){
                             if (iP == 0) {
                                 const next_piece = pieces[iP + 1];
                                 piece.σ = dihedral_angle(next_piece.φ, piece.ω, piece.ω);
@@ -932,6 +932,7 @@
                             B = vertices[iB];
                             C = vertices[iC];
 
+                            // Don't push base vertices if zome is entire
                             if(this.height_ratio < 1){
                                 base_vertices.push(B);
                             }

@@ -47,7 +47,7 @@ function mid(a, b) {
 }
 
 function angle(p1, p2, p3) {
-    return Math.acos(dot(normalize(sub(p1, p2)), normalize(sub(p3, p2))));
+    return Math.acos(dot(normalize(sub(p1, p2)), normalize(sub(p3, p2)))) || 0;
 }
 
 function dihedral_angle(a, b, c) {
@@ -76,6 +76,10 @@ function toDecimal(x, fractionDigits = 2) {
 }
 
 function reprDistance(d) {
+    if (isNaN(d)) {
+        return "";
+    }
+
     // d unit is in mm
     if (d >= 1e6) {
         return toDecimal(d / 1e6) + "km";
@@ -102,6 +106,10 @@ function to_mm(v, unit) {
 
 function reprArea(d) {
     // d unit is in mm²
+    if (isNaN(d)) {
+        return "";
+    }
+
     if (d >= 1e12) {
         return toDecimal(d / 1e12) + "km²";
     } else if (d >= 1e6) {
@@ -114,7 +122,7 @@ function reprArea(d) {
 };
 
 function reprAngle(a, fractionDigits = 2) {
-    return a ? a.toFixed(fractionDigits) + "°" : "";
+    return !isNaN(a) ? a.toFixed(fractionDigits) + "°" : "";
 }
 
 function reprArr(arr, unit = "") {
@@ -123,6 +131,7 @@ function reprArr(arr, unit = "") {
 }
 
 function uniqueArr(arr) {
+    // Set retains list order
     const s = new Set(arr);
     return [...s];
 }
@@ -221,6 +230,15 @@ class ConvexPolygon {
         };
     }
 
+    get slope() {
+        return 0;
+    }
+
+    get θ() {
+        // Other name for slope
+        return this.slope;
+    }
+
     to_2D() {
         // Convert to 2D, compute Boundaries, and get width and height
         let points_2d = []
@@ -250,7 +268,7 @@ class ConvexPolygon {
 }
 
 
-class InclinedPolygon extends ConvexPolygon {
+class PolygonWithHat extends ConvexPolygon {
     constructor(points) {
         super(points);
     }
@@ -313,18 +331,13 @@ class InclinedPolygon extends ConvexPolygon {
         return angle(this.A, this.I, [this.A[0], this.I[1], this.A[2]]);
     }
 
-    get θ() {
-        // Other name for slope
-        return this.slope;
-    }
-
     get diameter() {
         return 2 * dist(this.B, [0, this.B[1], 0]);
     }
 }
 
 
-class Triangle extends InclinedPolygon {
+class Triangle extends PolygonWithHat {
     get area() {
         // Heron formula
         const s = this.perimeter / 2;
@@ -341,7 +354,7 @@ class Triangle extends InclinedPolygon {
     }
 }
 
-class Kite extends InclinedPolygon {
+class Kite extends PolygonWithHat {
     //  Consider Kite like this       A
     //  points = [A, B, D, C]       B ◇ C
     //                                D
@@ -379,12 +392,5 @@ class TruncatedKite extends Kite {
 
 
 class ZomeBase extends ConvexPolygon {
-    get top_height() {
-        return 0;
-    }
-
-    get bottom_height() {
-        return 0;
-    }
 }
 
