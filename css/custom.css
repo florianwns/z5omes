@@ -24,12 +24,12 @@
 }
 
 .input-group > *:first-child {
-    min-width: 60px;
+    min-width: 48px;
 }
 
 .input-group .form-range {
-    min-width: 45%;
-    max-width: 45%;
+    min-width: 40%;
+    max-width: 40%;
 }
 
 /*.input-group .form-control {*/
