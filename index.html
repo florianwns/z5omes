@@ -249,19 +249,19 @@
 
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Cover Num Pieces
-                        <span class="badge bg-primary rounded-pill" x-text="cover_num_pieces"></span>
+                        Body Num Pieces
+                        <span class="badge bg-primary rounded-pill" x-text="body_num_pieces"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Cover Widest Ø
+                        Body Widest Ø
                         <span class="badge bg-primary rounded-pill" x-text="widest_diameter"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Cover Area
-                        <span class="badge bg-primary rounded-pill" x-text="cover_area"></span>
+                        Body Area
+                        <span class="badge bg-primary rounded-pill" x-text="body_area"></span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        x-show.important="has_base">
+                    <li class="list-group-item d-flex justify-content-between align-items-center border-top"
+                        x-show.important="has_base" >
                         Base Ø
                         <span class="badge bg-primary rounded-pill" x-text="base_diameter"></span>
                     </li>
@@ -362,7 +362,7 @@
 
             return {
                 pieces: [],
-                cover:[],
+                body:[],
                 has_base: false,
                 height: 100,                // Height
                 length_unit: "mm",          // Length unit by default is mm
@@ -383,15 +383,15 @@
                     return this.has_base ? this.pieces[this.pieces.length - 1] : null;
                 },
                 get widest_diameter(){
-                    const value = _.reduce(this.cover, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                    const value = _.reduce(this.body, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return reprDistance(value);
                 },
-                get cover_area(){
-                    const value = _.reduce(this.cover, (res, p) => res + p.area * num, 0);
+                get body_area(){
+                    const value = _.reduce(this.body, (res, p) => res + p.area * num, 0);
                     return reprArea(value);
                 },
-                get cover_num_pieces(){
-                    return num * this.cover.length;
+                get body_num_pieces(){
+                    return num * this.body.length;
                 },
                 get base_diameter(){
                     const value = this.base ? this.base.diameter : 0;
@@ -478,8 +478,8 @@
                     this.pieces = pieces;
 
                     // All pieces without the zome base
-                    this.cover = _.filter(this.pieces, p => !(p instanceof ZomeBase));
-                    this.has_base = (this.cover.length + 1) === this.pieces.length;
+                    this.body = _.filter(this.pieces, p => !(p instanceof ZomeBase));
+                    this.has_base = (this.body.length + 1) === this.pieces.length;
                 },
             };
         });
