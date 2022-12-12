@@ -281,53 +281,51 @@
                 <!--                    canvas-->
                 <!--                </div>-->
             </div>
-            <div class="col-12 mb-3">
-                <div class="card mx-0 p-0 overflow-hidden">
-                    <div class="table-responsive">
-                        <table x-ref="dim-table" class="table  table-sm small table-striped-order m-0">
-                            <thead class="bg-primary text-white">
+            <div class="col-12 mb-5">
+                <div class="table-responsive border border-bottom-0 bg-white rounded">
+                    <table x-ref="dim-table" class="table  table-sm small table-striped-order m-0">
+                        <thead class="bg-primary text-white">
+                        <tr>
+                            <th>#</th>
+                            <th></th>
+                            <th>Width</th>
+                            <th>Height</th>
+                            <!--                            <th>Top Height</th>-->
+                            <!--                            <th>Bottom Height</th>-->
+                            <th>CCW Edges</th>
+                            <th>CCW Angles</th>
+                            <th>θ (Slope angle)</th>
+                            <th>σ (Dihedral angle)</th>
+                            <th>Area</th>
+                            <th>Ø</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <template x-for="(obj, i) in pieces" :key="i">
                             <tr>
-                                <th>#</th>
-                                <th></th>
-                                <th>Width</th>
-                                <th>Height</th>
-                                <!--                            <th>Top Height</th>-->
-                                <!--                            <th>Bottom Height</th>-->
-                                <th>CCW Edges</th>
-                                <th>CCW Angles</th>
-                                <th>θ (Slope angle)</th>
-                                <th>σ (Dihedral angle)</th>
-                                <th>Area</th>
-                                <th>Ø</th>
+                                <td x-text="i + 1"></td>
+                                <td>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                         :fill="obj.color">
+                                        <polygon :points="to_svg_polygon(obj, 32)"/>
+                                    </svg>
+                                </td>
+                                <td x-text="reprDistance(obj.size.width)"></td>
+                                <td x-text="reprDistance(obj.size.height)"></td>
+                                <!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
+                                <!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
+                                <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
+                                <td x-text="reprArr(uniqueArr(_.map(obj.deg_angles, v => reprAngle(v))))"></td>
+                                <td x-text="reprAngle(rad2deg(obj.θ))"></td>
+                                <td x-text="reprAngle(rad2deg(obj.σ))"></td>
+                                <td x-text="reprArea(obj.area)"></td>
+                                <td x-text="reprDistance(obj.diameter)"></td>
                             </tr>
-                            </thead>
-                            <tbody>
-                            <template x-for="(obj, i) in pieces" :key="i">
-                                <tr>
-                                    <td x-text="i + 1"></td>
-                                    <td>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                             :fill="obj.color">
-                                            <polygon :points="to_svg_polygon(obj, 32)"/>
-                                        </svg>
-                                    </td>
-                                    <td x-text="reprDistance(obj.size.width)"></td>
-                                    <td x-text="reprDistance(obj.size.height)"></td>
-                                    <!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
-                                    <!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
-                                    <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
-                                    <td x-text="reprArr(uniqueArr(_.map(obj.deg_angles, v => reprAngle(v))))"></td>
-                                    <td x-text="reprAngle(rad2deg(obj.θ))"></td>
-                                    <td x-text="reprAngle(rad2deg(obj.σ))"></td>
-                                    <td x-text="reprArea(obj.area)"></td>
-                                    <td x-text="reprDistance(obj.diameter)"></td>
-                                </tr>
-                            </template>
-                            </tbody>
-                            <tfoot>
-                            </tfoot>
-                        </table>
-                    </div>
+                        </template>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
