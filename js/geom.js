@@ -136,6 +136,19 @@ function uniqueArr(arr) {
     return [...s];
 }
 
+function hex(value) {
+    const x = value.toString(16);
+    return (x.length == 1) ? '0' + x : x;
+};
+
+function colorMap(value, start = '#FFFFFF', end = '#000000') {
+    const ratio = Math.max(0, Math.min(1, value));
+    const r = Math.ceil(parseInt(end.substring(1, 3), 16) * ratio + parseInt(start.substring(1, 3), 16) * (1 - ratio));
+    const g = Math.ceil(parseInt(end.substring(3, 5), 16) * ratio + parseInt(start.substring(3, 5), 16) * (1 - ratio));
+    const b = Math.ceil(parseInt(end.substring(5, 7), 16) * ratio + parseInt(start.substring(5, 7), 16) * (1 - ratio));
+    return `#${_.reduce([r, g, b], (res, v) => res + v.toString(16).toUpperCase().padStart(2, '0'), "")}`;
+}
+
 
 class ConvexPolygon {
     constructor(points) {
