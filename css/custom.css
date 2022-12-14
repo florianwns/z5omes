@@ -6,6 +6,21 @@
     margin-bottom: 0.2rem;
 }
 
+.fa-file {
+    position: relative;
+}
+
+.fa-icon-file-type {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    left: 1px;
+    font-size: 6.3px;
+    line-height: 27px;
+}
+
+
 .input-group .form-range {
     height: inherit !important;
 }
