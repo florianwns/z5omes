@@ -146,36 +146,49 @@
                 <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                      tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
                      @zome-is-made.window="process($event.detail);">
-                    <!-- Canvas for Zome 3D rendering -->
-                    <div x-ref="canvas" style="height:326px; cursor: move;" class="shadow bg-dark rounded"></div>
-                    <hr>
-                    <div class="d-flex flex-wrap justify-content-evenly">
-                        <!-- Draw Axis -->
-                        <div class="form-check form-switch me-2 mb-3">
-                            <label class="form-check-label" for="draw-axis-switch">Axis</label>
-                            <input class="form-check-input" type="checkbox" role="switch"
-                                   id="draw-axis-switch" x-model="draw_axis">
+                    <div class="d-flex justify-content-center">
+                        <div style="width:calc(100% - 48px)">
+                            <!-- Canvas for Zome 3D rendering -->
+                            <div x-ref="canvas" style="height:326px; cursor: move;" class="shadow bg-dark rounded mb-2"></div>
+
+                            <div class="d-flex flex-wrap justify-content-evenly">
+                                <!-- Draw Axis -->
+                                <div class="form-check form-switch me-2 mb-3">
+                                    <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="draw-axis-switch" x-model="draw_axis">
+                                </div>
+
+                                <!-- Draw Vertices -->
+                                <div class="form-check form-switch me-2 mb-3">
+                                    <label class="form-check-label" for="draw-vertices-switch">Vertices</label>
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="draw-vertices-switch" x-model="draw_vertices">
+                                </div>
+
+                                <!-- Draw Faces -->
+                                <div class="form-check form-switch me-2 mb-3">
+                                    <label class="form-check-label" for="draw-faces-switch">Faces</label>
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="draw-faces-switch" x-model="draw_faces">
+                                </div>
+
+                                <!-- Spin -->
+                                <div class="form-check form-switch mb-3">
+                                    <label class="form-check-label" for="spin-switch">Spin</label>
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="spin-switch" x-model="is_spinning">
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Draw Vertices -->
-                        <div class="form-check form-switch me-2 mb-3">
-                            <label class="form-check-label" for="draw-vertices-switch">Vertices</label>
-                            <input class="form-check-input" type="checkbox" role="switch"
-                                   id="draw-vertices-switch" x-model="draw_vertices">
-                        </div>
-
-                        <!-- Draw Faces -->
-                        <div class="form-check form-switch me-2 mb-3">
-                            <label class="form-check-label" for="draw-faces-switch">Faces</label>
-                            <input class="form-check-input" type="checkbox" role="switch"
-                                   id="draw-faces-switch" x-model="draw_faces">
-                        </div>
-
-                        <!-- Spin -->
-                        <div class="form-check form-switch mb-3">
-                            <label class="form-check-label" for="spin-switch">Spin</label>
-                            <input class="form-check-input" type="checkbox" role="switch"
-                                   id="spin-switch" x-model="is_spinning">
+                        <div class="ps-2 flex-shrink-1">
+                            <div class="vstack">
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ">
+                                    <i class="fa-solid fa-file"></i>
+                                    <span class="fa-icon-file-type">OBJ</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -189,11 +202,11 @@
                         </div>
                         <div class="ps-2">
                             <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-1 px-2 position-relative" title="Save to PDF">
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PDF">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">PDF</span>
                                 </span>
-                                <span class="text-primary btn btn-sm fs-1 px-2 position-relative" title="Save to SVG">
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">SVG</span>
                                 </span>
@@ -208,8 +221,6 @@
                             How make your zome ?
                         </div>
                         <div class="card-body ">
-
-
                             <p>The shape of a <a href="https://en.wikipedia.org/wiki/Zome">zome</a> is
                                 determined by 3 parameters:</p>
                             <ul>
@@ -271,30 +282,30 @@
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Body Num Pieces
-                        <span class="badge bg-primary rounded-pill" x-text="body_num_pieces"></span>
+                        <span class="badge bg-info rounded-pill" x-text="body_num_pieces"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Body Widest Ø
-                        <span class="badge bg-primary rounded-pill" x-text="widest_diameter"></span>
+                        <span class="badge bg-info rounded-pill" x-text="widest_diameter"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Body Area
-                        <span class="badge bg-primary rounded-pill" x-text="body_area"></span>
+                        <span class="badge bg-info rounded-pill" x-text="body_area"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center border-top"
                         x-show.important="has_base">
                         Base Ø
-                        <span class="badge bg-primary rounded-pill" x-text="base_diameter"></span>
+                        <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center"
                         x-show.important="has_base">
                         Base Area
-                        <span class="badge bg-primary rounded-pill" x-text="base_area"></span>
+                        <span class="badge bg-info rounded-pill" x-text="base_area"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center"
                         x-show.important="has_base">
                         Base Perimeter
-                        <span class="badge bg-primary rounded-pill" x-text="base_perimeter"></span>
+                        <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
                     </li>
                 </ul>
             </div>
@@ -309,7 +320,7 @@
             <div class="col-12 mb-5">
                 <div class="table-responsive border border-bottom-0 bg-white rounded">
                     <table x-ref="dim-table" class="table  table-sm small table-striped-order m-0">
-                        <thead class="bg-primary text-white">
+                        <thead class="bg-info text-white">
                         <tr>
                             <th>#</th>
                             <th></th>
@@ -568,6 +579,7 @@
                 },
                 auto_size() {
                     const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
+                    console.log(width, height, canvas.parentNode.clientWidth, canvas.innerWidth);
                     if (width > 0 && height > 0) {
                         camera.aspect = width / height;
                         camera.updateProjectionMatrix();
