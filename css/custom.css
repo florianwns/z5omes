@@ -13,11 +13,11 @@
 .fa-icon-file-type {
     position: absolute;
     color: white;
-    font-weight: bold;
-    text-align: center;
-    left: 1px;
-    font-size: 6.3px;
-    line-height: 27px;
+    font-weight: 600;
+    left: 0;
+    font-size: 30%;
+    right: 0;
+    top: 45%;
 }
 
 
