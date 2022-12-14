@@ -10,6 +10,9 @@
     height: inherit !important;
 }
 
+.ratio-A4 {
+    --bs-aspect-ratio: calc(29.7 / 21 * 100%);
+}
 
 .small .badge {
     font-size: 0.9em;
