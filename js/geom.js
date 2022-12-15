@@ -167,114 +167,86 @@ function color_map(value, start = '#FFFFFF', end = '#000000') {
 class ConvexPolygon {
     constructor(points) {
         // Consider that polygon is made by triangle,
-        if (points.length < 3) {
+        const num_points = points.length;
+        if (num_points < 3) {
             console.error("Not enough points to make a polygon");
             return;
         }
 
-        this.points = points;       // 3D Points
+        // Init variables
+        this.points = points;
+        this.compute()
     }
 
-    get O() {
-        //  Consider first point like the origin
-        return this.points[0];
-    }
+    compute() {
+        this.num_points = this.points.length;
+        this.perimeter = 0;
+        this.area = 0;
+        this.angles = []
+        this.edge_distances = [];
+        this.points_2d = []
 
-    get num_points() {
-        return this.points.length;
-    }
-
-    get faces() {
-        // Traverse the triangles that form the polygon
-        let faces = []
-        for (let i = 1, j = 2; j < this.num_points; i++, j++) {
-            faces.push(
-                new Triangle([this.points[0], this.points[i], this.points[j]])
-            );
-        }
-        return faces
-    }
-
-    get face_points() {
-        // Traverse the faces to get points
-        return _.reduce(this.faces, (res, f) => {
-            res.push(...f.points);
-            return res;
-        }, []);
-    }
-
-    get face_colors() {
-        // Traverse the faces to get points
-        return _.reduce(this.faces, (res, f) => {
-            res.push(this.color);
-            return res;
-        }, []);
-    }
-
-    get area() {
-        // Add the areas of the triangles
-        return _.reduce(this.faces, (res, t) => res + t.area, 0);
-    }
-
-    get edges() {
-        // Compute Edges
-        return _.map(this.points, (p, i) => [p, this.points[(i + 1) % this.num_points]]);
-    }
-
-    get edge_distances() {
-        // Compute edges distances
-        return _.map(this.edges, (e, i) => dist(...e));
-    }
-
-    get perimeter() {
-        // Compute perimeter from distances
-        return _.reduce(this.edge_distances, (res, distance) => res + distance, 0);
-    }
-
-    get angles() {
-        return _.map(this.points, (p, i) => angle(
-            this.points[(this.num_points + i - 1) % this.num_points],
-            p,
-            this.points[(i + 1) % this.num_points]
-        ));
-    }
-
-    get deg_angles() {
-        return _.map(this.angles, a => rad2deg(a));
-    }
-
-    get diameter() {
-        return 2 * dist(this.O, [0, this.O[1], 0]);
-    }
-
-    get size() {
-        const points_2d = this.to_2D();
-
+        // Make a reference to planar 3D points to 2D
+        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
+        const xRef = normalize(sub(C, O));
+        const yRef = normalize(sub(sub(B, O), mul(xRef, dot(sub(B, O), xRef))));
+        const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
         let xMin = Number.MAX_VALUE, xMax = Number.MIN_VALUE;
         let yMin = Number.MAX_VALUE, yMax = Number.MIN_VALUE;
-        let x, y;
+        let x, y, ab, bc, ac;
 
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-        for (let iP = 0; iP < points_2d.length; iP++) {
+        for (let i = 0; i < this.num_points; i++) {
+            const nextPoint = this.points[(i + 1) % this.num_points];
+            const point = this.points[i];
+            const prevPoint = this.points[(this.num_points + i - 1) % this.num_points];
+
             // Create the new 2D point
-            [x, y] = points_2d[iP];
+            [x, y] = rot2d(
+                p2(
+                    dot(sub(point, O), xRef),
+                    dot(sub(point, O), yRef)
+                ),
+                ref_angle
+            )
+            this.points_2d.push([x, y]);
 
             // Save Boundaries
             if (x < xMin) xMin = x;
             if (x > xMax) xMax = x;
             if (y < yMin) yMin = y;
             if (y > yMax) yMax = y;
+
+            // Compute angle
+            this.angles.push(angle(prevPoint, point, nextPoint));
+
+            // Compute edges distances
+            ab = dist(O, point)
+            bc = dist(point, nextPoint)
+            ac = dist(nextPoint, O);
+            this.edge_distances.push(bc);
+            this.perimeter += bc;
+
+            // Heron formula to compute area of the triangle
+            const s = (ab + bc + ac) / 2;
+            this.area += Math.sqrt(s * (s - ab) * (s - bc) * (s - ac));
         }
 
-        // Subtract xMin and yMin (because SVG viewBox is not updated with AlpineJs)
-        return {
-            width: Math.abs(xMax - xMin),
-            height: Math.abs(yMax - yMin)
-        };
+        // Compute width and height from 2D boundaries
+        this.width = Math.abs(xMax - xMin);
+        this.height = Math.abs(yMax - yMin);
+    }
+
+    get O() {
+        return this.points[0];
     }
 
     get slope() {
         return 0;
+    }
+
+    get diameter() {
+        return 2 * dist(this.O, [0, this.O[1], 0]);
     }
 
     get color() {
@@ -287,44 +259,12 @@ class ConvexPolygon {
         const hue = Math.floor(ratio * 360);
         return hsl2rgb(hue, 90, 75)
     }
-
-    get θ() {
-        // Other name for slope
-        return this.slope;
-    }
-
-    to_2D() {
-        // Convert to 2D, compute Boundaries, and get width and height
-        let points_2d = []
-
-        // Make a reference to planar 3D points to 2D
-        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
-        const xRef = normalize(sub(C, O));
-        const yRef = normalize(sub(sub(B, O), mul(xRef, dot(sub(B, O), xRef))));
-        const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
-
-        let x, y;
-
-        // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-        for (let iV = 0; iV < this.num_points; iV++) {
-            // Create the new 2D point
-            [x, y] = rot2d(
-                p2(
-                    dot(sub(this.points[iV], O), xRef),
-                    dot(sub(this.points[iV], O), yRef)
-                ),
-                ref_angle
-            )
-            points_2d.push([x, y]);
-        }
-        return points_2d;
-    }
 }
 
 
 class PolygonWithHat extends ConvexPolygon {
     get A() {
-        return this.O;
+        return this.points[0];
     }
 
     get B() {
@@ -340,11 +280,6 @@ class PolygonWithHat extends ConvexPolygon {
         return [this.A, this.B, this.C];
     }
 
-    get hat_triangle() {
-        // The triangle at the top of polygon
-        return new Triangle(this.hat);
-    }
-
     get φ() {
         // The vertical ↓ angle
         return angle(this.C, this.A, this.B);
@@ -355,30 +290,10 @@ class PolygonWithHat extends ConvexPolygon {
         return angle(this.A, this.B, this.points[2]);
     }
 
-    get ψ() {
-        // The additional angle, (→ for triangle, ↑ for kite, ↗ for truncated kite)
-        return angle(this.B, this.points[2], this.points[3 % this.num_points]);
-    }
-
-    get top_edge() {
-        return dist(this.A, this.B);
-    }
-
-    get I() {
-        return mid(this.B, this.C);
-    }
-
-    get top_height() {
-        return this.hat_triangle.height;
-    }
-
-    get bottom_height() {
-        return 0;
-    }
-
     get slope() {
         // Compute the slope of the hat
-        return angle(this.A, this.I, [this.A[0], this.I[1], this.A[2]]);
+        const I = mid(this.B, this.C);
+        return angle(this.A, I, [this.A[0], I[1], this.A[2]]);
     }
 
     get diameter() {
@@ -388,20 +303,6 @@ class PolygonWithHat extends ConvexPolygon {
 
 
 class Triangle extends PolygonWithHat {
-    get area() {
-        // Heron formula
-        const s = this.perimeter / 2;
-        return Math.sqrt(_.reduce(this.edge_distances, (res, d) => res * (s - d), s));
-    }
-
-    get base() {
-        const [, B, C] = this.points;
-        return dist(B, C);
-    }
-
-    get height() {
-        return (2 * this.area) / this.base;
-    }
 }
 
 class Kite extends PolygonWithHat {
@@ -411,12 +312,6 @@ class Kite extends PolygonWithHat {
 
     // A, B, C Form the top_triangle
     // B, D, C Form the Base
-
-    get bottom_height() {
-        const [, B, D, C] = this.points;
-        const bottom_triangle = new Triangle([D, B, C]);
-        return bottom_triangle.height;
-    }
 }
 
 class Rhombus extends Kite {
@@ -427,17 +322,6 @@ class TruncatedKite extends Kite {
     //  Consider this Trapezium            A
     //  points = [A, B, E, F, C]         B ◇ C
     //                                    E F
-
-    get angles() {
-        return [
-            this.φ, this.ω, this.ψ
-        ];
-    }
-
-    get bottom_height() {
-        const [, B, E, F, C] = this.points;
-        return dist(mid(B, C), mid(E, F))
-    }
 }
 
 

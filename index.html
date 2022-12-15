@@ -349,13 +349,13 @@
                                         <polygon :points="to_svg_polygon(obj, 32)"/>
                                     </svg>
                                 </td>
-                                <td x-text="reprDistance(obj.size.width)"></td>
-                                <td x-text="reprDistance(obj.size.height)"></td>
+                                <td x-text="reprDistance(obj.width)"></td>
+                                <td x-text="reprDistance(obj.height)"></td>
                                 <!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
                                 <!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
                                 <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
-                                <td x-text="reprArr(uniqueArr(_.map(obj.deg_angles, v => reprAngle(v))))"></td>
-                                <td x-text="reprAngle(rad2deg(obj.θ))"></td>
+                                <td x-text="reprArr(uniqueArr(_.map(obj.angles, a => reprAngle(rad2deg(a)))))"></td>
+                                <td x-text="reprAngle(rad2deg(obj.slope))"></td>
                                 <td x-text="reprAngle(rad2deg(obj.σ))"></td>
                                 <td x-text="reprArea(obj.area)"></td>
                                 <td x-text="reprDistance(obj.diameter)"></td>
@@ -477,8 +477,7 @@
                 to_svg_polygon(piece, size) {
                     // Recompute pixel positions
                     const center = size / 2;
-                    const piece_size = piece.size;
-                    const pixel_ratio = size / Math.max(piece_size.height, piece_size.width);
+                    const pixel_ratio = size / Math.max(piece.height, piece.width);
                     return piece.points_2d.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 to_real_world() {
@@ -498,9 +497,7 @@
                             p[1] * real_size_ratio - yMin,
                             p[2] * real_size_ratio
                         ]);
-
-                        // Convert to 2D, compute Boundaries, and get width and height
-                        piece.points_2d = piece.to_2D();
+                        piece.compute();
 
                         // Compute σ, the Dihedral angle only for the Zome body
                         if (piece instanceof PolygonWithHat) {
