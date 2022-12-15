@@ -193,13 +193,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane" id="nav-2D" role="tabpanel" aria-labelledby="nav-2D-tab" tabindex="0">
+                <div class="tab-pane" id="nav-2D" role="tabpanel" aria-labelledby="nav-2D-tab" tabindex="0"
+                     x-data="renderer_2D" @resize.window="auto_size"
+                     @zome-is-made.window="process($event.detail);">
                     <div class="d-flex justify-content-center">
                         <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
-                            <!--                            <svg xmlns="http://www.w3.org/2000/svg" width="210" height="297"-->
-                            <!--                                 fill="blue">-->
-                            <!--                                <polygon points="16,0,0,14.246855049505413,16,28.493710099010844,32,14.246855049505417  "/>-->
-                            <!--                            </svg>-->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 210 297">
+                                <polygon points="16,0,0,14.246855049505413,16,28.493710099010844,32,14.246855049505417"
+                                stroke="red"/>
+                            </svg>
                         </div>
                         <div class="ps-2">
                             <div class="vstack">
@@ -475,7 +477,8 @@
                 to_svg_polygon(piece, size) {
                     // Recompute pixel positions
                     const center = size / 2;
-                    const pixel_ratio = size / Math.max(piece.size.height, piece.size.width);
+                    const piece_size = piece.size;
+                    const pixel_ratio = size / Math.max(piece_size.height, piece_size.width);
                     return piece.points_2d.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 to_real_world() {
@@ -486,11 +489,15 @@
                     const num_pieces = pieces.length;
                     const yMax = pieces[0].points[0][1];
                     const yMin = pieces[num_pieces - 1].points[1][1];
-                    const r = to_mm(this.height / (yMax - yMin), this.length_unit);
+                    const real_size_ratio = to_mm(this.height / (yMax - yMin), this.length_unit);
 
                     for (let iP = 0; iP < num_pieces; iP++) {
                         const piece = pieces[iP];
-                        piece.points = piece.points.map(p => [p[0] * r, p[1] * r - yMin, p[2] * r]);
+                        piece.points = piece.points.map(p => [
+                            p[0] * real_size_ratio,
+                            p[1] * real_size_ratio - yMin,
+                            p[2] * real_size_ratio
+                        ]);
 
                         // Convert to 2D, compute Boundaries, and get width and height
                         piece.points_2d = piece.to_2D();
@@ -516,6 +523,27 @@
                     // All pieces without the zome base
                     this.body = _.filter(this.pieces, p => !(p instanceof ZomeBase));
                     this.has_base = (this.body.length + 1) === this.pieces.length;
+                },
+            };
+        });
+        Alpine.data('renderer_2D', () => {
+            return {
+                // 2D Rendering Parameters
+                init() {
+                    // Add listeners
+
+                },
+                is_valid(obj) {
+                    const hasKey = (res, key) => res && obj.hasOwnProperty(key);
+                    return !(!obj || !["vertices", "faces"].reduce(hasKey, true));
+                },
+                process(zome) {
+                    if (!this.is_valid(zome)) {
+                        console.error("Object is not valid", zome)
+                        return;
+                    }
+
+                    console.log("Render 2D");
                 },
             };
         });
@@ -580,7 +608,6 @@
                 },
                 auto_size() {
                     const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
-                    console.log(width, height, canvas.parentNode.clientWidth, canvas.innerWidth);
                     if (width > 0 && height > 0) {
                         camera.aspect = width / height;
                         camera.updateProjectionMatrix();
