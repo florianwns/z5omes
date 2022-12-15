@@ -194,8 +194,7 @@
                     </div>
                 </div>
                 <div class="tab-pane" id="nav-2D" role="tabpanel" aria-labelledby="nav-2D-tab" tabindex="0"
-                     x-data="renderer_2D" @resize.window="auto_size"
-                     @zome-is-made.window="process($event.detail);">
+                     x-data="renderer_2D" @zome-is-made.window="process($event.detail);">
                     <div class="d-flex justify-content-center">
                         <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 210 297">
@@ -346,7 +345,7 @@
                                 <td>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
                                          :fill="obj.color">
-                                        <polygon :points="to_svg_polygon(obj, 32)"/>
+                                        <polygon :points="to_svg_points(obj, 32)"/>
                                     </svg>
                                 </td>
                                 <td x-text="reprDistance(obj.width)"></td>
@@ -474,7 +473,7 @@
 
                     this.__to_real_world();
                 },
-                to_svg_polygon(piece, size) {
+                to_svg_points(piece, size) {
                     // Recompute pixel positions
                     const center = size / 2;
                     const pixel_ratio = size / Math.max(piece.height, piece.width);
