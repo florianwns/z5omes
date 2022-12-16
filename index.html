@@ -394,13 +394,13 @@
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
-            let virtual_pieces = [];
+            let virtual_zome = null;
             let num = 0;
 
             return {
                 pieces: [],
                 body: [],
-                has_base: false,
+                base: null,
                 height: 100,                // Height
                 length_unit: "mm",          // Length unit by default is mm
 
@@ -415,9 +415,12 @@
 
                     this.$watch("length_unit", () => this.__to_real_world());
                 },
-                get base() {
+                get pieces() {
                     // Only the base
-                    return this.has_base ? this.pieces[this.pieces.length - 1] : null;
+                    return this.has_base ? [...this.body, this.base] : this.body;
+                },
+                get has_base(){
+                    return this.base !== null;
                 },
                 get widest_diameter() {
                     const value = _.reduce(this.body, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
@@ -460,7 +463,7 @@
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-                    return !(!obj || !["pieces", "num"].reduce(hasKey, true));
+                    return !(!obj || !["pieces", "base", "num"].reduce(hasKey, true));
                 },
                 process(zome) {
                     if (!this.is_valid(zome)) {
@@ -468,7 +471,7 @@
                         return;
                     }
 
-                    virtual_pieces = zome.pieces;
+                    virtual_zome = zome;
                     num = zome.num;
 
                     this.__to_real_world();
@@ -484,16 +487,17 @@
                 },
                 to_real_world() {
                     // Clone pieces
-                    const pieces = _.cloneDeep(virtual_pieces);
+                    const body = _.cloneDeep(virtual_zome.pieces);
+                    const base = _.cloneDeep(virtual_zome.base);
 
                     // Compute height ratio then convert dimensions to real world
-                    const num_pieces = pieces.length;
-                    const yMax = pieces[0].points[0][1];
-                    const yMin = pieces[num_pieces - 1].points[1][1];
+                    const num_pieces = body.length;
+                    const yMax = body[0].points[0][1];
+                    const yMin = body[num_pieces - 1].points[1][1];
                     const real_size_ratio = to_mm(this.height / (yMax - yMin), this.length_unit);
 
                     for (let iP = 0; iP < num_pieces; iP++) {
-                        const piece = pieces[iP];
+                        const piece = body[iP];
                         piece.points = piece.points.map(p => [
                             p[0] * real_size_ratio,
                             p[1] * real_size_ratio - yMin,
@@ -502,26 +506,31 @@
                         piece.compute();
 
                         // Compute σ, the Dihedral angle only for the Zome body
-                        if (piece instanceof PolygonWithHat) {
-                            if (iP == 0) {
-                                const next_piece = pieces[iP + 1];
-                                piece.σ = dihedral_angle(next_piece.φ, piece.ω, piece.ω);
-                            } else {
-                                const prev_piece = pieces[iP - 1];
-                                const α = angle(piece.A, piece.B, prev_piece.B);
-                                const δ = angle(piece.A, piece.B, piece.C);
-                                const λ = angle(prev_piece.B, piece.B, piece.C);
-                                piece.σ = dihedral_angle(λ, δ, α);
-                            }
+                        if (iP == 0) {
+                            const next_piece = body[iP + 1];
+                            piece.σ = dihedral_angle(next_piece.φ, piece.ω, piece.ω);
+                        } else {
+                            const prev_piece = body[iP - 1];
+                            const α = angle(piece.A, piece.B, prev_piece.B);
+                            const δ = angle(piece.A, piece.B, piece.C);
+                            const λ = angle(prev_piece.B, piece.B, piece.C);
+                            piece.σ = dihedral_angle(λ, δ, α);
                         }
                     }
 
-                    // Refresh proxy
-                    this.pieces = pieces;
+                    if(base !== null){
+                        base.points.map(p => [
+                            p[0] * real_size_ratio,
+                            p[1] * real_size_ratio - yMin,
+                            p[2] * real_size_ratio
+                        ]);
+                        base.compute();
+                    }
 
-                    // All pieces without the zome base
-                    this.body = _.filter(this.pieces, p => !(p instanceof ZomeBase));
-                    this.has_base = (this.body.length + 1) === this.pieces.length;
+
+                    // Refresh proxy
+                    this.base = base;
+                    this.body = body;
                 },
             };
         });
@@ -1108,6 +1117,8 @@
                             // Don't push base vertices if zome is entire
                             if (this.height_ratio < 1) {
                                 base_vertices.push(B);
+
+                                console.log(lastIsTruncated);
                                 if (lastIsTruncated) {
                                     base_vertices.push(C);
                                 }
@@ -1135,11 +1146,10 @@
                     }
 
                     // Finally add the base piece
+                    let base = null;
                     if (base_vertices.length >= 3) {
-                        const base = new ZomeBase(base_vertices)
-
+                        base = new ZomeBase(base_vertices)
                         color = base.rgb = angle2rgb(0, deg2rad(45));
-                        pieces.push(base);
 
                         // Add triangle to 3D
                         faces.push(...base.faces)
@@ -1153,6 +1163,7 @@
                         faces: faces,
                         face_colors: face_colors,
                         pieces: pieces,
+                        base: base,
                         num: N,
                     });
                 },
