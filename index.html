@@ -160,20 +160,6 @@
                                            id="draw-axis-switch" x-model="draw_axis">
                                 </div>
 
-                                <!-- Draw Vertices -->
-                                <div class="form-check form-switch me-2 mb-3">
-                                    <label class="form-check-label" for="draw-vertices-switch">Vertices</label>
-                                    <input class="form-check-input" type="checkbox" role="switch"
-                                           id="draw-vertices-switch" x-model="draw_vertices">
-                                </div>
-
-                                <!-- Draw Faces -->
-                                <div class="form-check form-switch me-2 mb-3">
-                                    <label class="form-check-label" for="draw-faces-switch">Faces</label>
-                                    <input class="form-check-input" type="checkbox" role="switch"
-                                           id="draw-faces-switch" x-model="draw_faces">
-                                </div>
-
                                 <!-- Spin -->
                                 <div class="form-check form-switch mb-3">
                                     <label class="form-check-label" for="spin-switch">Spin</label>
@@ -641,14 +627,12 @@
                 speed: 0.01,
 
                 draw_axis: true,
-                draw_vertices: false,
-                draw_faces: true,
 
                 init() {
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
 
-                    ["axis", "vertices", "faces"].forEach(
+                    ["axis"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
@@ -706,7 +690,7 @@
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-                    return !(!obj || !["vertices", "faces", "face_colors"].reduce(hasKey, true));
+                    return !(!obj || !["faces", "face_colors"].reduce(hasKey, true));
                 },
                 process(zome) {
                     if (!this.is_valid(zome)) {
@@ -719,19 +703,6 @@
                         scene.remove(meshes.zome)
                     }
                     meshes.zome = new THREE.Group();
-
-                    // Draw vertices
-                    {
-                        const vertices = new Float32Array(zome.vertices.flat())
-                        const geometry = new THREE.BufferGeometry();
-                        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-                        const material = new THREE.PointsMaterial({color: 0xFF0000, size: 0.25})
-
-                        // Add to group
-                        meshes.vertices = new THREE.Points(geometry, material)
-                        meshes.vertices.visible = this.draw_vertices;
-                        meshes.zome.add(meshes.vertices);
-                    }
 
                     // Draw faces
                     {
@@ -748,7 +719,6 @@
 
                         // Add to group
                         meshes.faces = new THREE.Mesh(geometry, material)
-                        meshes.faces.visible = this.draw_faces;
                         meshes.zome.add(meshes.faces);
                     }
                     // Add the final obj mesh to the scene
