@@ -589,6 +589,8 @@
                     // Compute pixel ratio
                     const border = 6;
                     const pixel_ratio = Math.min((297 - 2 * border) / yMax, (210 - 2 * border) / xMax);
+                    const dy = (297 - yMax * pixel_ratio) / 2 ;
+                    const dx = (210 - xMax * pixel_ratio) / 2 ;
 
                     // Build the new SVG
                     const svgns = "http://www.w3.org/2000/svg";
@@ -597,8 +599,8 @@
                         const piece = planar_pieces[iP];
                         const el = document.createElementNS(svgns, "polygon");
                         el.setAttribute('points', piece.map(p => [
-                            p[0] * pixel_ratio + border,
-                            p[1] * pixel_ratio + border
+                            p[0] * pixel_ratio + dx,
+                            p[1] * pixel_ratio + dy
                         ]));
                         el.setAttribute('stroke', 'black');
                         el.setAttribute('stroke-width', '0.1px');
