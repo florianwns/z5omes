@@ -419,7 +419,7 @@
                     // Only the base
                     return this.has_base ? [...this.body, this.base] : this.body;
                 },
-                get has_base(){
+                get has_base() {
                     return this.base !== null;
                 },
                 get widest_diameter() {
@@ -518,7 +518,7 @@
                         }
                     }
 
-                    if(base !== null){
+                    if (base !== null) {
                         base.points.map(p => [
                             p[0] * real_size_ratio,
                             p[1] * real_size_ratio - yMin,
@@ -1114,18 +1114,9 @@
                             B = vertices[iB];
                             C = vertices[iC];
 
-                            // Don't push base vertices if zome is entire
-                            if (this.height_ratio < 1) {
-                                base_vertices.push(B);
-
-                                console.log(lastIsTruncated);
-                                if (lastIsTruncated) {
-                                    base_vertices.push(C);
-                                }
-                            }
-
                             // Deal with case where B and C are too close, so we don't add them
-                            if (toDecimal(dist(B, C), 2) > 0) {
+                            const far_enough = toDecimal(dist(B, C), 2) > 0
+                            if (far_enough) {
                                 // Add triangle to pieces
                                 if (iT == 0) {
                                     piece = new Triangle([A, B, C]);
@@ -1140,6 +1131,14 @@
                                 faces.push(A, B, C)
                                 for (let i = 0; i < 3; i++) {
                                     face_colors.push(...color)
+                                }
+                            }
+
+                            // Don't push base vertices if zome is entire
+                            if (this.height_ratio < 1) {
+                                base_vertices.push(B);
+                                if (lastIsTruncated && far_enough) {
+                                    base_vertices.push(C);
                                 }
                             }
                         }
