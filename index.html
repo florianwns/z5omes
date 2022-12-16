@@ -66,7 +66,7 @@
                         x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
                 </button>
                 </span>
-                <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
+                <input class="form-control form-range" min="30" max="60" step="0.01" type="range"
                        x-model.number="theta_deg" x-ref="theta_deg_slider">
                 <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
                 <select class="form-select" aria-label="Angle unit"
@@ -208,7 +208,7 @@
                                     <span class="fa-icon-file-type">PDF</span>
                                 </span>
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
-                                    @click="download_svg">
+                                      @click="download_svg">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">SVG</span>
                                 </span>
@@ -344,7 +344,7 @@
                                 <td x-text="i + 1"></td>
                                 <td>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="obj.color">
+                                         :fill="rgb2hex(...obj.rgb)">
                                         <polygon :points="to_svg_points(obj, 32)"/>
                                     </svg>
                                 </td>
@@ -475,9 +475,12 @@
                 },
                 to_svg_points(piece, size) {
                     // Recompute pixel positions
-                    const center = size / 2;
                     const pixel_ratio = size / Math.max(piece.height, piece.width);
-                    return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
+                    const center = size / 2;
+                    return piece.planar_points.map(p => [
+                        (p[0] - piece.bounds[0] - piece.width / 2) * pixel_ratio + center,
+                        (p[1] - piece.bounds[2] - piece.height / 2) * pixel_ratio + center,
+                    ]);
                 },
                 to_real_world() {
                     // Clone pieces
@@ -537,8 +540,6 @@
                     return !(!obj || !["vertices", "faces"].reduce(hasKey, true));
                 },
                 to_svg_points(piece, size) {
-                    console.log("pouet", piece);
-
                     // Recompute pixel positions
                     const center = size / 2;
                     const pixel_ratio = size / Math.max(piece.height, piece.width);
@@ -587,11 +588,11 @@
 
                         // Add planar piece and color
                         planar_pieces.push(planar_points);
-                        colors.push(piece.color);
+                        colors.push(rgb2hex(...piece.rgb));
                     }
 
                     // Compute pixel ratio
-                    const border = 8;
+                    const border = 6;
                     const pixel_ratio = Math.min((297 - 2 * border) / yMax, (210 - 2 * border) / xMax);
 
                     // Build the new SVG
@@ -628,7 +629,7 @@
             return {
                 // 3D Rendering Parameters
                 is_spinning: true,
-                speed: 0.005,
+                speed: 0.01,
 
                 draw_axis: true,
                 draw_vertices: false,
@@ -654,6 +655,18 @@
 
                     // Scene
                     scene = new THREE.Scene();
+
+                    // Add lights
+                    const ambient_light = new THREE.AmbientLight(0xffffff, 0.9);
+                    scene.add(ambient_light);
+
+                    const directional_light = new THREE.DirectionalLight(0xffffff, 0.2);
+                    directional_light.position.set(0, WORLD_HEIGHT, WORLD_HEIGHT);
+                    scene.add(directional_light);
+
+                    const directional_light2 = new THREE.DirectionalLight(0xffffff, 0.2);
+                    directional_light2.position.set(0, -WORLD_HEIGHT, -WORLD_HEIGHT);
+                    scene.add(directional_light2);
 
                     // Camera ( x is red, y is green, z is blue)
                     const [field_of_view, aspect_ratio, near, far] = [75, width / height, 0.1, 10 * WORLD_HEIGHT]
@@ -684,7 +697,7 @@
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-                    return !(!obj || !["vertices", "faces"].reduce(hasKey, true));
+                    return !(!obj || !["vertices", "faces", "face_colors"].reduce(hasKey, true));
                 },
                 process(zome) {
                     if (!this.is_valid(zome)) {
@@ -712,42 +725,16 @@
                     }
 
                     // Draw faces
-                    const color_face = false;
-                    if (color_face) {
-                        const points = [];
-                        const colors = [];
-                        const num_pieces = zome.pieces.length;
-                        for (let iP = 0; iP < num_pieces; iP++) {
-                            const faces = zome.pieces[iP].faces;
-                            const rgb = zome.pieces[iP].rgb;
-                            for (let iF = 0; iF < faces.length; iF++) {
-                                const vectors = _.map(faces[iF].points, p => new THREE.Vector3(...p));
-                                points.push(...vectors);
-                                colors.push(...rgb);  // r, g, b
-                                colors.push(...rgb);  // r, g, b
-                                colors.push(...rgb);  // r, g, b
-                            }
-                        }
-
-                        const material = new THREE.MeshBasicMaterial({
+                    {
+                        const points = zome.faces.map(p => new THREE.Vector3(...p));
+                        const material = new THREE.MeshLambertMaterial({
                             side: THREE.DoubleSide,
                             vertexColors: true,
                         });
 
                         const geometry = new THREE.BufferGeometry()
                         geometry.setFromPoints(points)
-                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-                        geometry.computeVertexNormals()
-
-                        // Add to group
-                        meshes.faces = new THREE.Mesh(geometry, material)
-                        meshes.faces.visible = this.draw_faces;
-                        meshes.zome.add(meshes.faces);
-                    } else {
-                        const points = zome.faces.map(p => new THREE.Vector3(...p));
-                        const material = new THREE.MeshNormalMaterial({side: THREE.DoubleSide})
-                        const geometry = new THREE.BufferGeometry()
-                        geometry.setFromPoints(points)
+                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(zome.face_colors, 3));
                         geometry.computeVertexNormals()
 
                         // Add to group
@@ -755,7 +742,6 @@
                         meshes.faces.visible = this.draw_faces;
                         meshes.zome.add(meshes.faces);
                     }
-
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome)
                 },
@@ -799,7 +785,7 @@
                     controls.update();
                 },
                 reset() {
-                    this.speed = 0.003;
+                    this.speed = 0.01;
                     controls.reset();
                     controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
                     controls.update();
@@ -846,9 +832,9 @@
         Alpine.data('settings', () => {
             let vertices = [];
             let faces = [];
+            let face_colors = [];
             let iTriangles = [];
             let pieces = [];
-            let colors = [];
 
             return {
                 // Shape Parameters
@@ -963,6 +949,7 @@
                     faces = [];
                     iTriangles = [];
                     pieces = [];
+                    face_colors = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return toDecimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
@@ -999,11 +986,13 @@
                     const TAU = Math.PI * 2
 
                     // Initialize variables
-                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, I, dist_to_ground, y;
+                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, I, dist_to_ground, y, piece,
+                        slope, color;
+                    let lastIsTruncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
                     for (let iN = 0; iN < N; iN++) {
-                        let a = iN * TAU / N;
+                        a = iN * TAU / N;
                         D = [ring_radius * Math.sin(a), Math.max(0, WORLD_HEIGHT - ring_height), ring_radius * Math.cos(a)];
                         this.add_vertice(D);
                     }
@@ -1016,6 +1005,7 @@
 
                         // On current ring, Loop over points from left to right
                         for (let iN = 0; iN < N; iN++) {
+                            a = iN * TAU / N;
                             k = (iN + 1) % N
 
                             iA = (iR == 0) ? 0 : fipr + k;      // Index of A point          A
@@ -1037,13 +1027,20 @@
                                 // Add Shape to 3D
                                 iD = this.add_vertice(D);
 
-                                faces.push(A, B, C);
-                                faces.push(B, C, D);
-
-                                // Add shape to pieces
-                                if (iN == 0) pieces.push(
-                                    (is_rhombus) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C])
-                                );
+                                // Add piece
+                                if (iN == 0) {
+                                    piece = (is_rhombus) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
+                                    slope = piece.slope;
+                                    color = piece.rgb = angle2rgb(a, slope);
+                                    pieces.push(piece)
+                                } else {
+                                    color = angle2rgb(a, slope);
+                                }
+                                // Add faces and colors
+                                faces.push(A, B, C, B, C, D);
+                                for (let i = 0; i < 6; i++) {
+                                    face_colors.push(...color)
+                                }
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
                                 hit_ground = toDecimal(y, 2) == 0;
@@ -1060,17 +1057,26 @@
                                 iE = this.add_vertice(E);
                                 iF = this.add_vertice(F);
 
-                                faces.push(A, B, E)
-                                faces.push(A, E, F)
-                                faces.push(A, F, C)
-
                                 // Add Truncated Kite to pieces
-                                if (iN == 0) pieces.push(new TruncatedKite([A, B, E, F, C]));
+                                if (iN == 0) {
+                                    piece = new TruncatedKite([A, B, E, F, C])
+                                    slope = piece.slope;
+                                    color = piece.rgb = angle2rgb(a, slope);
+                                    pieces.push(piece)
+                                } else {
+                                    color = angle2rgb(a, slope);
+                                }
+
+                                // Add faces and colors
+                                faces.push(A, B, E, A, E, F, A, F, C);
+                                for (let i = 0; i < 9; i++) {
+                                    face_colors.push(...color)
+                                }
 
                                 // Add last triangles to close it after if needed
                                 iTriangles.push(iE, iF, iC);
                                 hit_ground = true;
-
+                                lastIsTruncated = true;
                             }
                         }
 
@@ -1082,12 +1088,15 @@
                         }
                     }
 
-
                     // Close The Zome
                     let base_vertices = [];
                     const num_triangles = iTriangles.length;
                     if (num_triangles > 0) {
-                        for (let iT = 0; iT < num_triangles; iT += 3) {
+                        let iT = 0;
+                        for (let iN = 0; iN < N; iN++) {
+                            iT = iN * 3;
+                            a = iN * TAU / N;
+
                             iA = iTriangles[(iT + 2) % num_triangles]
                             iB = iTriangles[(iT + 1) % num_triangles]
                             iC = iTriangles[(iT + 3) % num_triangles]
@@ -1099,27 +1108,50 @@
                             // Don't push base vertices if zome is entire
                             if (this.height_ratio < 1) {
                                 base_vertices.push(B);
+                                if (lastIsTruncated) {
+                                    base_vertices.push(C);
+                                }
                             }
 
                             // Deal with case where B and C are too close, so we don't add them
                             if (toDecimal(dist(B, C), 2) > 0) {
+                                // Add triangle to pieces
+                                if (iT == 0) {
+                                    piece = new Triangle([A, B, C]);
+                                    slope = piece.slope;
+                                    color = piece.rgb = angle2rgb(a, slope);
+                                    pieces.push(piece)
+                                } else {
+                                    color = angle2rgb(a, slope);
+                                }
+
                                 // Add triangle to 3D
                                 faces.push(A, B, C)
-
-                                // Add triangle to pieces
-                                if (iT == 0) pieces.push(new Triangle([A, B, C]));
+                                for (let i = 0; i < 3; i++) {
+                                    face_colors.push(...color)
+                                }
                             }
                         }
                     }
 
                     // Finally add the base piece
                     if (base_vertices.length >= 3) {
-                        pieces.push(new ZomeBase(base_vertices));
+                        const base = new ZomeBase(base_vertices)
+
+                        color = base.rgb = angle2rgb(0, deg2rad(45));
+                        pieces.push(base);
+
+                        // Add triangle to 3D
+                        faces.push(...base.faces)
+                        for (let i = 0; i < base.faces.length; i++) {
+                            face_colors.push(...color)
+                        }
                     }
 
                     this.$dispatch('zome-is-made', {
                         vertices: vertices,
                         faces: faces,
+                        face_colors: face_colors,
                         pieces: pieces,
                         num: N,
                     });
@@ -1129,5 +1161,4 @@
     });
 </script>
 </body>
-
 </html>
