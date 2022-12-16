@@ -505,7 +505,7 @@
                     }
 
                     if (base !== null) {
-                        base.points.map(p => [
+                        base.points = base.points.map(p => [
                             p[0] * real_size_ratio,
                             p[1] * real_size_ratio - yMin,
                             p[2] * real_size_ratio
