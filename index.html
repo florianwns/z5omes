@@ -197,9 +197,8 @@
                      x-data="renderer_2D" @zome-is-made.window="process($event.detail);">
                     <div class="d-flex justify-content-center">
                         <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="0 0 210 297">
-                                <polygon points="16,0,0,14.246855049505413,16,28.493710099010844,32,14.246855049505417"
-                                stroke="red"/>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                                 viewbox="0 0 210 297" x-ref="A4_sheet">
                             </svg>
                         </div>
                         <div class="ps-2">
@@ -208,7 +207,8 @@
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">PDF</span>
                                 </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG">
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
+                                    @click="download_svg">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">SVG</span>
                                 </span>
@@ -477,7 +477,7 @@
                     // Recompute pixel positions
                     const center = size / 2;
                     const pixel_ratio = size / Math.max(piece.height, piece.width);
-                    return piece.points_2d.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
+                    return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 to_real_world() {
                     // Clone pieces
@@ -524,14 +524,38 @@
         });
         Alpine.data('renderer_2D', () => {
             return {
+                pieces: [],
+                A4_sheet: null,
+
                 // 2D Rendering Parameters
                 init() {
                     // Add listeners
-
+                    this.A4_sheet = this.$refs.A4_sheet;
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
                     return !(!obj || !["vertices", "faces"].reduce(hasKey, true));
+                },
+                to_svg_points(piece, size) {
+                    console.log("pouet", piece);
+
+                    // Recompute pixel positions
+                    const center = size / 2;
+                    const pixel_ratio = size / Math.max(piece.height, piece.width);
+                    return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
+                },
+                download_pdf() {
+                    // TODO : Finish PDF downloading
+                    // https://stackoverflow.com/questions/17293135/download-a-div-in-a-html-page-as-pdf-using-javascript
+                },
+                download_svg() {
+                    const svg = this.A4_sheet.outerHTML;
+                    const blob = new Blob([svg.toString()]);
+                    const element = document.createElement("a");
+                    element.download = "planar_pieces.svg";
+                    element.href = window.URL.createObjectURL(blob);
+                    element.click();
+                    element.remove();
                 },
                 process(zome) {
                     if (!this.is_valid(zome)) {
@@ -539,7 +563,55 @@
                         return;
                     }
 
-                    console.log("Render 2D");
+                    // Compute planar pieces
+                    let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE;
+                    const first_piece = zome.pieces[0].planar_points[1];
+                    let O = [-first_piece[0], 0, 0], planar_points = [];
+                    let A, a;
+                    const planar_pieces = [], colors = [];
+                    for (let iP = 0; iP < zome.pieces.length; iP++) {
+                        const piece = zome.pieces[iP];
+
+                        // Move to Origin and rotate to match with previous piece
+                        planar_points = piece.planar_points.map(p => add(p, O));
+                        if (iP > 0) {
+                            a = Math.abs(angle(A, O, planar_points[1]));
+                            planar_points = planar_points.map(p => rot2d(p, -a, O));
+                        }
+                        O = planar_points[planar_points.length - 1];
+                        A = planar_points[planar_points.length - 2];
+
+                        // Compute Boundaries
+                        xMax = _.reduce(planar_points, (res, p) => Math.max(p[0], res), xMax);
+                        yMax = _.reduce(planar_points, (res, p) => Math.max(p[1], res), yMax);
+
+                        // Add planar piece and color
+                        planar_pieces.push(planar_points);
+                        colors.push(piece.color);
+                    }
+
+                    // Compute pixel ratio
+                    const border = 8;
+                    const pixel_ratio = Math.min((297 - 2 * border) / yMax, (210 - 2 * border) / xMax);
+
+                    // Build the new SVG
+                    const svgns = "http://www.w3.org/2000/svg";
+                    const children = [];
+                    for (let iP = 0; iP < planar_pieces.length; iP++) {
+                        const piece = planar_pieces[iP];
+                        const el = document.createElementNS(svgns, "polygon");
+                        el.setAttribute('points', piece.map(p => [
+                            p[0] * pixel_ratio + border,
+                            p[1] * pixel_ratio + border
+                        ]));
+                        el.setAttribute('stroke', 'black');
+                        el.setAttribute('stroke-width', '0.1px');
+                        el.setAttribute('fill', colors[iP]);
+                        children.push(el);
+                    }
+
+                    // Replace Children
+                    this.A4_sheet.replaceChildren(...children);
                 },
             };
         });

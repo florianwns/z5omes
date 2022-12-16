@@ -1,11 +1,3 @@
-function p3(x, y, z) {
-    return [x, y, z];
-}
-
-function p2(x, y) {
-    return [x, y];
-}
-
 function add(a, b) {
     return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 }
@@ -39,7 +31,7 @@ function normalize(a) {
 }
 
 function cross(a, b) {
-    return p3(a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]);
+    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
 
 function mid(a, b) {
@@ -57,10 +49,14 @@ function dihedral_angle(a, b, c) {
     )
 }
 
-function rot2d(v, theta) {
-    const s = Math.sin(theta);
-    const c = Math.cos(theta);
-    return p2(v[0] * c - v[1] * s, v[0] * s + v[1] * c);
+function rot2d(v, theta, o= [0, 0, 0]) {
+    const sin_theta = Math.sin(theta);
+    const cos_theta = Math.cos(theta);
+    let xM = v[0] - o[0] ;
+    let yM = v[1] - o[1] ;
+    let x = xM * cos_theta - yM * sin_theta + o[0];
+    let y = xM * sin_theta + yM * cos_theta + o[1];
+    return [x, y, 0]
 }
 
 function deg2rad(deg) {
@@ -184,7 +180,7 @@ class ConvexPolygon {
         this.area = 0;
         this.angles = []
         this.edge_distances = [];
-        this.points_2d = []
+        this.planar_points = []
 
         // Make a reference to planar 3D points to 2D
         const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
@@ -193,7 +189,7 @@ class ConvexPolygon {
         const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
         let xMin = Number.MAX_VALUE, xMax = Number.MIN_VALUE;
         let yMin = Number.MAX_VALUE, yMax = Number.MIN_VALUE;
-        let x, y, ab, bc, ac;
+        let x, y, z, ab, bc, ac;
 
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
         for (let i = 0; i < this.num_points; i++) {
@@ -202,14 +198,14 @@ class ConvexPolygon {
             const prevPoint = this.points[(this.num_points + i - 1) % this.num_points];
 
             // Create the new 2D point
-            [x, y] = rot2d(
-                p2(
+            [x, y, z] = rot2d(
+                [
                     dot(sub(point, O), xRef),
                     dot(sub(point, O), yRef)
-                ),
+                ],
                 ref_angle
             )
-            this.points_2d.push([x, y]);
+            this.planar_points.push([x, y, z]);
 
             // Save Boundaries
             if (x < xMin) xMin = x;
