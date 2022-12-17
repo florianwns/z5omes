@@ -184,13 +184,14 @@
                      x-data="renderer_a4" @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
                         <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="2100px" height="2970px"
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1050px" height="1485px"
                                  viewbox="0 0 210 297" x-ref="A4_sheet">
                             </svg>
                         </div>
                         <div class="ps-2">
                             <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PDF">
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PDF"
+                                      @click="download_pdf()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">PDF</span>
                                 </span>
@@ -606,21 +607,16 @@
                     return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 download_pdf() {
-                    const doc = new jsPDF({
-                        orientation: 'portrait',
-                        unit: 'mm',
-                        format: [210, 297]
-                    })
+                    const doc = new jsPDF({orientation: 'portrait', unit: 'mm', format: [210, 297]})
                     const canvas = this.svg_to_canvas();
-
+                    const img_data = canvas.toDataURL('image/png');
+                    doc.addImage(img_data, 'png', 0, 0, 210, 297, '', 'FAST');
+                    doc.save('planar_pieces.pdf')
                 },
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    download(
-                        "planar_pieces.svg",
-                        window.URL.createObjectURL(blob),
-                    );
+                    download("planar_pieces.svg", window.URL.createObjectURL(blob));
                 },
                 svg_to_canvas() {
                     const A4_sheet = this.A4_sheet;
@@ -631,10 +627,7 @@
                 download_png() {
                     const canvas = this.svg_to_canvas();
                     canvas.toBlob(blob => {
-                        download(
-                            "planar_pieces.png",
-                            window.URL.createObjectURL(blob),
-                        );
+                        download("planar_pieces.png", window.URL.createObjectURL(blob));
                     });
                 },
                 process() {
