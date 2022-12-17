@@ -184,7 +184,7 @@
                      x-data="renderer_a4" @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
                         <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                            <svg xmlns="http://www.w3.org/2000/svg" width="2100px" height="2970px"
                                  viewbox="0 0 210 297" x-ref="A4_sheet">
                             </svg>
                         </div>
@@ -198,6 +198,11 @@
                                       @click="download_svg()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">SVG</span>
+                                </span>
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
+                                      @click="download_png()">
+                                    <i class="fa-solid fa-file"></i>
+                                    <span class="fa-icon-file-type">PNG</span>
                                 </span>
                             </div>
                         </div>
@@ -363,6 +368,12 @@
 <!-- ThreeJS -->
 <script src="js/three.min.js"></script>
 <script src="js/OrbitControls.js"></script>
+
+<!-- Canvg -->
+<script src="js/canvg.min.js"></script>
+
+<!-- JS PDF -->
+<script src="js/jspdf.min.js"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -595,8 +606,13 @@
                     return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 download_pdf() {
-                    // TODO : Finish PDF downloading
-                    // https://stackoverflow.com/questions/17293135/download-a-div-in-a-html-page-as-pdf-using-javascript
+                    const doc = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: [210, 297]
+                    })
+                    const canvas = this.svg_to_canvas();
+
                 },
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
@@ -605,6 +621,21 @@
                         "planar_pieces.svg",
                         window.URL.createObjectURL(blob),
                     );
+                },
+                svg_to_canvas() {
+                    const A4_sheet = this.A4_sheet;
+                    const canvas = document.createElement("canvas");
+                    canvg(canvas, A4_sheet.outerHTML.toString());
+                    return canvas;
+                },
+                download_png() {
+                    const canvas = this.svg_to_canvas();
+                    canvas.toBlob(blob => {
+                        download(
+                            "planar_pieces.png",
+                            window.URL.createObjectURL(blob),
+                        );
+                    });
                 },
                 process() {
                     if (!this.is_valid(ZOME)) {
