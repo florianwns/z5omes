@@ -1100,7 +1100,7 @@
                                     color = angle2rgb(a, slope);
                                 }
                                 // Add faces and colors
-                                this.add_face([iA, iB, iC, iB, iC, iD], color);
+                                this.add_face([iA, iB, iD, iA, iD, iC], color);
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
                                 hit_ground = toDecimal(y, 2) == 0;
