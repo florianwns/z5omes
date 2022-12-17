@@ -1215,7 +1215,7 @@
                             }
 
                             // Don't push base vertices if zome is entire
-                            if (this.height_ratio < 1) {
+                            if (!(height_ratio == 1 && K == 1)) {
                                 base_vertices.push(iB);
                                 if (lastIsTruncated && far_enough) {
                                     base_vertices.push(iC);
