@@ -558,9 +558,8 @@
                         piece.compute();
 
 
-
                         // Compute σ, the Dihedral angle only for the Zome body with at least 2 pieces
-                        if(num_pieces < 2){
+                        if (num_pieces < 2) {
                             continue;
                         }
 
@@ -646,7 +645,7 @@
                     let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE;
                     const first_piece = ZOME.pieces[0].planar_points[1];
                     let O = [-first_piece[0], 0, 0], planar_points = [];
-                    let A, a;
+                    let A, a, rotated_A;
                     const planar_pieces = [], colors = [];
                     for (let iP = 0; iP < ZOME.pieces.length; iP++) {
                         const piece = ZOME.pieces[iP];
@@ -655,7 +654,10 @@
                         planar_points = piece.planar_points.map(p => add(p, O));
                         if (iP > 0) {
                             a = angle(A, O, planar_points[1]);
-                            if (A[0] > planar_points[1][0]) {
+                            rotated_A = rot2d(planar_points[1], a, O);
+
+                            // Rotate the other way if rotatedA is not too close to A
+                            if (toDecimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
                                 a = -a;
                             }
                             planar_points = planar_points.map(p => rot2d(p, a, O));
