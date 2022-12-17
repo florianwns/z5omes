@@ -311,11 +311,11 @@ class PolygonWithHat extends ConvexPolygon {
         return 2 * dist(this.B, [0, this.B[1], 0]);
     }
 
-    get slope(){
+    get slope() {
         // Compute the slope of the hat
         const I = mid(this.points[1], this.points[this.num_points - 1]);
         let a = angle(this.O, I, [0, I[1], 0]);
-        if(a > A90){
+        if (a > A90) {
             a = Math.PI - a
         }
         return a
