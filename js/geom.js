@@ -52,13 +52,6 @@ function dihedral_angle(a, b, c) {
     )
 }
 
-
-// function rot2d(v, theta) {
-//     const s = Math.sin(theta);
-//     const c = Math.cos(theta);
-//     return [v[0] * c - v[1] * s, v[0] * s + v[1] * c, 0];
-// }
-
 function rot2d(v, theta, o = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
     const cos_theta = Math.cos(theta);
