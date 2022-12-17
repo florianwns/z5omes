@@ -249,8 +249,8 @@
             Measurements
         </h5>
 
-        <div class="row">
-            <div class="col mb-4">
+        <div class="row justify-content-between">
+            <div class="col-md-6 col-xl-5">
                 <!-- Height of Zome -->
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" title="Height of zome">Height</span>
@@ -266,7 +266,6 @@
                         <option value="m">m</option>
                     </select>
                 </div>
-
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Body Num Pieces
@@ -280,18 +279,19 @@
                         Body Area
                         <span class="badge bg-info rounded-pill" x-text="body_area"></span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center border-top"
-                        x-show.important="has_base">
+                </ul>
+            </div>
+            <div class="col-md-6 col-xl-5 mt-2 mt-md-5" x-show.important="has_base">
+                <ul class="list-group small">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
                         Base Ø
                         <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        x-show.important="has_base">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
                         Base Area
                         <span class="badge bg-info rounded-pill" x-text="base_area"></span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        x-show.important="has_base">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
                         Base Perimeter
                         <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
                     </li>
@@ -589,8 +589,8 @@
                     // Compute pixel ratio
                     const border = 6;
                     const pixel_ratio = Math.min((297 - 2 * border) / yMax, (210 - 2 * border) / xMax);
-                    const dy = (297 - yMax * pixel_ratio) / 2 ;
-                    const dx = (210 - xMax * pixel_ratio) / 2 ;
+                    const dy = (297 - yMax * pixel_ratio) / 2;
+                    const dx = (210 - xMax * pixel_ratio) / 2;
 
                     // Build the new SVG
                     const svgns = "http://www.w3.org/2000/svg";
@@ -1135,6 +1135,7 @@
                         face_colors: face_colors,
                         pieces: pieces,
                         base: base,
+                        has_base: base != null,
                         num: N,
                     });
                 },
