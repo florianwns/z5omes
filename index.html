@@ -172,7 +172,7 @@
                         <div class="ps-2 flex-shrink-1">
                             <div class="vstack">
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ"
-                                      @click="download_obj">
+                                      @click="download_obj()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">OBJ</span>
                                 </span>
@@ -195,7 +195,7 @@
                                     <span class="fa-icon-file-type">PDF</span>
                                 </span>
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
-                                      @click="download_svg">
+                                      @click="download_svg()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">SVG</span>
                                 </span>
@@ -245,10 +245,28 @@
     </div>
     <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
         <hr>
-        <h5 class="text-secondary mt-4 mb-4 me-auto">
-            <i class="fa-solid fa-ruler-triangle fa-fw"></i>
-            Measurements
-        </h5>
+
+        <div class="d-flex align-items-center">
+            <h5 class="text-secondary mt-4 mb-4 me-auto">
+                <i class="fa-solid fa-ruler-triangle fa-fw"></i>
+                Measurements
+            </h5>
+            <!-- CSV Button -->
+            <div>
+                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to CSV"
+                      @click="download_tsv()">
+                    <i class="fa-solid fa-file"></i>
+                    <span class="fa-icon-file-type">TSV</span>
+                </span>
+            </div>
+            <div>
+                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to CSV"
+                      @click="download_csv()">
+                    <i class="fa-solid fa-file"></i>
+                    <span class="fa-icon-file-type">CSV</span>
+                </span>
+            </div>
+        </div>
 
         <div class="row justify-content-between">
             <div class="col-md-6 col-xl-5">
@@ -274,7 +292,7 @@
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Body Widest Ø
-                        <span class="badge bg-info rounded-pill" x-text="widest_diameter"></span>
+                        <span class="badge bg-info rounded-pill" x-text="body_widest_diameter"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Body Area
@@ -285,6 +303,10 @@
             <div class="col-md-6 col-xl-5 mt-2 mt-md-5" x-show.important="has_base">
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Base Perimeter
+                        <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
                         Base Ø
                         <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
                     </li>
@@ -292,47 +314,31 @@
                         Base Area
                         <span class="badge bg-info rounded-pill" x-text="base_area"></span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Base Perimeter
-                        <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
-                    </li>
                 </ul>
             </div>
             <div class="col-12 mt-3 mb-5">
                 <div class="table-responsive border border-bottom-0 bg-white rounded">
-                    <table x-ref="dim-table" class="table  table-sm small table-striped-order m-0">
+                    <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
                         <thead class="bg-info text-white">
                         <tr>
-                            <th>#</th>
                             <th></th>
-                            <th>Width</th>
-                            <th>Height</th>
-                            <th>CCW Edges</th>
-                            <th>CCW Angles</th>
-                            <th>θ (Slope angle)</th>
-                            <th>σ (Dihedral angle)</th>
-                            <th>Area</th>
-                            <th>Ø</th>
+                            <template x-for="(obj, i) in table_column_names" :key="i">
+                                <th x-text="obj"></th>
+                            </template>
                         </tr>
                         </thead>
                         <tbody>
-                        <template x-for="(obj, i) in pieces" :key="i">
+                        <template x-for="(row, i) in table_rows" :key="i">
                             <tr class="align-middle">
-                                <td x-text="i + 1"></td>
                                 <td>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="rgb2hex(...obj.rgb)">
-                                        <polygon :points="to_svg_points(obj, 32)"/>
+                                         :fill="rgb2hex(...pieces[i].rgb)">
+                                        <polygon :points="to_svg_points(pieces[i], 32)"/>
                                     </svg>
                                 </td>
-                                <td x-text="reprDistance(obj.width)"></td>
-                                <td x-text="reprDistance(obj.height)"></td>
-                                <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
-                                <td x-text="reprArr(uniqueArr(_.map(obj.angles, a => reprAngle(rad2deg(a)))))"></td>
-                                <td x-text="reprAngle(rad2deg(obj.slope))"></td>
-                                <td x-text="reprAngle(rad2deg(obj.σ))"></td>
-                                <td x-text="reprArea(obj.area)"></td>
-                                <td x-text="reprDistance(obj.diameter)"></td>
+                                <template x-for="(value, j) in row" :key="j">
+                                    <td x-text="value"></td>
+                                </template>
                             </tr>
                         </template>
                         </tbody>
@@ -405,7 +411,7 @@
                 get has_base() {
                     return this.base !== null;
                 },
-                get widest_diameter() {
+                get body_widest_diameter() {
                     const value = _.reduce(this.body, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return reprDistance(value);
                 },
@@ -443,6 +449,61 @@
                 clamp(key, value) {
                     const slider = this.get_slider(key);
                     this[key] = this.format(key, _.clamp(value, slider.min, slider.max));
+                },
+                download_tsv() {
+                    this.download_csv("\t", "tsv");
+                },
+                download_csv(sep = ";", fmt = "csv") {
+                    const hr = "# ------------------------------\n"
+
+                    // Add comments
+                    let obj = hr;
+                    obj += "# This zome was made with https://florianwns.github.io/z5omes/\n";
+                    obj += hr;
+                    obj += `# Body Num Pieces : ${this.body_num_pieces}\n`;
+                    obj += `# Body Widest Ø : ${this.body_widest_diameter}\n`;
+                    obj += `# Body Area : ${this.body_area}\n`;
+                    obj += `# Base Perimeter : ${this.base_perimeter}\n`;
+                    obj += `# Base Ø : ${this.base_diameter}\n`;
+                    obj += `# Base Area : ${this.base_area}\n`;
+                    obj += hr;
+                    obj += _.join(this.table_column_names, sep) + "\n"
+                    const rows = this.table_rows;
+                    for (let i = 0; i < rows.length; i++) {
+                        obj += _.join(rows[i], sep) + "\n"
+                    }
+                    download(`zome_measurements.${fmt}`, `data:text/${fmt}; charset=utf-8,` + encodeURIComponent(obj));
+                },
+                get table_column_names() {
+                    return [
+                        "Id",
+                        "Width",
+                        "Height",
+                        "CCW Edges",
+                        "CCW Angles",
+                        "θ (Slope angle)",
+                        "σ (Dihedral angle)",
+                        "Area",
+                        "Ø",
+                    ]
+                },
+                get table_rows() {
+                    const rows = []
+                    for (let i = 0; i < this.pieces.length; i++) {
+                        const piece = this.pieces[i];
+                        rows.push([
+                            i + 1,
+                            reprDistance(piece.width),
+                            reprDistance(piece.height),
+                            reprArr(uniqueArr(_.map(piece.edge_distances, v => reprDistance(v)))),
+                            reprArr(uniqueArr(_.map(piece.angles, a => reprAngle(rad2deg(a))))),
+                            reprAngle(rad2deg(piece.slope)),
+                            reprAngle(rad2deg(piece.σ)),
+                            reprArea(piece.area),
+                            reprDistance(piece.diameter),
+                        ]);
+                    }
+                    return rows;
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
@@ -683,7 +744,7 @@
                     }
                 },
                 download_obj() {
-                    var obj = "# This zome is produced by https://florianwns.github.io/z5omes/\n";
+                    let obj = "# This zome was made with https://florianwns.github.io/z5omes/\n";
                     for (let iV = 0; iV < ZOME.vertices.length; iV++) {
                         const v = ZOME.vertices[iV]
                         obj += "v " + v[0] + " " + v[1] + " " + v[2] + "\n";
@@ -697,10 +758,7 @@
                         }
                         obj += "\n";
                     }
-                    console.log(obj)
-                    console.log(ZOME.faces.length)
-                    console.log(ZOME.faces)
-                    download("zome_3D.obj", 'data:application/object;charset=utf-8,' + encodeURIComponent(obj));
+                    download("zome_3D.obj", 'data:application/object; charset=utf-8,' + encodeURIComponent(obj));
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);

@@ -122,7 +122,7 @@ function reprAngle(a, fractionDigits = 2) {
 }
 
 function reprArr(arr, unit = "") {
-    const res = _.join(_.map(arr, v => v + unit), ", ");
+    const res = _.join(_.map(arr, v => v + unit), " ");
     return `${res}`;
 }
 
