@@ -569,7 +569,6 @@
                             piece.σ = dihedral_angle(next_piece.φ, piece.ω, piece.ω);
                         } else {
                             const prev_piece = body[iP - 1];
-                            console.log(prev_piece)
                             const α = angle(piece.A, piece.B, prev_piece.B);
                             const δ = angle(piece.A, piece.B, piece.C);
                             const λ = angle(prev_piece.B, piece.B, piece.C);
