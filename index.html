@@ -557,12 +557,19 @@
                         ]);
                         piece.compute();
 
-                        // Compute σ, the Dihedral angle only for the Zome body
+
+
+                        // Compute σ, the Dihedral angle only for the Zome body with at least 2 pieces
+                        if(num_pieces < 2){
+                            continue;
+                        }
+
                         if (iP == 0) {
-                            const next_piece = body[iP + 1];
+                            const next_piece = body[1];
                             piece.σ = dihedral_angle(next_piece.φ, piece.ω, piece.ω);
                         } else {
                             const prev_piece = body[iP - 1];
+                            console.log(prev_piece)
                             const α = angle(piece.A, piece.B, prev_piece.B);
                             const δ = angle(piece.A, piece.B, piece.C);
                             const λ = angle(prev_piece.B, piece.B, piece.C);
@@ -648,8 +655,11 @@
                         // Move to Origin and rotate to match with previous piece
                         planar_points = piece.planar_points.map(p => add(p, O));
                         if (iP > 0) {
-                            a = Math.abs(angle(A, O, planar_points[1]));
-                            planar_points = planar_points.map(p => rot2d(p, -a, O));
+                            a = angle(A, O, planar_points[1]);
+                            if (A[0] > planar_points[1][0]) {
+                                a = -a;
+                            }
+                            planar_points = planar_points.map(p => rot2d(p, a, O));
                         }
                         O = planar_points[planar_points.length - 1];
                         A = planar_points[planar_points.length - 2];
@@ -1186,7 +1196,8 @@
                             C = vertices[iC];
 
                             // Deal with case where B and C are too close, so we don't add them
-                            const far_enough = toDecimal(dist(B, C), 2) > 0
+                            const far_enough = toDecimal(dist(B, C), 2) !== 0;
+
                             if (far_enough) {
                                 // Add triangle to pieces
                                 if (iT == 0) {

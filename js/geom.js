@@ -39,7 +39,10 @@ function mid(a, b) {
 }
 
 function angle(p1, p2, p3) {
-    return Math.acos(dot(normalize(sub(p1, p2)), normalize(sub(p3, p2)))) || 0;
+    const a = dist(p2, p3);
+    const b = dist(p1, p2);
+    const c = dist(p1, p3);
+    return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
 function dihedral_angle(a, b, c) {
@@ -48,6 +51,13 @@ function dihedral_angle(a, b, c) {
         (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
     )
 }
+
+
+// function rot2d(v, theta) {
+//     const s = Math.sin(theta);
+//     const c = Math.cos(theta);
+//     return [v[0] * c - v[1] * s, v[0] * s + v[1] * c, 0];
+// }
 
 function rot2d(v, theta, o = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
