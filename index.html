@@ -190,11 +190,6 @@
                         </div>
                         <div class="ps-2">
                             <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PDF"
-                                      @click="download_pdf()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">PDF</span>
-                                </span>
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
                                       @click="download_svg()">
                                     <i class="fa-solid fa-file"></i>
@@ -204,6 +199,11 @@
                                       @click="download_png()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">PNG</span>
+                                </span>
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PDF"
+                                      @click="download_pdf()">
+                                    <i class="fa-solid fa-file"></i>
+                                    <span class="fa-icon-file-type">PDF</span>
                                 </span>
                             </div>
                         </div>
