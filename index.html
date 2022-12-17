@@ -145,7 +145,7 @@
             <div class="tab-content h-100 mt-3">
                 <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                      tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
-                     @zome-is-made.window="process($event.detail);">
+                     @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
                         <div style="width:calc(100% - 48px)">
                             <!-- Canvas for Zome 3D rendering -->
@@ -171,7 +171,8 @@
 
                         <div class="ps-2 flex-shrink-1">
                             <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ">
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ"
+                                      @click="download_obj">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">OBJ</span>
                                 </span>
@@ -180,7 +181,7 @@
                     </div>
                 </div>
                 <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab" tabindex="0"
-                     x-data="renderer_a4" @zome-is-made.window="process($event.detail);">
+                     x-data="renderer_a4" @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
                         <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
                             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
@@ -242,7 +243,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process($event.detail);">
+    <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
         <hr>
         <h5 class="text-secondary mt-4 mb-4 me-auto">
             <i class="fa-solid fa-ruler-triangle fa-fw"></i>
@@ -366,11 +367,19 @@
     const FLOAT_PRECISION = 6;
     const ALPHABET = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
+    // Use a global variable to store ZOME data
+    let ZOME = {
+        vertices: [],
+        faces: [],
+        face_colors: [],
+        pieces: [],
+        base: null,
+        has_base: false,
+        num: 0,
+    };
+
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
-            let virtual_zome = null;
-            let num = 0;
-
             return {
                 pieces: [],
                 body: [],
@@ -401,11 +410,11 @@
                     return reprDistance(value);
                 },
                 get body_area() {
-                    const value = _.reduce(this.body, (res, p) => res + p.area * num, 0);
+                    const value = _.reduce(this.body, (res, p) => res + p.area * ZOME.num, 0);
                     return reprArea(value);
                 },
                 get body_num_pieces() {
-                    return num * this.body.length;
+                    return ZOME.num * this.body.length;
                 },
                 get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
@@ -439,15 +448,11 @@
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
                     return !(!obj || !["pieces", "base", "num"].reduce(hasKey, true));
                 },
-                process(zome) {
-                    if (!this.is_valid(zome)) {
-                        console.error("Object is not valid", zome)
+                process() {
+                    if (!this.is_valid(ZOME)) {
+                        console.error("Object is not valid", ZOME)
                         return;
                     }
-
-                    virtual_zome = zome;
-                    num = zome.num;
-
                     this.__to_real_world();
                 },
                 to_svg_points(piece, size) {
@@ -461,8 +466,8 @@
                 },
                 to_real_world() {
                     // Clone pieces
-                    const body = _.cloneDeep(virtual_zome.pieces);
-                    const base = _.cloneDeep(virtual_zome.base);
+                    const body = _.cloneDeep(ZOME.pieces);
+                    const base = _.cloneDeep(ZOME.base);
 
                     // Compute height ratio then convert dimensions to real world
                     const num_pieces = body.length;
@@ -508,6 +513,7 @@
                 },
             };
         });
+
         Alpine.data('renderer_a4', () => {
             return {
                 pieces: [],
@@ -535,26 +541,25 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    const element = document.createElement("a");
-                    element.download = "planar_pieces.svg";
-                    element.href = window.URL.createObjectURL(blob);
-                    element.click();
-                    element.remove();
+                    download(
+                        "planar_pieces.svg",
+                        window.URL.createObjectURL(blob),
+                    );
                 },
-                process(zome) {
-                    if (!this.is_valid(zome)) {
-                        console.error("Object is not valid", zome)
+                process() {
+                    if (!this.is_valid(ZOME)) {
+                        console.error("Object is not valid", ZOME)
                         return;
                     }
 
                     // Compute planar pieces
                     let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE;
-                    const first_piece = zome.pieces[0].planar_points[1];
+                    const first_piece = ZOME.pieces[0].planar_points[1];
                     let O = [-first_piece[0], 0, 0], planar_points = [];
                     let A, a;
                     const planar_pieces = [], colors = [];
-                    for (let iP = 0; iP < zome.pieces.length; iP++) {
-                        const piece = zome.pieces[iP];
+                    for (let iP = 0; iP < ZOME.pieces.length; iP++) {
+                        const piece = ZOME.pieces[iP];
 
                         // Move to Origin and rotate to match with previous piece
                         planar_points = piece.planar_points.map(p => add(p, O));
@@ -615,7 +620,6 @@
                 // 3D Rendering Parameters
                 is_spinning: true,
                 speed: 0.01,
-
                 draw_axis: true,
 
                 init() {
@@ -678,13 +682,33 @@
                         renderer.setSize(width, height);
                     }
                 },
+                download_obj() {
+                    var obj = "# This zome is produced by https://florianwns.github.io/z5omes/\n";
+                    for (let iV = 0; iV < ZOME.vertices.length; iV++) {
+                        const v = ZOME.vertices[iV]
+                        obj += "v " + v[0] + " " + v[1] + " " + v[2] + "\n";
+                    }
+                    for (let iF = 0; iF < ZOME.faces.length; iF += 3) {
+                        obj += "f";
+                        for (let j = 0; j < 3; j++) {
+                            // (OBJ format uses 1-based indices)
+                            const iV = ZOME.faces[iF + j] + 1;
+                            obj += " " + iV;
+                        }
+                        obj += "\n";
+                    }
+                    console.log(obj)
+                    console.log(ZOME.faces.length)
+                    console.log(ZOME.faces)
+                    download("zome_3D.obj", 'data:application/object;charset=utf-8,' + encodeURIComponent(obj));
+                },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
                     return !(!obj || !["faces", "face_colors"].reduce(hasKey, true));
                 },
-                process(zome) {
-                    if (!this.is_valid(zome)) {
-                        console.error("Object is not valid", zome)
+                process() {
+                    if (!this.is_valid(ZOME)) {
+                        console.error("Object is not valid", ZOME)
                         return;
                     }
 
@@ -696,7 +720,7 @@
 
                     // Draw faces
                     {
-                        const points = zome.faces.map(p => new THREE.Vector3(...p));
+                        const points = ZOME.faces.map(iV => new THREE.Vector3(...(ZOME.vertices[iV])));
                         const material = new THREE.MeshLambertMaterial({
                             side: THREE.DoubleSide,
                             vertexColors: true,
@@ -704,7 +728,7 @@
 
                         const geometry = new THREE.BufferGeometry()
                         geometry.setFromPoints(points)
-                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(zome.face_colors, 3));
+                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(ZOME.face_colors, 3));
                         geometry.computeVertexNormals()
 
                         // Add to group
@@ -799,10 +823,9 @@
         });
 
         Alpine.data('settings', () => {
-            let vertices = [];
-            let faces = [];
-            let face_colors = [];
-            let iTriangles = [];
+            let vertices = [];          // 3D point vector
+            let faces = [];             // vertice indexes vector
+            let face_colors = [];       // rgb colors vector
             let pieces = [];
 
             return {
@@ -908,20 +931,31 @@
                     const slider = this.get_slider(key);
                     this[key] = this.format(key, _.clamp(value, slider.min, slider.max));
                 },
-                add_vertice(p) {
-                    vertices.push(p);
-                    return vertices.length - 1;
-                },
                 clear() {
                     // Clear data
                     vertices = [];
                     faces = [];
-                    iTriangles = [];
-                    pieces = [];
                     face_colors = [];
+                    pieces = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return toDecimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
+                },
+                add_vertice(p) {
+                    vertices.push(p);
+                    return vertices.length - 1;
+                },
+                add_face(iVertices, rgb) {
+                    const num_vertices = iVertices.length
+                    if (num_vertices % 3 > 0) {
+                        console.error("Faces must only have 3 vertices")
+                        return;
+                    }
+
+                    for (let i = 0; i < num_vertices; i++) {
+                        faces.push(iVertices[i]);
+                        face_colors.push(...rgb);
+                    }
                 },
                 make_zome() {
                     // Constants
@@ -968,6 +1002,8 @@
 
                     // Loop over rings (M = N - 1), while zome does not hit ground
                     let iR = 0, hit_ground = false;
+                    const triangles = [];
+
                     for (; iR < M && !hit_ground; iR++) {     // ri => Ring index
                         ficr = iR * N + 1;                      // First Index on current ring
                         fipr = ficr - N;                        // First index on previous ring
@@ -1006,15 +1042,12 @@
                                     color = angle2rgb(a, slope);
                                 }
                                 // Add faces and colors
-                                faces.push(A, B, C, B, C, D);
-                                for (let i = 0; i < 6; i++) {
-                                    face_colors.push(...color)
-                                }
+                                this.add_face([iA, iB, iC, iB, iC, iD], color);
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
                                 hit_ground = toDecimal(y, 2) == 0;
                                 if (hit_ground) {
-                                    iTriangles.push(iD, iD, iC);
+                                    triangles.push(iD, iD, iC);
                                 }
                             } else {
                                 // Compute the Truncated Kite
@@ -1037,13 +1070,10 @@
                                 }
 
                                 // Add faces and colors
-                                faces.push(A, B, E, A, E, F, A, F, C);
-                                for (let i = 0; i < 9; i++) {
-                                    face_colors.push(...color)
-                                }
+                                this.add_face([iA, iB, iE, iA, iE, iF, iA, iF, iC], color);
 
                                 // Add last triangles to close it after if needed
-                                iTriangles.push(iE, iF, iC);
+                                triangles.push(iE, iF, iC);
                                 hit_ground = true;
                                 lastIsTruncated = true;
                             }
@@ -1059,16 +1089,16 @@
 
                     // Close The Zome
                     let base_vertices = [];
-                    const num_triangles = iTriangles.length;
+                    const num_triangles = triangles.length;
                     if (num_triangles > 0) {
                         let iT = 0;
                         for (let iN = 0; iN < N; iN++) {
                             iT = iN * 3;
                             a = iN * TAU / N;
 
-                            iA = iTriangles[(iT + 2) % num_triangles]
-                            iB = iTriangles[(iT + 1) % num_triangles]
-                            iC = iTriangles[(iT + 3) % num_triangles]
+                            iA = triangles[(iT + 2) % num_triangles]
+                            iB = triangles[(iT + 1) % num_triangles]
+                            iC = triangles[(iT + 3) % num_triangles]
 
                             A = vertices[iA];
                             B = vertices[iB];
@@ -1088,17 +1118,14 @@
                                 }
 
                                 // Add triangle to 3D
-                                faces.push(A, B, C)
-                                for (let i = 0; i < 3; i++) {
-                                    face_colors.push(...color)
-                                }
+                                this.add_face([iA, iB, iC], color);
                             }
 
                             // Don't push base vertices if zome is entire
                             if (this.height_ratio < 1) {
-                                base_vertices.push(B);
+                                base_vertices.push(iB);
                                 if (lastIsTruncated && far_enough) {
-                                    base_vertices.push(C);
+                                    base_vertices.push(iC);
                                 }
                             }
                         }
@@ -1107,17 +1134,22 @@
                     // Finally add the base piece
                     let base = null;
                     if (base_vertices.length >= 3) {
-                        base = new ZomeBase(base_vertices)
+                        base = new ZomeBase(base_vertices.map(iV => vertices[iV]))
                         color = base.rgb = angle2rgb(0, deg2rad(45));
 
                         // Add triangle to 3D
-                        faces.push(...base.faces)
-                        for (let i = 0; i < base.faces.length; i++) {
-                            face_colors.push(...color)
+                        const last_iV = this.add_vertice([0, 0, 0]);
+                        const base_faces = []
+                        for (let i = 0; i < base_vertices.length; i++) {
+                            const iV = base_vertices[i];
+                            const iNV = base_vertices[(i + 1) % base_vertices.length];
+                            base_faces.push(iV, last_iV, iNV)
                         }
+                        this.add_face(base_faces, color);
                     }
 
-                    this.$dispatch('zome-is-made', {
+                    // Save Zome and dispatch it
+                    ZOME = {
                         vertices: vertices,
                         faces: faces,
                         face_colors: face_colors,
@@ -1125,7 +1157,9 @@
                         base: base,
                         has_base: base != null,
                         num: N,
-                    });
+                    }
+
+                    this.$dispatch('zome-is-made');
                 },
             };
         });

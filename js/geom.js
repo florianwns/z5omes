@@ -167,6 +167,15 @@ function color_map(value, start = '#FFFFFF', end = '#000000') {
     return rgb2hex(r, g, b);
 }
 
+
+function download(filename, href) {
+    const element = document.createElement("a");
+    element.download = filename;
+    element.href = href;
+    element.click();
+    element.remove();
+}
+
 class ConvexPolygon {
     constructor(points) {
         // Consider that polygon is made by triangle,
