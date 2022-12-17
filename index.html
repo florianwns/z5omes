@@ -306,8 +306,6 @@
                             <th></th>
                             <th>Width</th>
                             <th>Height</th>
-                            <!--                            <th>Top Height</th>-->
-                            <!--                            <th>Bottom Height</th>-->
                             <th>CCW Edges</th>
                             <th>CCW Angles</th>
                             <th>θ (Slope angle)</th>
@@ -328,8 +326,6 @@
                                 </td>
                                 <td x-text="reprDistance(obj.width)"></td>
                                 <td x-text="reprDistance(obj.height)"></td>
-                                <!--                                <td x-text="toDecimal(obj.top_height)"></td>-->
-                                <!--                                <td x-text="toDecimal(obj.bottom_height)"></td>-->
                                 <td x-text="reprArr(uniqueArr(_.map(obj.edge_distances, v => reprDistance(v))))"></td>
                                 <td x-text="reprArr(uniqueArr(_.map(obj.angles, a => reprAngle(rad2deg(a)))))"></td>
                                 <td x-text="reprAngle(rad2deg(obj.slope))"></td>
