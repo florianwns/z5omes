@@ -332,11 +332,11 @@
                             <tr class="align-middle">
                                 <td>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="rgb2hex(...pieces[i].rgb)">
-                                        <polygon :points="to_svg_points(pieces[i], 32)"/>
+                                         :fill="rgb2hex(...row[0].rgb)">
+                                        <polygon :points="to_svg_points(row[0], 32)"/>
                                     </svg>
                                 </td>
-                                <template x-for="(value, j) in row" :key="j">
+                                <template x-for="(value, j) in row[1]" :key="j">
                                     <td x-text="value"></td>
                                 </template>
                             </tr>
@@ -380,14 +380,12 @@
         face_colors: [],
         pieces: [],
         base: null,
-        has_base: false,
         num: 0,
     };
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
             return {
-                pieces: [],
                 body: [],
                 base: null,
                 height: 100,                // Height
@@ -405,7 +403,6 @@
                     this.$watch("length_unit", () => this.__to_real_world());
                 },
                 get pieces() {
-                    // Only the base
                     return this.has_base ? [...this.body, this.base] : this.body;
                 },
                 get has_base() {
@@ -470,7 +467,7 @@
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
                     for (let i = 0; i < rows.length; i++) {
-                        obj += _.join(rows[i], sep) + "\n"
+                        obj += _.join(rows[i][1], sep) + "\n"
                     }
                     download(`zome_measurements.${fmt}`, `data:text/${fmt}; charset=utf-8,` + encodeURIComponent(obj));
                 },
@@ -492,15 +489,18 @@
                     for (let i = 0; i < this.pieces.length; i++) {
                         const piece = this.pieces[i];
                         rows.push([
-                            i + 1,
-                            reprDistance(piece.width),
-                            reprDistance(piece.height),
-                            reprArr(uniqueArr(_.map(piece.edge_distances, v => reprDistance(v)))),
-                            reprArr(uniqueArr(_.map(piece.angles, a => reprAngle(rad2deg(a))))),
-                            reprAngle(rad2deg(piece.slope)),
-                            reprAngle(rad2deg(piece.σ)),
-                            reprArea(piece.area),
-                            reprDistance(piece.diameter),
+                            piece,
+                            [
+                                i + 1,
+                                reprDistance(piece.width),
+                                reprDistance(piece.height),
+                                reprArr(uniqueArr(_.map(piece.edge_distances, v => reprDistance(v)))),
+                                reprArr(uniqueArr(_.map(piece.angles, a => reprAngle(rad2deg(a))))),
+                                reprAngle(rad2deg(piece.slope)),
+                                reprAngle(rad2deg(piece.σ)),
+                                reprArea(piece.area),
+                                reprDistance(piece.diameter),
+                            ]
                         ]);
                     }
                     return rows;
@@ -566,7 +566,6 @@
                         ]);
                         base.compute();
                     }
-
 
                     // Refresh proxy
                     this.base = base;
@@ -1213,7 +1212,6 @@
                         face_colors: face_colors,
                         pieces: pieces,
                         base: base,
-                        has_base: base != null,
                         num: N,
                     }
 
