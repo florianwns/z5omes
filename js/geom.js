@@ -152,6 +152,7 @@ function hsl2hex(h, s, l) {
 };
 
 const TAU = 2 * Math.PI;
+const A90 = Math.PI / 2;
 
 function angle2rgb(theta, beta = 0) {
     const hue = Math.round(((4 + theta) % TAU) / TAU * 360);
@@ -306,14 +307,18 @@ class PolygonWithHat extends ConvexPolygon {
         return angle(this.A, this.B, this.points[2]);
     }
 
-    get slope() {
-        // Compute the slope of the hat
-        const I = mid(this.B, this.C);
-        return angle(this.A, I, [this.A[0], I[1], this.A[2]]);
-    }
-
     get diameter() {
         return 2 * dist(this.B, [0, this.B[1], 0]);
+    }
+
+    get slope(){
+        // Compute the slope of the hat
+        const I = mid(this.points[1], this.points[this.num_points - 1]);
+        let a = angle(this.O, I, [0, I[1], 0]);
+        if(a > A90){
+            a = Math.PI - a
+        }
+        return a
     }
 }
 
