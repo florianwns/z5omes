@@ -190,12 +190,14 @@
                                      viewbox="0 0 210 297" x-ref="A4_sheet">
                                 </svg>
                             </div>
-                            <div class="d-flex flex-wrap justify-content-center gap-2 mt-2" style="width:300px">
+                            <div class="d-flex flex-wrap justify-content-center mt-2" style="width:300px">
                                 <template x-for="(color, i) in bulleted_list_colors" :key="i">
-                                    <span class="bulleted_list_item"
-                                          :class="(page_index == i)? 'border border-1' : ''"
-                                          :style="`background-color: ${color};`"
-                                          @click="page_index = i"></span>
+                                    <div class="px-1">
+                                        <div class="bulleted_list_item"
+                                              :class="(page_index == i)? 'border border-1' : ''"
+                                              :style="`background-color: ${color};`"
+                                              @click="page_index = i"></div>
+                                    </div>
                                 </template>
                             </div>
                         </div>
