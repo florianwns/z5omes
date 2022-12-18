@@ -20,6 +20,18 @@
     top: 45%;
 }
 
+.bulleted_list_item {
+    width: 12px;
+    height: 12px;
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 50% !important;
+    border-color: rgb(108, 117, 125) !important;
+}
+
+.tab-content > .active {
+    outline: none;
+}
 
 .input-group .form-range {
     height: inherit !important;

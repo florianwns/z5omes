@@ -171,6 +171,23 @@ function color_map(value, start = '#FFFFFF', end = '#000000') {
     return rgb2hex(r, g, b);
 }
 
+function get_boundaries(points) {
+    // Compute Boundaries
+    let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
+        xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
+    for (let i = 0; i < points.length; i++) {
+        [x, y] = points[i];
+
+        // Save Boundaries
+        if (x < xMin) xMin = x;
+        if (x > xMax) xMax = x;
+        if (y < yMin) yMin = y;
+        if (y > yMax) yMax = y;
+    }
+    const width = Math.abs(xMax - xMin);
+    const height = Math.abs(yMax - yMin);
+    return [xMin, xMax, yMin, yMax, width, height];
+}
 
 function download(filename, href) {
     const element = document.createElement("a");
@@ -191,7 +208,8 @@ class ConvexPolygon {
 
         // Init variables
         this.points = points;
-        this.rgb = [1, 0, 1];
+        this.color = "#FF00FF";
+        this.colors = [];
         this.compute()
     }
 
@@ -265,7 +283,6 @@ class ConvexPolygon {
         // Compute width and height from 2D boundaries
         this.width = Math.abs(xMax - xMin);
         this.height = Math.abs(yMax - yMin);
-        this.bounds = [xMin, xMax, yMin, yMax];
     }
 
     get O() {

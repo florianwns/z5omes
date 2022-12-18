@@ -180,14 +180,26 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab" tabindex="0"
+                <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
+                     tabindex="0"
                      x-data="renderer_a4" @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
-                        <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1050px" height="1485px"
-                                 viewbox="0 0 210 297" x-ref="A4_sheet">
-                            </svg>
+                        <div>
+                            <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1050px" height="1485px"
+                                     viewbox="0 0 210 297" x-ref="A4_sheet">
+                                </svg>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mt-2" style="width:300px">
+                                <template x-for="(color, i) in bulleted_list_colors" :key="i">
+                                    <span class="bulleted_list_item"
+                                          :class="(page_index == i)? 'border border-1' : ''"
+                                          :style="`background-color: ${color};`"
+                                          @click="page_index = i"></span>
+                                </template>
+                            </div>
                         </div>
+
                         <div class="ps-2">
                             <div class="vstack">
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
@@ -208,6 +220,8 @@
                             </div>
                         </div>
                     </div>
+
+
                 </div>
 
                 <div class="tab-pane" id="nav-help" role="tabpanel" aria-labelledby="nav-help-tab" tabindex="0">
@@ -338,7 +352,7 @@
                             <tr class="align-middle">
                                 <td>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="rgb2hex(...row[0].rgb)">
+                                         :fill="row[0].colors[0]">
                                         <polygon :points="to_svg_points(row[0], 32)"/>
                                     </svg>
                                 </td>
@@ -530,11 +544,12 @@
                 },
                 to_svg_points(piece, size) {
                     // Recompute pixel positions
+                    const [xMin, xMax, yMin, yMax] = get_boundaries(piece.planar_points);
                     const pixel_ratio = size / Math.max(piece.height, piece.width);
                     const center = size / 2;
                     return piece.planar_points.map(p => [
-                        (p[0] - piece.bounds[0] - piece.width / 2) * pixel_ratio + center,
-                        (p[1] - piece.bounds[2] - piece.height / 2) * pixel_ratio + center,
+                        (p[0] - xMin - piece.width / 2) * pixel_ratio + center,
+                        (p[1] - yMin - piece.height / 2) * pixel_ratio + center,
                     ]);
                 },
                 to_real_world() {
@@ -592,18 +607,28 @@
         });
 
         Alpine.data('renderer_a4', () => {
+            let polygons_per_page = [];
+
             return {
-                pieces: [],
                 A4_sheet: null,
+                num_pages: 0,
+                page_index: 0,
+                pages: [],
+                bulleted_list_colors: [],
 
                 // 2D Rendering Parameters
                 init() {
-                    // Add listeners
                     this.A4_sheet = this.$refs.A4_sheet;
+
+                    // Add listeners
+                    this.$watch("page_index", (value) => {
+                        this.update();
+                    })
+                    this.$el.addEventListener("keydown", e => this.keydown(e), false);
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-                    return !(!obj || !["vertices", "faces"].reduce(hasKey, true));
+                    return !(!obj || !["num", "pieces"].reduce(hasKey, true));
                 },
                 to_svg_points(piece, size) {
                     // Recompute pixel positions
@@ -641,14 +666,23 @@
                         return;
                     }
 
-                    // Compute planar pieces
-                    let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE;
-                    const first_piece = ZOME.pieces[0].planar_points[1];
-                    let O = [-first_piece[0], 0, 0], planar_points = [];
-                    let A, a, rotated_A;
-                    const planar_pieces = [], colors = [];
-                    for (let iP = 0; iP < ZOME.pieces.length; iP++) {
-                        const piece = ZOME.pieces[iP];
+                    // Init variables
+                    const pages = [];
+                    const bulleted_list_colors = [];
+                    let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
+                        xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE,
+                        maxWidth = Number.MIN_VALUE, maxHeight = Number.MIN_VALUE;
+
+                    const body_pieces = _.cloneDeep(ZOME.pieces);
+                    const base = _.cloneDeep(ZOME.base);
+                    const N = ZOME.num;
+
+                    // Compute body planar pieces
+                    const first_piece = body_pieces[0].planar_points[1];
+                    let O = [0, 0, 0], planar_points = [];
+                    let A, a, x, y, rotated_A, width, height;
+                    for (let iP = 0; iP < body_pieces.length; iP++) {
+                        const piece = body_pieces[iP];
 
                         // Move to Origin and rotate to match with previous piece
                         planar_points = piece.planar_points.map(p => add(p, O));
@@ -666,39 +700,130 @@
                         A = planar_points[planar_points.length - 2];
 
                         // Compute Boundaries
-                        xMax = _.reduce(planar_points, (res, p) => Math.max(p[0], res), xMax);
-                        yMax = _.reduce(planar_points, (res, p) => Math.max(p[1], res), yMax);
+                        for (let i = 0; i < planar_points.length; i++) {
+                            [x, y] = planar_points[i];
 
-                        // Add planar piece and color
-                        planar_pieces.push(planar_points);
-                        colors.push(rgb2hex(...piece.rgb));
+                            // Save Boundaries
+                            if (x < xMin) xMin = x;
+                            if (x > xMax) xMax = x;
+                            if (y < yMin) yMin = y;
+                            if (y > yMax) yMax = y;
+                        }
+
+                        // Save planar pieces
+                        piece.planar_points = planar_points;
                     }
 
-                    // Compute pixel ratio
-                    const border = 6;
-                    const pixel_ratio = Math.min((297 - 2 * border) / yMax, (210 - 2 * border) / xMax);
-                    const dy = (297 - yMax * pixel_ratio) / 2;
-                    const dx = (210 - xMax * pixel_ratio) / 2;
+                    // Save height and width
+                    maxWidth = Math.abs(xMax - xMin);
+                    maxHeight = Math.abs(yMax - yMin);
 
-                    // Build the new SVG
-                    const svgns = "http://www.w3.org/2000/svg";
-                    const children = [];
-                    for (let iP = 0; iP < planar_pieces.length; iP++) {
-                        const piece = planar_pieces[iP];
-                        const el = document.createElementNS(svgns, "polygon");
-                        el.setAttribute('points', piece.map(p => [
-                            p[0] * pixel_ratio + dx,
-                            p[1] * pixel_ratio + dy
-                        ]));
-                        el.setAttribute('stroke', 'black');
-                        el.setAttribute('stroke-width', '0.1px');
-                        el.setAttribute('fill', colors[iP]);
-                        children.push(el);
+                    // For each color, Add a page with body pieces
+                    for (let iC = 0; iC < N; iC++) {
+                        const page_body_pieces = [];
+                        for (let iP = 0; iP < body_pieces.length; iP++) {
+                            const piece = _.cloneDeep(body_pieces[iP]);
+                            piece.color = piece.colors[iC]
+                            page_body_pieces.push(piece)
+                        }
+                        pages.push(page_body_pieces);
                     }
 
-                    // Replace Children
-                    this.A4_sheet.replaceChildren(...children);
+
+                    // Add a last page if base exists
+                    if (base !== null) {
+                        // Center base
+                        [xMin, xMax, yMin, yMax, width, height] = get_boundaries(base.planar_points);
+
+                        // Save height and width
+                        maxWidth = Math.max(width, maxWidth);
+                        maxHeight = Math.max(height, maxHeight);
+                        base.color = base.colors[0];
+                        pages.push([base]);
+                    }
+
+                    // Compute the same pixel ratio for all pages
+                    const border_width = 2 * 6;
+                    const pixel_ratio = Math.min((297 - border_width) / maxHeight, (210 - border_width) / maxWidth);
+                    const center = [210 / 2, 297 / 2];
+
+
+                    // Build pages polygons
+                    polygons_per_page = [];
+                    for (let iPa = 0; iPa < pages.length; iPa++) {
+                        const polygons = [];
+                        const page_pieces = pages[iPa];
+
+                        // Reset boundaries
+                        xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
+                            xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
+
+                        // Compute boundaries of all pieces before center
+                        for (let iP = 0; iP < page_pieces.length; iP++) {
+                            const piece = page_pieces[iP];
+                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(piece.planar_points);
+
+                            // Save Boundaries
+                            if (xPMin < xMin) xMin = xPMin;
+                            if (xPMax > xMax) xMax = xPMax;
+                            if (yPMin < yMin) yMin = yPMin;
+                            if (yPMax > yMax) yMax = yPMax;
+                        }
+                        width = Math.abs(xMax - xMin);
+                        height = Math.abs(yMax - yMin);
+
+                        for (let iP = 0; iP < page_pieces.length; iP++) {
+                            const piece = page_pieces[iP];
+                            const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+
+                            el.setAttribute('points', piece.planar_points.map(p => [
+                                (p[0] - xMin - width / 2) * pixel_ratio + center[0],
+                                (p[1] - yMin - height / 2) * pixel_ratio + center[1],
+                            ]));
+                            el.setAttribute('stroke', 'black');
+                            el.setAttribute('stroke-width', '0.1px');
+                            el.setAttribute('fill', piece.color);
+                            polygons.push(el);
+                        }
+                        // Add color of the first piece to bulleted list
+                        bulleted_list_colors.push(page_pieces[0].color);
+                        polygons_per_page.push(polygons);
+                    }
+
+                    // Save proxies
+                    this.bulleted_list_colors = bulleted_list_colors;
+                    this.page_index = 0;
+                    this.update();
                 },
+                next_page() {
+                    this.page_index = (this.page_index + 1) % polygons_per_page.length;
+                },
+                previous_page() {
+                    this.page_index = (polygons_per_page.length + this.page_index - 1) % polygons_per_page.length;
+                },
+                keydown(e) {
+                    switch (e.key) {
+                        case "Up":
+                        case "ArrowUp":
+                        case "Left":
+                        case "ArrowLeft":
+                            this.previous_page();
+                            break;
+                        case "Down":
+                        case "ArrowDown":
+                        case "Right":
+                        case "ArrowRight":
+                            this.next_page();
+                            break;
+                        default:
+                            return;
+                    }
+                    e.preventDefault();
+                },
+                update() {
+                    const polygons = polygons_per_page[this.page_index % polygons_per_page.length];
+                    this.A4_sheet.replaceChildren(...polygons);
+                }
             };
         });
 
@@ -1082,7 +1207,7 @@
 
                     // Initialize variables
                     let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, I, dist_to_ground, y, piece,
-                        slope, color;
+                        slope, rgb;
                     let lastIsTruncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -1124,17 +1249,17 @@
                                 // Add Shape to 3D
                                 iD = this.add_vertice(D);
 
-                                // Add piece
+                                // Add only the first piece, because only color change for 2D
                                 if (iN == 0) {
                                     piece = (is_rhombus) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
                                     slope = piece.slope;
-                                    color = piece.rgb = angle2rgb(a, slope);
                                     pieces.push(piece)
-                                } else {
-                                    color = angle2rgb(a, slope);
                                 }
+
                                 // Add faces and colors
-                                this.add_face([iA, iB, iD, iA, iD, iC], color);
+                                rgb = angle2rgb(a, slope);
+                                piece.colors.push(rgb2hex(...rgb));
+                                this.add_face([iA, iB, iD, iA, iD, iC], rgb);
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
                                 hit_ground = toDecimal(y, 2) == 0;
@@ -1155,14 +1280,13 @@
                                 if (iN == 0) {
                                     piece = new TruncatedKite([A, B, E, F, C])
                                     slope = piece.slope;
-                                    color = piece.rgb = angle2rgb(a, slope);
                                     pieces.push(piece)
-                                } else {
-                                    color = angle2rgb(a, slope);
                                 }
 
                                 // Add faces and colors
-                                this.add_face([iA, iB, iE, iA, iE, iF, iA, iF, iC], color);
+                                rgb = angle2rgb(a, slope);
+                                piece.colors.push(rgb2hex(...rgb));
+                                this.add_face([iA, iB, iE, iA, iE, iF, iA, iF, iC], rgb);
 
                                 // Add last triangles to close it after if needed
                                 triangles.push(iE, iF, iC);
@@ -1204,14 +1328,13 @@
                                 if (iT == 0) {
                                     piece = new Triangle([A, B, C]);
                                     slope = piece.slope;
-                                    color = piece.rgb = angle2rgb(a, slope);
                                     pieces.push(piece)
-                                } else {
-                                    color = angle2rgb(a, slope);
                                 }
 
                                 // Add triangle to 3D
-                                this.add_face([iA, iB, iC], color);
+                                rgb = angle2rgb(a, slope);
+                                piece.colors.push(rgb2hex(...rgb));
+                                this.add_face([iA, iB, iC], rgb);
                             }
 
                             // Don't push base vertices if zome is entire
@@ -1228,7 +1351,8 @@
                     let base = null;
                     if (base_vertices.length >= 3) {
                         base = new ZomeBase(base_vertices.map(iV => vertices[iV]))
-                        color = base.rgb = angle2rgb(0, deg2rad(45));
+                        rgb = angle2rgb(0, deg2rad(45));
+                        base.colors.push(rgb2hex(...rgb));
 
                         // Add triangle to 3D
                         const last_iV = this.add_vertice([0, 0, 0]);
@@ -1238,7 +1362,7 @@
                             const iNV = base_vertices[(i + 1) % base_vertices.length];
                             base_faces.push(iV, last_iV, iNV)
                         }
-                        this.add_face(base_faces, color);
+                        this.add_face(base_faces, rgb);
                     }
 
                     // Save Zome and dispatch it
