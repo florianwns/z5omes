@@ -651,7 +651,10 @@
                     svg.setAttribute('viewBox', '0 0 210 297');
                     for (let iP = 0; iP < polygons_per_page.length; iP++, doc.addPage()) {
                         const polygons = polygons_per_page[iP];
-                        svg.replaceChildren(...polygons);
+                        svg.innerHTML = '';
+                        for (let i = 0; i < polygons.length; i++) {
+                            svg.appendChild(polygons[i]);
+                        }
 
                         // Convert SVG to PDF
                         SVGtoPDF(doc, svg);
@@ -833,7 +836,11 @@
                 },
                 update() {
                     const polygons = polygons_per_page[this.page_index % polygons_per_page.length];
-                    this.A4_sheet.replaceChildren(...polygons);
+
+                    this.A4_sheet.innerHTML = '';
+                    for (let i = 0; i < polygons.length; i++) {
+                        this.A4_sheet.appendChild(polygons[i]);
+                    }
                 }
             };
         });
