@@ -390,6 +390,9 @@
 <!-- JS PDF -->
 <script src="js/jspdf.min.js"></script>
 
+<!-- Hammer : Touch events -->
+<script src="js/hammer.min.js"></script>
+
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
 
@@ -397,7 +400,6 @@
 <script type="text/javascript">
     const WORLD_HEIGHT = 100;
     const FLOAT_PRECISION = 6;
-    const ALPHABET = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
     // Use a global variable to store ZOME data
     let ZOME = {
@@ -625,6 +627,11 @@
                         this.update();
                     })
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
+
+                    // Add swipe
+                    const hammer = new Hammer(this.A4_sheet);
+                    hammer.on('swiperight', (e) => this.previous_page());
+                    hammer.on('swipeleft', (e) => this.next_page());
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
