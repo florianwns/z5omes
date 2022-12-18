@@ -186,7 +186,7 @@
                     <div class="d-flex justify-content-center">
                         <div>
                             <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="1050px" height="1485px"
+                                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
                                      viewbox="0 0 210 297" x-ref="A4_sheet">
                                 </svg>
                             </div>
@@ -206,11 +206,6 @@
                                       @click="download_svg()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">SVG</span>
-                                </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
-                                      @click="download_png()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">PNG</span>
                                 </span>
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PDF"
                                       @click="download_pdf()">
@@ -387,8 +382,10 @@
 <!-- Canvg -->
 <script src="js/canvg.min.js"></script>
 
-<!-- JS PDF -->
-<script src="js/jspdf.min.js"></script>
+<!-- PDF Kit -->
+<script src="js/pdfkit.min.js"></script>
+<script src="js/blobstream.min.js"></script>
+<script src="js/svg2pdf.min.js"></script>
 
 <!-- Hammer : Touch events -->
 <script src="js/hammer.min.js"></script>
@@ -644,28 +641,36 @@
                     return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 download_pdf() {
-                    const doc = new jsPDF({orientation: 'portrait', unit: 'mm', format: [210, 297]})
-                    const canvas = this.svg_to_canvas();
-                    const img_data = canvas.toDataURL('image/png');
-                    doc.addImage(img_data, 'png', 0, 0, 210, 297, '', 'FAST');
-                    doc.save('planar_pieces.pdf')
+                    // Create empty PDF document
+                    const doc = new PDFDocument({compress: false, size: [595, 842]});
+                    const stream = doc.pipe(blobStream());
+
+                    // Create SVG
+                    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                    svg.setAttribute('viewBox', '0 0 210 297');
+                    for (let iP = 0; iP < polygons_per_page.length; iP++, doc.addPage()) {
+                        const polygons = polygons_per_page[iP];
+                        svg.replaceChildren(...polygons);
+
+                        // Convert SVG to PDF
+                        SVGtoPDF(doc, svg);
+                    }
+
+                    // Save document
+                    doc.end();
+                    stream.on('finish', function () {
+                        const url = stream.toBlobURL("application/pdf");
+                        download("planar_pieces.pdf", url);
+                    });
+
+                    // Tricks because svg is empty otherwise ;)
+                    this.update();
                 },
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
                     download("planar_pieces.svg", window.URL.createObjectURL(blob));
-                },
-                svg_to_canvas() {
-                    const A4_sheet = this.A4_sheet;
-                    const canvas = document.createElement("canvas");
-                    canvg(canvas, A4_sheet.outerHTML.toString());
-                    return canvas;
-                },
-                download_png() {
-                    const canvas = this.svg_to_canvas();
-                    canvas.toBlob(blob => {
-                        download("planar_pieces.png", window.URL.createObjectURL(blob));
-                    });
                 },
                 process() {
                     if (!this.is_valid(ZOME)) {
