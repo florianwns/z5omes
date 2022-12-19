@@ -783,7 +783,7 @@
                     const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
                     const border = 6;
                     const pixel_ratio = Math.min(
-                        (210 - 2 * border) / maxWidth, (297 - 2 * border) / maxHeight
+                        (210 - 2 * border) / maxWidth, (297 - 6 * border) / maxHeight
                     ) * this.zoom;
                     const center = [210 / 2, 297 / 2];
 
