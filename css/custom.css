@@ -29,7 +29,7 @@
 }
 
 .bulleted_list_item.active {
-    border-color: #86b7fe;
+    border: 1px solid #86b7fe;
     outline: 0;
     box-shadow: 0 0 0 0.15rem #0d6efd40;
 }
