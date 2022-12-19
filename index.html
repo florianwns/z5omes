@@ -182,6 +182,11 @@
                                     <span class="fa-icon-file-type">PLY</span>
                                 </span>
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ"
+                                      @click="download_gltf()">
+                                    <i class="fa-solid fa-file"></i>
+                                    <span class="fa-icon-file-type">GLTF</span>
+                                </span>
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ"
                                       @click="download_obj()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">OBJ</span>
@@ -389,10 +394,11 @@
 
 <!-- ThreeJS -->
 <script src="js/three.min.js"></script>
-<script src="js/OrbitControls.js"></script>
-<script src="js/OBJExporter.js"></script>
-<script src="js/STLExporter.js"></script>
-<script src="js/PLYExporter.js"></script>
+<script src="js/OrbitControls.min.js"></script>
+<script src="js/OBJExporter.min.js"></script>
+<script src="js/STLExporter.min.js"></script>
+<script src="js/PLYExporter.min.js"></script>
+<script src="js/GLTFExporter.min.js"></script>
 
 <!-- Canvg -->
 <script src="js/canvg.min.js"></script>
@@ -941,6 +947,19 @@
                 },
                 download_obj() {
                     this.export_to(THREE.OBJExporter, "obj");
+                },
+                download_gltf() {
+                    const exporter = new THREE.GLTFExporter();
+                    exporter.parse(
+                        scene,
+                        (res) => {
+                            const str = JSON.stringify(res, null, 2);
+                            const blob = new Blob([str], {type: 'text/plain'});
+                            download(`zome_3D.gltf`, window.URL.createObjectURL(blob));
+                        },
+                        (error) => console.error(error),
+                        {binary: false},
+                    );
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
