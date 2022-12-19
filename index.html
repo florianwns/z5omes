@@ -40,73 +40,75 @@
                 </button>
             </div>
 
-            <!-- Num of Order -->
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" title="Num of order">N</span>
-                <input class="form-control form-range" max="21" min="3" step="1" type="range"
-                       x-model.number="num" x-ref="num_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="num">
-            </div>
+            <div class="aligned-form">
+                <!-- Num of Order -->
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" title="Num of order">N</span>
+                    <input class="form-control form-range" max="21" min="3" step="1" type="range"
+                           x-model.number="num" x-ref="num_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="num">
+                </div>
 
-            <!-- Num of rhombus from the top -->
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" title="Num of rhombus from the top">M</span>
-                <input class="form-control form-range" :max="num - 1" min="1" step="1" type="range"
-                       x-model.number="num_rhombus" x-ref="num_rhombus_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="num_rhombus">
-            </div>
+                <!-- Num of rhombus from the top -->
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" title="Num of rhombus from the top">M</span>
+                    <input class="form-control form-range" :max="num - 1" min="1" step="1" type="range"
+                           x-model.number="num_rhombus" x-ref="num_rhombus_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="num_rhombus">
+                </div>
 
-            <!-- First Vertical Angle of Zome -->
-            <div class="input-group input-group-sm mb-3">
-                <button class="btn btn-secondary text-start" type="button"
-                        title="First Vertical Angle of Zome"
-                        @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
-                        x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
-                </button>
-                </span>
-                <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
-                       x-model.number="theta_deg" x-ref="theta_deg_slider">
-                <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
-                <select class="form-select" aria-label="Angle unit"
-                        x-show="angle_unit != 'tan'" x-model="angle_unit">
-                    <option selected value="deg">deg</option>
-                    <option value="rad">rad</option>
-                    <option hidden value="tan">tan</option>
-                </select>
-            </div>
+                <!-- First Vertical Angle of Zome -->
+                <div class="input-group input-group-sm mb-3">
+                    <button class="btn btn-secondary text-start" type="button"
+                            title="First Vertical Angle of Zome"
+                            @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
+                            x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
+                    </button>
+                    </span>
+                    <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
+                           x-model.number="theta_deg" x-ref="theta_deg_slider">
+                    <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
+                    <select class="form-select" aria-label="Angle unit"
+                            x-show="angle_unit != 'tan'" x-model="angle_unit">
+                        <option selected value="deg">deg</option>
+                        <option value="rad">rad</option>
+                        <option hidden value="tan">tan</option>
+                    </select>
+                </div>
 
-            <hr>
+                <hr>
 
-            <!-- Height Ratio of Zome -->
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text">HR</span>
-                <input class="form-control form-range" max="1" step="0.000001" type="range"
-                       :min="toDecimal(2 / num, FLOAT_PRECISION)"
-                       x-model.number="height_ratio" x-ref="height_ratio_slider">
-                <input class="form-control" step="0.01" type="number"
-                       x-model.lazy.number="height_ratio">
-                <button class="btn btn-primary" title="Magnetize" type="button"
-                        :disabled="height_ratio == suggested_height_ratio" @click="magnetize">
-                    <i class="fa-solid fa-magnet fa-fw"></i>
-                </button>
-            </div>
+                <!-- Height Ratio of Zome -->
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text">HR</span>
+                    <input class="form-control form-range" max="1" step="0.000001" type="range"
+                           :min="toDecimal(2 / num, FLOAT_PRECISION)"
+                           x-model.number="height_ratio" x-ref="height_ratio_slider">
+                    <input class="form-control" step="0.01" type="number"
+                           x-model.lazy.number="height_ratio">
+                    <button class="btn btn-primary" title="Magnetize" type="button"
+                            :disabled="height_ratio == suggested_height_ratio" @click="magnetize">
+                        <i class="fa-solid fa-magnet fa-fw"></i>
+                    </button>
+                </div>
 
-            <!-- Kite Ratio of Zome -->
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text">
-                    KR
-                </span>
-                <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
-                       x-model.number="kite_ratio" x-ref="kite_ratio_slider">
-                <input class="form-control" step="0.01" type="number"
-                       x-model.lazy.number="kite_ratio">
-                <button class="btn btn-primary"
-                        title="Set rhombus" type="button"
-                        :disabled="is_rhombus" @click="is_rhombus = true">
-                    <i class="fa-solid fa-rhombus"></i>
-                </button>
+                <!-- Kite Ratio of Zome -->
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text">
+                        KR
+                    </span>
+                    <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
+                           x-model.number="kite_ratio" x-ref="kite_ratio_slider">
+                    <input class="form-control" step="0.01" type="number"
+                           x-model.lazy.number="kite_ratio">
+                    <button class="btn btn-primary"
+                            title="Set rhombus" type="button"
+                            :disabled="is_rhombus" @click="is_rhombus = true">
+                        <i class="fa-solid fa-rhombus fa-fw"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -131,7 +133,6 @@
                     <li>
                         <button class="nav-link" id="nav-help-tab" data-bs-toggle="tab" data-bs-target="#nav-help"
                                 type="button" role="tab" aria-controls="nav-help" aria-selected="false">
-
                             <i class="fa-solid fa-question-circle fa-fw"></i>
                             Help
                         </button>
@@ -139,7 +140,7 @@
                 </ul>
             </nav>
             <div class="tab-content h-100 mt-3">
-                <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
+                <div class="tab-pane" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                      tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
                      @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
@@ -191,7 +192,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
+                <div class="tab-pane show active" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
                      tabindex="0"
                      x-data="renderer_a4" @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
@@ -200,13 +201,21 @@
                                 <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
                                     <option selected value="mandala_origami">Mandala Origami</option>
                                     <option value="spiral_origami">Spiral Origami</option>
-                                    <!--                                    <option value="grid">Grid</option>-->
                                 </select>
+
                             </div>
+
                             <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
                                      viewbox="0 0 210 297" x-ref="A4_sheet">
                                 </svg>
+                            </div>
+                            <!-- Zoom Level -->
+                            <div class="input-group input-group-sm mt-2">
+                                <span class="input-group-text" title="Zoom level">Zoom</span>
+
+                                <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
+                                       x-model.number="zoom" x-ref="zoom_slider">
                             </div>
                             <div class="d-flex flex-wrap justify-content-center mt-2" style="width:300px">
                                 <template x-for="(color, i) in bulleted_list_colors" :key="i">
@@ -218,7 +227,6 @@
                                 </template>
                             </div>
                         </div>
-
                         <div class="ps-2">
                             <div class="vstack">
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
@@ -305,19 +313,21 @@
         <div class="row justify-content-between">
             <div class="col-md-6 col-xl-5">
                 <!-- Height of Zome -->
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text" title="Height of zome">Height</span>
-                    <input class="form-control form-range" min="1" max="9999" step="1" type="range"
-                           x-model.number="height" x-ref="height_slider">
+                <div class="aligned-form">
+                    <div class="input-group input-group-sm mb-3">
+                        <span class="input-group-text" title="Height of zome">Height</span>
+                        <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                               x-model.number="height" x-ref="height_slider">
 
-                    <input class="form-control" step="0.01" type="number"
-                           x-model.lazy.number="height">
+                        <input class="form-control" step="0.01" type="number"
+                               x-model.lazy.number="height">
 
-                    <select class="form-select" aria-label="Length unit" x-model="length_unit">
-                        <option selected value="mm">mm</option>
-                        <option value="cm">cm</option>
-                        <option value="m">m</option>
-                    </select>
+                        <select class="form-select" aria-label="Length unit" x-model="length_unit">
+                            <option selected value="mm">mm</option>
+                            <option value="cm">cm</option>
+                            <option value="m">m</option>
+                        </select>
+                    </div>
                 </div>
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -629,7 +639,7 @@
         });
 
         Alpine.data('renderer_a4', () => {
-            let polygons_per_page = [];
+            let svg_elements_per_page = [];
 
             return {
                 A4_sheet: null,
@@ -637,6 +647,7 @@
                 page_index: 0,
                 pages: [],
                 bulleted_list_colors: [],
+                zoom: 1,
                 kind_of_drawing: "mandala_origami",
 
                 // 2D Rendering Parameters
@@ -646,10 +657,13 @@
                     // Add listeners
                     this.$watch("page_index", (value) => {
                         this.draw();
-                    })
-                    this.$watch("kind_of_drawing", (value) => {
-                        this.process()
-                    })
+                    });
+
+                    ["kind_of_drawing", "zoom"].forEach(
+                        (key) => this.$watch(key, (value) => {
+                            this.process()
+                        })
+                    );
 
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
 
@@ -670,22 +684,40 @@
                 },
                 download_pdf() {
                     // Create empty PDF document
-                    const doc = new PDFDocument({compress: false, size: [595, 842]});
+                    const [A4_width, A4_height] = [595, 842];
+                    const doc = new PDFDocument({compress: false, size: [A4_width, A4_height]});
                     const stream = doc.pipe(blobStream());
 
                     // Create SVG
                     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                     svg.setAttribute('viewBox', '0 0 210 297');
-                    for (let iP = 0; iP < polygons_per_page.length; iP++, doc.addPage()) {
-                        const polygons = polygons_per_page[iP];
+
+                    const ratio = 1;
+                    for (let iP = 0; iP < svg_elements_per_page.length; iP++) {
+                        const polygons = svg_elements_per_page[iP];
                         svg.innerHTML = '';
                         for (let i = 0; i < polygons.length; i++) {
                             svg.appendChild(polygons[i]);
                         }
 
-                        // Convert SVG to PDF
-                        SVGtoPDF(doc, svg);
+                        switch (ratio) {
+                            case 1:
+                                SVGtoPDF(doc, svg, 0, 0, {width: A4_width, height: A4_height});
+                                break;
+                            default:
+                                SVGtoPDF(doc, svg, 0, 0, {width: 1190, height: 1684});
+                                // Convert SVG to PDF
+                                doc.addPage()
+                                SVGtoPDF(doc, svg, -595, -842, {width: 1190, height: 1684});
+                                break;
+
+                        }
+
+
+                        if (iP < svg_elements_per_page.length - 1) {
+                            doc.addPage()
+                        }
                     }
 
                     // Save document
@@ -718,9 +750,6 @@
                         case 'mandala_origami':
                             pages = this.draw_mandala_origami();
                             break;
-                        case 'grid':
-                            pages = this.draw_grid();
-                            break;
                     }
 
                     // Compute boundaries for all pages
@@ -752,15 +781,17 @@
                     // Compute the same pixel ratio for all pages
                     const maxWidth = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
                     const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
-                    const border_width = 2 * 6;
-                    const pixel_ratio = Math.min((210 - border_width) / maxWidth, (297 - border_width) / maxHeight);
+                    const border = 6;
+                    const pixel_ratio = Math.min(
+                        (210 - 2 * border) / maxWidth, (297 - 2 * border) / maxHeight
+                    ) * this.zoom;
                     const center = [210 / 2, 297 / 2];
 
                     // Build pages polygons
-                    polygons_per_page = [];
+                    svg_elements_per_page = [];
                     const bulleted_list_colors = [];
                     for (let iPa = 0; iPa < pages.length; iPa++) {
-                        const polygons = [];
+                        const svg_elements = [];
                         const page_pieces = pages[iPa];
 
                         for (let iP = 0; iP < page_pieces.length; iP++) {
@@ -775,11 +806,22 @@
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
                             el.setAttribute('fill', piece.color);
-                            polygons.push(el);
+                            svg_elements.push(el);
                         }
+
+                        // Add Text
+                        const el = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        el.setAttribute('text-anchor', 'end');
+                        el.setAttribute('x', 210 - border);
+                        el.setAttribute('y', 297 - border);
+                        el.setAttribute('font-family', "Verdana")
+                        el.setAttribute('font-size', "6px")
+                        el.innerHTML = `Page ${iPa+1}/${pages.length}`;
+                        svg_elements.push(el);
+
                         // Add color of the first piece to bulleted list
                         bulleted_list_colors.push(page_pieces[0].color);
-                        polygons_per_page.push(polygons);
+                        svg_elements_per_page.push(svg_elements);
                     }
 
                     // Save proxies
@@ -817,10 +859,6 @@
                         spiral_pieces.push(piece);
                     }
                     return spiral_pieces;
-                },
-                draw_grid() {
-                    const pages = [];
-                    return pages;
                 },
                 draw_mandala_origami() {
                     const pages = [];
@@ -875,10 +913,10 @@
                     return pages;
                 },
                 next_page() {
-                    this.page_index = (this.page_index + 1) % polygons_per_page.length;
+                    this.page_index = (this.page_index + 1) % svg_elements_per_page.length;
                 },
                 previous_page() {
-                    this.page_index = (polygons_per_page.length + this.page_index - 1) % polygons_per_page.length;
+                    this.page_index = (svg_elements_per_page.length + this.page_index - 1) % svg_elements_per_page.length;
                 },
                 keydown(e) {
                     switch (e.key) {
@@ -901,14 +939,13 @@
                 },
                 draw() {
                     this.A4_sheet.innerHTML = '';
-                    if (polygons_per_page.length <= 0) {
+                    if (svg_elements_per_page.length <= 0) {
                         return;
                     }
 
-                    const polygons = polygons_per_page[this.page_index % polygons_per_page.length];
-
-                    for (let i = 0; i < polygons.length; i++) {
-                        this.A4_sheet.appendChild(polygons[i]);
+                    const elements = svg_elements_per_page[this.page_index % svg_elements_per_page.length];
+                    for (let i = 0; i < elements.length; i++) {
+                        this.A4_sheet.appendChild(elements[i]);
                     }
                 }
             };
