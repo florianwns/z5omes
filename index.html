@@ -171,6 +171,16 @@
 
                         <div class="ps-2 flex-shrink-1">
                             <div class="vstack">
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to STL"
+                                      @click="download_stl()">
+                                    <i class="fa-solid fa-file"></i>
+                                    <span class="fa-icon-file-type">STL</span>
+                                </span>
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PLY"
+                                      @click="download_ply()">
+                                    <i class="fa-solid fa-file"></i>
+                                    <span class="fa-icon-file-type">PLY</span>
+                                </span>
                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ"
                                       @click="download_obj()">
                                     <i class="fa-solid fa-file"></i>
@@ -194,9 +204,9 @@
                                 <template x-for="(color, i) in bulleted_list_colors" :key="i">
                                     <div class="px-1">
                                         <div class="bulleted_list_item"
-                                              :class="(page_index == i)? 'border border-1' : ''"
-                                              :style="`background-color: ${color};`"
-                                              @click="page_index = i"></div>
+                                             :class="(page_index == i)? 'border border-1' : ''"
+                                             :style="`background-color: ${color};`"
+                                             @click="page_index = i"></div>
                                     </div>
                                 </template>
                             </div>
@@ -380,6 +390,9 @@
 <!-- ThreeJS -->
 <script src="js/three.min.js"></script>
 <script src="js/OrbitControls.js"></script>
+<script src="js/OBJExporter.js"></script>
+<script src="js/STLExporter.js"></script>
+<script src="js/PLYExporter.js"></script>
 
 <!-- Canvg -->
 <script src="js/canvg.min.js"></script>
@@ -851,9 +864,7 @@
             let scene, camera, renderer, controls, canvas;              // Three JS Parameters
             const meshes = {
                 "axis": null,
-                "zome": null, // Group of faces and vertices
-                "faces": null,
-                "vertices": null,
+                "zome": null,
             }
 
             return {
@@ -922,22 +933,20 @@
                         renderer.setSize(width, height);
                     }
                 },
+                download_ply() {
+                    this.export_to(THREE.PLYExporter, "ply");
+                },
+                download_stl() {
+                    this.export_to(THREE.STLExporter, "stl");
+                },
                 download_obj() {
-                    let obj = "# This zome was made with https://florianwns.github.io/z5omes/\n";
-                    for (let iV = 0; iV < ZOME.vertices.length; iV++) {
-                        const v = ZOME.vertices[iV]
-                        obj += "v " + v[0] + " " + v[1] + " " + v[2] + "\n";
-                    }
-                    for (let iF = 0; iF < ZOME.faces.length; iF += 3) {
-                        obj += "f";
-                        for (let j = 0; j < 3; j++) {
-                            // (OBJ format uses 1-based indices)
-                            const iV = ZOME.faces[iF + j] + 1;
-                            obj += " " + iV;
-                        }
-                        obj += "\n";
-                    }
-                    download("zome_3D.obj", 'data:application/object; charset=utf-8,' + encodeURIComponent(obj));
+                    this.export_to(THREE.OBJExporter, "obj");
+                },
+                export_to(cls, ext) {
+                    const exporter = new cls();
+                    const str = exporter.parse(scene);
+                    const blob = new Blob([str], {type: 'text/plain'});
+                    download(`zome_3D.${ext}`, window.URL.createObjectURL(blob));
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
@@ -950,28 +959,25 @@
                     }
 
                     // Clean old mesh
-                    if (meshes.zome instanceof THREE.Group) {
+                    if (meshes.zome instanceof THREE.Mesh) {
                         scene.remove(meshes.zome)
                     }
-                    meshes.zome = new THREE.Group();
 
                     // Draw faces
-                    {
-                        const points = ZOME.faces.map(iV => new THREE.Vector3(...(ZOME.vertices[iV])));
-                        const material = new THREE.MeshLambertMaterial({
-                            side: THREE.DoubleSide,
-                            vertexColors: true,
-                        });
+                    const points = ZOME.faces.map(iV => new THREE.Vector3(...(ZOME.vertices[iV])));
+                    const material = new THREE.MeshLambertMaterial({
+                        side: THREE.DoubleSide,
+                        vertexColors: true,
+                    });
 
-                        const geometry = new THREE.BufferGeometry()
-                        geometry.setFromPoints(points)
-                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(ZOME.face_colors, 3));
-                        geometry.computeVertexNormals()
+                    const geometry = new THREE.BufferGeometry()
+                    geometry.setFromPoints(points)
+                    geometry.setAttribute('color', new THREE.Float32BufferAttribute(ZOME.face_colors, 3));
+                    geometry.computeVertexNormals()
 
-                        // Add to group
-                        meshes.faces = new THREE.Mesh(geometry, material)
-                        meshes.zome.add(meshes.faces);
-                    }
+                    // Add to group
+                    meshes.zome = new THREE.Mesh(geometry, material)
+
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome)
                 },
@@ -998,7 +1004,7 @@
                     }
                 },
                 update() {
-                    if (this.is_spinning && meshes.zome instanceof THREE.Group) {
+                    if (this.is_spinning && meshes.zome instanceof THREE.Mesh) {
                         meshes.zome.rotation.y -= this.speed
                     }
                 },
