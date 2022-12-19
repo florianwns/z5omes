@@ -210,11 +210,10 @@
                             </div>
                             <div class="d-flex flex-wrap justify-content-center mt-2" style="width:300px">
                                 <template x-for="(color, i) in bulleted_list_colors" :key="i">
-                                    <div class="px-1">
+                                    <div class="px-1" @click="page_index = i">
                                         <div class="bulleted_list_item"
-                                             :class="(page_index == i)? 'border border-1' : ''"
-                                             :style="`background-color: ${color};`"
-                                             @click="page_index = i"></div>
+                                             :class="(page_index == i)? 'active' : ''"
+                                             :style="`background-color: ${color};`"></div>
                                     </div>
                                 </template>
                             </div>
