@@ -115,26 +115,22 @@
             <nav class="navbar mx-auto mt-2">
                 <ul class="nav nav-pills" id="nav-tab" role="tablist">
                     <li class="nav-item">
-                        <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab"
-                                data-bs-target="#nav-3D"
+                        <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab" data-bs-target="#nav-3D"
                                 type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
                             <i class="fa-solid fa-chart-pyramid fa-fw"></i>
                             3D View
                         </button>
                     </li>
                     <li>
-                        <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab"
-                                data-bs-target="#nav-print"
+                        <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab" data-bs-target="#nav-print"
                                 type="button" role="tab" aria-controls="nav-print" aria-selected="false">
                             <i class="fa-solid fa-print fa-fw"></i>
                             Print
                         </button>
                     </li>
                     <li>
-                        <button class="nav-link" id="nav-help-tab" data-bs-toggle="tab"
-                                data-bs-target="#nav-help" type="button" role="tab"
-                                aria-controls="nav-help"
-                                aria-selected="false">
+                        <button class="nav-link" id="nav-help-tab" data-bs-toggle="tab" data-bs-target="#nav-help"
+                                type="button" role="tab" aria-controls="nav-help" aria-selected="false">
 
                             <i class="fa-solid fa-question-circle fa-fw"></i>
                             Help
@@ -200,6 +196,13 @@
                      x-data="renderer_a4" @zome-is-made.window="process">
                     <div class="d-flex justify-content-center">
                         <div>
+                            <div class="mb-2">
+                                <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
+                                    <option selected value="mandala_origami">Mandala Origami</option>
+                                    <option value="spiral_origami">Spiral Origami</option>
+                                    <!--                                    <option value="grid">Grid</option>-->
+                                </select>
+                            </div>
                             <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
                                      viewbox="0 0 210 297" x-ref="A4_sheet">
@@ -635,6 +638,7 @@
                 page_index: 0,
                 pages: [],
                 bulleted_list_colors: [],
+                kind_of_drawing: "mandala_origami",
 
                 // 2D Rendering Parameters
                 init() {
@@ -642,8 +646,12 @@
 
                     // Add listeners
                     this.$watch("page_index", (value) => {
-                        this.update();
+                        this.draw();
                     })
+                    this.$watch("kind_of_drawing", (value) => {
+                        this.process()
+                    })
+
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
 
                     // Add swipe
@@ -689,7 +697,7 @@
                     });
 
                     // Tricks because svg is empty otherwise ;)
-                    this.update();
+                    this.draw();
                 },
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
@@ -703,20 +711,90 @@
                     }
 
                     // Init variables
-                    const pages = [];
-                    const bulleted_list_colors = [];
-                    let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
-                        xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE,
-                        maxWidth = Number.MIN_VALUE, maxHeight = Number.MIN_VALUE;
+                    let pages = [];
+                    switch (this.kind_of_drawing) {
+                        case 'spiral_origami':
+                            pages = this.draw_spiral_origami();
+                            break;
+                        case 'mandala_origami':
+                            pages = this.draw_mandala_origami();
+                            break;
+                        case 'grid':
+                            pages = this.draw_grid();
+                            break;
+                    }
 
+                    // Compute boundaries for all pages
+                    const page_bounds = [];
+                    for (let iPa = 0; iPa < pages.length; iPa++) {
+                        const page_pieces = pages[iPa];
+
+                        // Reset boundaries
+                        let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
+                            xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
+
+                        // Compute boundaries of all pieces
+                        for (let iP = 0; iP < page_pieces.length; iP++) {
+                            const piece = page_pieces[iP];
+                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(piece.planar_points);
+
+                            // Save boundaries
+                            if (xPMin < xMin) xMin = xPMin;
+                            if (xPMax > xMax) xMax = xPMax;
+                            if (yPMin < yMin) yMin = yPMin;
+                            if (yPMax > yMax) yMax = yPMax;
+                        }
+
+                        const width = Math.abs(xMax - xMin);
+                        const height = Math.abs(yMax - yMin);
+                        page_bounds.push([xMin, yMin, width, height]);
+                    }
+
+                    // Compute the same pixel ratio for all pages
+                    const maxWidth = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
+                    const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
+                    const border_width = 2 * 6;
+                    const pixel_ratio = Math.min((210 - border_width) / maxWidth, (297 - border_width) / maxHeight);
+                    const center = [210 / 2, 297 / 2];
+
+                    // Build pages polygons
+                    polygons_per_page = [];
+                    const bulleted_list_colors = [];
+                    for (let iPa = 0; iPa < pages.length; iPa++) {
+                        const polygons = [];
+                        const page_pieces = pages[iPa];
+
+                        for (let iP = 0; iP < page_pieces.length; iP++) {
+                            const piece = page_pieces[iP];
+                            const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+
+                            const [xMin, yMin, width, height] = page_bounds[iPa];
+                            el.setAttribute('points', piece.planar_points.map(p => [
+                                (p[0] - xMin - width / 2) * pixel_ratio + center[0],
+                                (p[1] - yMin - height / 2) * pixel_ratio + center[1],
+                            ]));
+                            el.setAttribute('stroke', 'black');
+                            el.setAttribute('stroke-width', '0.1px');
+                            el.setAttribute('fill', piece.color);
+                            polygons.push(el);
+                        }
+                        // Add color of the first piece to bulleted list
+                        bulleted_list_colors.push(page_pieces[0].color);
+                        polygons_per_page.push(polygons);
+                    }
+
+                    // Save proxies
+                    this.bulleted_list_colors = bulleted_list_colors;
+                    this.page_index = 0;
+                    this.draw();
+                },
+                build_spiral_pieces() {
+                    const spiral_pieces = [];
                     const body_pieces = _.cloneDeep(ZOME.pieces);
-                    const base = _.cloneDeep(ZOME.base);
-                    const N = ZOME.num;
 
                     // Compute body planar pieces
-                    const first_piece = body_pieces[0].planar_points[1];
                     let O = [0, 0, 0], planar_points = [];
-                    let A, a, x, y, rotated_A, width, height;
+                    let A, a, rotated_A;
                     for (let iP = 0; iP < body_pieces.length; iP++) {
                         const piece = body_pieces[iP];
 
@@ -735,100 +813,67 @@
                         O = planar_points[planar_points.length - 1];
                         A = planar_points[planar_points.length - 2];
 
-                        // Compute Boundaries
-                        for (let i = 0; i < planar_points.length; i++) {
-                            [x, y] = planar_points[i];
-
-                            // Save Boundaries
-                            if (x < xMin) xMin = x;
-                            if (x > xMax) xMax = x;
-                            if (y < yMin) yMin = y;
-                            if (y > yMax) yMax = y;
-                        }
-
                         // Save planar pieces
                         piece.planar_points = planar_points;
+                        spiral_pieces.push(piece);
                     }
+                    return spiral_pieces;
+                },
+                draw_grid() {
+                    const pages = [];
+                    return pages;
+                },
+                draw_mandala_origami() {
+                    const pages = [];
+                    const spiral_pieces = this.build_spiral_pieces()
+                    const base = _.cloneDeep(ZOME.base);
+                    const N = ZOME.num;
 
-                    // Save height and width
-                    maxWidth = Math.abs(xMax - xMin);
-                    maxHeight = Math.abs(yMax - yMin);
-
-                    // For each color, Add a page with body pieces
+                    // For each color, rotate piece around the origin
+                    const TAU = Math.PI * 2, O = [0, 0, 0];
+                    const mandala_pieces = [];
                     for (let iC = 0; iC < N; iC++) {
-                        const page_body_pieces = [];
-                        for (let iP = 0; iP < body_pieces.length; iP++) {
-                            const piece = _.cloneDeep(body_pieces[iP]);
+                        const a = iC * TAU / N;
+                        for (let iP = 0; iP < spiral_pieces.length; iP++) {
+                            const piece = _.cloneDeep(spiral_pieces[iP]);
+                            piece.planar_points = piece.planar_points.map(p => rot2d(p, a, O));
                             piece.color = piece.colors[iC]
-                            page_body_pieces.push(piece)
+                            mandala_pieces.push(piece)
                         }
-                        pages.push(page_body_pieces);
                     }
-
+                    pages.push(mandala_pieces);
 
                     // Add a last page if base exists
                     if (base !== null) {
-                        // Center base
-                        [xMin, xMax, yMin, yMax, width, height] = get_boundaries(base.planar_points);
-
-                        // Save height and width
-                        maxWidth = Math.max(width, maxWidth);
-                        maxHeight = Math.max(height, maxHeight);
                         base.color = base.colors[0];
                         pages.push([base]);
                     }
 
-                    // Compute the same pixel ratio for all pages
-                    const border_width = 2 * 6;
-                    const pixel_ratio = Math.min((297 - border_width) / maxHeight, (210 - border_width) / maxWidth);
-                    const center = [210 / 2, 297 / 2];
+                    return pages;
+                },
+                draw_spiral_origami() {
+                    const pages = [];
+                    const spiral_pieces = this.build_spiral_pieces()
+                    const base = _.cloneDeep(ZOME.base);
+                    const N = ZOME.num;
 
-
-                    // Build pages polygons
-                    polygons_per_page = [];
-                    for (let iPa = 0; iPa < pages.length; iPa++) {
-                        const polygons = [];
-                        const page_pieces = pages[iPa];
-
-                        // Reset boundaries
-                        xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE, xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
-
-                        // Compute boundaries of all pieces before center
-                        for (let iP = 0; iP < page_pieces.length; iP++) {
-                            const piece = page_pieces[iP];
-                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(piece.planar_points);
-
-                            // Save Boundaries
-                            if (xPMin < xMin) xMin = xPMin;
-                            if (xPMax > xMax) xMax = xPMax;
-                            if (yPMin < yMin) yMin = yPMin;
-                            if (yPMax > yMax) yMax = yPMax;
+                    // For each color, Add a page with spiral pieces
+                    for (let iC = 0; iC < N; iC++) {
+                        const colored_spiral_pieces = [];
+                        for (let iP = 0; iP < spiral_pieces.length; iP++) {
+                            const piece = _.cloneDeep(spiral_pieces[iP]);
+                            piece.color = piece.colors[iC]
+                            colored_spiral_pieces.push(piece)
                         }
-                        width = Math.abs(xMax - xMin);
-                        height = Math.abs(yMax - yMin);
-
-                        for (let iP = 0; iP < page_pieces.length; iP++) {
-                            const piece = page_pieces[iP];
-                            const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-
-                            el.setAttribute('points', piece.planar_points.map(p => [
-                                (p[0] - xMin - width / 2) * pixel_ratio + center[0],
-                                (p[1] - yMin - height / 2) * pixel_ratio + center[1],
-                            ]));
-                            el.setAttribute('stroke', 'black');
-                            el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', piece.color);
-                            polygons.push(el);
-                        }
-                        // Add color of the first piece to bulleted list
-                        bulleted_list_colors.push(page_pieces[0].color);
-                        polygons_per_page.push(polygons);
+                        pages.push(colored_spiral_pieces);
                     }
 
-                    // Save proxies
-                    this.bulleted_list_colors = bulleted_list_colors;
-                    this.page_index = 0;
-                    this.update();
+                    // Add Base at last page if base exists
+                    if (base !== null) {
+                        base.color = base.colors[0];
+                        pages.push([base]);
+                    }
+                    return pages;
                 },
                 next_page() {
                     this.page_index = (this.page_index + 1) % polygons_per_page.length;
@@ -855,10 +900,14 @@
                     }
                     e.preventDefault();
                 },
-                update() {
+                draw() {
+                    this.A4_sheet.innerHTML = '';
+                    if (polygons_per_page.length <= 0) {
+                        return;
+                    }
+
                     const polygons = polygons_per_page[this.page_index % polygons_per_page.length];
 
-                    this.A4_sheet.innerHTML = '';
                     for (let i = 0; i < polygons.length; i++) {
                         this.A4_sheet.appendChild(polygons[i]);
                     }
