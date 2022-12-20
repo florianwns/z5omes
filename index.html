@@ -195,12 +195,13 @@
                 <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
                      tabindex="0"
                      x-data="renderer_a4" @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-center position-relative" style="left:24px">
                         <div>
                             <div class="mb-2">
                                 <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
                                     <option selected value="mandala_origami">Mandala Origami</option>
                                     <option value="spiral_origami">Spiral Origami</option>
+                                    <option value="faces">Faces</option>
                                 </select>
 
                             </div>
@@ -217,15 +218,7 @@
                                 <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
                                        x-model.number="zoom" x-ref="zoom_slider">
                             </div>
-                            <div class="d-flex flex-wrap justify-content-center mt-2" style="width:300px">
-                                <template x-for="(color, i) in bulleted_list_colors" :key="i">
-                                    <div class="px-1" @click="page_index = i">
-                                        <div class="bulleted_list_item"
-                                             :class="(page_index == i)? 'active' : ''"
-                                             :style="`background-color: ${color};`"></div>
-                                    </div>
-                                </template>
-                            </div>
+
                         </div>
                         <div class="ps-2">
                             <div class="vstack">
@@ -242,8 +235,16 @@
                             </div>
                         </div>
                     </div>
-
-
+                    <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
+                         style="max-height: 96px;overflow-y: auto;">
+                        <template x-for="(color, i) in bulleted_list_colors" :key="i">
+                            <div class="px-1" @click="page_index = i">
+                                <div class="bulleted_list_item"
+                                     :class="(page_index == i)? 'active' : ''"
+                                     :style="`background-color: ${color};`"></div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
                 <div class="tab-pane" id="nav-help" role="tabpanel" aria-labelledby="nav-help-tab" tabindex="0">
@@ -750,6 +751,9 @@
                         case 'mandala_origami':
                             pages = this.draw_mandala_origami();
                             break;
+                        case 'faces':
+                            pages = this.draw_faces();
+                            break;
                     }
 
                     // Compute boundaries for all pages
@@ -816,7 +820,7 @@
                         el.setAttribute('y', 297 - border);
                         el.setAttribute('font-family', "Verdana")
                         el.setAttribute('font-size', "6px")
-                        el.innerHTML = `Page ${iPa+1}/${pages.length}`;
+                        el.innerHTML = `Page ${iPa + 1}/${pages.length}`;
                         svg_elements.push(el);
 
                         // Add color of the first piece to bulleted list
@@ -859,6 +863,28 @@
                         spiral_pieces.push(piece);
                     }
                     return spiral_pieces;
+                },
+                draw_faces() {
+                    const pages = [];
+                    const N = ZOME.num;
+                    const body_pieces = _.cloneDeep(ZOME.pieces);
+                    const base = _.cloneDeep(ZOME.base);
+
+                    // For each color, Add a page with spiral pieces
+                    for (let iP = 0; iP < body_pieces.length; iP++) {
+                        for (let iC = 0; iC < N; iC++) {
+                            const piece = _.cloneDeep(body_pieces[iP]);
+                            piece.color = piece.colors[iC]
+                            pages.push([piece]);
+                        }
+                    }
+
+                    // Add Base at last page if base exists
+                    if (base !== null) {
+                        base.color = base.colors[0];
+                        pages.push([base]);
+                    }
+                    return pages;
                 },
                 draw_mandala_origami() {
                     const pages = [];
@@ -942,8 +968,8 @@
                     if (svg_elements_per_page.length <= 0) {
                         return;
                     }
-
                     const elements = svg_elements_per_page[this.page_index % svg_elements_per_page.length];
+
                     for (let i = 0; i < elements.length; i++) {
                         this.A4_sheet.appendChild(elements[i]);
                     }
