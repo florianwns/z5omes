@@ -688,6 +688,8 @@
 
         Alpine.data('renderer_a4', () => {
             let svg_elements_per_page = [];
+            let pages = [];
+            let page_bounds = [];
 
             return {
                 A4_sheet: null,
@@ -704,13 +706,22 @@
                     this.A4_sheet = this.$refs.A4_sheet;
 
                     // Add listeners
-                    this.$watch("page_index", (value) => {
-                        this.draw();
-                    });
-
-                    ["kind_of_drawing", "zoom"].forEach(
+                    ["kind_of_drawing"].forEach(
                         (key) => this.$watch(key, (value) => {
                             this.process()
+                        })
+                    );
+
+                    ["page_index"].forEach(
+                        (key) => this.$watch(key, (value) => {
+                            this.draw();
+                        })
+                    );
+
+                    ["zoom"].forEach(
+                        (key) => this.$watch(key, (value) => {
+                            this.resize();
+                            this.draw();
                         })
                     );
 
@@ -799,21 +810,21 @@
                     }
 
                     // Init variables
-                    let pages = [];
+                    pages = [];
                     switch (this.kind_of_drawing) {
                         case 'spiral_origami':
-                            pages = this.draw_spiral_origami();
+                            this.draw_spiral_origami();
                             break;
                         case 'mandala_origami':
-                            pages = this.draw_mandala_origami();
+                            this.draw_mandala_origami();
                             break;
                         case 'faces':
-                            pages = this.draw_faces();
+                            this.draw_faces();
                             break;
                     }
 
                     // Compute boundaries for all pages
-                    const page_bounds = [];
+                    page_bounds = [];
                     for (let iPa = 0; iPa < pages.length; iPa++) {
                         const page_pieces = pages[iPa];
 
@@ -838,6 +849,22 @@
                         page_bounds.push([xMin, yMin, width, height]);
                     }
 
+                    // Add bulleted list
+                    const bulleted_list_colors = [];
+                    for (let iPa = 0; iPa < pages.length; iPa++) {
+                        // Add color of the first piece to bulleted list
+                        const page_pieces = pages[iPa];
+                        bulleted_list_colors.push(page_pieces[0].color);
+                    }
+
+                    // Save proxies
+                    this.bulleted_list_colors = bulleted_list_colors;
+
+                    this.resize();
+                    this.page_index = 0;
+                    this.draw();
+                },
+                resize() {
                     // Compute the same pixel ratio for all pages
                     const maxWidth = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
                     const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
@@ -849,7 +876,6 @@
 
                     // Build pages polygons
                     svg_elements_per_page = [];
-                    const bulleted_list_colors = [];
                     for (let iPa = 0; iPa < pages.length; iPa++) {
                         const svg_elements = [];
                         const page_pieces = pages[iPa];
@@ -872,22 +898,16 @@
                         // Add Text
                         const el = document.createElementNS("http://www.w3.org/2000/svg", "text");
                         el.setAttribute('text-anchor', 'end');
-                        el.setAttribute('x', 210 - border);
-                        el.setAttribute('y', 297 - border);
+                        el.setAttribute('x', (210 - border).toString());
+                        el.setAttribute('y', (297 - border).toString());
                         el.setAttribute('font-family', "Verdana")
                         el.setAttribute('font-size', "6px")
                         el.innerHTML = `Page ${iPa + 1}/${pages.length}`;
                         svg_elements.push(el);
 
                         // Add color of the first piece to bulleted list
-                        bulleted_list_colors.push(page_pieces[0].color);
                         svg_elements_per_page.push(svg_elements);
                     }
-
-                    // Save proxies
-                    this.bulleted_list_colors = bulleted_list_colors;
-                    this.page_index = 0;
-                    this.draw();
                 },
                 build_spiral_pieces() {
                     const spiral_pieces = [];
@@ -921,7 +941,6 @@
                     return spiral_pieces;
                 },
                 draw_faces() {
-                    const pages = [];
                     const N = ZOME.num;
                     const body_pieces = _.cloneDeep(ZOME.pieces);
                     const base = _.cloneDeep(ZOME.base);
@@ -940,10 +959,8 @@
                         base.color = base.colors[0];
                         pages.push([base]);
                     }
-                    return pages;
                 },
                 draw_mandala_origami() {
-                    const pages = [];
                     const spiral_pieces = this.build_spiral_pieces()
                     const base = _.cloneDeep(ZOME.base);
                     const N = ZOME.num;
@@ -967,11 +984,8 @@
                         base.color = base.colors[0];
                         pages.push([base]);
                     }
-
-                    return pages;
                 },
                 draw_spiral_origami() {
-                    const pages = [];
                     const spiral_pieces = this.build_spiral_pieces()
                     const base = _.cloneDeep(ZOME.base);
                     const N = ZOME.num;
@@ -992,7 +1006,6 @@
                         base.color = base.colors[0];
                         pages.push([base]);
                     }
-                    return pages;
                 },
                 next_page() {
                     this.page_index = (this.page_index + 1) % svg_elements_per_page.length;
