@@ -90,6 +90,12 @@
     padding-right: 1rem;
 }
 
+.exports-container {
+    position: absolute;
+    top: 0px;
+    right: -48px;
+}
+
 
 .accordion-body li {
     margin-bottom: 12px;

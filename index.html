@@ -54,7 +54,7 @@
                 <!-- Num of rhombus from the top -->
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
-                    <input class="form-control form-range" min="1" max="20" :max="num - 1"  step="1" type="range"
+                    <input class="form-control form-range" min="1" max="20" :max="num - 1" step="1" type="range"
                            x-model.number="num_rhombus" x-ref="num_rhombus_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="num_rhombus">
@@ -148,11 +148,41 @@
                 <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                      tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
                      @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center position-relative" style="left:24px">
-                        <div style="width:calc(100% - 72px); max-width: 500px;">
+                    <div class="d-flex justify-content-center">
+                        <div style="width:calc(100% - 72px); max-width: 500px;" class="position-relative">
+                            <!-- Export to -->
+                            <div class="ps-2 exports-container" style="top:0px;">
+                                <div class="vstack">
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to STL format"
+                                          @click="download_stl()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">STL</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to PLY format"
+                                          @click="download_ply()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">PLY</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to GLTF format"
+                                          @click="download_gltf()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">GLTF</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to OBJ format"
+                                          @click="download_obj()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">OBJ</span>
+                                    </span>
+                                </div>
+                            </div>
+
                             <!-- Canvas for Zome 3D rendering -->
                             <div x-ref="canvas" style="height:326px; cursor: move;"
-                                 class="shadow bg-dark rounded mb-2"></div>
+                                 class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
 
                             <div class="d-flex flex-wrap justify-content-evenly">
                                 <!-- Draw Axis -->
@@ -170,42 +200,31 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="ps-2 flex-shrink-1">
-                            <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                      data-bs-toggle="tooltip" title="Export to STL format"
-                                      @click="download_stl()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">STL</span>
-                                </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                      data-bs-toggle="tooltip" title="Export to PLY format"
-                                      @click="download_ply()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">PLY</span>
-                                </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                      data-bs-toggle="tooltip" title="Export to GLTF format"
-                                      @click="download_gltf()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">GLTF</span>
-                                </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                      data-bs-toggle="tooltip" title="Export to OBJ format"
-                                      @click="download_obj()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">OBJ</span>
-                                </span>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
                      tabindex="0"
                      x-data="renderer_a4" @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center position-relative" style="left:24px">
-                        <div>
+                    <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
+                        <div class="position-relative">
+                            <!-- Export to -->
+                            <div class="ps-2 exports-container" style="top:48px;">
+                                <div class="vstack">
+                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to SVG format"
+                                          @click="download_svg()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">SVG</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to PDF format"
+                                          @click="download_pdf()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">PDF</span>
+                                    </span>
+                                </div>
+                            </div>
+
                             <div class="mb-2">
                                 <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
                                     <option selected value="mandala_origami">Mandala Origami</option>
@@ -249,23 +268,9 @@
                                     <i class="fa-regular fa-grid-2-plus fa-fw"></i>
                                 </button>
                             </div>
+
                         </div>
-                        <div class="ps-2">
-                            <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                      data-bs-toggle="tooltip" title="Export to SVG format"
-                                      @click="download_svg()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">SVG</span>
-                                </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                      data-bs-toggle="tooltip" title="Export to PDF format"
-                                      @click="download_pdf()">
-                                    <i class="fa-solid fa-file"></i>
-                                    <span class="fa-icon-file-type">PDF</span>
-                                </span>
-                            </div>
-                        </div>
+
                     </div>
                     <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
                          style="max-height: 96px;overflow-y: auto;">
