@@ -1561,7 +1561,7 @@
                         // Deal with case where points are too close to make a base
                         const far_enough = toDecimal(dist(piece.points[0], piece.points[1]), 2) !== 0;
                         if (far_enough) {
-                            rgb = angle2rgb(0, deg2rad(45));
+                            rgb = angle2rgb(0, deg2rad(0));
                             piece.colors.push(rgb2hex(...rgb));
 
                             // Add triangle to 3D
