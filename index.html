@@ -148,8 +148,8 @@
                 <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                      tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
                      @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center">
-                        <div style="width:calc(100% - 48px)">
+                    <div class="d-flex justify-content-center position-relative" style="left:24px">
+                        <div style="width:calc(100% - 72px); max-width: 500px;">
                             <!-- Canvas for Zome 3D rendering -->
                             <div x-ref="canvas" style="height:326px; cursor: move;"
                                  class="shadow bg-dark rounded mb-2"></div>
@@ -215,7 +215,7 @@
 
                             </div>
 
-                            <div class="ratio ratio-A4 bg-white rounded border position-relative" style="width:300px">
+                            <div class="ratio ratio-A4 bg-white rounded border position-relative">
                                 <!-- Svg Drawing -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
                                      viewbox="0 0 210 297" x-ref="A4_sheet">
