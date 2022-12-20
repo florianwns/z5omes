@@ -54,7 +54,7 @@
                 <!-- Num of rhombus from the top -->
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
-                    <input class="form-control form-range" :max="num - 1" min="1" step="1" type="range"
+                    <input class="form-control form-range" min="1" max="20" :max="num - 1"  step="1" type="range"
                            x-model.number="num_rhombus" x-ref="num_rhombus_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="num_rhombus">
@@ -86,7 +86,7 @@
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Height ratio">
                         HR
                     </span>
-                    <input class="form-control form-range" max="1" step="0.000001" type="range"
+                    <input class="form-control form-range" max="1" min="0" step="0.000001" type="range"
                            :min="toDecimal(2 / num, FLOAT_PRECISION)"
                            x-model.number="height_ratio" x-ref="height_ratio_slider">
                     <input class="form-control" step="0.01" type="number"
