@@ -712,7 +712,7 @@
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
 
                     // Add swipe
-                    const hammer = new Hammer(this.A4_sheet);
+                    const hammer = new Hammer(this.A4_sheet.parentNode);
                     hammer.on('swiperight', (e) => this.previous_page());
                     hammer.on('swipeleft', (e) => this.next_page());
                 },
