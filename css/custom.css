@@ -2,6 +2,10 @@
     filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .2));
 }
 
+.tooltip {
+    --bs-tooltip-bg: var(--bs-secondary);
+}
+
 .help-content li {
     margin-bottom: 0.2rem;
 }

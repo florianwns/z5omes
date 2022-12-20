@@ -22,7 +22,7 @@
                     class="fs-4">o</span>mes
             </h2>
             <a href="https://github.com/florianwns/z5omes"
-               class="text-primary btn btn-sm fs-4 p-2" title="Go to Github">
+               class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip" title="Go to Github">
                 <i class="fa-brands fa-github"></i>
             </a>
         </div>
@@ -35,7 +35,8 @@
                     Shape
                 </h5>
                 <!-- Randomize Button -->
-                <button @click="randomize" class="btn btn-primary btn-sm p-2" title="Randomize settings">
+                <button @click="randomize" class="btn btn-primary btn-sm p-2" data-bs-toggle="tooltip"
+                        title="Randomize settings">
                     <i class="fa-solid fa-dice fa-fw"></i>
                 </button>
             </div>
@@ -43,7 +44,7 @@
             <div class="aligned-form">
                 <!-- Num of Order -->
                 <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text" title="Num of order">N</span>
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Num of order">N</span>
                     <input class="form-control form-range" max="21" min="3" step="1" type="range"
                            x-model.number="num" x-ref="num_slider">
                     <input class="form-control" step="1" type="number"
@@ -52,7 +53,7 @@
 
                 <!-- Num of rhombus from the top -->
                 <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text" title="Num of rhombus from the top">M</span>
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
                     <input class="form-control form-range" :max="num - 1" min="1" step="1" type="range"
                            x-model.number="num_rhombus" x-ref="num_rhombus_slider">
                     <input class="form-control" step="1" type="number"
@@ -61,8 +62,8 @@
 
                 <!-- First Vertical Angle of Zome -->
                 <div class="input-group input-group-sm mb-3">
-                    <button class="btn btn-secondary text-start" type="button"
-                            title="First Vertical Angle of Zome"
+                    <button class="btn btn-primary text-start" type="button"
+                            data-bs-toggle="tooltip" title="First Vertical Angle of Zome"
                             @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
                             x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
                     </button>
@@ -82,21 +83,24 @@
 
                 <!-- Height Ratio of Zome -->
                 <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text">HR</span>
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Height ratio">
+                        HR
+                    </span>
                     <input class="form-control form-range" max="1" step="0.000001" type="range"
                            :min="toDecimal(2 / num, FLOAT_PRECISION)"
                            x-model.number="height_ratio" x-ref="height_ratio_slider">
                     <input class="form-control" step="0.01" type="number"
                            x-model.lazy.number="height_ratio">
-                    <button class="btn btn-primary" title="Magnetize" type="button"
-                            :disabled="height_ratio == suggested_height_ratio" @click="magnetize">
+                    <button class="btn btn-primary" data-bs-toggle="tooltip" title="Magnetize" type="button"
+                            :class="(height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
+                            @click="magnetize">
                         <i class="fa-solid fa-magnet fa-fw"></i>
                     </button>
                 </div>
 
                 <!-- Kite Ratio of Zome -->
                 <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text">
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Kite ratio">
                         KR
                     </span>
                     <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
@@ -104,8 +108,9 @@
                     <input class="form-control" step="0.01" type="number"
                            x-model.lazy.number="kite_ratio">
                     <button class="btn btn-primary"
-                            title="Set rhombus" type="button"
-                            :disabled="is_rhombus" @click="is_rhombus = true">
+                            data-bs-toggle="tooltip" title="Set rhombus" type="button"
+                            :class="(is_rhombus) ? 'btn-secondary' : ''"
+                            @click="is_rhombus = true">
                         <i class="fa-solid fa-rhombus fa-fw"></i>
                     </button>
                 </div>
@@ -168,22 +173,26 @@
 
                         <div class="ps-2 flex-shrink-1">
                             <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to STL"
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                      data-bs-toggle="tooltip" title="Export to STL format"
                                       @click="download_stl()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">STL</span>
                                 </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PLY"
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                      data-bs-toggle="tooltip" title="Export to PLY format"
                                       @click="download_ply()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">PLY</span>
                                 </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ"
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                      data-bs-toggle="tooltip" title="Export to GLTF format"
                                       @click="download_gltf()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">GLTF</span>
                                 </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to OBJ"
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                      data-bs-toggle="tooltip" title="Export to OBJ format"
                                       @click="download_obj()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">OBJ</span>
@@ -206,28 +215,51 @@
 
                             </div>
 
-                            <div class="ratio ratio-A4 bg-white rounded border" style="width:300px">
+                            <div class="ratio ratio-A4 bg-white rounded border position-relative" style="width:300px">
+                                <!-- Svg Drawing -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
                                      viewbox="0 0 210 297" x-ref="A4_sheet">
                                 </svg>
-                            </div>
-                            <!-- Zoom Level -->
-                            <div class="input-group input-group-sm mt-2">
-                                <span class="input-group-text" title="Zoom level">Zoom</span>
 
+                                <!-- Grid Drawing -->
+                                <div class="position-absolute top-0 start-0" x-show="num_col > 1">
+                                    <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
+                                        <div class="float-start border border-top-0 border-start-0"
+                                             :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
+                                             + ((i >= num_col * (num_col - 1)) ? ' border-bottom-0' : '')"
+                                             :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="input-group input-group-sm mt-2">
+                                <!-- Zoom Level -->
+                                <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </span>
                                 <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
                                        x-model.number="zoom" x-ref="zoom_slider">
-                            </div>
 
+                                <!-- Num Col of Grid -->
+                                <button class="btn btn-primary" type="button"
+                                        data-bs-toggle="tooltip"
+                                        title="Split the drawing into multiple A4 sheets for export to PDF"
+                                        @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
+                                    <i class="fa-regular fa-grid-2-plus fa-fw"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="ps-2">
                             <div class="vstack">
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to SVG"
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                      data-bs-toggle="tooltip" title="Export to SVG format"
                                       @click="download_svg()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">SVG</span>
                                 </span>
-                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to PDF"
+                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                      data-bs-toggle="tooltip" title="Export to PDF format"
                                       @click="download_pdf()">
                                     <i class="fa-solid fa-file"></i>
                                     <span class="fa-icon-file-type">PDF</span>
@@ -296,14 +328,16 @@
             </h5>
             <!-- CSV Button -->
             <div>
-                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to CSV"
+                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                      title="Export to TSV format"
                       @click="download_tsv()">
                     <i class="fa-solid fa-file"></i>
                     <span class="fa-icon-file-type">TSV</span>
                 </span>
             </div>
             <div>
-                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" title="Save to CSV"
+                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                      title="Export to CSV format"
                       @click="download_csv()">
                     <i class="fa-solid fa-file"></i>
                     <span class="fa-icon-file-type">CSV</span>
@@ -316,13 +350,11 @@
                 <!-- Height of Zome -->
                 <div class="aligned-form">
                     <div class="input-group input-group-sm mb-3">
-                        <span class="input-group-text" title="Height of zome">Height</span>
+                        <span class="input-group-text" data-bs-toggle="tooltip" title="Height of zome">Height</span>
                         <input class="form-control form-range" min="1" max="9999" step="1" type="range"
                                x-model.number="height" x-ref="height_slider">
-
                         <input class="form-control" step="0.01" type="number"
                                x-model.lazy.number="height">
-
                         <select class="form-select" aria-label="Length unit" x-model="length_unit">
                             <option selected value="mm">mm</option>
                             <option value="cm">cm</option>
@@ -397,6 +429,7 @@
 </div>
 
 <!-- Scripts / Bootstrap 5 runs without jQuery -->
+<script src="js/popper.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 
 <!-- Lodash -->
@@ -441,6 +474,15 @@
         base: null,
         num: 0,
     };
+
+    // Enable tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(
+        tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+            placement: "auto",
+            trigger: "hover",
+        })
+    )
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
@@ -649,6 +691,7 @@
                 pages: [],
                 bulleted_list_colors: [],
                 zoom: 1,
+                num_col: 1,
                 kind_of_drawing: "mandala_origami",
 
                 // 2D Rendering Parameters
@@ -673,6 +716,10 @@
                     hammer.on('swiperight', (e) => this.previous_page());
                     hammer.on('swipeleft', (e) => this.next_page());
                 },
+                get grid_pct() {
+                    // Compute Grid size in percent for css drawing
+                    return 100 / this.num_col;
+                },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
                     return !(!obj || !["num", "pieces"].reduce(hasKey, true));
@@ -694,28 +741,32 @@
                     svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                     svg.setAttribute('viewBox', '0 0 210 297');
 
-                    const ratio = 1;
+                    const size = {width: A4_width * this.num_col, height: A4_height * this.num_col};
+                    const num_sheet_per_svg = this.num_col * this.num_col;
+
                     for (let iP = 0; iP < svg_elements_per_page.length; iP++) {
-                        const polygons = svg_elements_per_page[iP];
+                        // Create the svg with elements
+                        const elements = svg_elements_per_page[iP];
                         svg.innerHTML = '';
-                        for (let i = 0; i < polygons.length; i++) {
-                            svg.appendChild(polygons[i]);
+                        for (let i = 0; i < elements.length; i++) {
+                            svg.appendChild(elements[i]);
                         }
 
-                        switch (ratio) {
-                            case 1:
-                                SVGtoPDF(doc, svg, 0, 0, {width: A4_width, height: A4_height});
-                                break;
-                            default:
-                                SVGtoPDF(doc, svg, 0, 0, {width: 1190, height: 1684});
-                                // Convert SVG to PDF
-                                doc.addPage()
-                                SVGtoPDF(doc, svg, -595, -842, {width: 1190, height: 1684});
-                                break;
+                        // Split the drawing into multiple A4 sheets depends on the num_col
+                        for (let i = 0; i < num_sheet_per_svg; i++) {
+                            for (let j = 0; j < this.num_col; j++) {
+                                const x = -j * A4_width;
+                                const y = -i * A4_height;
+                                SVGtoPDF(doc, svg, x, y, size);
 
+                                // Add page if it's not the last
+                                if ((i + 1) * (j + 1) < num_sheet_per_svg - 1) {
+                                    doc.addPage()
+                                }
+                            }
                         }
 
-
+                        // Add page if it's not the last
                         if (iP < svg_elements_per_page.length - 1) {
                             doc.addPage()
                         }
