@@ -946,9 +946,9 @@
                     }
                 },
                 draw_mandala_faces() {
-                    const body_rings = ZOME.body_rings;
+                    const body_rings = _.cloneDeep(ZOME.body_rings);
                     const spiral_faces = this.build_spiral_faces(body_rings)
-                    const base = ZOME.base;
+                    const base = _.cloneDeep(ZOME.base);
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
