@@ -966,10 +966,11 @@
                     const N = ZOME.num;
 
                     // For each color, rotate piece around the origin
-                    const TAU = Math.PI * 2, O = [0, 0, 0];
+                    const O = [0, 0, 0];
                     const mandala_pieces = [];
+                    const incr_rad = TAU / N
                     for (let iC = 0; iC < N; iC++) {
-                        const a = iC * TAU / N;
+                        const a = iC * incr_rad;
                         for (let iP = 0; iP < spiral_pieces.length; iP++) {
                             const piece = _.cloneDeep(spiral_pieces[iP]);
                             piece.planar_points = piece.planar_points.map(p => rot2d(p, a, O));
@@ -1409,6 +1410,7 @@
                         this.is_rhombus,
                     ]
                     const M = N - 1
+                    const incr_rad = TAU / N;
                     const cos_theta = Math.cos(deg2rad(theta_deg))
                     const sin_theta = Math.sin(deg2rad(theta_deg))
 
@@ -1427,17 +1429,15 @@
                     const ring_radius = top_edge * sin_theta;
                     const ring_height = top_edge * cos_theta;
 
-                    // Add points on first ring every 'TAU / N' from left to right
-                    const TAU = Math.PI * 2
-
                     // Initialize variables
                     let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, I, dist_to_ground, y, piece,
                         slope, rgb;
                     let lastIsTruncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
+                    // Add points on first ring every 'incr_rad' from left to right
                     for (let iN = 0; iN < N; iN++) {
-                        a = iN * TAU / N;
+                        a = iN * incr_rad;
                         D = [ring_radius * Math.sin(a), Math.max(0, WORLD_HEIGHT - ring_height), ring_radius * Math.cos(a)];
                         this.add_vertice(D);
                     }
@@ -1452,7 +1452,7 @@
 
                         // On current ring, Loop over points from left to right
                         for (let iN = 0; iN < N; iN++) {
-                            a = iN * TAU / N;
+                            a = iN * incr_rad;
                             k = (iN + 1) % N
 
                             iA = (iR == 0) ? 0 : fipr + k;      // Index of A point          A
@@ -1482,7 +1482,7 @@
                                 }
 
                                 // Add faces and colors
-                                rgb = angle2rgb(a, slope);
+                                rgb = angle2rgb(slope, a);
                                 piece.colors.push(rgb2hex(...rgb));
                                 this.add_face([iA, iB, iD, iA, iD, iC], rgb);
 
@@ -1509,7 +1509,7 @@
                                 }
 
                                 // Add faces and colors
-                                rgb = angle2rgb(a, slope);
+                                rgb = angle2rgb(slope, a);
                                 piece.colors.push(rgb2hex(...rgb));
                                 this.add_face([iA, iB, iE, iA, iE, iF, iA, iF, iC], rgb);
 
@@ -1535,7 +1535,7 @@
                         let iT = 0;
                         for (let iN = 0; iN < N; iN++) {
                             iT = iN * 3;
-                            a = iN * TAU / N;
+                            a = iN * incr_rad;
 
                             iA = triangles[(iT + 2) % num_triangles]
                             iB = triangles[(iT + 1) % num_triangles]
@@ -1556,7 +1556,7 @@
                                 }
 
                                 // Add triangle to 3D
-                                rgb = angle2rgb(a, slope);
+                                rgb = angle2rgb(slope, a);
                                 piece.colors.push(rgb2hex(...rgb));
                                 this.add_face([iA, iB, iC], rgb);
                             }
@@ -1579,7 +1579,7 @@
                         // Deal with case where points are too close to make a base
                         const far_enough = toDecimal(dist(piece.points[0], piece.points[1]), 2) !== 0;
                         if (far_enough) {
-                            rgb = angle2rgb(0, deg2rad(0));
+                            rgb = angle2rgb(deg2rad(0));
                             piece.colors.push(rgb2hex(...rgb));
 
                             // Add triangle to 3D

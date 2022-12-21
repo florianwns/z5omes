@@ -1,3 +1,9 @@
+
+// Constants
+const TAU = 2 * Math.PI;    // 360° in rad
+const TAU_Q = Math.PI / 2;  // 90° in rad
+
+
 function add(a, b) {
     return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 }
@@ -154,12 +160,10 @@ function hsl2hex(h, s, l) {
     return rgb2hex(...hsl2rgb(h, s, l));
 };
 
-const TAU = 2 * Math.PI;
-const A90 = Math.PI / 2;
 
-function angle2rgb(theta, beta = 0) {
-    const hue = Math.round(((4 + theta) % TAU) / TAU * 360);
-    const rgb = hsl2rgb(hue, 80, Math.min(65 + Math.abs(rad2deg(beta) / 90) * 15, 80));
+function angle2rgb(theta = 0, beta = 0) {
+    const hue = Math.round(((4 + beta) % TAU) / TAU * 360);
+    const rgb = hsl2rgb(hue, 80, Math.min(65 + Math.abs(rad2deg(theta) / 90) * 15, 80));
     return rgb;
 }
 
@@ -335,7 +339,7 @@ class PolygonWithHat extends ConvexPolygon {
         // Compute the slope of the hat
         const I = mid(this.points[1], this.points[this.num_points - 1]);
         let a = angle(this.O, I, [0, I[1], 0]);
-        if (a > A90) {
+        if (a > TAU_Q) {
             a = Math.PI - a
         }
         return a
