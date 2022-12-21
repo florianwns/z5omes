@@ -205,7 +205,6 @@ function download(filename, href) {
 }
 
 
-
 class PolygonRing {
     constructor(polygon, num) {
         // Init variables
