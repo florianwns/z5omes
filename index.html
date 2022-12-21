@@ -633,7 +633,7 @@
                     // Clone faces
                     const body_rings = _.cloneDeep(ZOME.body_rings);
                     const body_faces = [];
-                    const base = _.cloneDeep(ZOME.base);
+                    const base = ZOME.base;
 
                     // Compute height ratio then convert dimensions to real world
                     const num_rings = body_rings.length;
@@ -919,8 +919,8 @@
                     return spiral_faces;
                 },
                 draw_faces() {
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
-                    const base = _.cloneDeep(ZOME.base);
+                    const body_rings = ZOME.body_rings;
+                    const base = ZOME.base;
 
                     // for each color and each face add a page
                     const range = _.range(0, ZOME.num);
@@ -940,7 +940,7 @@
                 draw_mandala_faces() {
                     const body_rings = _.cloneDeep(ZOME.body_rings);
                     const spiral_faces = this.build_spiral_faces(body_rings)
-                    const base = _.cloneDeep(ZOME.base);
+                    const base = ZOME.base;
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
@@ -963,7 +963,7 @@
                 draw_spiral_faces() {
                     const body_rings = _.cloneDeep(ZOME.body_rings);
                     const spiral_faces = this.build_spiral_faces(body_rings)
-                    const base = _.cloneDeep(ZOME.base);
+                    const base = ZOME.base;
 
                     // For each color, Add a page with spiral faces
                     for (let i = 0; i < ZOME.num; i++) {
@@ -1012,7 +1012,9 @@
                         return;
                     }
                     const elements = svg_elements_per_page[this.page_index % svg_elements_per_page.length];
-                    _.forEach(elements, el => this.A4_sheet.appendChild(el));
+                    for (const el of elements) {
+                        this.A4_sheet.appendChild(el);
+                    }
                 }
             };
         });
