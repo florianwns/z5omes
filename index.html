@@ -574,9 +574,9 @@
                     obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
-                    for (let i = 0; i < rows.length; i++) {
-                        obj += _.join(rows[i][1], sep) + "\n"
-                    }
+                    _.forEach(rows, row => {
+                        obj += _.join(row[1], sep) + "\n"
+                    });
                     download(`zome_measurements.${fmt}`, `data:text/${fmt}; charset=utf-8,` + encodeURIComponent(obj));
                 },
                 get table_column_names() {
@@ -594,8 +594,7 @@
                 },
                 get table_rows() {
                     const rows = []
-                    for (let i = 0; i < this.faces.length; i++) {
-                        const face = this.faces[i];
+                    _.forEach(this.faces, (face, i) => {
                         rows.push([
                             face,
                             [
@@ -610,7 +609,7 @@
                                 reprDistance(face.diameter),
                             ]
                         ]);
-                    }
+                    });
                     return rows;
                 },
                 process() {
@@ -751,13 +750,10 @@
                     const size = {width: A4_width * this.num_col, height: A4_height * this.num_col};
                     const num_sheet_per_svg = this.num_col * this.num_col;
 
-                    for (let iP = 0; iP < svg_elements_per_page.length; iP++) {
+                    _.forEach(svg_elements_per_page, (elements, iP) => {
                         // Create the svg with elements
-                        const elements = svg_elements_per_page[iP];
                         svg.innerHTML = '';
-                        for (let i = 0; i < elements.length; i++) {
-                            svg.appendChild(elements[i]);
-                        }
+                        _.forEach(elements, element => svg.appendChild(element));
 
                         // Split the drawing into multiple A4 sheets depends on the num_col
                         for (let i = 0; i < num_sheet_per_svg; i++) {
@@ -777,7 +773,7 @@
                         if (iP < svg_elements_per_page.length - 1) {
                             doc.addPage()
                         }
-                    }
+                    });
 
                     // Save document
                     doc.end();
@@ -863,24 +859,20 @@
 
                     // Build pages polygons
                     svg_elements_per_page = [];
-                    for (let iPa = 0; iPa < pages.length; iPa++) {
+                    _.forEach(pages, (page, iPa) => {
                         const svg_elements = [];
-                        const page_faces = pages[iPa];
-
-                        for (let iP = 0; iP < page_faces.length; iP++) {
-                            const piece = page_faces[iP];
+                        _.forEach(page, face => {
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-
                             const [xMin, yMin, width, height] = page_bounds[iPa];
-                            el.setAttribute('points', piece.planar_points.map(p => [
+                            el.setAttribute('points', face.planar_points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
                             ]));
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', piece.color.hex);
+                            el.setAttribute('fill', face.color.hex);
                             svg_elements.push(el);
-                        }
+                        });
 
                         // Add Text
                         const el = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -894,7 +886,7 @@
 
                         // Add color of the first piece to bulleted list
                         svg_elements_per_page.push(svg_elements);
-                    }
+                    });
                 },
                 build_spiral_faces(body_rings) {
                     const spiral_faces = [];
@@ -1020,10 +1012,7 @@
                         return;
                     }
                     const elements = svg_elements_per_page[this.page_index % svg_elements_per_page.length];
-
-                    for (let i = 0; i < elements.length; i++) {
-                        this.A4_sheet.appendChild(elements[i]);
-                    }
+                    _.forEach(elements, el => this.A4_sheet.appendChild(el));
                 }
             };
         });

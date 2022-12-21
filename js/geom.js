@@ -260,9 +260,8 @@ class ConvexPolygon {
         let x, y, z, ab, bd, ob, od;
 
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-        for (let i = 0; i < this.num_points; i++) {
+        _.forEach(this.points, (A, i) => {
             const C = this.points[(this.num_points + i - 1) % this.num_points];
-            const A = this.points[i];
             const B = this.points[(i + 1) % this.num_points];
             const D = this.points[(i + 2) % this.num_points];
 
@@ -306,7 +305,7 @@ class ConvexPolygon {
                 const s = (ob + bd + od) / 2;
                 this.area += Math.sqrt(s * (s - ob) * (s - bd) * (s - od));
             }
-        }
+        });
 
         // Compute width and height from 2D boundaries
         this.width = Math.abs(xMax - xMin);
