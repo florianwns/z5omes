@@ -227,8 +227,8 @@
 
                             <div class="mb-2">
                                 <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
-                                    <option selected value="mandala_origami">Mandala Origami</option>
-                                    <option value="spiral_origami">Spiral Origami</option>
+                                    <option selected value="mandala_faces">Mandala Origami</option>
+                                    <option value="spiral_faces">Spiral Origami</option>
                                     <option value="faces">Faces</option>
                                 </select>
 
@@ -369,8 +369,8 @@
                 </div>
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Num Pieces
-                        <span class="badge bg-info rounded-pill" x-text="body_num_pieces"></span>
+                        Body Num Faces
+                        <span class="badge bg-info rounded-pill" x-text="body_num_faces"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Body Widest Ø
@@ -414,7 +414,7 @@
                             <tr class="align-middle">
                                 <td>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="row[0].colors[0]">
+                                         :fill="row[0].color.hex">
                                         <polygon :points="to_svg_points(row[0], 32)"/>
                                     </svg>
                                 </td>
@@ -473,9 +473,7 @@
     // Use a global variable to store ZOME data
     let ZOME = {
         vertices: [],
-        faces: [],
-        face_colors: [],
-        pieces: [],
+        face_rings: [],
         base: null,
         num: 0,
     };
@@ -492,7 +490,7 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
             return {
-                body: [],
+                body_faces: [],
                 base: null,
                 height: 100,                // Height
                 length_unit: "mm",          // Length unit by default is mm
@@ -508,22 +506,22 @@
 
                     this.$watch("length_unit", () => this.__to_real_world());
                 },
-                get pieces() {
-                    return this.has_base ? [...this.body, this.base] : this.body;
+                get faces() {
+                    return this.has_base ? [...this.body_faces, this.base] : this.body_faces;
                 },
                 get has_base() {
                     return this.base !== null;
                 },
                 get body_widest_diameter() {
-                    const value = _.reduce(this.body, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                    const value = _.reduce(this.body_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return reprDistance(value);
                 },
                 get body_area() {
-                    const value = _.reduce(this.body, (res, p) => res + p.area * ZOME.num, 0);
+                    const value = _.reduce(this.body_faces, (res, p) => res + p.area * ZOME.num, 0);
                     return reprArea(value);
                 },
-                get body_num_pieces() {
-                    return ZOME.num * this.body.length;
+                get body_num_faces() {
+                    return ZOME.num * this.body_faces.length;
                 },
                 get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
@@ -563,7 +561,7 @@
                     let obj = hr;
                     obj += "# This zome was made with https://florianwns.github.io/z5omes/\n";
                     obj += hr;
-                    obj += `# Body Num Pieces : ${this.body_num_pieces}\n`;
+                    obj += `# Body Num Faces : ${this.body_num_faces}\n`;
                     obj += `# Body Widest Ø : ${this.body_widest_diameter}\n`;
                     obj += `# Body Area : ${this.body_area}\n`;
                     obj += `# Base Perimeter : ${this.base_perimeter}\n`;
@@ -592,20 +590,20 @@
                 },
                 get table_rows() {
                     const rows = []
-                    for (let i = 0; i < this.pieces.length; i++) {
-                        const piece = this.pieces[i];
+                    for (let i = 0; i < this.faces.length; i++) {
+                        const face = this.faces[i];
                         rows.push([
-                            piece,
+                            face,
                             [
                                 i + 1,
-                                reprDistance(piece.width),
-                                reprDistance(piece.height),
-                                reprArr(uniqueArr(_.map(piece.edge_distances, v => reprDistance(v)))),
-                                reprArr(uniqueArr(_.map(piece.angles, a => reprAngle(rad2deg(a))))),
-                                reprAngle(rad2deg(piece.slope)),
-                                reprAngle(rad2deg(piece.σ)),
-                                reprArea(piece.area),
-                                reprDistance(piece.diameter),
+                                reprDistance(face.width),
+                                reprDistance(face.height),
+                                reprArr(uniqueArr(_.map(face.edge_distances, v => reprDistance(v)))),
+                                reprArr(uniqueArr(_.map(face.angles, a => reprAngle(rad2deg(a))))),
+                                reprAngle(rad2deg(face.slope)),
+                                reprAngle(rad2deg(face.σ)),
+                                reprArea(face.area),
+                                reprDistance(face.diameter),
                             ]
                         ]);
                     }
@@ -613,7 +611,7 @@
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-                    return !(!obj || !["pieces", "base", "num"].reduce(hasKey, true));
+                    return !(!obj || !["face_rings", "base", "num"].reduce(hasKey, true));
                 },
                 process() {
                     if (!this.is_valid(ZOME)) {
@@ -633,43 +631,47 @@
                     ]);
                 },
                 to_real_world() {
-                    // Clone pieces
-                    const body = _.cloneDeep(ZOME.pieces);
+                    // Clone faces
+                    const face_rings = _.cloneDeep(ZOME.face_rings);
+                    const body_faces = [];
                     const base = _.cloneDeep(ZOME.base);
 
                     // Compute height ratio then convert dimensions to real world
-                    const num_pieces = body.length;
-                    const yMax = body[0].points[0][1];
-                    const yMin = body[num_pieces - 1].points[1][1];
+                    const num_rings = face_rings.length;
+                    const yMax = face_rings[0].polygon.points[0][1];
+                    const yMin = face_rings[num_rings - 1].polygon.points[1][1];
                     const real_size_ratio = to_mm(this.height / (yMax - yMin), this.length_unit);
 
-                    for (let iP = 0; iP < num_pieces; iP++) {
-                        const piece = body[iP];
-                        piece.points = piece.points.map(p => [
+
+                    // Resize Body faces
+                    face_rings.forEach((ring, iR) => {
+                        const face = ring.polygon;
+                        face.points = face.points.map(p => [
                             p[0] * real_size_ratio,
                             p[1] * real_size_ratio - yMin,
                             p[2] * real_size_ratio
                         ]);
-                        piece.compute();
+                        face.compute();
 
-
-                        // Compute σ, the Dihedral angle only for the Zome body with at least 2 pieces
-                        if (num_pieces < 2) {
-                            continue;
+                        // Compute σ, the Dihedral angle only for the Zome body with at least 2 faces
+                        if (num_rings > 1) {
+                            if (iR == 0) {
+                                const next_face = face_rings[1].polygon;
+                                face.σ = dihedral_angle(next_face.φ, face.ω, face.ω);
+                            } else {
+                                const prev_face = face_rings[iR - 1].polygon;
+                                const α = angle(face.A, face.B, prev_face.B);
+                                const δ = angle(face.A, face.B, face.C);
+                                const λ = angle(prev_face.B, face.B, face.C);
+                                face.σ = dihedral_angle(λ, δ, α);
+                            }
                         }
 
-                        if (iP == 0) {
-                            const next_piece = body[1];
-                            piece.σ = dihedral_angle(next_piece.φ, piece.ω, piece.ω);
-                        } else {
-                            const prev_piece = body[iP - 1];
-                            const α = angle(piece.A, piece.B, prev_piece.B);
-                            const δ = angle(piece.A, piece.B, piece.C);
-                            const λ = angle(prev_piece.B, piece.B, piece.C);
-                            piece.σ = dihedral_angle(λ, δ, α);
-                        }
-                    }
+                        body_faces.push(face);
+                    });
 
+
+                    // Resize base
                     if (base !== null) {
                         base.points = base.points.map(p => [
                             p[0] * real_size_ratio,
@@ -681,7 +683,7 @@
 
                     // Refresh proxy
                     this.base = base;
-                    this.body = body;
+                    this.body_faces = body_faces;
                 },
             };
         });
@@ -699,7 +701,7 @@
                 bulleted_list_colors: [],
                 zoom: 1,
                 num_col: 1,
-                kind_of_drawing: "mandala_origami",
+                kind_of_drawing: "mandala_faces",
 
                 // 2D Rendering Parameters
                 init() {
@@ -738,7 +740,7 @@
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-                    return !(!obj || !["num", "pieces"].reduce(hasKey, true));
+                    return !(!obj || !["num", "face_rings"].reduce(hasKey, true));
                 },
                 to_svg_points(piece, size) {
                     // Recompute pixel positions
@@ -792,7 +794,7 @@
                     doc.end();
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
-                        download("planar_pieces.pdf", url);
+                        download("planar_faces.pdf", url);
                     });
 
                     // Tricks because svg is empty otherwise ;)
@@ -801,7 +803,7 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    download("planar_pieces.svg", window.URL.createObjectURL(blob));
+                    download("planar_faces.svg", window.URL.createObjectURL(blob));
                 },
                 process() {
                     if (!this.is_valid(ZOME)) {
@@ -812,11 +814,11 @@
                     // Init variables
                     pages = [];
                     switch (this.kind_of_drawing) {
-                        case 'spiral_origami':
-                            this.draw_spiral_origami();
+                        case 'spiral_faces':
+                            this.draw_spiral_faces();
                             break;
-                        case 'mandala_origami':
-                            this.draw_mandala_origami();
+                        case 'mandala_faces':
+                            this.draw_mandala_faces();
                             break;
                         case 'faces':
                             this.draw_faces();
@@ -825,17 +827,14 @@
 
                     // Compute boundaries for all pages
                     page_bounds = [];
-                    for (let iPa = 0; iPa < pages.length; iPa++) {
-                        const page_pieces = pages[iPa];
-
+                    for (const page_faces of pages) {
                         // Reset boundaries
                         let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
                             xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
 
-                        // Compute boundaries of all pieces
-                        for (let iP = 0; iP < page_pieces.length; iP++) {
-                            const piece = page_pieces[iP];
-                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(piece.planar_points);
+                        // Compute boundaries of all faces
+                        for (const face of page_faces) {
+                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(face.planar_points);
 
                             // Save boundaries
                             if (xPMin < xMin) xMin = xPMin;
@@ -851,10 +850,9 @@
 
                     // Add bulleted list
                     const bulleted_list_colors = [];
-                    for (let iPa = 0; iPa < pages.length; iPa++) {
+                    for (const page_faces of pages) {
                         // Add color of the first piece to bulleted list
-                        const page_pieces = pages[iPa];
-                        bulleted_list_colors.push(page_pieces[0].color);
+                        bulleted_list_colors.push(page_faces[0].color.hex);
                     }
 
                     // Save proxies
@@ -878,10 +876,10 @@
                     svg_elements_per_page = [];
                     for (let iPa = 0; iPa < pages.length; iPa++) {
                         const svg_elements = [];
-                        const page_pieces = pages[iPa];
+                        const page_faces = pages[iPa];
 
-                        for (let iP = 0; iP < page_pieces.length; iP++) {
-                            const piece = page_pieces[iP];
+                        for (let iP = 0; iP < page_faces.length; iP++) {
+                            const piece = page_faces[iP];
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
 
                             const [xMin, yMin, width, height] = page_bounds[iPa];
@@ -891,7 +889,7 @@
                             ]));
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', piece.color);
+                            el.setAttribute('fill', piece.color.hex);
                             svg_elements.push(el);
                         }
 
@@ -909,19 +907,18 @@
                         svg_elements_per_page.push(svg_elements);
                     }
                 },
-                build_spiral_pieces() {
-                    const spiral_pieces = [];
-                    const body_pieces = _.cloneDeep(ZOME.pieces);
+                build_spiral_faces(face_rings) {
+                    const spiral_faces = [];
 
-                    // Compute body planar pieces
+                    // Compute body planar faces
                     let O = [0, 0, 0], planar_points = [];
                     let A, a, rotated_A;
-                    for (let iP = 0; iP < body_pieces.length; iP++) {
-                        const piece = body_pieces[iP];
+                    face_rings.forEach((ring, iR) => {
+                        const polygon = ring.polygon;
 
                         // Move to Origin and rotate to match with previous piece
-                        planar_points = piece.planar_points.map(p => add(p, O));
-                        if (iP > 0) {
+                        planar_points = polygon.planar_points.map(p => add(p, O));
+                        if (iR > 0) {
                             a = angle(A, O, planar_points[1]);
                             rotated_A = rot2d(planar_points[1], a, O);
 
@@ -934,77 +931,72 @@
                         O = planar_points[planar_points.length - 1];
                         A = planar_points[planar_points.length - 2];
 
-                        // Save planar pieces
-                        piece.planar_points = planar_points;
-                        spiral_pieces.push(piece);
-                    }
-                    return spiral_pieces;
+                        // Save planar faces
+                        polygon.planar_points = planar_points;
+                        spiral_faces.push(polygon);
+                    });
+                    return spiral_faces;
                 },
                 draw_faces() {
-                    const N = ZOME.num;
-                    const body_pieces = _.cloneDeep(ZOME.pieces);
+                    const face_rings = _.cloneDeep(ZOME.face_rings);
                     const base = _.cloneDeep(ZOME.base);
 
-                    // For each color, Add a page with spiral pieces
-                    for (let iP = 0; iP < body_pieces.length; iP++) {
-                        for (let iC = 0; iC < N; iC++) {
-                            const piece = _.cloneDeep(body_pieces[iP]);
-                            piece.color = piece.colors[iC]
-                            pages.push([piece]);
+                    // for each color and each face add a page
+                    const range = _.range(0, ZOME.num);
+                    for (const ring of face_rings) {
+                        for (const i of range) {
+                            const face = _.cloneDeep(ring.polygon);
+                            face.color = ring.colors[i];
+                            pages.push([face]);
                         }
                     }
 
                     // Add Base at last page if base exists
                     if (base !== null) {
-                        base.color = base.colors[0];
                         pages.push([base]);
                     }
                 },
-                draw_mandala_origami() {
-                    const spiral_pieces = this.build_spiral_pieces()
+                draw_mandala_faces() {
+                    const face_rings = _.cloneDeep(ZOME.face_rings);
+                    const spiral_faces = this.build_spiral_faces(face_rings)
                     const base = _.cloneDeep(ZOME.base);
-                    const N = ZOME.num;
 
                     // For each color, rotate piece around the origin
-                    const O = [0, 0, 0];
-                    const mandala_pieces = [];
-                    const incr_rad = TAU / N
-                    for (let iC = 0; iC < N; iC++) {
-                        const a = iC * incr_rad;
-                        for (let iP = 0; iP < spiral_pieces.length; iP++) {
-                            const piece = _.cloneDeep(spiral_pieces[iP]);
-                            piece.planar_points = piece.planar_points.map(p => rot2d(p, a, O));
-                            piece.color = piece.colors[iC]
-                            mandala_pieces.push(piece)
-                        }
+                    const mandala_faces = [], O = [0, 0, 0];
+                    for (let i = 0; i < ZOME.num; i++) {
+                        spiral_faces.forEach((spiral_face, j) => {
+                            const ring = face_rings[j];
+                            const face = _.cloneDeep(spiral_face);
+                            face.planar_points = face.planar_points.map(p => rot2d(p, ring.angles[i], O));
+                            face.color = ring.colors[i];
+                            mandala_faces.push(face)
+                        });
                     }
-                    pages.push(mandala_pieces);
+                    pages.push(mandala_faces);
 
                     // Add a last page if base exists
                     if (base !== null) {
-                        base.color = base.colors[0];
                         pages.push([base]);
                     }
                 },
-                draw_spiral_origami() {
-                    const spiral_pieces = this.build_spiral_pieces()
+                draw_spiral_faces() {
+                    const face_rings = _.cloneDeep(ZOME.face_rings);
+                    const spiral_faces = this.build_spiral_faces(face_rings)
                     const base = _.cloneDeep(ZOME.base);
-                    const N = ZOME.num;
 
-                    // For each color, Add a page with spiral pieces
-                    for (let iC = 0; iC < N; iC++) {
-                        const colored_spiral_pieces = [];
-                        for (let iP = 0; iP < spiral_pieces.length; iP++) {
-                            const piece = _.cloneDeep(spiral_pieces[iP]);
-                            piece.color = piece.colors[iC]
-                            colored_spiral_pieces.push(piece)
-                        }
-                        pages.push(colored_spiral_pieces);
+                    // For each color, Add a page with spiral faces
+                    for (let i = 0; i < ZOME.num; i++) {
+                        const colored_spiral_faces = [];
+                        spiral_faces.forEach((spiral_face, j) => {
+                            const face = _.cloneDeep(spiral_face);
+                            face.color = face_rings[j].colors[i];
+                            colored_spiral_faces.push(face)
+                        });
+                        pages.push(colored_spiral_faces);
                     }
 
                     // Add Base at last page if base exists
                     if (base !== null) {
-                        base.color = base.colors[0];
                         pages.push([base]);
                     }
                 },
@@ -1150,7 +1142,7 @@
                 },
                 is_valid(obj) {
                     const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-                    return !(!obj || !["faces", "face_colors"].reduce(hasKey, true));
+                    return !(!obj || !["face_rings", "num"].reduce(hasKey, true));
                 },
                 process() {
                     if (!this.is_valid(ZOME)) {
@@ -1159,25 +1151,69 @@
                     }
 
                     // Clean old mesh
-                    if (meshes.zome instanceof THREE.Mesh) {
+                    if (meshes.zome instanceof THREE.Group) {
                         scene.remove(meshes.zome)
                     }
 
-                    // Draw faces
-                    const points = ZOME.faces.map(iV => new THREE.Vector3(...(ZOME.vertices[iV])));
+                    meshes.zome = new THREE.Group();
+
+                    // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({
                         side: THREE.DoubleSide,
                         vertexColors: true,
                     });
 
-                    const geometry = new THREE.BufferGeometry()
-                    geometry.setFromPoints(points)
-                    geometry.setAttribute('color', new THREE.Float32BufferAttribute(ZOME.face_colors, 3));
-                    geometry.computeVertexNormals()
+                    // Build 3D Body Faces
+                    {
+                        // Build geometry of first spiral
+                        const points = [];
+                        ZOME.face_rings.forEach(ring => {
+                            const polygon = ring.polygon;
+                            points.push(...polygon.faces);
+                        });
 
-                    // Add to group
-                    meshes.zome = new THREE.Mesh(geometry, material)
+                        const geometry = new THREE.BufferGeometry();
+                        geometry.setFromPoints(points)
 
+                        for (let iN = 0; iN < ZOME.num; iN++) {
+                            const rot_geometry = geometry.clone()
+
+                            // Rotate the new geometry
+                            const a = ZOME.face_rings[0].angles[iN];
+                            rot_geometry.rotateY(a);
+
+                            // Get colors
+                            const face_colors = [];
+                            ZOME.face_rings.forEach(ring => {
+                                const rgb = ring.colors[iN].rgb;
+                                points.forEach(() => {
+                                    face_colors.push(...rgb);
+                                });
+                            });
+
+                            rot_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                            rot_geometry.computeVertexNormals()
+
+                            meshes.zome.add(new THREE.Mesh(rot_geometry, material))
+                        }
+                    }
+
+                    // Build 3D Base Faces
+                    const base = ZOME.base;
+                    if (base !== null) {
+                        const geometry = new THREE.BufferGeometry();
+                        geometry.setFromPoints(base.faces)
+
+                        const face_colors = [];
+                        base.faces.forEach(() => {
+                            face_colors.push(...base.color.rgb);
+                        });
+
+                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                        geometry.computeVertexNormals()
+
+                        meshes.zome.add(new THREE.Mesh(geometry, material))
+                    }
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome)
                 },
@@ -1204,7 +1240,7 @@
                     }
                 },
                 update() {
-                    if (this.is_spinning && meshes.zome instanceof THREE.Mesh) {
+                    if (this.is_spinning && meshes.zome instanceof THREE.Group) {
                         meshes.zome.rotation.y -= this.speed
                     }
                 },
@@ -1267,9 +1303,7 @@
 
         Alpine.data('settings', () => {
             let vertices = [];          // 3D point vector
-            let faces = [];             // vertice indexes vector
-            let face_colors = [];       // rgb colors vector
-            let pieces = [];
+            let face_rings = [];
 
             return {
                 // Shape Parameters
@@ -1377,9 +1411,7 @@
                 clear() {
                     // Clear data
                     vertices = [];
-                    faces = [];
-                    face_colors = [];
-                    pieces = [];
+                    face_rings = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return toDecimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
@@ -1387,18 +1419,6 @@
                 add_vertice(p) {
                     vertices.push(p);
                     return vertices.length - 1;
-                },
-                add_face(iVertices, rgb) {
-                    const num_vertices = iVertices.length
-                    if (num_vertices % 3 > 0) {
-                        console.error("Faces must only have 3 vertices")
-                        return;
-                    }
-
-                    for (let i = 0; i < num_vertices; i++) {
-                        faces.push(iVertices[i]);
-                        face_colors.push(...rgb);
-                    }
                 },
                 make_zome() {
                     // Constants
@@ -1431,8 +1451,7 @@
                     const ring_height = top_edge * cos_theta;
 
                     // Initialize variables
-                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, I, dist_to_ground, y, piece,
-                        slope, rgb;
+                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, dist_to_ground, y, face;
                     let lastIsTruncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -1453,7 +1472,6 @@
 
                         // On current ring, Loop over points from left to right
                         for (let iN = 0; iN < N; iN++) {
-                            a = iN * incr_rad;
                             k = (iN + 1) % N
 
                             iA = (iR == 0) ? 0 : fipr + k;      // Index of A point          A
@@ -1477,15 +1495,9 @@
 
                                 // Add only the first piece, because only color change for 2D
                                 if (iN == 0) {
-                                    piece = (is_rhombus) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
-                                    slope = piece.slope;
-                                    pieces.push(piece)
+                                    face = (is_rhombus) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
+                                    face_rings.push(new PolygonRing(face, N));
                                 }
-
-                                // Add faces and colors
-                                rgb = angle2rgb(slope, a);
-                                piece.colors.push(rgb2hex(...rgb));
-                                this.add_face([iA, iB, iD, iA, iD, iC], rgb);
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
                                 hit_ground = toDecimal(y, 2) == 0;
@@ -1502,17 +1514,11 @@
                                 iE = this.add_vertice(E);
                                 iF = this.add_vertice(F);
 
-                                // Add Truncated Kite to pieces
+                                // Add Truncated Kite to faces
                                 if (iN == 0) {
-                                    piece = new TruncatedKite([A, B, E, F, C])
-                                    slope = piece.slope;
-                                    pieces.push(piece)
+                                    face = new TruncatedKite([A, B, E, F, C])
+                                    face_rings.push(new PolygonRing(face, N));
                                 }
-
-                                // Add faces and colors
-                                rgb = angle2rgb(slope, a);
-                                piece.colors.push(rgb2hex(...rgb));
-                                this.add_face([iA, iB, iE, iA, iE, iF, iA, iF, iC], rgb);
 
                                 // Add last triangles to close it after if needed
                                 triangles.push(iE, iF, iC);
@@ -1536,7 +1542,6 @@
                         let iT = 0;
                         for (let iN = 0; iN < N; iN++) {
                             iT = iN * 3;
-                            a = iN * incr_rad;
 
                             iA = triangles[(iT + 2) % num_triangles]
                             iB = triangles[(iT + 1) % num_triangles]
@@ -1549,17 +1554,11 @@
                             // Deal with case where B and C are too close, so we don't add them
                             const far_enough = toDecimal(dist(B, C), 2) !== 0;
                             if (far_enough) {
-                                // Add triangle to pieces
+                                // Add triangle to faces
                                 if (iT == 0) {
-                                    piece = new Triangle([A, B, C]);
-                                    slope = piece.slope;
-                                    pieces.push(piece)
+                                    face = new Triangle([A, B, C]);
+                                    face_rings.push(new PolygonRing(face, N));
                                 }
-
-                                // Add triangle to 3D
-                                rgb = angle2rgb(slope, a);
-                                piece.colors.push(rgb2hex(...rgb));
-                                this.add_face([iA, iB, iC], rgb);
                             }
 
                             // Push base vertices only if zome is partial
@@ -1575,33 +1574,19 @@
                     // Finally add the base piece
                     let base = null;
                     if (base_vertices.length >= 3) {
-                        piece = new ZomeBase(base_vertices.map(iV => vertices[iV]))
+                        face = new ZomeBase(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
-                        const far_enough = toDecimal(dist(piece.points[0], piece.points[1]), 2) !== 0;
+                        const far_enough = toDecimal(dist(face.points[0], face.points[1]), 2) !== 0;
                         if (far_enough) {
-                            rgb = angle2rgb(deg2rad(0));
-                            piece.colors.push(rgb2hex(...rgb));
-
-                            // Add triangle to 3D
-                            const last_iV = this.add_vertice([0, 0, 0]);
-                            const base_faces = []
-                            for (let i = 0; i < base_vertices.length; i++) {
-                                const iV = base_vertices[i];
-                                const iNV = base_vertices[(i + 1) % base_vertices.length];
-                                base_faces.push(iV, last_iV, iNV)
-                            }
-                            this.add_face(base_faces, rgb);
-                            base = piece;
+                            base = face;
                         }
                     }
 
                     // Save Zome and dispatch it
                     ZOME = {
                         vertices: vertices,
-                        faces: faces,
-                        face_colors: face_colors,
-                        pieces: pieces,
+                        face_rings: face_rings,
                         base: base,
                         num: N,
                     }

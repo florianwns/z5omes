@@ -1,4 +1,3 @@
-
 // Constants
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
@@ -152,19 +151,23 @@ function hsl2rgb(h, s, l) {
     return [f(0), f(8), f(4)];
 };
 
-function rgb2hex(r, g, b) {
-    return `#${_.reduce([r, g, b], (res, v) => res + parseInt(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
-};
-
-function hsl2hex(h, s, l) {
-    return rgb2hex(...hsl2rgb(h, s, l));
+function rgb2hex(rgb) {
+    return `#${_.reduce(rgb, (res, v) => res + parseInt(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
 };
 
 
-function angle2rgb(theta = 0, beta = 0) {
+class Color {
+    constructor(rgb) {
+        // Consider that polygon is made by triangle,
+        this.rgb = rgb;
+        this.hex = rgb2hex(rgb);
+    }
+}
+
+function angle2color(theta = 0, beta = 0) {
     const hue = Math.round(((4 + beta) % TAU) / TAU * 360);
     const rgb = hsl2rgb(hue, 80, Math.min(65 + Math.abs(rad2deg(theta) / 90) * 15, 80));
-    return rgb;
+    return new Color(rgb);
 }
 
 function color_map(value, start = '#FFFFFF', end = '#000000') {
@@ -201,6 +204,27 @@ function download(filename, href) {
     element.remove();
 }
 
+
+class PolygonRing {
+    constructor(polygon, num) {
+        // Init variables
+        this.polygon = polygon
+
+        // Compute angles and colors
+        this.angles = [];
+        this.colors = []; // list of colors
+
+        const slope = this.polygon.slope;
+        const incr_rad = TAU / num;
+        for (let i = 0; i < num; i++) {
+            const a = i * incr_rad;
+            this.angles.push(a);
+            this.colors.push(angle2color(slope, a));
+        }
+    }
+}
+
+
 class ConvexPolygon {
     constructor(points) {
         // Consider that polygon is made by triangle,
@@ -212,17 +236,17 @@ class ConvexPolygon {
 
         // Init variables
         this.points = points;
-        this.color = "#FF00FF";
-        this.colors = [];
         this.compute()
+        this.color = angle2color(this.slope);
     }
+
 
     compute() {
         this.num_points = this.points.length;
         this.perimeter = 0;
         this.area = 0;
-        this.angles = []
-        this.faces = []
+        this.angles = [];
+        this.faces = [];
         this.edge_distances = [];
         this.planar_points = [];
 
