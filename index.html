@@ -593,22 +593,19 @@
                     ]
                 },
                 get table_rows() {
-                    const rows = []
+                    const rows = new Array(this.faces.length);
                     _.forEach(this.faces, (face, i) => {
-                        rows.push([
-                            face,
-                            [
-                                i + 1,
-                                reprDistance(face.width),
-                                reprDistance(face.height),
-                                reprArr(uniqueArr(_.map(face.edge_distances, v => reprDistance(v)))),
-                                reprArr(uniqueArr(_.map(face.angles, a => reprAngle(rad2deg(a))))),
-                                reprAngle(rad2deg(face.slope)),
-                                reprAngle(rad2deg(face.σ)),
-                                reprArea(face.area),
-                                reprDistance(face.diameter),
-                            ]
-                        ]);
+                        rows[i] = [face, [
+                            i + 1,
+                            reprDistance(face.width),
+                            reprDistance(face.height),
+                            reprArr(uniqueArr(_.map(face.edge_distances, v => reprDistance(v)))),
+                            reprArr(uniqueArr(_.map(face.angles, a => reprAngle(rad2deg(a))))),
+                            reprAngle(rad2deg(face.slope)),
+                            reprAngle(rad2deg(face.σ)),
+                            reprArea(face.area),
+                            reprDistance(face.diameter),
+                        ]];
                     });
                     return rows;
                 },
@@ -632,8 +629,7 @@
                 to_real_world() {
                     // Clone faces
                     const body_rings = _.cloneDeep(ZOME.body_rings);
-                    const body_faces = [];
-                    const base = ZOME.base;
+                    const base = _.cloneDeep(ZOME.base);
 
                     // Compute height ratio then convert dimensions to real world
                     const num_rings = body_rings.length;
@@ -643,6 +639,7 @@
 
 
                     // Resize Body faces
+                    const body_faces = new Array(body_rings.length);
                     _.forEach(body_rings, (ring, iR) => {
                         const face = ring.polygon;
                         face.points = face.points.map(p => [
@@ -665,8 +662,7 @@
                                 face.σ = dihedral_angle(λ, δ, α);
                             }
                         }
-
-                        body_faces.push(face);
+                        body_faces[iR] = face;
                     });
 
                     // Resize base
@@ -811,8 +807,8 @@
                     }
 
                     // Compute boundaries for all pages
-                    page_bounds = [];
-                    for (const page_faces of pages) {
+                    page_bounds = new Array(pages.length);
+                    _.forEach(pages, (page_faces, iP) => {
                         // Reset boundaries
                         let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
                             xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
@@ -830,15 +826,15 @@
 
                         const width = Math.abs(xMax - xMin);
                         const height = Math.abs(yMax - yMin);
-                        page_bounds.push([xMin, yMin, width, height]);
-                    }
+                        page_bounds[iP] = [xMin, yMin, width, height];
+                    });
 
                     // Add bulleted list
-                    const bulleted_list_colors = [];
-                    for (const page_faces of pages) {
+                    const bulleted_list_colors = new Array(pages.length);
+                    _.forEach(pages, (page_faces, iP) => {
                         // Add color of the first piece to bulleted list
-                        bulleted_list_colors.push(page_faces[0].color.hex);
-                    }
+                        bulleted_list_colors[iP] = page_faces[0].color.hex;
+                    });
 
                     // Save proxies
                     this.bulleted_list_colors = bulleted_list_colors;
@@ -858,10 +854,10 @@
                     const center = [210 / 2, 297 / 2];
 
                     // Build pages polygons
-                    svg_elements_per_page = [];
+                    svg_elements_per_page = new Array(pages.length);
                     _.forEach(pages, (page, iPa) => {
-                        const svg_elements = [];
-                        _.forEach(page, face => {
+                        const svg_elements = new Array(page.length + 1);
+                        _.forEach(page, (face, iF) => {
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
                             el.setAttribute('points', face.planar_points.map(p => [
@@ -871,7 +867,7 @@
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
                             el.setAttribute('fill', face.color.hex);
-                            svg_elements.push(el);
+                            svg_elements[iF] = el;
                         });
 
                         // Add Text
@@ -882,14 +878,14 @@
                         el.setAttribute('font-family', "Verdana")
                         el.setAttribute('font-size', "6px")
                         el.innerHTML = `Page ${iPa + 1}/${pages.length}`;
-                        svg_elements.push(el);
+                        svg_elements[svg_elements.length - 1] = el;
 
                         // Add color of the first piece to bulleted list
-                        svg_elements_per_page.push(svg_elements);
+                        svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
                 build_spiral_faces(body_rings) {
-                    const spiral_faces = [];
+                    const spiral_faces = new Array(body_rings.length);
 
                     // Compute body planar faces
                     let O = [0, 0, 0], planar_points = [];
@@ -914,13 +910,13 @@
 
                         // Save planar faces
                         polygon.planar_points = planar_points;
-                        spiral_faces.push(polygon);
+                        spiral_faces[iR] = polygon;
                     });
                     return spiral_faces;
                 },
                 draw_faces() {
-                    const body_rings = ZOME.body_rings;
-                    const base = ZOME.base;
+                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const base = _.cloneDeep(ZOME.base);
 
                     // for each color and each face add a page
                     const range = _.range(0, ZOME.num);
@@ -940,7 +936,7 @@
                 draw_mandala_faces() {
                     const body_rings = _.cloneDeep(ZOME.body_rings);
                     const spiral_faces = this.build_spiral_faces(body_rings)
-                    const base = ZOME.base;
+                    const base = _.cloneDeep(ZOME.base)
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
@@ -963,7 +959,7 @@
                 draw_spiral_faces() {
                     const body_rings = _.cloneDeep(ZOME.body_rings);
                     const spiral_faces = this.build_spiral_faces(body_rings)
-                    const base = ZOME.base;
+                    const base = _.cloneDeep(ZOME.base)
 
                     // For each color, Add a page with spiral faces
                     for (let i = 0; i < ZOME.num; i++) {
