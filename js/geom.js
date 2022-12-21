@@ -211,15 +211,15 @@ class PolygonRing {
         this.polygon = polygon
 
         // Compute angles and colors
-        this.angles = [];
-        this.colors = []; // list of colors
+        this.angles = new Array(num);
+        this.colors = new Array(num); // list of colors
 
         const slope = this.polygon.slope;
         const incr_rad = TAU / num;
         for (let i = 0; i < num; i++) {
             const a = i * incr_rad;
-            this.angles.push(a);
-            this.colors.push(angle2color(slope, a));
+            this.angles[i] = a;
+            this.colors[i] = angle2color(slope, a);
         }
     }
 }
