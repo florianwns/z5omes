@@ -245,10 +245,11 @@ class ConvexPolygon {
         this.num_points = this.points.length;
         this.perimeter = 0;
         this.area = 0;
-        this.angles = [];
-        this.faces = [];
-        this.edge_distances = [];
-        this.planar_points = [];
+        this.num_faces = 3 * (this.num_points - 2);
+        this.angles = new Array(this.num_points);
+        this.faces = new Array(this.num_faces);
+        this.edge_distances = new Array(this.num_points);
+        this.planar_points = new Array(this.num_points);
 
         // Make a reference to planar 3D points to 2D
         const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
@@ -260,6 +261,7 @@ class ConvexPolygon {
         let x, y, z, ab, bd, ob, od;
 
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
+        let iF = 0;
         _.forEach(this.points, (A, i) => {
             const C = this.points[(this.num_points + i - 1) % this.num_points];
             const B = this.points[(i + 1) % this.num_points];
@@ -273,7 +275,7 @@ class ConvexPolygon {
                 ],
                 ref_angle
             )
-            this.planar_points.push([x, y, z]);
+            this.planar_points[i] = [x, y, z];
 
             // Save Boundaries
             if (x < xMin) xMin = x;
@@ -282,21 +284,20 @@ class ConvexPolygon {
             if (y > yMax) yMax = y;
 
             // Compute angle
-            this.angles.push(angle(C, A, B));
+            this.angles[i] = angle(C, A, B);
 
             // Compute edges distances, and perimeter
             ab = dist(A, B)
-            this.edge_distances.push(ab);
+            this.edge_distances[i] = ab;
             this.perimeter += ab;
 
             // Compute triangles
-            if (i < this.num_points - 2) {
+            iF = i * 3;
+            if (iF < this.num_faces) {
                 // Faces for 3D from △ O, B, D
-                this.faces.push(
-                    new THREE.Vector3(...O),
-                    new THREE.Vector3(...B),
-                    new THREE.Vector3(...D)
-                );
+                this.faces[iF] = new THREE.Vector3(...O)
+                this.faces[iF + 1] = new THREE.Vector3(...B)
+                this.faces[iF + 2] = new THREE.Vector3(...D)
 
                 // Heron formula to compute area of the triangle
                 ob = dist(O, B);
