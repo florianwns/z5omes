@@ -86,7 +86,7 @@
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Height ratio">
                         HR
                     </span>
-                    <input class="form-control form-range" max="1" min="0" step="0.000001" type="range"
+                    <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
                            :min="toDecimal(2 / num, FLOAT_PRECISION)"
                            x-model.number="height_ratio" x-ref="height_ratio_slider">
                     <input class="form-control" step="0.01" type="number"
@@ -1411,6 +1411,7 @@
                     ]
                     const M = N - 1
                     const incr_rad = TAU / N;
+                    const is_partial = !(height_ratio == 1 && K == 1);
                     const cos_theta = Math.cos(deg2rad(theta_deg))
                     const sin_theta = Math.sin(deg2rad(theta_deg))
 
@@ -1561,8 +1562,8 @@
                                 this.add_face([iA, iB, iC], rgb);
                             }
 
-                            // Don't push base vertices if zome is entire
-                            if (!(height_ratio == 1 && K == 1)) {
+                            // Push base vertices only if zome is partial
+                            if (is_partial) {
                                 base_vertices.push(iB);
                                 if (lastIsTruncated && far_enough) {
                                     base_vertices.push(iC);
@@ -1573,7 +1574,7 @@
 
                     // Finally add the base piece
                     let base = null;
-                    if (base_vertices.length >= 3 && base_vertices.length) {
+                    if (base_vertices.length >= 3) {
                         piece = new ZomeBase(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
