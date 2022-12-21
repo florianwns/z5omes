@@ -1433,10 +1433,9 @@
                     }
 
                     // Loop over rings (M = N - 1), while zome does not hit ground
-                    let iR = 0, hit_ground = false;
+                    let hit_ground = false;
                     const triangles = [];
-
-                    for (; iR < M && !hit_ground; iR++) {     // ri => Ring index
+                    for (let iR = 0; iR < M && !hit_ground; iR++) {         // iR => Ring index
                         ficr = iR * N + 1;                      // First Index on current ring
                         fipr = ficr - N;                        // First index on previous ring
 
@@ -1463,7 +1462,7 @@
                                 // Add Shape to 3D
                                 iD = this.add_vertice(D);
 
-                                // Add only the first piece, because only color change for 2D
+                                // Add only the first piece, because only color after that
                                 if (iN == 0) {
                                     face = (is_rhombus) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
                                     body_rings.push(new PolygonRing(face, N));
