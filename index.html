@@ -253,6 +253,24 @@
                             </div>
 
                             <div class="input-group input-group-sm mt-2">
+                                <!-- Draw color -->
+                                <button class="btn btn-primary" type="button"
+                                        data-bs-toggle="tooltip"
+                                        title="Draw polygon color"
+                                        :class="draw_color ? '' : 'btn-secondary'"
+                                        @click="draw_color = !draw_color">
+                                    <i class="fa-regular fa-droplet fa-fw"></i>
+                                </button>
+
+                                <!-- Draw centroid -->
+                                <button class="btn btn-primary" type="button"
+                                        data-bs-toggle="tooltip"
+                                        title="Draw polygon centroid"
+                                        :class="draw_centroid ? '' : 'btn-secondary'"
+                                        @click="draw_centroid = !draw_centroid">
+                                    <i class="fa-regular fa-circle-dot fa-fw"></i>
+                                </button>
+
                                 <!-- Zoom Level -->
                                 <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
                                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -268,9 +286,7 @@
                                     <i class="fa-regular fa-grid-2-plus fa-fw"></i>
                                 </button>
                             </div>
-
                         </div>
-
                     </div>
                     <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
                          style="max-height: 96px;overflow-y: auto;">
@@ -450,6 +466,9 @@
 <script src="js/STLExporter.min.js"></script>
 <script src="js/PLYExporter.min.js"></script>
 <script src="js/GLTFExporter.min.js"></script>
+
+<!-- D3 -->
+<script src="js/d3-polygon.min.js"></script>
 
 <!-- Canvg -->
 <script src="js/canvg.min.js"></script>
@@ -696,6 +715,8 @@
                 zoom: 1,
                 num_col: 1,
                 kind_of_drawing: "mandala_faces",
+                draw_color: true,
+                draw_centroid: false,
 
                 // 2D Rendering Parameters
                 init() {
@@ -710,10 +731,11 @@
                         this.draw();
                     });
 
-                    this.$watch("zoom", () => {
-                        this.resize();
-                        this.draw();
-                    });
+                    _.forEach(["zoom", "draw_color", "draw_centroid"], key => this.$watch(key, () => {
+                            this.build_elements_per_page();
+                            this.draw();
+                        })
+                    );
 
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
 
@@ -839,11 +861,11 @@
                     // Save proxies
                     this.bulleted_list_colors = bulleted_list_colors;
 
-                    this.resize();
+                    this.build_elements_per_page();
                     this.page_index = 0;
                     this.draw();
                 },
-                resize() {
+                build_elements_per_page() {
                     // Compute the same pixel ratio for all pages
                     const maxWidth = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
                     const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
@@ -855,19 +877,33 @@
 
                     // Build pages polygons
                     svg_elements_per_page = new Array(pages.length);
+                    let iF, points;
                     _.forEach(pages, (page, iPa) => {
-                        const svg_elements = new Array(page.length + 1);
-                        _.forEach(page, (face, iF) => {
+                        const num_elements = this.draw_centroid ? page.length * 2 + 1 : page.length + 1;
+                        const svg_elements = new Array(num_elements);
+                        iF = 0;
+                        _.forEach(page, face => {
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
-                            el.setAttribute('points', face.planar_points.map(p => [
+                            points = face.planar_points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
-                            ]));
+                            ]);
+                            el.setAttribute('points', `${points}`);
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', face.color.hex);
+                            el.setAttribute('fill', this.draw_color ? face.color.hex : 'transparent');
                             svg_elements[iF] = el;
+                            iF++
+                            if (this.draw_centroid) {
+                                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                                const centroid = d3.polygonCentroid(points);
+                                c.setAttribute('cx', `${centroid[0]}`);
+                                c.setAttribute('cy', `${centroid[1]}`);
+                                c.setAttribute('r', `${pixel_ratio}`);
+                                svg_elements[iF] = c;
+                                iF++;
+                            }
                         });
 
                         // Add Text
@@ -878,7 +914,7 @@
                         el.setAttribute('font-family', "Verdana")
                         el.setAttribute('font-size', "6px")
                         el.innerHTML = `Page ${iPa + 1}/${pages.length}`;
-                        svg_elements[svg_elements.length - 1] = el;
+                        svg_elements[iF] = el;
 
                         // Add color of the first piece to bulleted list
                         svg_elements_per_page[iPa] = svg_elements;
@@ -1297,7 +1333,7 @@
                     this.__make_zome = _.debounce(this.make_zome, 1);
 
                     // Add shape parameter listeners
-                    _.forEach(["num", "theta_deg", "height_ratio", "kite_ratio"], (key) => this.$watch(key, (value) => {
+                    _.forEach(["num", "theta_deg", "height_ratio", "kite_ratio"], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
                         })
