@@ -1137,16 +1137,25 @@
 
                     // Build 3D Body Faces
                     {
-                        // Build geometry of first spiral
+                        // Pre-Compute geometry points, ring colors and num_faces
                         const points = [];
-                        _.forEach(ZOME.body_rings, ring => {
+                        const num_rings = ZOME.body_rings.length;
+                        const colors = new Array(num_rings);
+                        const num_faces = new Array(num_rings);
+                        const face_colors = new Array(num_rings);
+                        _.forEach(ZOME.body_rings, (ring, iR) => {
                             const polygon = ring.polygon;
                             points.push(...polygon.faces);
+                            colors[iR] = ring.colors;
+                            num_faces[iR] = polygon.num_faces;
                         });
 
+                        // Build geometry of first spiral
                         const geometry = new THREE.BufferGeometry();
                         geometry.setFromPoints(points)
+                        geometry.computeVertexNormals()
 
+                        // Compute All faces geometries and colors
                         for (let iN = 0; iN < ZOME.num; iN++) {
                             const rot_geometry = geometry.clone()
 
@@ -1155,17 +1164,11 @@
                             rot_geometry.rotateY(a);
 
                             // Get colors
-                            const face_colors = [];
-                            _.forEach(ZOME.body_rings, ring => {
-                                const rgb = ring.colors[iN].rgb;
-                                _.forEach(points, () => {
-                                    face_colors.push(...rgb);
-                                });
-                            });
+                            for (let iR = 0; iR < num_rings; iR++) {
+                                face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
+                            }
 
-                            rot_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                            rot_geometry.computeVertexNormals()
-
+                            rot_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
                             meshes.zome.add(new THREE.Mesh(rot_geometry, material))
                         }
                     }
