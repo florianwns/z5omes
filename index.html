@@ -318,7 +318,7 @@
                                     from top to bottom.
                                 </li>
                                 <li>
-                                    <b>Θ</b> : First vertical angle of zome, related to the slope of the edges.
+                                    <b>Θ</b> : Angle of shape which allows to calculate the slope of the first face at the top of zome. <br>
                                     <span class="text-muted">F = tan(Θ) </span>
                                 </li>
                             </ul>
@@ -329,7 +329,7 @@
                                     <br><span class="text-muted">💡 Set HR to 1 for an entire zome.</span>
                                 </li>
                                 <li>
-                                    <b>KR</b> : The Kite ratio. Change rhombus faces to kite faces.
+                                    <b>KR</b> : The kite ratio is the proportion between the length of the edges of the upper triangle and that of the lower triangle which make up the rhombus.
                                     <br><span class="text-muted">💡 Set KR to 1 for rhombus faces.</span>
                                 </li>
                             </ul>
@@ -1319,7 +1319,7 @@
             return {
                 // Shape Parameters
                 num: 7,                     // number of faces (kites or diamonds)
-                theta_deg: 50,              // In degrees, vertical angle of top struts
+                theta_deg: 50,              // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
                 angle_unit: "deg",          // Degrees or Radians
                 height_ratio: 0.7142857,         // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
                 kite_ratio: 1,                   // Kite ratio, lower half to upper half (1 => is rhombus else kites)
