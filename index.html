@@ -63,9 +63,8 @@
                 <!--  Shape angle of Zome -->
                 <div class="input-group input-group-sm mb-3">
                     <button class="btn btn-primary text-start" type="button"
-                            data-bs-toggle="tooltip"
+                            data-bs-toggle="tooltip" title="Shape angle(Θ) | number(F) : F = tan(Θ)"
                             @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
-                            :title="(angle_unit == 'tan') ? 'Shape number : F = tan(Θ)' : 'Shape angle : Θ = atan(F)'"
                             x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
                     </button>
                     </span>
@@ -319,7 +318,7 @@
                                     from top to bottom.
                                 </li>
                                 <li>
-                                    <b>Θ</b> : Angle of shape which allows to calculate the slope of the first face at the top of zome. <br>
+                                    <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first ring at the top of zome. <br>
                                     <span class="text-muted">F = tan(Θ) </span>
                                 </li>
                             </ul>
