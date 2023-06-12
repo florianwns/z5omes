@@ -63,8 +63,9 @@
                 <!--  Shape angle of Zome -->
                 <div class="input-group input-group-sm mb-3">
                     <button class="btn btn-primary text-start" type="button"
-                            data-bs-toggle="tooltip" title="Shape angle"
+                            data-bs-toggle="tooltip"
                             @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
+                            x-title="(angle_unit == 'tan') ? 'Shape number : F = tan(Θ)' : 'Shape angle : Θ = atan(F)'"
                             x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
                     </button>
                     </span>
