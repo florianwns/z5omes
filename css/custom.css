@@ -100,3 +100,7 @@
 .accordion-body li {
     margin-bottom: 12px;
 }
+
+.offcanvas-backdrop.show {
+    opacity: 0.1 !important;
+}
