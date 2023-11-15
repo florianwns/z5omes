@@ -420,7 +420,23 @@
         </div>
 
         <div class="row justify-content-between">
-            <div class="col-md-6 col-xl-5 mt-2 mt-md-5" x-show.important="has_base">
+            <div class="col-md-6 col-xl-5 mt-2">
+                <ul class="list-group small">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Body Num Faces
+                        <span class="badge bg-info rounded-pill" x-text="body_num_faces"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Body Widest Ø
+                        <span class="badge bg-info rounded-pill" x-text="body_widest_diameter"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Body Area
+                        <span class="badge bg-info rounded-pill" x-text="body_area"></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Base Perimeter
@@ -537,8 +553,6 @@
             return {
                 body_faces: [],
                 base: null,
-                height: 100,                // Height
-                length_unit: "mm",          // Length unit by default is mm
 
                 __to_real_world: null,
                 async init() {
@@ -674,19 +688,11 @@
 
                     // Compute height ratio then convert dimensions to real world
                     const num_rings = body_rings.length;
-                    const yMax = body_rings[0].polygon.points[0][1];
-                    const yMin = body_rings[num_rings - 1].polygon.points[1][1];
-                    const real_size_ratio = to_mm(this.height / (yMax - yMin), this.length_unit);
 
                     // Resize Body faces
                     const body_faces = new Array(body_rings.length);
                     _.forEach(body_rings, (ring, iR) => {
                         const face = ring.polygon;
-                        face.points = face.points.map(p => [
-                            p[0] * real_size_ratio,
-                            p[1] * real_size_ratio - yMin,
-                            p[2] * real_size_ratio
-                        ]);
                         face.compute();
 
                         // Compute σ, the Dihedral angle only for the Zome body with at least 2 faces
@@ -704,16 +710,6 @@
                         }
                         body_faces[iR] = face;
                     });
-
-                    // Resize base
-                    if (base !== null) {
-                        base.points = base.points.map(p => [
-                            p[0] * real_size_ratio,
-                            p[1] * real_size_ratio - yMin,
-                            p[2] * real_size_ratio
-                        ]);
-                        base.compute();
-                    }
 
                     // Refresh proxy
                     this.base = base;

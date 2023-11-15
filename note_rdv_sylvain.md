@@ -26,5 +26,5 @@ Goodkarma seulement pour le moment
 0. Rajouter les réglages de dimensionnement (DONE)
 1. Export modèle à l'échelle (DONE)
    
-2. Dessiner les montants
+2. Dessiner les montants 
 3. Et enfin dessiner les côtes (mode acidome) de chaque montants
