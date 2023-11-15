@@ -96,6 +96,42 @@ function reprDistance(d) {
     }
 };
 
+
+function humanize_distance(d) {
+    // d unit is meter
+    if (isNaN(d)) {
+        return "";
+    }
+    // Distance are in milimeters
+    if (d >= 1e6) {
+        return toDecimal(d / 1e6) + "km";
+    } else if (d >= 1e3) {
+        return toDecimal(d / 1e3) + "m";
+    } else if (d >= 10) {
+        return toDecimal(d / 10) + "cm";
+    } else {
+        return toDecimal(d) + "mm";
+    }
+};
+
+
+function humanize_area(d) {
+    if (isNaN(d)) {
+        return "";
+    }
+
+    // Area are in mm²
+    if (d >= 1e12) {
+        return toDecimal(d / 1e12) + "km²";
+    } else if (d >= 1e6) {
+        return toDecimal(d / 1e6) + "m²";
+    } else if (d >= 100) {
+        return toDecimal(d / 100) + "cm²";
+    } else {
+        return toDecimal(d) + "mm²";
+    }
+};
+
 function to_mm(v, unit) {
     switch (unit) {
         case "m":
@@ -116,6 +152,31 @@ function from_mm(v, unit) {
         case "cm":
             return v / 10;
         case "mm":
+        default:
+            return v;
+    }
+}
+
+function to_meters(v, unit) {
+    switch (unit) {
+        case "mm":
+            return v / 1000;
+        case "cm":
+            return v / 100;
+        case "m":
+        default:
+            return v;
+    }
+}
+
+
+function from_meters(v, unit) {
+    switch (unit) {
+        case "mm":
+            return v * 1000;
+        case "cm":
+            return v * 100;
+        case "m":
         default:
             return v;
     }

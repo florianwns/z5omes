@@ -15,7 +15,8 @@
 <body class="bg-light">
 
 <div x-data="settings" @zome-renderer-is-ready.window="__make_zome"
-     class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSettings" aria-labelledby="settingsLabel">
+     class="offcanvas offcanvas-start" tabindex="-1" data-bs-scroll="true"
+     id="offcanvasSettings" aria-labelledby="settingsLabel">
     <div class="offcanvas-body">
         <div class="d-flex align-items-center mb-3">
             <h5 class="text-secondary my-1 me-3">
@@ -147,8 +148,8 @@
 
             <select class="form-select form-select-sm unit-select"
                     aria-label="Length unit" x-model="length_unit">
-                <option selected value="mm">mm</option>
-                <option value="cm">cm</option>
+                <option value="mm">mm</option>
+                <option selected value="cm">cm</option>
                 <option value="m">m</option>
             </select>
         </div>
@@ -160,7 +161,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
-                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                <input class="form-control form-range" min="100" max="10000" step="10" type="range"
                        x-model.number="zome_height_in_mm" x-ref="zome_height_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="zome_height">
@@ -172,7 +173,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
-                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
                        x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_width">
@@ -184,7 +185,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
-                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
                        x-model.number="timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_thickness">
@@ -557,13 +558,6 @@
                 __to_real_world: null,
                 async init() {
                     this.__to_real_world = _.debounce(this.to_real_world, 1);
-
-                    this.$watch("height", (value) => {
-                        this.clamp("height", value);
-                        this.__to_real_world();
-                    });
-
-                    this.$watch("length_unit", () => this.__to_real_world());
                 },
                 get faces() {
                     return this.has_base ? [...this.body_faces, this.base] : this.body_faces;
@@ -573,26 +567,26 @@
                 },
                 get body_widest_diameter() {
                     const value = _.reduce(this.body_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
-                    return reprDistance(value);
+                    return humanize_distance(value);
                 },
                 get body_area() {
                     const value = _.reduce(this.body_faces, (res, p) => res + p.area * ZOME.num, 0);
-                    return reprArea(value);
+                    return humanize_area(value);
                 },
                 get body_num_faces() {
                     return ZOME.num * this.body_faces.length;
                 },
                 get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
-                    return reprDistance(value);
+                    return humanize_distance(value);
                 },
                 get base_area() {
                     const value = this.base ? this.base.area : 0
-                    return reprArea(value);
+                    return humanize_area(value);
                 },
                 get base_perimeter() {
                     const value = this.base ? this.base.perimeter : 0
-                    return reprDistance(value);
+                    return humanize_distance(value);
                 },
                 format(key, value) {
                     return toDecimal(value, 2);
@@ -652,14 +646,14 @@
                     _.forEach(this.faces, (face, i) => {
                         rows[i] = [face, [
                             i + 1,
-                            reprDistance(face.width),
-                            reprDistance(face.height),
-                            reprArr(uniqueArr(_.map(face.edge_distances, v => reprDistance(v)))),
+                            humanize_distance(face.width),
+                            humanize_distance(face.height),
+                            reprArr(uniqueArr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             reprArr(uniqueArr(_.map(face.angles, a => reprAngle(rad2deg(a))))),
                             reprAngle(rad2deg(face.slope)),
                             reprAngle(rad2deg(face.σ)),
-                            reprArea(face.area),
-                            reprDistance(face.diameter),
+                            humanize_area(face.area),
+                            humanize_distance(face.diameter),
                         ]];
                     });
                     return rows;
@@ -1344,10 +1338,10 @@
                 suggested_height_ratio: null,    // Value to magnetize the zome to the nearest cut
 
                 // Sizing Parameters
-                length_unit: "mm",                      // Length unit by default is mm
-                zome_height_in_mm: WORLD_HEIGHT,       // Height in mm
-                timber_width_in_mm: 10,                // Timber width in mm
-                timber_thickness_in_mm: 5,              // Timber thickness in mm
+                length_unit: "cm",                                  // Length unit by default is cm
+                zome_height_in_mm: WORLD_HEIGHT,                     // Height in mm
+                timber_width_in_mm: WORLD_HEIGHT / 10,               // Timber width in mm
+                timber_thickness_in_mm: WORLD_HEIGHT / 10,           // Timber thickness in mm
 
                 // Commons parameters
                 help_is_displayed: false,

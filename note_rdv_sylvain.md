@@ -25,11 +25,7 @@ Goodkarma seulement pour le moment
 
 0. Rajouter les réglages de dimensionnement (DONE)
 1. Export modèle à l'échelle (DONE)
-   
 2. Dessiner les montants 
 3. Et enfin dessiner les côtes (mode acidome) de chaque montants
+4. Mandala : export en 3D : .obj
 
-
-Unité de sketchup : metre
-Mandala : export en 3D : .obj
-Panneau bouge à gauche et la page reste Scrollable
