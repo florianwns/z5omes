@@ -23,7 +23,8 @@ Goodkarma seulement pour le moment
 
 ## A faire
 
-0. Rajouter les réglages de dimensionnement (en cours)
-1. Export modèle à l'échelle (vs 100 mm)
+0. Rajouter les réglages de dimensionnement (DONE)
+1. Export modèle à l'échelle (DONE)
+   
 2. Dessiner les montants
 3. Et enfin dessiner les côtes (mode acidome) de chaque montants
