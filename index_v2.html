@@ -178,16 +178,16 @@
                        x-model.lazy.number="timber_width">
             </div>
 
-            <!-- Timber tickness -->
+            <!-- Timber thickness -->
             <div x-show="help_is_displayed">
-                <b>TT</b> : Timber tickness
+                <b>TT</b> : Timber thickness
             </div>
             <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Timber tickness">TT</span>
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
                 <input class="form-control form-range" min="1" max="9999" step="1" type="range"
-                       x-model.number="timber_tickness_in_mm" x-ref="timber_tickness_in_mm_slider">
+                       x-model.number="timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                 <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="timber_tickness">
+                       x-model.lazy.number="timber_thickness">
             </div>
         </div>
     </div>
@@ -1347,7 +1347,7 @@
                 length_unit: "mm",                      // Length unit by default is mm
                 zome_height_in_mm: WORLD_HEIGHT,       // Height in mm
                 timber_width_in_mm: 10,                // Timber width in mm
-                timber_tickness_in_mm: 5,              // Timber tickness in mm
+                timber_thickness_in_mm: 5,              // Timber thickness in mm
 
                 // Commons parameters
                 help_is_displayed: false,
@@ -1363,7 +1363,7 @@
                     // Add shape parameter listeners
                     _.forEach([
                             "num", "theta_deg", "height_ratio", "kite_ratio",
-                            "zome_height_in_mm", "timber_width_in_mm", "timber_tickness_in_mm"
+                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm"
                         ], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
@@ -1427,11 +1427,11 @@
                 set timber_width(value) {
                     this.clamp("timber_width_in_mm", to_mm(value, this.length_unit));
                 },
-                get timber_tickness() {
-                    return from_mm(this.timber_tickness_in_mm, this.length_unit);
+                get timber_thickness() {
+                    return from_mm(this.timber_thickness_in_mm, this.length_unit);
                 },
-                set timber_tickness(value) {
-                    this.clamp("timber_tickness_in_mm", to_mm(value, this.length_unit));
+                set timber_thickness(value) {
+                    this.clamp("timber_thickness_in_mm", to_mm(value, this.length_unit));
                 },
                 magnetize() {
                     if (this.suggested_height_ratio && this.suggested_height_ratio != this.height_ratio) {
