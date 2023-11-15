@@ -28,3 +28,8 @@ Goodkarma seulement pour le moment
    
 2. Dessiner les montants 
 3. Et enfin dessiner les côtes (mode acidome) de chaque montants
+
+
+Unité de sketchup : metre
+Mandala : export en 3D : .obj
+Panneau bouge à gauche et la page reste Scrollable
