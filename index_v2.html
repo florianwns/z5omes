@@ -161,8 +161,8 @@
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
                 <input class="form-control form-range" min="1" max="9999" step="1" type="range"
-                       x-model.number="zome_height" x-ref="zome_height_slider">
-                <input class="form-control" step="0.01" type="number"
+                       x-model.number="zome_height_in_mm" x-ref="zome_height_in_mm_slider">
+                <input class="form-control" step="1" type="number"
                        x-model.lazy.number="zome_height">
             </div>
 
@@ -173,8 +173,8 @@
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
                 <input class="form-control form-range" min="1" max="9999" step="1" type="range"
-                       x-model.number="timber_width" x-ref="timber_width_slider">
-                <input class="form-control" step="0.01" type="number"
+                       x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
+                <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_width">
             </div>
 
@@ -185,8 +185,8 @@
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber tickness">TT</span>
                 <input class="form-control form-range" min="1" max="9999" step="1" type="range"
-                       x-model.number="timber_tickness" x-ref="timber_tickness_slider">
-                <input class="form-control" step="0.01" type="number"
+                       x-model.number="timber_tickness_in_mm" x-ref="timber_tickness_in_mm_slider">
+                <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_tickness">
             </div>
         </div>
@@ -420,37 +420,6 @@
         </div>
 
         <div class="row justify-content-between">
-            <div class="col-md-6 col-xl-5">
-                <!-- Height of Zome -->
-                <div class="aligned-form">
-                    <div class="input-group input-group-sm mb-3">
-                        <span class="input-group-text" data-bs-toggle="tooltip" title="Height of zome">Height</span>
-                        <input class="form-control form-range" min="1" max="9999" step="1" type="range"
-                               x-model.number="height" x-ref="height_slider">
-                        <input class="form-control" step="0.01" type="number"
-                               x-model.lazy.number="height">
-                        <select class="form-select" aria-label="Length unit" x-model="length_unit">
-                            <option selected value="mm">mm</option>
-                            <option value="cm">cm</option>
-                            <option value="m">m</option>
-                        </select>
-                    </div>
-                </div>
-                <ul class="list-group small">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Num Faces
-                        <span class="badge bg-info rounded-pill" x-text="body_num_faces"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Widest Ø
-                        <span class="badge bg-info rounded-pill" x-text="body_widest_diameter"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Area
-                        <span class="badge bg-info rounded-pill" x-text="body_area"></span>
-                    </li>
-                </ul>
-            </div>
             <div class="col-md-6 col-xl-5 mt-2 mt-md-5" x-show.important="has_base">
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -539,7 +508,7 @@
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
-    const WORLD_HEIGHT = 100;       // or 3D HEIGHT OF ZOME
+    const WORLD_HEIGHT = 2500;       // or 3D HEIGHT OF ZOME in mm
     const FLOAT_PRECISION = 7;
 
     // Use a global variable to store ZOME data
@@ -1160,6 +1129,7 @@
                     // Add (x, y, z) Axis
                     meshes.axis = new THREE.AxesHelper(WORLD_HEIGHT);
                     meshes.axis.visible = this.draw_axis;
+
                     scene.add(meshes.axis);
 
                     this.reset();
@@ -1378,10 +1348,10 @@
                 suggested_height_ratio: null,    // Value to magnetize the zome to the nearest cut
 
                 // Sizing Parameters
-                length_unit: "mm",               // Length unit by default is mm
-                zome_height: 100,                // Height in mm
-                timber_width: 10,                // Timber width in mm
-                timber_tickness: 5,              // Timber tickness in mm
+                length_unit: "mm",                      // Length unit by default is mm
+                zome_height_in_mm: WORLD_HEIGHT,       // Height in mm
+                timber_width_in_mm: 10,                // Timber width in mm
+                timber_tickness_in_mm: 5,              // Timber tickness in mm
 
                 // Commons parameters
                 help_is_displayed: false,
@@ -1397,13 +1367,12 @@
                     // Add shape parameter listeners
                     _.forEach([
                             "num", "theta_deg", "height_ratio", "kite_ratio",
-                            "length_unit", "zome_height", "timber_width", "timber_tickness"
+                            "zome_height_in_mm", "timber_width_in_mm", "timber_tickness_in_mm"
                         ], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
                         })
                     );
-
 
                     // Refresh the height_ratio if you change the zome num
                     this.$watch("num", (value) => {
@@ -1434,6 +1403,7 @@
                             this.theta_deg = angle;
                     }
                 },
+
                 get num_rhombus() {
                     return toDecimal(this.num * this.height_ratio - 1, 0);
                 },
@@ -1448,6 +1418,24 @@
                     if (value === true) {
                         this.kite_ratio = 1
                     }
+                },
+                get zome_height() {
+                    return from_mm(this.zome_height_in_mm, this.length_unit);
+                },
+                set zome_height(value) {
+                    this.clamp("zome_height_in_mm", to_mm(value, this.length_unit));
+                },
+                get timber_width() {
+                    return from_mm(this.timber_width_in_mm, this.length_unit);
+                },
+                set timber_width(value) {
+                    this.clamp("timber_width_in_mm", to_mm(value, this.length_unit));
+                },
+                get timber_tickness() {
+                    return from_mm(this.timber_tickness_in_mm, this.length_unit);
+                },
+                set timber_tickness(value) {
+                    this.clamp("timber_tickness_in_mm", to_mm(value, this.length_unit));
                 },
                 magnetize() {
                     if (this.suggested_height_ratio && this.suggested_height_ratio != this.height_ratio) {
@@ -1500,7 +1488,7 @@
                         this.height_ratio,
                         this.kite_ratio,
                         this.is_rhombus,
-                        to_mm(this.zome_height, this.length_unit)
+                        this.zome_height_in_mm,
                     ]
                     const M = N - 1;
                     const THETA_RAD = deg2rad(THETA_DEG);

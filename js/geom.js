@@ -108,6 +108,19 @@ function to_mm(v, unit) {
     }
 }
 
+
+function from_mm(v, unit) {
+    switch (unit) {
+        case "m":
+            return v / 1000;
+        case "cm":
+            return v / 10;
+        case "mm":
+        default:
+            return v;
+    }
+}
+
 function reprArea(d) {
     // d unit is in mm²
     if (isNaN(d)) {
@@ -240,6 +253,17 @@ class ConvexPolygon {
         this.color = angle2color(this.slope);
     }
 
+    get O() {
+        return this.points[0];
+    }
+
+    get slope() {
+        return 0;
+    }
+
+    get diameter() {
+        return 2 * dist(this.O, [0, this.O[1], 0]);
+    }
 
     compute() {
         this.num_points = this.points.length;
@@ -311,18 +335,6 @@ class ConvexPolygon {
         // Compute width and height from 2D boundaries
         this.width = Math.abs(xMax - xMin);
         this.height = Math.abs(yMax - yMin);
-    }
-
-    get O() {
-        return this.points[0];
-    }
-
-    get slope() {
-        return 0;
-    }
-
-    get diameter() {
-        return 2 * dist(this.O, [0, this.O[1], 0]);
     }
 }
 
