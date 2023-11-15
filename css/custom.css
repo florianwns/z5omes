@@ -85,7 +85,7 @@
     line-height: 1px;
 }
 
-.input-group .form-select {
+.unit-select, .input-group .form-select {
     max-width: 70px;
     padding-right: 1rem;
 }
@@ -99,4 +99,8 @@
 
 .accordion-body li {
     margin-bottom: 12px;
+}
+
+.offcanvas-backdrop.show {
+    opacity: 0.1 !important;
 }

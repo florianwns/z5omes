@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Z5omes | A Zome Maker</title>
+
+    <!-- Stylesheets -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/fa.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div x-data="settings" @zome-renderer-is-ready.window="__make_zome"
+     class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSettings" aria-labelledby="settingsLabel">
+    <div class="offcanvas-body">
+        <div class="d-flex align-items-center mb-3">
+            <h5 class="text-secondary my-1 me-3">
+                <i class="fa-solid fa-rhombus me-1"></i>
+                Shape
+            </h5>
+
+            <!-- Randomize Button -->
+            <button @click="randomize" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
+                    title="Randomize settings">
+                <i class="fa-solid fa-dice fa-fw"></i>
+            </button>
+
+            <!-- Show Help -->
+            <button class="btn btn-sm p-1"
+                    @click="help_is_displayed = !help_is_displayed"
+                    :class="help_is_displayed ? 'text-primary' : 'text-secondary'"
+                    data-bs-toggle="tooltip" title="Display help">
+                <i class="fa-solid fa-question-circle fa-fw"></i>
+            </button>
+
+            <!-- Close Button -->
+            <button type="button" class="btn btn-sm p-1"
+                    data-bs-dismiss="offcanvas"
+                    data-bs-toggle="tooltip" title="Close">
+                <i class="fa-solid fa-close fa-fw"></i>
+            </button>
+        </div>
+
+        <div class="text-muted small aligned-form">
+            <div x-show="help_is_displayed">
+                <p>The shape of a <a href="https://en.wikipedia.org/wiki/Zome">zome</a> is determined by :</p>
+
+                <!-- Num of Order -->
+                <b>N</b> : Number of edges starting from the top of zome
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Num of order">N</span>
+                <input class="form-control form-range" max="21" min="3" step="1" type="range"
+                       x-model.number="num" x-ref="num_slider">
+                <input class="form-control" step="1" type="number"
+                       x-model.lazy.number="num">
+            </div>
+
+            <!-- Num of rhombus from the top -->
+            <div x-show="help_is_displayed"><b>M</b> : Number of <a
+                    href="https://en.wikipedia.org/wiki/Rhombus">rhombus</a> from top to bottom
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
+                <input class="form-control form-range" min="1" max="20" :max="num - 1" step="1" type="range"
+                       x-model.number="num_rhombus" x-ref="num_rhombus_slider">
+                <input class="form-control" step="1" type="number"
+                       x-model.lazy.number="num_rhombus">
+            </div>
+
+            <!--  Shape angle of Zome -->
+            <div x-show="help_is_displayed">
+                <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first ring of zome. F =
+                tan(Θ)<br>
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <button class="btn btn-primary text-start" type="button"
+                        data-bs-toggle="tooltip" title="Shape angle(Θ) | number(F) : F = tan(Θ)"
+                        @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
+                        x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
+                </button>
+                </span>
+                <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
+                       x-model.number="theta_deg" x-ref="theta_deg_slider">
+                <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
+                <select class="form-select" aria-label="Angle unit"
+                        x-show="angle_unit != 'tan'" x-model="angle_unit">
+                    <option selected value="deg">deg</option>
+                    <option value="rad">rad</option>
+                    <option hidden value="tan">tan</option>
+                </select>
+            </div>
+
+            <!-- Height Ratio of Zome -->
+            <div x-show="help_is_displayed">
+                <b>HR</b> : The height ratio (Set HR to 1 for an entire zome)
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Height ratio">
+                    HR
+                </span>
+                <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
+                       :min="toDecimal(2 / num, FLOAT_PRECISION)"
+                       x-model.number="height_ratio" x-ref="height_ratio_slider">
+                <input class="form-control" step="0.01" type="number"
+                       x-model.lazy.number="height_ratio">
+                <button class="btn btn-primary" data-bs-toggle="tooltip" title="Magnetize" type="button"
+                        :class="(height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
+                        @click="magnetize">
+                    <i class="fa-solid fa-magnet fa-fw"></i>
+                </button>
+            </div>
+
+            <!-- Kite Ratio of Zome -->
+            <div x-show="help_is_displayed">
+                <b>KR</b> : The kite ratio is the proportion between the length of the edges of the upper triangle
+                and that of the lower triangle of the rhombus
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Kite ratio">
+                    KR
+                </span>
+                <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
+                       x-model.number="kite_ratio" x-ref="kite_ratio_slider">
+                <input class="form-control" step="0.01" type="number"
+                       x-model.lazy.number="kite_ratio">
+                <button class="btn btn-primary"
+                        data-bs-toggle="tooltip" title="Set rhombus" type="button"
+                        :class="(is_rhombus) ? 'btn-secondary' : ''"
+                        @click="is_rhombus = true">
+                    <i class="fa-solid fa-rhombus fa-fw"></i>
+                </button>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="d-flex align-items-center mb-3">
+            <h5 class="text-secondary my-1 me-auto">
+                <i class="fa-solid fa-ruler-triangle me-1"></i>
+                Sizing
+            </h5>
+
+            <select class="form-select form-select-sm unit-select"
+                    aria-label="Length unit" x-model="length_unit">
+                <option selected value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+            </select>
+        </div>
+
+        <div class="text-muted small aligned-form">
+            <!-- Height of Zome -->
+            <div x-show="help_is_displayed">
+                <b>ZH</b> : Zome height
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
+                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                       x-model.number="zome_height_in_mm" x-ref="zome_height_in_mm_slider">
+                <input class="form-control" step="1" type="number"
+                       x-model.lazy.number="zome_height">
+            </div>
+
+            <!-- Timber width -->
+            <div x-show="help_is_displayed">
+                <b>TW</b> : Timber width
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
+                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                       x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
+                <input class="form-control" step="1" type="number"
+                       x-model.lazy.number="timber_width">
+            </div>
+
+            <!-- Timber tickness -->
+            <div x-show="help_is_displayed">
+                <b>TT</b> : Timber tickness
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Timber tickness">TT</span>
+                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                       x-model.number="timber_tickness_in_mm" x-ref="timber_tickness_in_mm_slider">
+                <input class="form-control" step="1" type="number"
+                       x-model.lazy.number="timber_tickness">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-xl row m-auto">
+    <div class="col mb-3 mt-3">
+        <div class="d-flex align-items-center">
+            <h2 id="#title" class="text-primary me-auto mb-0">
+                <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
+                Z<span class="fs-4">o</span>oOo<span
+                    class="fs-4">o</span>mes v2
+            </h2>
+
+            <a href="https://github.com/florianwns/z5omes"
+               class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip" title="Go to Github">
+                <i class="fa-brands fa-github"></i>
+            </a>
+
+            <button class="btn btn-primary" type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
+                <i class="fa-solid fa-cog"></i>
+            </button>
+
+        </div>
+
+        <div class="d-flex flex-column">
+            <nav class="navbar mx-auto mt-2">
+                <ul class="nav nav-pills" id="nav-tab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab" data-bs-target="#nav-3D"
+                                type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
+                            <i class="fa-solid fa-chart-pyramid me-1"></i>
+                            3D View
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab" data-bs-target="#nav-print"
+                                type="button" role="tab" aria-controls="nav-print" aria-selected="false">
+                            <i class="fa-solid fa-print me-1"></i>
+                            Print
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+            <div class="tab-content h-100 mt-3">
+                <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
+                     tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
+                     @zome-is-made.window="process">
+                    <div class="d-flex justify-content-center">
+                        <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
+                            <!-- Export to -->
+                            <div class="ps-2 exports-container" style="top:0px;">
+                                <div class="vstack">
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to STL format"
+                                          @click="download_stl()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">STL</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to PLY format"
+                                          @click="download_ply()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">PLY</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to GLTF format"
+                                          @click="download_gltf()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">GLTF</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to OBJ format"
+                                          @click="download_obj()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">OBJ</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Canvas for Zome 3D rendering -->
+                            <div x-ref="canvas" style="height:500px; cursor: move;"
+                                 class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
+
+                            <div class="d-flex flex-wrap justify-content-evenly">
+                                <!-- Draw Axis -->
+                                <div class="form-check form-switch me-2 mb-3">
+                                    <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="draw-axis-switch" x-model="draw_axis">
+                                </div>
+
+                                <!-- Spin -->
+                                <div class="form-check form-switch mb-3">
+                                    <label class="form-check-label" for="spin-switch">Spin</label>
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="spin-switch" x-model="is_spinning">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
+                     tabindex="0"
+                     x-data="renderer_a4" @zome-is-made.window="process">
+                    <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
+                        <div class="position-relative">
+                            <!-- Export to -->
+                            <div class="ps-2 exports-container" style="top:48px;">
+                                <div class="vstack">
+                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to SVG format"
+                                          @click="download_svg()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">SVG</span>
+                                    </span>
+                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                          data-bs-toggle="tooltip" title="Export to PDF format"
+                                          @click="download_pdf()">
+                                        <i class="fa-solid fa-file"></i>
+                                        <span class="fa-icon-file-type">PDF</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
+                                    <option selected value="mandala_faces">Mandala Origami</option>
+                                    <option value="spiral_faces">Spiral Origami</option>
+                                    <option value="faces">Faces</option>
+                                </select>
+
+                            </div>
+
+                            <div class="ratio ratio-A4 bg-white rounded border position-relative">
+                                <!-- Svg Drawing -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                                     viewbox="0 0 210 297" x-ref="A4_sheet">
+                                </svg>
+
+                                <!-- Grid Drawing -->
+                                <div class="position-absolute top-0 start-0" x-show="num_col > 1">
+                                    <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
+                                        <div class="float-start border border-top-0 border-start-0"
+                                             :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
+                                             + ((i >= num_col * (num_col - 1)) ? ' border-bottom-0' : '')"
+                                             :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="input-group input-group-sm mt-2">
+                                <!-- Draw color -->
+                                <button class="btn btn-primary" type="button"
+                                        data-bs-toggle="tooltip"
+                                        title="Draw polygon color"
+                                        :class="draw_color ? '' : 'btn-secondary'"
+                                        @click="draw_color = !draw_color">
+                                    <i class="fa-regular fa-droplet fa-fw"></i>
+                                </button>
+
+                                <!-- Draw centroid -->
+                                <button class="btn btn-primary" type="button"
+                                        data-bs-toggle="tooltip"
+                                        title="Draw polygon centroid"
+                                        :class="draw_centroid ? '' : 'btn-secondary'"
+                                        @click="draw_centroid = !draw_centroid">
+                                    <i class="fa-regular fa-circle-dot fa-fw"></i>
+                                </button>
+
+                                <!-- Zoom Level -->
+                                <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </span>
+                                <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
+                                       x-model.number="zoom" x-ref="zoom_slider">
+
+                                <!-- Num Col of Grid -->
+                                <button class="btn btn-primary" type="button"
+                                        data-bs-toggle="tooltip"
+                                        title="Split the drawing into multiple A4 sheets for export to PDF"
+                                        @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
+                                    <i class="fa-regular fa-grid-2-plus fa-fw"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
+                         style="max-height: 96px;overflow-y: auto;">
+                        <template x-for="(color, i) in bulleted_list_colors" :key="i">
+                            <div class="px-1" @click="page_index = i">
+                                <div class="bulleted_list_item"
+                                     :class="(page_index == i)? 'active' : ''"
+                                     :style="`background-color: ${color};`"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
+        <hr>
+
+        <div class="d-flex align-items-center">
+            <h5 class="text-secondary mt-4 mb-4 me-auto">
+                <i class="fa-solid fa-ruler-triangle me-1"></i>
+                Measurements
+            </h5>
+            <!-- CSV Button -->
+            <div>
+                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                      title="Export to TSV format"
+                      @click="download_tsv()">
+                    <i class="fa-solid fa-file"></i>
+                    <span class="fa-icon-file-type">TSV</span>
+                </span>
+            </div>
+            <div>
+                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                      title="Export to CSV format"
+                      @click="download_csv()">
+                    <i class="fa-solid fa-file"></i>
+                    <span class="fa-icon-file-type">CSV</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="row justify-content-between">
+            <div class="col-md-6 col-xl-5 mt-2">
+                <ul class="list-group small">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Body Num Faces
+                        <span class="badge bg-info rounded-pill" x-text="body_num_faces"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Body Widest Ø
+                        <span class="badge bg-info rounded-pill" x-text="body_widest_diameter"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Body Area
+                        <span class="badge bg-info rounded-pill" x-text="body_area"></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
+                <ul class="list-group small">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Base Perimeter
+                        <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Base Ø
+                        <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Base Area
+                        <span class="badge bg-info rounded-pill" x-text="base_area"></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-12 mt-3 mb-5">
+                <div class="table-responsive border border-bottom-0 bg-white rounded">
+                    <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
+                        <thead class="bg-info text-white">
+                        <tr>
+                            <th></th>
+                            <template x-for="(obj, i) in table_column_names" :key="i">
+                                <th x-text="obj"></th>
+                            </template>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <template x-for="(row, i) in table_rows" :key="i">
+                            <tr class="align-middle">
+                                <td>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                         :fill="row[0].color.hex">
+                                        <polygon :points="to_svg_points(row[0], 32)"/>
+                                    </svg>
+                                </td>
+                                <template x-for="(value, j) in row[1]" :key="j">
+                                    <td x-text="value"></td>
+                                </template>
+                            </tr>
+                        </template>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts / Bootstrap 5 runs without jQuery -->
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<!-- Lodash -->
+<script src="js/lodash.min.js"></script>
+
+<!-- Geometry functions -->
+<script src="js/geom.js"></script>
+
+<!-- ThreeJS -->
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.min.js"></script>
+<script src="js/OBJExporter.min.js"></script>
+<script src="js/STLExporter.min.js"></script>
+<script src="js/PLYExporter.min.js"></script>
+<script src="js/GLTFExporter.min.js"></script>
+
+<!-- D3 -->
+<script src="js/d3-polygon.min.js"></script>
+
+<!-- Canvg -->
+<script src="js/canvg.min.js"></script>
+
+<!-- PDF Kit -->
+<script src="js/pdfkit.min.js"></script>
+<script src="js/blobstream.min.js"></script>
+<script src="js/svg2pdf.min.js"></script>
+
+<!-- Hammer : Touch events -->
+<script src="js/hammer.min.js"></script>
+
+<!-- Alpine JS -->
+<script defer src="js/alpine.min.js"></script>
+
+<!-- Custom Javascript -->
+<script type="text/javascript">
+    const WORLD_HEIGHT = 2500;       // or 3D HEIGHT OF ZOME in mm
+    const FLOAT_PRECISION = 7;
+
+    // Use a global variable to store ZOME data
+    let ZOME = {
+        body_rings: [],
+        base: null,
+        num: 0,
+    };
+
+    function is_valid_zome(obj) {
+        const hasKey = (res, key) => res && obj.hasOwnProperty(key);
+        return !(!obj || !["body_rings", "base", "num"].reduce(hasKey, true));
+    };
+
+    // Enable tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(
+        tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+            placement: "auto",
+            trigger: "hover",
+        })
+    )
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('measurements', () => {
+            return {
+                body_faces: [],
+                base: null,
+
+                __to_real_world: null,
+                async init() {
+                    this.__to_real_world = _.debounce(this.to_real_world, 1);
+
+                    this.$watch("height", (value) => {
+                        this.clamp("height", value);
+                        this.__to_real_world();
+                    });
+
+                    this.$watch("length_unit", () => this.__to_real_world());
+                },
+                get faces() {
+                    return this.has_base ? [...this.body_faces, this.base] : this.body_faces;
+                },
+                get has_base() {
+                    return this.base !== null;
+                },
+                get body_widest_diameter() {
+                    const value = _.reduce(this.body_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                    return reprDistance(value);
+                },
+                get body_area() {
+                    const value = _.reduce(this.body_faces, (res, p) => res + p.area * ZOME.num, 0);
+                    return reprArea(value);
+                },
+                get body_num_faces() {
+                    return ZOME.num * this.body_faces.length;
+                },
+                get base_diameter() {
+                    const value = this.base ? this.base.diameter : 0;
+                    return reprDistance(value);
+                },
+                get base_area() {
+                    const value = this.base ? this.base.area : 0
+                    return reprArea(value);
+                },
+                get base_perimeter() {
+                    const value = this.base ? this.base.perimeter : 0
+                    return reprDistance(value);
+                },
+                format(key, value) {
+                    return toDecimal(value, 2);
+                },
+                format_str(value, unit) {
+                    switch (key) {
+                        default:
+                            return toDecimal(value, FLOAT_PRECISION);
+                    }
+                },
+                get_slider(key) {
+                    return eval(`this.$refs.${key}_slider`);
+                },
+                clamp(key, value) {
+                    const slider = this.get_slider(key);
+                    this[key] = this.format(key, _.clamp(value, slider.min, slider.max));
+                },
+                download_tsv() {
+                    this.download_csv("\t", "tsv");
+                },
+                download_csv(sep = ";", fmt = "csv") {
+                    const hr = "# ------------------------------\n"
+
+                    // Add comments
+                    let obj = hr;
+                    obj += "# This zome was made with https://florianwns.github.io/z5omes/\n";
+                    obj += hr;
+                    obj += `# Body Num Faces : ${this.body_num_faces}\n`;
+                    obj += `# Body Widest Ø : ${this.body_widest_diameter}\n`;
+                    obj += `# Body Area : ${this.body_area}\n`;
+                    obj += `# Base Perimeter : ${this.base_perimeter}\n`;
+                    obj += `# Base Ø : ${this.base_diameter}\n`;
+                    obj += `# Base Area : ${this.base_area}\n`;
+                    obj += hr;
+                    obj += _.join(this.table_column_names, sep) + "\n"
+                    const rows = this.table_rows;
+                    _.forEach(rows, row => {
+                        obj += _.join(row[1], sep) + "\n"
+                    });
+                    download(`zome_measurements.${fmt}`, `data:text/${fmt}; charset=utf-8,` + encodeURIComponent(obj));
+                },
+                get table_column_names() {
+                    return [
+                        "Id",
+                        "Width",
+                        "Height",
+                        "CCW Edges",
+                        "CCW Angles",
+                        "θ (Slope angle)",
+                        "σ (Dihedral angle)",
+                        "Area",
+                        "Ø",
+                    ]
+                },
+                get table_rows() {
+                    const rows = new Array(this.faces.length);
+                    _.forEach(this.faces, (face, i) => {
+                        rows[i] = [face, [
+                            i + 1,
+                            reprDistance(face.width),
+                            reprDistance(face.height),
+                            reprArr(uniqueArr(_.map(face.edge_distances, v => reprDistance(v)))),
+                            reprArr(uniqueArr(_.map(face.angles, a => reprAngle(rad2deg(a))))),
+                            reprAngle(rad2deg(face.slope)),
+                            reprAngle(rad2deg(face.σ)),
+                            reprArea(face.area),
+                            reprDistance(face.diameter),
+                        ]];
+                    });
+                    return rows;
+                },
+                process() {
+                    if (!is_valid_zome(ZOME)) {
+                        console.error("Zome is not valid", ZOME)
+                        return;
+                    }
+                    this.__to_real_world();
+                },
+                to_svg_points(piece, size) {
+                    // Recompute pixel positions
+                    const [xMin, xMax, yMin, yMax] = get_boundaries(piece.planar_points);
+                    const pixel_ratio = size / Math.max(piece.height, piece.width);
+                    const center = size / 2;
+                    return piece.planar_points.map(p => [
+                        (p[0] - xMin - piece.width / 2) * pixel_ratio + center,
+                        (p[1] - yMin - piece.height / 2) * pixel_ratio + center,
+                    ]);
+                },
+                to_real_world() {
+                    // Clone faces
+                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const base = _.cloneDeep(ZOME.base);
+
+                    // Compute height ratio then convert dimensions to real world
+                    const num_rings = body_rings.length;
+
+                    // Resize Body faces
+                    const body_faces = new Array(body_rings.length);
+                    _.forEach(body_rings, (ring, iR) => {
+                        const face = ring.polygon;
+                        face.compute();
+
+                        // Compute σ, the Dihedral angle only for the Zome body with at least 2 faces
+                        if (num_rings > 1) {
+                            if (iR == 0) {
+                                const next_face = body_rings[1].polygon;
+                                face.σ = dihedral_angle(next_face.φ, face.ω, face.ω);
+                            } else {
+                                const prev_face = body_rings[iR - 1].polygon;
+                                const α = angle(face.A, face.B, prev_face.B);
+                                const δ = angle(face.A, face.B, face.C);
+                                const λ = angle(prev_face.B, face.B, face.C);
+                                face.σ = dihedral_angle(λ, δ, α);
+                            }
+                        }
+                        body_faces[iR] = face;
+                    });
+
+                    // Refresh proxy
+                    this.base = base;
+                    this.body_faces = body_faces;
+                },
+            };
+        });
+
+        Alpine.data('renderer_a4', () => {
+            let svg_elements_per_page = [];
+            let pages = [];
+            let page_bounds = [];
+
+            return {
+                A4_sheet: null,
+                num_pages: 0,
+                page_index: 0,
+                pages: [],
+                bulleted_list_colors: [],
+                zoom: 1,
+                num_col: 1,
+                kind_of_drawing: "mandala_faces",
+                draw_color: true,
+                draw_centroid: false,
+
+                // 2D Rendering Parameters
+                init() {
+                    this.A4_sheet = this.$refs.A4_sheet;
+
+                    // Add listeners
+                    this.$watch("kind_of_drawing", () => {
+                        this.process();
+                    });
+
+                    this.$watch("page_index", () => {
+                        this.draw();
+                    });
+
+                    _.forEach(["zoom", "draw_color", "draw_centroid"], key => this.$watch(key, () => {
+                            this.build_elements_per_page();
+                            this.draw();
+                        })
+                    );
+
+                    this.$el.addEventListener("keydown", e => this.keydown(e), false);
+
+                    // Add swipe
+                    const hammer = new Hammer(this.A4_sheet.parentNode);
+                    hammer.on('swiperight', (e) => this.previous_page());
+                    hammer.on('swipeleft', (e) => this.next_page());
+                },
+                get grid_pct() {
+                    // Compute Grid size in percent for css drawing
+                    return 100 / this.num_col;
+                },
+                to_svg_points(piece, size) {
+                    // Recompute pixel positions
+                    const center = size / 2;
+                    const pixel_ratio = size / Math.max(piece.height, piece.width);
+                    return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
+                },
+                download_pdf() {
+                    // Create empty PDF document
+                    const [A4_width, A4_height] = [595, 842];
+                    const doc = new PDFDocument({compress: false, size: [A4_width, A4_height]});
+                    const stream = doc.pipe(blobStream());
+
+                    // Create SVG
+                    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                    svg.setAttribute('viewBox', '0 0 210 297');
+
+                    const size = {width: A4_width * this.num_col, height: A4_height * this.num_col};
+                    const num_sheet_per_svg = this.num_col * this.num_col;
+
+                    _.forEach(svg_elements_per_page, (elements, iP) => {
+                        // Create the svg with elements
+                        svg.innerHTML = '';
+                        _.forEach(elements, element => svg.appendChild(element));
+
+                        // Split the drawing into multiple A4 sheets depends on the num_col
+                        for (let i = 0; i < num_sheet_per_svg; i++) {
+                            for (let j = 0; j < this.num_col; j++) {
+                                const x = -j * A4_width;
+                                const y = -i * A4_height;
+                                SVGtoPDF(doc, svg, x, y, size);
+
+                                // Add page if it's not the last
+                                if ((i + 1) * (j + 1) < num_sheet_per_svg - 1) {
+                                    doc.addPage()
+                                }
+                            }
+                        }
+
+                        // Add page if it's not the last
+                        if (iP < svg_elements_per_page.length - 1) {
+                            doc.addPage()
+                        }
+                    });
+
+                    // Save document
+                    doc.end();
+                    stream.on('finish', function () {
+                        const url = stream.toBlobURL("application/pdf");
+                        download("planar_faces.pdf", url);
+                    });
+
+                    // Tricks because svg is empty otherwise ;)
+                    this.draw();
+                },
+                download_svg() {
+                    const svg = this.A4_sheet.outerHTML;
+                    const blob = new Blob([svg.toString()]);
+                    download("planar_faces.svg", window.URL.createObjectURL(blob));
+                },
+                process() {
+                    if (!is_valid_zome(ZOME)) {
+                        console.error("Object is not valid", ZOME)
+                        return;
+                    }
+
+                    // Init variables
+                    pages = [];
+                    switch (this.kind_of_drawing) {
+                        case 'spiral_faces':
+                            this.draw_spiral_faces();
+                            break;
+                        case 'mandala_faces':
+                            this.draw_mandala_faces();
+                            break;
+                        case 'faces':
+                            this.draw_faces();
+                            break;
+                    }
+
+                    // Compute boundaries for all pages
+                    page_bounds = new Array(pages.length);
+                    _.forEach(pages, (page_faces, iP) => {
+                        // Reset boundaries
+                        let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
+                            xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
+
+                        // Compute boundaries of all faces
+                        for (const face of page_faces) {
+                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(face.planar_points);
+
+                            // Save boundaries
+                            if (xPMin < xMin) xMin = xPMin;
+                            if (xPMax > xMax) xMax = xPMax;
+                            if (yPMin < yMin) yMin = yPMin;
+                            if (yPMax > yMax) yMax = yPMax;
+                        }
+
+                        const width = Math.abs(xMax - xMin);
+                        const height = Math.abs(yMax - yMin);
+                        page_bounds[iP] = [xMin, yMin, width, height];
+                    });
+
+                    // Add bulleted list
+                    const bulleted_list_colors = new Array(pages.length);
+                    _.forEach(pages, (page_faces, iP) => {
+                        // Add color of the first piece to bulleted list
+                        bulleted_list_colors[iP] = page_faces[0].color.hex;
+                    });
+
+                    // Save proxies
+                    this.bulleted_list_colors = bulleted_list_colors;
+
+                    this.build_elements_per_page();
+                    this.page_index = 0;
+                    this.draw();
+                },
+                build_elements_per_page() {
+                    // Compute the same pixel ratio for all pages
+                    const maxWidth = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
+                    const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
+                    const border = 6;
+                    const pixel_ratio = Math.min(
+                        (210 - 2 * border) / maxWidth, (297 - 6 * border) / maxHeight
+                    ) * this.zoom;
+                    const center = [210 / 2, 297 / 2];
+
+                    // Build pages polygons
+                    svg_elements_per_page = new Array(pages.length);
+                    let iF, points;
+                    _.forEach(pages, (page, iPa) => {
+                        const num_elements = this.draw_centroid ? page.length * 2 + 1 : page.length + 1;
+                        const svg_elements = new Array(num_elements);
+                        iF = 0;
+                        _.forEach(page, face => {
+                            const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            const [xMin, yMin, width, height] = page_bounds[iPa];
+                            points = face.planar_points.map(p => [
+                                (p[0] - xMin - width / 2) * pixel_ratio + center[0],
+                                (p[1] - yMin - height / 2) * pixel_ratio + center[1],
+                            ]);
+                            el.setAttribute('points', `${points}`);
+                            el.setAttribute('stroke', 'black');
+                            el.setAttribute('stroke-width', '0.1px');
+                            el.setAttribute('fill', this.draw_color ? face.color.hex : 'transparent');
+                            svg_elements[iF] = el;
+                            iF++
+                            if (this.draw_centroid) {
+                                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                                const centroid = d3.polygonCentroid(points);
+                                c.setAttribute('cx', `${centroid[0]}`);
+                                c.setAttribute('cy', `${centroid[1]}`);
+                                c.setAttribute('r', `${pixel_ratio}`);
+                                svg_elements[iF] = c;
+                                iF++;
+                            }
+                        });
+
+                        // Add Text
+                        const el = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        el.setAttribute('text-anchor', 'end');
+                        el.setAttribute('x', (210 - border).toString());
+                        el.setAttribute('y', (297 - border).toString());
+                        el.setAttribute('font-family', "Verdana")
+                        el.setAttribute('font-size', "6px")
+                        el.innerHTML = `Page ${iPa + 1}/${pages.length}`;
+                        svg_elements[iF] = el;
+
+                        // Add color of the first piece to bulleted list
+                        svg_elements_per_page[iPa] = svg_elements;
+                    });
+                },
+                build_spiral_faces(body_rings) {
+                    const spiral_faces = new Array(body_rings.length);
+
+                    // Compute body planar faces
+                    let O = [0, 0, 0], planar_points = [];
+                    let A, a, rotated_A;
+                    _.forEach(body_rings, (ring, iR) => {
+                        const polygon = ring.polygon;
+
+                        // Move to Origin and rotate to match with previous piece
+                        planar_points = polygon.planar_points.map(p => add(p, O));
+                        if (iR > 0) {
+                            a = angle(A, O, planar_points[1]);
+                            rotated_A = rot2d(planar_points[1], a, O);
+
+                            // Rotate the other way if rotatedA is not too close to A
+                            if (toDecimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
+                                a = -a;
+                            }
+                            planar_points = planar_points.map(p => rot2d(p, a, O));
+                        }
+                        O = planar_points[planar_points.length - 1];
+                        A = planar_points[planar_points.length - 2];
+
+                        // Save planar faces
+                        polygon.planar_points = planar_points;
+                        spiral_faces[iR] = polygon;
+                    });
+                    return spiral_faces;
+                },
+                draw_faces() {
+                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const base = _.cloneDeep(ZOME.base);
+
+                    // for each color and each face add a page
+                    const range = _.range(0, ZOME.num);
+                    for (const ring of body_rings) {
+                        for (const i of range) {
+                            const face = _.cloneDeep(ring.polygon);
+                            face.color = ring.colors[i];
+                            pages.push([face]);
+                        }
+                    }
+
+                    // Add Base at last page if base exists
+                    if (base !== null) {
+                        pages.push([base]);
+                    }
+                },
+                draw_mandala_faces() {
+                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const spiral_faces = this.build_spiral_faces(body_rings)
+                    const base = _.cloneDeep(ZOME.base)
+
+                    // For each color, rotate piece around the origin
+                    const mandala_faces = [], O = [0, 0, 0];
+                    for (let i = 0; i < ZOME.num; i++) {
+                        _.forEach(spiral_faces, (spiral_face, j) => {
+                            const ring = body_rings[j];
+                            const face = _.cloneDeep(spiral_face);
+                            face.planar_points = face.planar_points.map(p => rot2d(p, ring.angles[i], O));
+                            face.color = ring.colors[i];
+                            mandala_faces.push(face)
+                        });
+                    }
+                    pages.push(mandala_faces);
+
+                    // Add a last page if base exists
+                    if (base !== null) {
+                        pages.push([base]);
+                    }
+                },
+                draw_spiral_faces() {
+                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const spiral_faces = this.build_spiral_faces(body_rings)
+                    const base = _.cloneDeep(ZOME.base)
+
+                    // For each color, Add a page with spiral faces
+                    for (let i = 0; i < ZOME.num; i++) {
+                        const colored_spiral_faces = [];
+                        _.forEach(spiral_faces, (spiral_face, j) => {
+                            const face = _.cloneDeep(spiral_face);
+                            face.color = body_rings[j].colors[i];
+                            colored_spiral_faces.push(face)
+                        });
+                        pages.push(colored_spiral_faces);
+                    }
+
+                    // Add Base at last page if base exists
+                    if (base !== null) {
+                        pages.push([base]);
+                    }
+                },
+                next_page() {
+                    this.page_index = (this.page_index + 1) % svg_elements_per_page.length;
+                },
+                previous_page() {
+                    this.page_index = (svg_elements_per_page.length + this.page_index - 1) % svg_elements_per_page.length;
+                },
+                keydown(e) {
+                    switch (e.key) {
+                        case "Up":
+                        case "ArrowUp":
+                        case "Left":
+                        case "ArrowLeft":
+                            this.previous_page();
+                            break;
+                        case "Down":
+                        case "ArrowDown":
+                        case "Right":
+                        case "ArrowRight":
+                            this.next_page();
+                            break;
+                        default:
+                            return;
+                    }
+                    e.preventDefault();
+                },
+                draw() {
+                    this.A4_sheet.innerHTML = '';
+                    if (svg_elements_per_page.length <= 0) {
+                        return;
+                    }
+                    const elements = svg_elements_per_page[this.page_index % svg_elements_per_page.length];
+                    for (const el of elements) {
+                        this.A4_sheet.appendChild(el);
+                    }
+                }
+            };
+        });
+
+        Alpine.data('renderer_3D', () => {
+            let scene, camera, renderer, controls, canvas;              // Three JS Parameters
+            const meshes = {
+                "axis": null,
+                "zome": null,
+            }
+
+            return {
+                // 3D Rendering Parameters
+                is_spinning: true,
+                speed: 0.01,
+                draw_axis: true,
+
+                init() {
+                    // Add listeners
+                    this.$el.addEventListener("keydown", e => this.keydown(e), false);
+
+                    ["axis"].forEach(
+                        (key) => this.$watch(`draw_${key}`, (value) => {
+                            this.set_visibility(key, value);
+                        })
+                    );
+
+                    // Set Canvas Parameters
+                    canvas = this.$refs.canvas;
+                    const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
+
+                    // Renderer
+                    renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+                    canvas.appendChild(renderer.domElement);
+
+                    // Scene
+                    scene = new THREE.Scene();
+
+                    // Add lights
+                    const ambient_light = new THREE.AmbientLight(0xffffff, 0.9);
+                    scene.add(ambient_light);
+
+                    const directional_light = new THREE.DirectionalLight(0xffffff, 0.2);
+                    directional_light.position.set(0, WORLD_HEIGHT, WORLD_HEIGHT);
+                    scene.add(directional_light);
+
+                    const directional_light2 = new THREE.DirectionalLight(0xffffff, 0.2);
+                    directional_light2.position.set(0, -WORLD_HEIGHT, -WORLD_HEIGHT);
+                    scene.add(directional_light2);
+
+                    // Camera ( x is red, y is green, z is blue)
+                    const [field_of_view, aspect_ratio, near, far] = [75, width / height, 0.1, 10 * WORLD_HEIGHT]
+                    camera = new THREE.PerspectiveCamera(field_of_view, aspect_ratio, near, far);
+                    camera.position.copy(this.home);
+
+                    // Add controls
+                    controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+                    // Add (x, y, z) Axis
+                    meshes.axis = new THREE.AxesHelper(WORLD_HEIGHT);
+                    meshes.axis.visible = this.draw_axis;
+
+                    scene.add(meshes.axis);
+
+                    this.reset();
+                    this.auto_size()
+                    this.animate()
+
+                    this.$dispatch('zome-renderer-is-ready');
+                },
+                auto_size() {
+                    const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
+                    if (width > 0 && height > 0) {
+                        camera.aspect = width / height;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(width, height);
+                    }
+                },
+                download_ply() {
+                    this.export_to(THREE.PLYExporter, "ply");
+                },
+                download_stl() {
+                    this.export_to(THREE.STLExporter, "stl");
+                },
+                download_obj() {
+                    this.export_to(THREE.OBJExporter, "obj");
+                },
+                download_gltf() {
+                    const exporter = new THREE.GLTFExporter();
+                    exporter.parse(
+                        scene,
+                        (res) => {
+                            const str = JSON.stringify(res, null, 2);
+                            const blob = new Blob([str], {type: 'text/plain'});
+                            download(`zome_3D.gltf`, window.URL.createObjectURL(blob));
+                        },
+                        (error) => console.error(error),
+                        {binary: false},
+                    );
+                },
+                export_to(cls, ext) {
+                    const exporter = new cls();
+                    const str = exporter.parse(scene);
+                    const blob = new Blob([str], {type: 'text/plain'});
+                    download(`zome_3D.${ext}`, window.URL.createObjectURL(blob));
+                },
+                process() {
+                    if (!is_valid_zome(ZOME)) {
+                        console.error("Zome is not valid", ZOME)
+                        return;
+                    }
+
+                    // Clean old mesh
+                    if (meshes.zome instanceof THREE.Group) {
+                        scene.remove(meshes.zome)
+                    }
+
+                    meshes.zome = new THREE.Group();
+
+                    // Use same material for all faces
+                    const material = new THREE.MeshLambertMaterial({
+                        side: THREE.DoubleSide,
+                        vertexColors: true,
+                    });
+
+                    // Build 3D Body Faces
+                    {
+                        // Pre-Compute geometry points, ring colors and num_faces
+                        const points = [];
+                        const num_rings = ZOME.body_rings.length;
+                        const colors = new Array(num_rings);
+                        const num_faces = new Array(num_rings);
+                        const face_colors = new Array(num_rings);
+                        _.forEach(ZOME.body_rings, (ring, iR) => {
+                            const polygon = ring.polygon;
+                            points.push(...polygon.faces);
+                            colors[iR] = ring.colors;
+                            num_faces[iR] = polygon.num_faces;
+                        });
+
+                        // Build geometry of first spiral
+                        const geometry = new THREE.BufferGeometry();
+                        geometry.setFromPoints(points)
+                        geometry.computeVertexNormals()
+
+                        // Compute All faces geometries and colors
+                        for (let iN = 0; iN < ZOME.num; iN++) {
+                            const rot_geometry = geometry.clone()
+
+                            // Rotate the new geometry
+                            const a = ZOME.body_rings[0].angles[iN];
+                            rot_geometry.rotateY(a);
+
+                            // Get colors
+                            for (let iR = 0; iR < num_rings; iR++) {
+                                face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
+                            }
+
+                            rot_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+                            meshes.zome.add(new THREE.Mesh(rot_geometry, material))
+                        }
+                    }
+
+                    // Build 3D Base Faces
+                    const base = ZOME.base;
+                    if (base !== null) {
+                        const geometry = new THREE.BufferGeometry();
+                        geometry.setFromPoints(base.faces)
+
+                        const face_colors = [];
+                        _.forEach(base.faces, () => {
+                            face_colors.push(...base.color.rgb);
+                        });
+
+                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                        geometry.computeVertexNormals()
+
+                        meshes.zome.add(new THREE.Mesh(geometry, material))
+                    }
+                    // Add the final obj mesh to the scene
+                    scene.add(meshes.zome)
+                },
+                get right() {
+                    return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
+                },
+                get left() {
+                    return new THREE.Vector3(0, WORLD_HEIGHT * 0.5, WORLD_HEIGHT * 1.5);
+                },
+                get down() {
+                    return new THREE.Vector3(0, -WORLD_HEIGHT * 1.20, 0);
+                },
+                get up() {
+                    return new THREE.Vector3(0, WORLD_HEIGHT * 1.50, 0);
+                },
+                get home() {
+                    const axis = new THREE.Vector3(0, 1, 0);
+                    const angle = Math.PI / 4;
+                    return this.left.applyAxisAngle(axis, angle);
+                },
+                set_visibility(key, value) {
+                    if (meshes.hasOwnProperty(key) && meshes[key].hasOwnProperty("visible")) {
+                        meshes[key].visible = value
+                    }
+                },
+                update() {
+                    if (this.is_spinning && meshes.zome instanceof THREE.Group) {
+                        meshes.zome.rotation.y -= this.speed
+                    }
+                },
+                render() {
+                    renderer.render(scene, camera)
+                },
+                animate() {
+                    this.update()
+                    this.render()
+                    requestAnimationFrame(this.animate.bind(this));
+                },
+                move(v) {
+                    camera.position.copy(v);
+                    controls.update();
+                },
+                reset() {
+                    this.speed = 0.01;
+                    controls.reset();
+                    controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
+                    controls.update();
+                },
+                keydown(e) {
+                    switch (e.key) {
+                        case "*":
+                            this.speed += 0.001;
+                            break;
+                        case "/":
+                            this.speed -= 0.001;
+                            break;
+                        case " ":
+                            this.is_spinning = !this.is_spinning;
+                            break;
+                        case "h":
+                        case "H":
+                            this.reset();
+                            break;
+                        case "Down":
+                        case "ArrowDown":
+                            this.move(this.down);
+                            break;
+                        case "Up":
+                        case "ArrowUp":
+                            this.move(this.up);
+                            break;
+                        case "Left":
+                        case "ArrowLeft":
+                            this.move(this.left);
+                            break;
+                        case "Right":
+                        case "ArrowRight":
+                            this.move(this.right);
+                            break;
+                        default:
+                            return;
+                    }
+                    e.preventDefault();
+                },
+            };
+        });
+
+        Alpine.data('settings', () => {
+            let vertices = [];          // 3D point vector
+            let body_rings = [];
+
+            return {
+                // Shape Parameters
+                num: 7,                     // number of faces (kites or diamonds)
+                theta_deg: 50,              // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
+                angle_unit: "deg",          // Degrees or Radians
+                height_ratio: 0.7142857,         // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
+                kite_ratio: 1,                   // Kite ratio, lower half to upper half (1 => is rhombus else kites)
+                suggested_height_ratio: null,    // Value to magnetize the zome to the nearest cut
+
+                // Sizing Parameters
+                length_unit: "mm",                      // Length unit by default is mm
+                zome_height_in_mm: WORLD_HEIGHT,       // Height in mm
+                timber_width_in_mm: 10,                // Timber width in mm
+                timber_tickness_in_mm: 5,              // Timber tickness in mm
+
+                // Commons parameters
+                help_is_displayed: false,
+
+                colors: [],
+
+                // Debouncers
+                __make_zome: null,
+
+                async init() {
+                    this.__make_zome = _.debounce(this.make_zome, 1);
+
+                    // Add shape parameter listeners
+                    _.forEach([
+                            "num", "theta_deg", "height_ratio", "kite_ratio",
+                            "zome_height_in_mm", "timber_width_in_mm", "timber_tickness_in_mm"
+                        ], key => this.$watch(key, (value) => {
+                            this.clamp(key, value);
+                            this.__make_zome();
+                        })
+                    );
+
+                    // Refresh the height_ratio if you change the zome num
+                    this.$watch("num", (value) => {
+                        this.clamp("height_ratio", this.height_ratio);
+                    });
+                },
+                get theta() {
+                    switch (this.angle_unit) {
+                        case "rad":
+                            return toDecimal(deg2rad(this.theta_deg), FLOAT_PRECISION);
+                        case "tan":
+                            return toDecimal(Math.tan(deg2rad(this.theta_deg)), FLOAT_PRECISION);
+                        case "deg":
+                        default:
+                            return this.theta_deg;
+                    }
+                },
+                set theta(angle) {
+                    switch (this.angle_unit) {
+                        case "rad":
+                            this.theta_deg = rad2deg(angle)
+                            break;
+                        case "tan":
+                            this.theta_deg = rad2deg(Math.atan(angle))
+                            break;
+                        case "deg":
+                        default:
+                            this.theta_deg = angle;
+                    }
+                },
+
+                get num_rhombus() {
+                    return toDecimal(this.num * this.height_ratio - 1, 0);
+                },
+                set num_rhombus(value) {
+                    this.kite_ratio = 1;
+                    this.height_ratio = toDecimal((value + 1) / this.num, FLOAT_PRECISION);
+                },
+                get is_rhombus() {
+                    return this.kite_ratio === 1;
+                },
+                set is_rhombus(value) {
+                    if (value === true) {
+                        this.kite_ratio = 1
+                    }
+                },
+                get zome_height() {
+                    return from_mm(this.zome_height_in_mm, this.length_unit);
+                },
+                set zome_height(value) {
+                    this.clamp("zome_height_in_mm", to_mm(value, this.length_unit));
+                },
+                get timber_width() {
+                    return from_mm(this.timber_width_in_mm, this.length_unit);
+                },
+                set timber_width(value) {
+                    this.clamp("timber_width_in_mm", to_mm(value, this.length_unit));
+                },
+                get timber_tickness() {
+                    return from_mm(this.timber_tickness_in_mm, this.length_unit);
+                },
+                set timber_tickness(value) {
+                    this.clamp("timber_tickness_in_mm", to_mm(value, this.length_unit));
+                },
+                magnetize() {
+                    if (this.suggested_height_ratio && this.suggested_height_ratio != this.height_ratio) {
+                        this.height_ratio = this.suggested_height_ratio;
+                    }
+                },
+                format(key, value) {
+                    // Format Zome parameters by pair of [key, value]
+                    switch (key) {
+                        case 'num':
+                            return toDecimal(value, 0);
+                        default:
+                            return toDecimal(value, FLOAT_PRECISION);
+                    }
+                },
+                randomize() {
+                    _.forEach(["num", "theta_deg", "num_rhombus"], (key) => {
+                            const slider = this.get_slider(key);
+                            this[key] = _.random(slider.min, slider.max)
+                        },
+                    );
+                    this.kite_ratio = 1;
+                },
+                get_slider(key) {
+                    return eval(`this.$refs.${key}_slider`);
+                },
+                clamp(key, value) {
+                    const slider = this.get_slider(key);
+                    if (slider) {
+                        this[key] = this.format(key, _.clamp(value, slider.min, slider.max));
+                    }
+                },
+                clear() {
+                    // Clear data
+                    vertices = [];
+                    body_rings = [];
+                },
+                to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
+                    return toDecimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
+                },
+                add_vertice(p) {
+                    vertices.push(p);
+                    return vertices.length - 1;
+                },
+                make_zome() {
+                    // Constants, sizing are in mm
+                    const [N, THETA_DEG, HEIGHT_RATIO, K, IS_RHOMBUS, ZOME_HEIGHT] = [
+                        this.num,
+                        this.theta_deg,
+                        this.height_ratio,
+                        this.kite_ratio,
+                        this.is_rhombus,
+                        this.zome_height_in_mm,
+                    ]
+                    const M = N - 1;
+                    const THETA_RAD = deg2rad(THETA_DEG);
+                    const INCR_RAD = TAU / N;
+                    const IS_PARTIAL = !(HEIGHT_RATIO == 1 && K == 1);
+                    const COS_THETA = Math.cos(THETA_RAD);
+                    const SIN_THETA = Math.sin(THETA_RAD);
+
+                    // We calculate the total height of entire zome, top to top
+                    const TOTAL_HEIGHT = ZOME_HEIGHT / HEIGHT_RATIO;
+
+                    const K_SUM = IS_RHOMBUS ? N : (1 - Math.pow(K, N)) / (1 - K);
+
+                    // Clear all data
+                    this.clear();
+
+                    // First Point at the top
+                    this.add_vertice([0, ZOME_HEIGHT, 0]);
+
+                    // First ring properties
+                    const TOP_EDGE = TOTAL_HEIGHT / (K_SUM * COS_THETA);
+                    const FIRST_RING_RADIUS = TOP_EDGE * SIN_THETA;
+                    const FIRST_RING_HEIGHT = TOP_EDGE * COS_THETA;
+
+                    // Initialize variables
+                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, dist_to_ground, y, face;
+                    let lastIsTruncated = false;
+                    let closest_dist_to_ground = Number.MAX_VALUE;
+
+                    // Add points on first ring every 'incr_rad' from left to right
+                    for (let iN = 0; iN < N; iN++) {
+                        a = iN * INCR_RAD;
+                        B = [
+                            FIRST_RING_RADIUS * Math.sin(a),
+                            Math.max(0, ZOME_HEIGHT - FIRST_RING_HEIGHT),
+                            FIRST_RING_RADIUS * Math.cos(a)
+                        ];
+                        this.add_vertice(B);
+                    }
+
+                    // Loop over rings (M = N - 1), while zome does not hit ground
+                    let hit_ground = false;
+                    const triangles = [];
+                    for (let iR = 0; iR < M && !hit_ground; iR++) {         // iR => Ring index
+                        ficr = iR * N + 1;                      // First Index on current ring
+                        fipr = ficr - N;                        // First index on previous ring
+
+                        // On current ring, Loop over points from left to right
+                        for (let iN = 0; iN < N; iN++) {
+                            k = (iN + 1) % N
+
+                            iA = (iR == 0) ? 0 : fipr + k;      // Index of A point          A
+                            iB = ficr + iN;                     // Index of B point        B ◇ C
+                            iC = ficr + k;                      // Index of C point          D
+
+                            A = vertices[iA];
+                            B = vertices[iB];
+                            C = vertices[iC];
+
+                            // Compute the new point to close diamond/kite face
+                            D = add(A, mul(sub(mid(B, C), A), 1 + K));
+
+                            // Draw the second part of shape while D is higher than the ground
+                            y = toDecimal(D[1], FLOAT_PRECISION);
+
+                            // Add a tolerance to Y
+                            if (y + 0.001 >= 0) {
+                                // Add Shape to 3D
+                                iD = this.add_vertice(D);
+
+                                // Add only the first piece, because only color after that
+                                if (iN == 0) {
+                                    face = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
+                                    body_rings.push(new PolygonRing(face, N));
+                                }
+
+                                // Close the zome => Deal with case where this ring is exactly on the ground
+                                hit_ground = toDecimal(y, 2) == 0;
+                                if (hit_ground) {
+                                    triangles.push(iD, iD, iC);
+                                }
+                            } else {
+                                // Compute the Truncated Kite
+                                u = -B[1] / (D[1] - B[1]);
+                                E = add(B, mul(sub(D, B), u));
+                                F = add(C, mul(sub(D, C), u));
+
+                                // Add Truncated Kite to 3D
+                                iE = this.add_vertice(E);
+                                iF = this.add_vertice(F);
+
+                                // Add Truncated Kite to faces
+                                if (iN == 0) {
+                                    face = new TruncatedKite([A, B, E, F, C])
+                                    body_rings.push(new PolygonRing(face, N));
+                                }
+
+                                // Add last triangles to close it after if needed
+                                triangles.push(iE, iF, iC);
+                                hit_ground = true;
+                                lastIsTruncated = true;
+                            }
+                        }
+
+                        // Compute the suggested height ratio for magnetize button
+                        dist_to_ground = Math.abs(y);
+                        if (dist_to_ground < closest_dist_to_ground) {
+                            closest_dist_to_ground = dist_to_ground;
+                            this.suggested_height_ratio = this.to_suggested_height_ratio(y, ZOME_HEIGHT, TOTAL_HEIGHT);
+                        }
+                    }
+
+                    // Close The Zome
+                    let base_vertices = [];
+                    const num_triangles = triangles.length;
+                    if (num_triangles > 0) {
+                        let iT = 0;
+                        for (let iN = 0; iN < N; iN++) {
+                            iT = iN * 3;
+
+                            iA = triangles[(iT + 2) % num_triangles]
+                            iB = triangles[(iT + 1) % num_triangles]
+                            iC = triangles[(iT + 3) % num_triangles]
+
+                            A = vertices[iA];
+                            B = vertices[iB];
+                            C = vertices[iC];
+
+                            // Deal with case where B and C are too close, so we don't add them
+                            const far_enough = toDecimal(dist(B, C), 2) !== 0;
+                            if (far_enough) {
+                                // Add triangle to faces
+                                if (iT == 0) {
+                                    face = new Triangle([A, B, C]);
+                                    body_rings.push(new PolygonRing(face, N));
+                                }
+                            }
+
+                            // Push base vertices only if zome is partial
+                            if (IS_PARTIAL) {
+                                base_vertices.push(iB);
+                                if (lastIsTruncated && far_enough) {
+                                    base_vertices.push(iC);
+                                }
+                            }
+                        }
+                    }
+
+                    // Finally add the base piece
+                    let base = null;
+                    if (base_vertices.length >= 3) {
+                        face = new ZomeBase(base_vertices.map(iV => vertices[iV]))
+
+                        // Deal with case where points are too close to make a base
+                        const far_enough = toDecimal(dist(face.points[0], face.points[1]), 2) !== 0;
+                        if (far_enough) {
+                            base = face;
+                        }
+                    }
+
+                    // Save Zome and dispatch it
+                    ZOME = {
+                        body_rings: body_rings,
+                        base: base,
+                        num: N,
+                    }
+
+                    // Dispatch zome
+                    this.$dispatch('zome-is-made');
+                },
+            };
+        });
+    });
+</script>
+</body>
+</html>
