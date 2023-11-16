@@ -112,7 +112,7 @@
 
 @media (min-width: 1280px) {
     .offcanvas.show + .auto-shift {
-        margin-left: 400px!important;
+        margin-right: 400px!important;
     }
 }
 
