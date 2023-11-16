@@ -105,7 +105,7 @@
                     HR
                 </span>
                 <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                       :min="toDecimal(2 / num, FLOAT_PRECISION)"
+                       :min="to_decimal(2 / num, FLOAT_PRECISION)"
                        x-model.number="height_ratio" x-ref="height_ratio_slider">
                 <input class="form-control" step="0.01" type="number"
                        x-model.lazy.number="height_ratio">
