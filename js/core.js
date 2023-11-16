@@ -292,7 +292,6 @@ class ConvexPolygon {
         // Init variables
         this.points = points;
         this.compute()
-        this.color = angle2color(this.slope);
     }
 
     get O() {
@@ -377,6 +376,9 @@ class ConvexPolygon {
         // Compute width and height from 2D boundaries
         this.width = Math.abs(xMax - xMin);
         this.height = Math.abs(yMax - yMin);
+
+        // Compute color which depends on slope
+        this.color = angle2color(this.slope);
     }
 }
 

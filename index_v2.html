@@ -690,7 +690,6 @@
                     const envelop_faces = new Array(envelop_rings.length);
                     _.forEach(envelop_rings, (ring, iR) => {
                         const face = ring.polygon;
-                        face.compute();
 
                         // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 faces
                         if (num_rings > 1) {
@@ -1645,9 +1644,6 @@
 
                     // Compute the connection point
                     const connection_point = [0, 0, 0];
-
-
-
 
                     // Save Zome and dispatch it
                     ZOME = {
