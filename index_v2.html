@@ -424,16 +424,16 @@
             <div class="col-md-6 col-xl-5 mt-2">
                 <ul class="list-group small">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Num Faces
-                        <span class="badge bg-info rounded-pill" x-text="body_num_faces"></span>
+                        Envelop Num Faces
+                        <span class="badge bg-info rounded-pill" x-text="envelop_num_faces"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Widest Ø
-                        <span class="badge bg-info rounded-pill" x-text="body_widest_diameter"></span>
+                        Envelop Widest Ø
+                        <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Area
-                        <span class="badge bg-info rounded-pill" x-text="body_area"></span>
+                        Envelop Area
+                        <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
                     </li>
                 </ul>
             </div>
@@ -530,7 +530,7 @@
 
     // Use a global variable to store ZOME data
     let ZOME = {
-        body_rings: [],
+        envelop_rings: [],
         base: null,
         connection_point: null,
         num: 0,
@@ -538,7 +538,7 @@
 
     function is_valid_zome(obj) {
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-        return !(!obj || !["body_rings", "base", "connection_point", "num"].reduce(hasKey, true));
+        return !(!obj || !["envelop_rings", "base", "connection_point", "num"].reduce(hasKey, true));
     };
 
     // Enable tooltips
@@ -553,7 +553,7 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
             return {
-                body_faces: [],
+                envelop_faces: [],
                 base: null,
 
                 __to_real_world: null,
@@ -561,21 +561,21 @@
                     this.__to_real_world = _.debounce(this.to_real_world, 1);
                 },
                 get faces() {
-                    return this.has_base ? [...this.body_faces, this.base] : this.body_faces;
+                    return this.has_base ? [...this.envelop_faces, this.base] : this.envelop_faces;
                 },
                 get has_base() {
                     return this.base !== null;
                 },
-                get body_widest_diameter() {
-                    const value = _.reduce(this.body_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                get envelop_widest_diameter() {
+                    const value = _.reduce(this.envelop_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
-                get body_area() {
-                    const value = _.reduce(this.body_faces, (res, p) => res + p.area * ZOME.num, 0);
+                get envelop_area() {
+                    const value = _.reduce(this.envelop_faces, (res, p) => res + p.area * ZOME.num, 0);
                     return humanize_area(value);
                 },
-                get body_num_faces() {
-                    return ZOME.num * this.body_faces.length;
+                get envelop_num_faces() {
+                    return ZOME.num * this.envelop_faces.length;
                 },
                 get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
@@ -615,9 +615,9 @@
                     let obj = hr;
                     obj += "# This zome was made with https://florianwns.github.io/z5omes/\n";
                     obj += hr;
-                    obj += `# Body Num Faces : ${this.body_num_faces}\n`;
-                    obj += `# Body Widest Ø : ${this.body_widest_diameter}\n`;
-                    obj += `# Body Area : ${this.body_area}\n`;
+                    obj += `# Envelop Num Faces : ${this.envelop_num_faces}\n`;
+                    obj += `# Envelop Widest Ø : ${this.envelop_widest_diameter}\n`;
+                    obj += `# Envelop Area : ${this.envelop_area}\n`;
                     obj += `# Base Perimeter : ${this.base_perimeter}\n`;
                     obj += `# Base Ø : ${this.base_diameter}\n`;
                     obj += `# Base Area : ${this.base_area}\n`;
@@ -678,37 +678,37 @@
                 },
                 to_real_world() {
                     // Clone faces
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
                     const base = _.cloneDeep(ZOME.base);
 
                     // Compute height ratio then convert dimensions to real world
-                    const num_rings = body_rings.length;
+                    const num_rings = envelop_rings.length;
 
-                    // Resize Body faces
-                    const body_faces = new Array(body_rings.length);
-                    _.forEach(body_rings, (ring, iR) => {
+                    // Resize Envelop faces
+                    const envelop_faces = new Array(envelop_rings.length);
+                    _.forEach(envelop_rings, (ring, iR) => {
                         const face = ring.polygon;
                         face.compute();
 
-                        // Compute σ, the Dihedral angle only for the Zome body with at least 2 faces
+                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 faces
                         if (num_rings > 1) {
                             if (iR == 0) {
-                                const next_face = body_rings[1].polygon;
+                                const next_face = envelop_rings[1].polygon;
                                 face.σ = dihedral_angle(next_face.φ, face.ω, face.ω);
                             } else {
-                                const prev_face = body_rings[iR - 1].polygon;
+                                const prev_face = envelop_rings[iR - 1].polygon;
                                 const α = angle(face.A, face.B, prev_face.B);
                                 const δ = angle(face.A, face.B, face.C);
                                 const λ = angle(prev_face.B, face.B, face.C);
                                 face.σ = dihedral_angle(λ, δ, α);
                             }
                         }
-                        body_faces[iR] = face;
+                        envelop_faces[iR] = face;
                     });
 
                     // Refresh proxy
                     this.base = base;
-                    this.body_faces = body_faces;
+                    this.envelop_faces = envelop_faces;
                 },
             };
         });
@@ -912,7 +912,7 @@
                                 const centroid = d3.polygonCentroid(points);
                                 c.setAttribute('cx', `${centroid[0]}`);
                                 c.setAttribute('cy', `${centroid[1]}`);
-                                c.setAttribute('r', `${pixel_ratio}`);
+                                c.setAttribute('r', `${pixel_ratio * 10}`);
                                 svg_elements[iF] = c;
                                 iF++;
                             }
@@ -932,13 +932,13 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                build_spiral_faces(body_rings) {
-                    const spiral_faces = new Array(body_rings.length);
+                build_spiral_faces(envelop_rings) {
+                    const spiral_faces = new Array(envelop_rings.length);
 
-                    // Compute body planar faces
+                    // Compute envelop planar faces
                     let O = [0, 0, 0], planar_points = [];
                     let A, a, rotated_A;
-                    _.forEach(body_rings, (ring, iR) => {
+                    _.forEach(envelop_rings, (ring, iR) => {
                         const polygon = ring.polygon;
 
                         // Move to Origin and rotate to match with previous piece
@@ -963,12 +963,12 @@
                     return spiral_faces;
                 },
                 draw_faces() {
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
                     const base = _.cloneDeep(ZOME.base);
 
                     // for each color and each face add a page
                     const range = _.range(0, ZOME.num);
-                    for (const ring of body_rings) {
+                    for (const ring of envelop_rings) {
                         for (const i of range) {
                             const face = _.cloneDeep(ring.polygon);
                             face.color = ring.colors[i];
@@ -982,15 +982,15 @@
                     }
                 },
                 draw_mandala_faces() {
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
-                    const spiral_faces = this.build_spiral_faces(body_rings)
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
+                    const spiral_faces = this.build_spiral_faces(envelop_rings)
                     const base = _.cloneDeep(ZOME.base)
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
                         _.forEach(spiral_faces, (spiral_face, j) => {
-                            const ring = body_rings[j];
+                            const ring = envelop_rings[j];
                             const face = _.cloneDeep(spiral_face);
                             face.planar_points = face.planar_points.map(p => rot2d(p, ring.angles[i], O));
                             face.color = ring.colors[i];
@@ -1005,8 +1005,8 @@
                     }
                 },
                 draw_spiral_faces() {
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
-                    const spiral_faces = this.build_spiral_faces(body_rings)
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
+                    const spiral_faces = this.build_spiral_faces(envelop_rings)
                     const base = _.cloneDeep(ZOME.base)
 
                     // For each color, Add a page with spiral faces
@@ -1014,7 +1014,7 @@
                         const colored_spiral_faces = [];
                         _.forEach(spiral_faces, (spiral_face, j) => {
                             const face = _.cloneDeep(spiral_face);
-                            face.color = body_rings[j].colors[i];
+                            face.color = envelop_rings[j].colors[i];
                             colored_spiral_faces.push(face)
                         });
                         pages.push(colored_spiral_faces);
@@ -1184,15 +1184,15 @@
                         vertexColors: true,
                     });
 
-                    // Build 3D Body Faces
+                    // Build 3D Envelop Faces
                     {
                         // Pre-Compute geometry points, ring colors and num_faces
                         const points = [];
-                        const num_rings = ZOME.body_rings.length;
+                        const num_rings = ZOME.envelop_rings.length;
                         const colors = new Array(num_rings);
                         const num_faces = new Array(num_rings);
                         const face_colors = new Array(num_rings);
-                        _.forEach(ZOME.body_rings, (ring, iR) => {
+                        _.forEach(ZOME.envelop_rings, (ring, iR) => {
                             const polygon = ring.polygon;
                             points.push(...polygon.faces);
                             colors[iR] = ring.colors;
@@ -1209,7 +1209,7 @@
                             const rot_geometry = geometry.clone()
 
                             // Rotate the new geometry
-                            const a = ZOME.body_rings[0].angles[iN];
+                            const a = ZOME.envelop_rings[0].angles[iN];
                             rot_geometry.rotateY(a);
 
                             // Get colors
@@ -1326,8 +1326,8 @@
         });
 
         Alpine.data('settings', () => {
-            let vertices = [];          // 3D point vector
-            let body_rings = [];
+            let vertices = [];                  // 3D point vector
+            let envelop_rings = [];                //
 
             return {
                 // Shape Parameters
@@ -1462,7 +1462,7 @@
                 clear() {
                     // Clear data
                     vertices = [];
-                    body_rings = [];
+                    envelop_rings = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return toDecimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
@@ -1553,7 +1553,7 @@
                                 // Add only the first piece, because only color after that
                                 if (iN == 0) {
                                     face = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
-                                    body_rings.push(new PolygonRing(face, N));
+                                    envelop_rings.push(new PolygonRing(face, N));
                                 }
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
@@ -1574,7 +1574,7 @@
                                 // Add Truncated Kite to faces
                                 if (iN == 0) {
                                     face = new TruncatedKite([A, B, E, F, C])
-                                    body_rings.push(new PolygonRing(face, N));
+                                    envelop_rings.push(new PolygonRing(face, N));
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -1614,7 +1614,7 @@
                                 // Add triangle to faces
                                 if (iT == 0) {
                                     face = new Triangle([A, B, C]);
-                                    body_rings.push(new PolygonRing(face, N));
+                                    envelop_rings.push(new PolygonRing(face, N));
                                 }
                             }
 
@@ -1649,7 +1649,7 @@
 
                     // Save Zome and dispatch it
                     ZOME = {
-                        body_rings: body_rings,
+                        envelop_rings: envelop_rings,
                         base: base,
                         connection_point: connection_point,
                         num: N,
