@@ -318,11 +318,11 @@ class ConvexPolygon {
 
         // Make a reference to planar 3D points to 2D
         const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
-        const xRef = normalize(sub(C, O));
-        const yRef = normalize(sub(sub(B, O), mul(xRef, dot(sub(B, O), xRef))));
+        const x_ref = normalize(sub(C, O));
+        const y_ref = normalize(sub(sub(B, O), mul(x_ref, dot(sub(B, O), x_ref))));
         const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
-        let xMin = Number.MAX_VALUE, xMax = Number.MIN_VALUE;
-        let yMin = Number.MAX_VALUE, yMax = Number.MIN_VALUE;
+        let x_min = Number.MAX_VALUE, x_max = Number.MIN_VALUE;
+        let y_min = Number.MAX_VALUE, y_max = Number.MIN_VALUE;
         let x, y, z, ab, bd, ob, od;
 
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
@@ -335,18 +335,18 @@ class ConvexPolygon {
             // Create the new 2D point
             [x, y, z] = rot2d(
                 [
-                    dot(sub(A, O), xRef),
-                    dot(sub(A, O), yRef)
+                    dot(sub(A, O), x_ref),
+                    dot(sub(A, O), y_ref)
                 ],
                 ref_angle
             )
             this.planar_points[i] = [x, y, z];
 
             // Save Boundaries
-            if (x < xMin) xMin = x;
-            if (x > xMax) xMax = x;
-            if (y < yMin) yMin = y;
-            if (y > yMax) yMax = y;
+            if (x < x_min) x_min = x;
+            if (x > x_max) x_max = x;
+            if (y < y_min) y_min = y;
+            if (y > y_max) y_max = y;
 
             // Compute angle
             this.angles[i] = angle(C, A, B);
@@ -374,8 +374,8 @@ class ConvexPolygon {
         });
 
         // Compute width and height from 2D boundaries
-        this.width = Math.abs(xMax - xMin);
-        this.height = Math.abs(yMax - yMin);
+        this.width = Math.abs(x_max - x_min);
+        this.height = Math.abs(y_max - y_min);
 
         // Compute color which depends on slope
         this.color = angle2color(this.slope);
