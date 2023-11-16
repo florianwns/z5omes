@@ -532,12 +532,13 @@
     let ZOME = {
         body_rings: [],
         base: null,
+        connection_point: null,
         num: 0,
     };
 
     function is_valid_zome(obj) {
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-        return !(!obj || !["body_rings", "base", "num"].reduce(hasKey, true));
+        return !(!obj || !["body_rings", "base", "connection_point", "num"].reduce(hasKey, true));
     };
 
     // Enable tooltips
@@ -1639,10 +1640,18 @@
                         }
                     }
 
+
+                    // Compute the connection point
+                    const connection_point = [0, 0, 0];
+
+
+
+
                     // Save Zome and dispatch it
                     ZOME = {
                         body_rings: body_rings,
                         base: base,
+                        connection_point: connection_point,
                         num: N,
                     }
 
