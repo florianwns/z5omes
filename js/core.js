@@ -262,7 +262,7 @@ class Color {
 
 class PolygonRing {
     constructor(polygon, num) {
-        // Init variables
+        // Define an ring of polygon (triangle, kite, etc...) with N instances around the ring.
         this.polygon = polygon
 
         // Compute angles and colors
