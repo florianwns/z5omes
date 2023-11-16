@@ -15,7 +15,7 @@
 <body class="bg-light">
 
 <div x-data="settings" @zome-renderer-is-ready.window="__make_zome"
-     class="offcanvas offcanvas-start" tabindex="-1" data-bs-scroll="true"
+     class="offcanvas offcanvas-start" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false"
      id="offcanvasSettings" aria-labelledby="settingsLabel">
     <div class="offcanvas-body">
         <div class="d-flex align-items-center mb-3">
@@ -194,294 +194,296 @@
     </div>
 </div>
 
-<div class="container-xl row m-auto">
-    <div class="col mb-3 mt-3">
-        <div class="d-flex align-items-center">
-            <h2 id="#title" class="text-primary me-auto mb-0">
-                <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
-                Z<span class="fs-4">o</span>oOo<span
-                    class="fs-4">o</span>mes v2
-            </h2>
+<div class="auto-shift">
+    <div class="container-xl row m-auto">
+        <div class="col mb-3 mt-3">
+            <div class="d-flex align-items-center">
+                <h2 id="#title" class="text-primary me-auto mb-0">
+                    <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
+                    Z<span class="fs-4">o</span>oOo<span
+                        class="fs-4">o</span>mes v2
+                </h2>
 
-            <a href="https://github.com/florianwns/z5omes"
-               class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip" title="Go to Github">
-                <i class="fa-brands fa-github"></i>
-            </a>
+                <a href="https://github.com/florianwns/z5omes"
+                   class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip" title="Go to Github">
+                    <i class="fa-brands fa-github"></i>
+                </a>
 
-            <button class="btn btn-primary" type="button"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
-                <i class="fa-solid fa-cog"></i>
-            </button>
+                <button class="btn btn-primary" type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
+                    <i class="fa-solid fa-cog"></i>
+                </button>
 
-        </div>
+            </div>
 
-        <div class="d-flex flex-column">
-            <nav class="navbar mx-auto mt-2">
-                <ul class="nav nav-pills" id="nav-tab" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab" data-bs-target="#nav-3D"
-                                type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
-                            <i class="fa-solid fa-chart-pyramid me-1"></i>
-                            3D View
-                        </button>
-                    </li>
-                    <li>
-                        <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab" data-bs-target="#nav-print"
-                                type="button" role="tab" aria-controls="nav-print" aria-selected="false">
-                            <i class="fa-solid fa-print me-1"></i>
-                            Print
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-            <div class="tab-content h-100 mt-3">
-                <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
-                     tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
-                     @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center">
-                        <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
-                            <!-- Export to -->
-                            <div class="ps-2 exports-container" style="top:0px;">
-                                <div class="vstack">
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to STL format"
-                                          @click="download_stl()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">STL</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to PLY format"
-                                          @click="download_ply()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">PLY</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to GLTF format"
-                                          @click="download_gltf()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">GLTF</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to OBJ format"
-                                          @click="download_obj()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">OBJ</span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Canvas for Zome 3D rendering -->
-                            <div x-ref="canvas" style="height:500px; cursor: move;"
-                                 class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
-
-                            <div class="d-flex flex-wrap justify-content-evenly">
-                                <!-- Draw Axis -->
-                                <div class="form-check form-switch me-2 mb-3">
-                                    <label class="form-check-label" for="draw-axis-switch">Axis</label>
-                                    <input class="form-check-input" type="checkbox" role="switch"
-                                           id="draw-axis-switch" x-model="draw_axis">
+            <div class="d-flex flex-column">
+                <nav class="navbar mx-auto mt-2">
+                    <ul class="nav nav-pills" id="nav-tab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab" data-bs-target="#nav-3D"
+                                    type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
+                                <i class="fa-solid fa-chart-pyramid me-1"></i>
+                                3D View
+                            </button>
+                        </li>
+                        <li>
+                            <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab" data-bs-target="#nav-print"
+                                    type="button" role="tab" aria-controls="nav-print" aria-selected="false">
+                                <i class="fa-solid fa-print me-1"></i>
+                                Print
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="tab-content h-100 mt-3">
+                    <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
+                         tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
+                         @zome-is-made.window="process">
+                        <div class="d-flex justify-content-center">
+                            <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
+                                <!-- Export to -->
+                                <div class="ps-2 exports-container" style="top:0px;">
+                                    <div class="vstack">
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to STL format"
+                                              @click="download_stl()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">STL</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to PLY format"
+                                              @click="download_ply()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">PLY</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to GLTF format"
+                                              @click="download_gltf()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">GLTF</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to OBJ format"
+                                              @click="download_obj()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">OBJ</span>
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <!-- Spin -->
-                                <div class="form-check form-switch mb-3">
-                                    <label class="form-check-label" for="spin-switch">Spin</label>
-                                    <input class="form-check-input" type="checkbox" role="switch"
-                                           id="spin-switch" x-model="is_spinning">
+                                <!-- Canvas for Zome 3D rendering -->
+                                <div x-ref="canvas" style="height:500px; cursor: move;"
+                                     class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
+
+                                <div class="d-flex flex-wrap justify-content-evenly">
+                                    <!-- Draw Axis -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-axis-switch" x-model="draw_axis">
+                                    </div>
+
+                                    <!-- Spin -->
+                                    <div class="form-check form-switch mb-3">
+                                        <label class="form-check-label" for="spin-switch">Spin</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="spin-switch" x-model="is_spinning">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
-                     tabindex="0"
-                     x-data="renderer_a4" @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
-                        <div class="position-relative">
-                            <!-- Export to -->
-                            <div class="ps-2 exports-container" style="top:48px;">
-                                <div class="vstack">
-                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to SVG format"
-                                          @click="download_svg()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">SVG</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to PDF format"
-                                          @click="download_pdf()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">PDF</span>
-                                    </span>
+                    <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
+                         tabindex="0"
+                         x-data="renderer_a4" @zome-is-made.window="process">
+                        <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
+                            <div class="position-relative">
+                                <!-- Export to -->
+                                <div class="ps-2 exports-container" style="top:48px;">
+                                    <div class="vstack">
+                                        <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to SVG format"
+                                              @click="download_svg()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">SVG</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to PDF format"
+                                              @click="download_pdf()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">PDF</span>
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-2">
-                                <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
-                                    <option selected value="mandala_faces">Mandala Origami</option>
-                                    <option value="spiral_faces">Spiral Origami</option>
-                                    <option value="faces">Faces</option>
-                                </select>
+                                <div class="mb-2">
+                                    <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
+                                        <option selected value="mandala_faces">Mandala Origami</option>
+                                        <option value="spiral_faces">Spiral Origami</option>
+                                        <option value="faces">Faces</option>
+                                    </select>
 
-                            </div>
-
-                            <div class="ratio ratio-A4 bg-white rounded border position-relative">
-                                <!-- Svg Drawing -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
-                                     viewbox="0 0 210 297" x-ref="A4_sheet">
-                                </svg>
-
-                                <!-- Grid Drawing -->
-                                <div class="position-absolute top-0 start-0" x-show="num_col > 1">
-                                    <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
-                                        <div class="float-start border border-top-0 border-start-0"
-                                             :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
-                                             + ((i >= num_col * (num_col - 1)) ? ' border-bottom-0' : '')"
-                                             :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
-                                        </div>
-                                    </template>
                                 </div>
-                            </div>
 
-                            <div class="input-group input-group-sm mt-2">
-                                <!-- Draw color -->
-                                <button class="btn btn-primary" type="button"
-                                        data-bs-toggle="tooltip"
-                                        title="Draw polygon color"
-                                        :class="draw_color ? '' : 'btn-secondary'"
-                                        @click="draw_color = !draw_color">
-                                    <i class="fa-regular fa-droplet fa-fw"></i>
-                                </button>
-
-                                <!-- Draw centroid -->
-                                <button class="btn btn-primary" type="button"
-                                        data-bs-toggle="tooltip"
-                                        title="Draw polygon centroid"
-                                        :class="draw_centroid ? '' : 'btn-secondary'"
-                                        @click="draw_centroid = !draw_centroid">
-                                    <i class="fa-regular fa-circle-dot fa-fw"></i>
-                                </button>
-
-                                <!-- Zoom Level -->
-                                <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </span>
-                                <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
-                                       x-model.number="zoom" x-ref="zoom_slider">
-
-                                <!-- Num Col of Grid -->
-                                <button class="btn btn-primary" type="button"
-                                        data-bs-toggle="tooltip"
-                                        title="Split the drawing into multiple A4 sheets for export to PDF"
-                                        @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
-                                    <i class="fa-regular fa-grid-2-plus fa-fw"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
-                         style="max-height: 96px;overflow-y: auto;">
-                        <template x-for="(color, i) in bulleted_list_colors" :key="i">
-                            <div class="px-1" @click="page_index = i">
-                                <div class="bulleted_list_item"
-                                     :class="(page_index == i)? 'active' : ''"
-                                     :style="`background-color: ${color};`"></div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
-        <hr>
-
-        <div class="d-flex align-items-center">
-            <h5 class="text-secondary mt-4 mb-4 me-auto">
-                <i class="fa-solid fa-ruler-triangle me-1"></i>
-                Measurements
-            </h5>
-            <!-- CSV Button -->
-            <div>
-                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                      title="Export to TSV format"
-                      @click="download_tsv()">
-                    <i class="fa-solid fa-file"></i>
-                    <span class="fa-icon-file-type">TSV</span>
-                </span>
-            </div>
-            <div>
-                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                      title="Export to CSV format"
-                      @click="download_csv()">
-                    <i class="fa-solid fa-file"></i>
-                    <span class="fa-icon-file-type">CSV</span>
-                </span>
-            </div>
-        </div>
-
-        <div class="row justify-content-between">
-            <div class="col-md-6 col-xl-5 mt-2">
-                <ul class="list-group small">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Envelop Num Faces
-                        <span class="badge bg-info rounded-pill" x-text="envelop_num_faces"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Envelop Widest Ø
-                        <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Envelop Area
-                        <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
-                <ul class="list-group small">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Base Perimeter
-                        <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Base Ø
-                        <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Base Area
-                        <span class="badge bg-info rounded-pill" x-text="base_area"></span>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-12 mt-3 mb-5">
-                <div class="table-responsive border border-bottom-0 bg-white rounded">
-                    <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
-                        <thead class="bg-info text-white">
-                        <tr>
-                            <th></th>
-                            <template x-for="(obj, i) in table_column_names" :key="i">
-                                <th x-text="obj"></th>
-                            </template>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <template x-for="(row, i) in table_rows" :key="i">
-                            <tr class="align-middle">
-                                <td>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="row[0].color.hex">
-                                        <polygon :points="to_svg_points(row[0], 32)"/>
+                                <div class="ratio ratio-A4 bg-white rounded border position-relative">
+                                    <!-- Svg Drawing -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                                         viewbox="0 0 210 297" x-ref="A4_sheet">
                                     </svg>
-                                </td>
-                                <template x-for="(value, j) in row[1]" :key="j">
-                                    <td x-text="value"></td>
+
+                                    <!-- Grid Drawing -->
+                                    <div class="position-absolute top-0 start-0" x-show="num_col > 1">
+                                        <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
+                                            <div class="float-start border border-top-0 border-start-0"
+                                                 :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
+                                                 + ((i >= num_col * (num_col - 1)) ? ' border-bottom-0' : '')"
+                                                 :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="input-group input-group-sm mt-2">
+                                    <!-- Draw color -->
+                                    <button class="btn btn-primary" type="button"
+                                            data-bs-toggle="tooltip"
+                                            title="Draw polygon color"
+                                            :class="draw_color ? '' : 'btn-secondary'"
+                                            @click="draw_color = !draw_color">
+                                        <i class="fa-regular fa-droplet fa-fw"></i>
+                                    </button>
+
+                                    <!-- Draw centroid -->
+                                    <button class="btn btn-primary" type="button"
+                                            data-bs-toggle="tooltip"
+                                            title="Draw polygon centroid"
+                                            :class="draw_centroid ? '' : 'btn-secondary'"
+                                            @click="draw_centroid = !draw_centroid">
+                                        <i class="fa-regular fa-circle-dot fa-fw"></i>
+                                    </button>
+
+                                    <!-- Zoom Level -->
+                                    <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </span>
+                                    <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
+                                           x-model.number="zoom" x-ref="zoom_slider">
+
+                                    <!-- Num Col of Grid -->
+                                    <button class="btn btn-primary" type="button"
+                                            data-bs-toggle="tooltip"
+                                            title="Split the drawing into multiple A4 sheets for export to PDF"
+                                            @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
+                                        <i class="fa-regular fa-grid-2-plus fa-fw"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
+                             style="max-height: 96px;overflow-y: auto;">
+                            <template x-for="(color, i) in bulleted_list_colors" :key="i">
+                                <div class="px-1" @click="page_index = i">
+                                    <div class="bulleted_list_item"
+                                         :class="(page_index == i)? 'active' : ''"
+                                         :style="`background-color: ${color};`"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
+            <hr>
+
+            <div class="d-flex align-items-center">
+                <h5 class="text-secondary mt-4 mb-4 me-auto">
+                    <i class="fa-solid fa-ruler-triangle me-1"></i>
+                    Measurements
+                </h5>
+                <!-- CSV Button -->
+                <div>
+                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                          title="Export to TSV format"
+                          @click="download_tsv()">
+                        <i class="fa-solid fa-file"></i>
+                        <span class="fa-icon-file-type">TSV</span>
+                    </span>
+                </div>
+                <div>
+                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                          title="Export to CSV format"
+                          @click="download_csv()">
+                        <i class="fa-solid fa-file"></i>
+                        <span class="fa-icon-file-type">CSV</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row justify-content-between">
+                <div class="col-md-6 col-xl-5 mt-2">
+                    <ul class="list-group small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Envelop Num Faces
+                            <span class="badge bg-info rounded-pill" x-text="envelop_num_faces"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Envelop Widest Ø
+                            <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Envelop Area
+                            <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
+                    <ul class="list-group small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Base Perimeter
+                            <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Base Ø
+                            <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Base Area
+                            <span class="badge bg-info rounded-pill" x-text="base_area"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-12 mt-3 mb-5">
+                    <div class="table-responsive border border-bottom-0 bg-white rounded">
+                        <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
+                            <thead class="bg-info text-white">
+                            <tr>
+                                <th></th>
+                                <template x-for="(obj, i) in table_column_names" :key="i">
+                                    <th x-text="obj"></th>
                                 </template>
                             </tr>
-                        </template>
-                        </tbody>
-                        <tfoot>
-                        </tfoot>
-                    </table>
+                            </thead>
+                            <tbody>
+                            <template x-for="(row, i) in table_rows" :key="i">
+                                <tr class="align-middle">
+                                    <td>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                             :fill="row[0].color.hex">
+                                            <polygon :points="to_svg_points(row[0], 32)"/>
+                                        </svg>
+                                    </td>
+                                    <template x-for="(value, j) in row[1]" :key="j">
+                                        <td x-text="value"></td>
+                                    </template>
+                                </tr>
+                            </template>
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -912,7 +914,7 @@
                                 const centroid = d3.polygonCentroid(points);
                                 c.setAttribute('cx', `${centroid[0]}`);
                                 c.setAttribute('cy', `${centroid[1]}`);
-                                c.setAttribute('r', `${pixel_ratio * 10}`);
+                                c.setAttribute('r', '1');
                                 svg_elements[iF] = c;
                                 iF++;
                             }

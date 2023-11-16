@@ -104,3 +104,17 @@
 .offcanvas-backdrop.show {
     opacity: 0.1 !important;
 }
+
+.offcanvas + .auto-shift {
+    margin: 0;
+    transition: margin-left .1s ease-in-out
+}
+
+@media (min-width: 1280px) {
+    .offcanvas.show + .auto-shift {
+        margin-left: 400px!important;
+    }
+}
+
+
+
