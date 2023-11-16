@@ -1508,7 +1508,7 @@
 
                     // Initialize variables
                     let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, dist_to_ground, y, face;
-                    let lastIsTruncated = false;
+                    let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
                     // Add points on first ring every 'incr_rad' from left to right
@@ -1582,7 +1582,7 @@
                                 // Add last triangles to close it after if needed
                                 triangles.push(iE, iF, iC);
                                 hit_ground = true;
-                                lastIsTruncated = true;
+                                last_is_truncated = true;
                             }
                         }
 
@@ -1623,7 +1623,7 @@
                             // Push base vertices only if zome is partial
                             if (IS_PARTIAL) {
                                 base_vertices.push(iB);
-                                if (lastIsTruncated && far_enough) {
+                                if (last_is_truncated && far_enough) {
                                     base_vertices.push(iC);
                                 }
                             }
