@@ -105,7 +105,7 @@
                     HR
                 </span>
                 <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                       :min="toDecimal(2 / num, FLOAT_PRECISION)"
+                       :min="to_decimal(2 / num, FLOAT_PRECISION)"
                        x-model.number="height_ratio" x-ref="height_ratio_slider">
                 <input class="form-control" step="0.01" type="number"
                        x-model.lazy.number="height_ratio">
@@ -690,7 +690,6 @@
                     const envelop_faces = new Array(envelop_rings.length);
                     _.forEach(envelop_rings, (ring, iR) => {
                         const face = ring.polygon;
-                        face.compute();
 
                         // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 faces
                         if (num_rings > 1) {
@@ -1508,7 +1507,7 @@
 
                     // Initialize variables
                     let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, dist_to_ground, y, face;
-                    let lastIsTruncated = false;
+                    let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
                     // Add points on first ring every 'incr_rad' from left to right
@@ -1582,7 +1581,7 @@
                                 // Add last triangles to close it after if needed
                                 triangles.push(iE, iF, iC);
                                 hit_ground = true;
-                                lastIsTruncated = true;
+                                last_is_truncated = true;
                             }
                         }
 
@@ -1623,7 +1622,7 @@
                             // Push base vertices only if zome is partial
                             if (IS_PARTIAL) {
                                 base_vertices.push(iB);
-                                if (lastIsTruncated && far_enough) {
+                                if (last_is_truncated && far_enough) {
                                     base_vertices.push(iC);
                                 }
                             }
@@ -1645,9 +1644,6 @@
 
                     // Compute the connection point
                     const connection_point = [0, 0, 0];
-
-
-
 
                     // Save Zome and dispatch it
                     ZOME = {

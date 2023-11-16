@@ -30,7 +30,6 @@ Goodkarma seulement pour le moment
 ## A faire 
 
 * Dessiner les montants
-* entroid canvas à revoir   
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
 * Mandala : export en 3D : .obj
 * la caméra tourne autour du zome et le zome ne toune pas
