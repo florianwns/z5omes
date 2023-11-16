@@ -495,8 +495,8 @@
 <!-- Lodash -->
 <script src="js/lodash.min.js"></script>
 
-<!-- Geometry functions -->
-<script src="js/geom.js?v2.0"></script>
+<!-- Core and geometry functions -->
+<script src="js/core.js"></script>
 
 <!-- ThreeJS -->
 <script src="js/three.min.js"></script>
@@ -590,12 +590,12 @@
                     return humanize_distance(value);
                 },
                 format(key, value) {
-                    return toDecimal(value, 2);
+                    return to_decimal(value, 2);
                 },
                 format_str(value, unit) {
                     switch (key) {
                         default:
-                            return toDecimal(value, FLOAT_PRECISION);
+                            return to_decimal(value, FLOAT_PRECISION);
                     }
                 },
                 get_slider(key) {
@@ -649,10 +649,10 @@
                             i + 1,
                             humanize_distance(face.width),
                             humanize_distance(face.height),
-                            reprArr(uniqueArr(_.map(face.edge_distances, v => humanize_distance(v)))),
-                            reprArr(uniqueArr(_.map(face.angles, a => reprAngle(rad2deg(a))))),
-                            reprAngle(rad2deg(face.slope)),
-                            reprAngle(rad2deg(face.σ)),
+                            humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
+                            humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
+                            humanize_angle(rad2deg(face.slope)),
+                            humanize_angle(rad2deg(face.σ)),
                             humanize_area(face.area),
                             humanize_distance(face.diameter),
                         ]];
@@ -948,7 +948,7 @@
                             rotated_A = rot2d(planar_points[1], a, O);
 
                             // Rotate the other way if rotatedA is not too close to A
-                            if (toDecimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
+                            if (to_decimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
                                 a = -a;
                             }
                             planar_points = planar_points.map(p => rot2d(p, a, O));
@@ -1373,9 +1373,9 @@
                 get theta() {
                     switch (this.angle_unit) {
                         case "rad":
-                            return toDecimal(deg2rad(this.theta_deg), FLOAT_PRECISION);
+                            return to_decimal(deg2rad(this.theta_deg), FLOAT_PRECISION);
                         case "tan":
-                            return toDecimal(Math.tan(deg2rad(this.theta_deg)), FLOAT_PRECISION);
+                            return to_decimal(Math.tan(deg2rad(this.theta_deg)), FLOAT_PRECISION);
                         case "deg":
                         default:
                             return this.theta_deg;
@@ -1396,11 +1396,11 @@
                 },
 
                 get num_rhombus() {
-                    return toDecimal(this.num * this.height_ratio - 1, 0);
+                    return to_decimal(this.num * this.height_ratio - 1, 0);
                 },
                 set num_rhombus(value) {
                     this.kite_ratio = 1;
-                    this.height_ratio = toDecimal((value + 1) / this.num, FLOAT_PRECISION);
+                    this.height_ratio = to_decimal((value + 1) / this.num, FLOAT_PRECISION);
                 },
                 get is_rhombus() {
                     return this.kite_ratio === 1;
@@ -1437,9 +1437,9 @@
                     // Format Zome parameters by pair of [key, value]
                     switch (key) {
                         case 'num':
-                            return toDecimal(value, 0);
+                            return to_decimal(value, 0);
                         default:
-                            return toDecimal(value, FLOAT_PRECISION);
+                            return to_decimal(value, FLOAT_PRECISION);
                     }
                 },
                 randomize() {
@@ -1465,7 +1465,7 @@
                     envelop_rings = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
-                    return toDecimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
+                    return to_decimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
                 },
                 add_vertice(p) {
                     vertices.push(p);
@@ -1540,10 +1540,10 @@
                             C = vertices[iC];
 
                             // Compute the new point to close diamond/kite face
-                            D = add(A, mul(sub(mid(B, C), A), 1 + K));
+                            D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
-                            y = toDecimal(D[1], FLOAT_PRECISION);
+                            y = to_decimal(D[1], FLOAT_PRECISION);
 
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
@@ -1557,7 +1557,7 @@
                                 }
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
-                                hit_ground = toDecimal(y, 2) == 0;
+                                hit_ground = to_decimal(y, 2) == 0;
                                 if (hit_ground) {
                                     triangles.push(iD, iD, iC);
                                 }
@@ -1609,7 +1609,7 @@
                             C = vertices[iC];
 
                             // Deal with case where B and C are too close, so we don't add them
-                            const far_enough = toDecimal(dist(B, C), 2) !== 0;
+                            const far_enough = to_decimal(dist(B, C), 2) !== 0;
                             if (far_enough) {
                                 // Add triangle to faces
                                 if (iT == 0) {
@@ -1634,7 +1634,7 @@
                         face = new ZomeBase(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
-                        const far_enough = toDecimal(dist(face.points[0], face.points[1]), 2) !== 0;
+                        const far_enough = to_decimal(dist(face.points[0], face.points[1]), 2) !== 0;
                         if (far_enough) {
                             base = face;
                         }
