@@ -1,49 +1,69 @@
-// Constants
+// ------------------------------------
+// ========== Math Constants ==========
+// ------------------------------------
+
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
 
 
-function add(a, b) {
-    return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+// -----------------------------------
+// ========== 3D Operations ==========
+// -----------------------------------
+
+function add(p1, p2) {
+    // Add two 3D points
+    return [p1[0] + p2[0], p1[1] + p2[1], p1[2] + p2[2]];
 }
 
-function sub(a, b) {
-    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+function sub(p1, p2) {
+    // Subtract two 3D points
+    return [p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2]];
 }
 
-function mul(a, f) {
-    return [a[0] * f, a[1] * f, a[2] * f];
+function mul(p1, k) {
+    // Multiply a 3D point by k
+    // Increasing or decreasing the coordinates of the point by the k factor.
+    return [p1[0] * k, p1[1] * k, p1[2] * k];
 }
 
-function dot(a, b) {
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+function dot(vec1, vec2) {
+    // The dot product or scalar product of two 3D vectors (or points
+    // because a point can be represented as a position vector from the origin).
+    return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
 }
 
-function len2(a) {
-    return dot(a, a);
+function squared_norm(vec) {
+    // Compute the squared norm of the vector
+    return dot(vec, vec);
 }
 
-function len(a) {
-    return Math.sqrt(len2(a));
+function len(vec) {
+    // Compute the length (magnitude) of vector
+    return Math.sqrt(squared_norm(vec));
 }
 
-function dist(a, b) {
-    return len(sub(a, b));
+function dist(p1, p2) {
+    // Compute the distance between two 3D points
+    return len(sub(p1, p2));
 }
 
-function normalize(a) {
-    return mul(a, 1 / len(a));
+function normalize(vec) {
+    // Normalizing a vector consists of transforming it so that its norm (or magnitude)
+    // becomes equal to 1 while preserving its direction.
+    return mul(vec, 1 / len(vec));
 }
 
 function cross(a, b) {
     return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
 
-function mid(a, b) {
-    return mul(add(a, b), 0.5);
+function midpoint(p1, p2) {
+    // Find the midpoint of a segment
+    return mul(add(p1, p2), 0.5);
 }
 
 function angle(p1, p2, p3) {
+    // Compute the angle of 3 points
     const a = dist(p2, p3);
     const b = dist(p1, p2);
     const c = dist(p1, p3);
@@ -51,6 +71,7 @@ function angle(p1, p2, p3) {
 }
 
 function dihedral_angle(a, b, c) {
+    // Compute the dihedral angle from 3 angles
     // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
     return Math.acos(
         (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
@@ -67,72 +88,27 @@ function rot2d(v, theta, o = [0, 0, 0]) {
     return [x, y, 0]
 }
 
+
+// ---------------------------------
+// ========== Conversions ==========
+// ---------------------------------
+
 function deg2rad(deg) {
+    // Convert degrees to radians
     return deg * Math.PI / 180;
 }
 
 function rad2deg(rad) {
+    // Convert radians to degrees
     return 180.0 * rad / Math.PI;
 }
 
-function toDecimal(x, fractionDigits = 2) {
+function to_decimal(x, fractionDigits = 2) {
     return parseFloat(x.toFixed(fractionDigits));
 }
 
-function reprDistance(d) {
-    if (isNaN(d)) {
-        return "";
-    }
-
-    // d unit is in mm
-    if (d >= 1e6) {
-        return toDecimal(d / 1e6) + "km";
-    } else if (d >= 1e3) {
-        return toDecimal(d / 1e3) + "m";
-    } else if (d >= 10) {
-        return toDecimal(d / 10) + "cm";
-    } else {
-        return toDecimal(d) + "mm";
-    }
-};
-
-
-function humanize_distance(d) {
-    // d unit is meter
-    if (isNaN(d)) {
-        return "";
-    }
-    // Distance are in milimeters
-    if (d >= 1e6) {
-        return toDecimal(d / 1e6) + "km";
-    } else if (d >= 1e3) {
-        return toDecimal(d / 1e3) + "m";
-    } else if (d >= 10) {
-        return toDecimal(d / 10) + "cm";
-    } else {
-        return toDecimal(d) + "mm";
-    }
-};
-
-
-function humanize_area(d) {
-    if (isNaN(d)) {
-        return "";
-    }
-
-    // Area are in mm²
-    if (d >= 1e12) {
-        return toDecimal(d / 1e12) + "km²";
-    } else if (d >= 1e6) {
-        return toDecimal(d / 1e6) + "m²";
-    } else if (d >= 100) {
-        return toDecimal(d / 100) + "cm²";
-    } else {
-        return toDecimal(d) + "mm²";
-    }
-};
-
 function to_mm(v, unit) {
+    // Helper to convert value to mm
     switch (unit) {
         case "m":
             return v * 1000;
@@ -144,8 +120,8 @@ function to_mm(v, unit) {
     }
 }
 
-
 function from_mm(v, unit) {
+    // Helper to convert value from mm to other unit
     switch (unit) {
         case "m":
             return v / 1000;
@@ -157,65 +133,8 @@ function from_mm(v, unit) {
     }
 }
 
-function to_meters(v, unit) {
-    switch (unit) {
-        case "mm":
-            return v / 1000;
-        case "cm":
-            return v / 100;
-        case "m":
-        default:
-            return v;
-    }
-}
-
-
-function from_meters(v, unit) {
-    switch (unit) {
-        case "mm":
-            return v * 1000;
-        case "cm":
-            return v * 100;
-        case "m":
-        default:
-            return v;
-    }
-}
-
-function reprArea(d) {
-    // d unit is in mm²
-    if (isNaN(d)) {
-        return "";
-    }
-
-    if (d >= 1e12) {
-        return toDecimal(d / 1e12) + "km²";
-    } else if (d >= 1e6) {
-        return toDecimal(d / 1e6) + "m²";
-    } else if (d >= 100) {
-        return toDecimal(d / 100) + "cm²";
-    } else {
-        return toDecimal(d) + "mm²";
-    }
-};
-
-function reprAngle(a, fractionDigits = 2) {
-    return !isNaN(a) ? a.toFixed(fractionDigits) + "°" : "";
-}
-
-function reprArr(arr, unit = "") {
-    const res = _.join(_.map(arr, v => v + unit), " ");
-    return `${res}`;
-}
-
-function uniqueArr(arr) {
-    // Set retains list order
-    const s = new Set(arr);
-    return [...s];
-}
-
 function hsl2rgb(h, s, l) {
-    // output RGB have 0 to 1 value (not 255)
+    // Convert HSL color to RGB color (0 to 1 value not 255)
     s /= 100;
     l /= 100;
     const k = n => (n + h / 30) % 12;
@@ -226,17 +145,67 @@ function hsl2rgb(h, s, l) {
 };
 
 function rgb2hex(rgb) {
+    // Convert RGB color to HSL color
     return `#${_.reduce(rgb, (res, v) => res + parseInt(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
-};
+}
 
 
-class Color {
-    constructor(rgb) {
-        // Consider that polygon is made by triangle,
-        this.rgb = rgb;
-        this.hex = rgb2hex(rgb);
+// -----------------------------
+// ========== Helpers ==========
+// -----------------------------
+
+function humanize_distance(d) {
+    // Helper to display distances
+    if (isNaN(d)) {
+        return "";
+    }
+    // Distance are in milimeters
+    if (d >= 1e6) {
+        return to_decimal(d / 1e6) + "km";
+    } else if (d >= 1e3) {
+        return to_decimal(d / 1e3) + "m";
+    } else if (d >= 10) {
+        return to_decimal(d / 10) + "cm";
+    } else {
+        return to_decimal(d) + "mm";
     }
 }
+
+function humanize_area(d) {
+    // Helper to display areas
+    if (isNaN(d)) {
+        return "";
+    }
+
+    // Area are in mm²
+    if (d >= 1e12) {
+        return to_decimal(d / 1e12) + "km²";
+    } else if (d >= 1e6) {
+        return to_decimal(d / 1e6) + "m²";
+    } else if (d >= 100) {
+        return to_decimal(d / 100) + "cm²";
+    } else {
+        return to_decimal(d) + "mm²";
+    }
+}
+
+function humanize_angle(a, fractionDigits = 2) {
+    // Helper to display angle in degrees
+    return !isNaN(a) ? a.toFixed(fractionDigits) + "°" : "";
+}
+
+function humanize_arr(arr, unit = "") {
+    // Helper to display array elements
+    const res = _.join(_.map(arr, v => v + unit), " ");
+    return `${res}`;
+}
+
+function unique_arr(arr) {
+    // Set retains list order
+    const s = new Set(arr);
+    return [...s];
+}
+
 
 function angle2color(theta = 0, beta = 0) {
     const hue = Math.round(((4 + beta) % TAU) / TAU * 360);
@@ -278,6 +247,18 @@ function download(filename, href) {
     element.remove();
 }
 
+
+// -----------------------------
+// ========== Classes ==========
+// -----------------------------
+
+class Color {
+    constructor(rgb) {
+        // Consider that polygon is made by triangle,
+        this.rgb = rgb;
+        this.hex = rgb2hex(rgb);
+    }
+}
 
 class PolygonRing {
     constructor(polygon, num) {
@@ -434,7 +415,7 @@ class PolygonWithHat extends ConvexPolygon {
 
     get slope() {
         // Compute the slope of the hat
-        const I = mid(this.points[1], this.points[this.num_points - 1]);
+        const I = midpoint(this.points[1], this.points[this.num_points - 1]);
         let a = angle(this.O, I, [0, I[1], 0]);
         if (a > TAU_Q) {
             a = Math.PI - a

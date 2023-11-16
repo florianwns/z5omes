@@ -21,10 +21,16 @@ Dessin de la charpente avec les montants à 90°
 
 Goodkarma seulement pour le moment
 
-## A faire
+## Evos
 
 0. Rajouter les réglages de dimensionnement (DONE)
 1. Export modèle à l'échelle (DONE)
-   
-2. Dessiner les montants 
-3. Et enfin dessiner les côtes (mode acidome) de chaque montants
+2. Clean de la lib geom.js => core.js
+
+## A faire 
+
+* Dessiner les montants
+* entroid canvas à revoir   
+* Et enfin dessiner les côtes (mode acidome) de chaque montants
+* Mandala : export en 3D : .obj
+* la caméra tourne autour du zome et le zome ne toune pas

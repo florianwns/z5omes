@@ -15,7 +15,8 @@
 <body class="bg-light">
 
 <div x-data="settings" @zome-renderer-is-ready.window="__make_zome"
-     class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSettings" aria-labelledby="settingsLabel">
+     class="offcanvas offcanvas-start" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false"
+     id="offcanvasSettings" aria-labelledby="settingsLabel">
     <div class="offcanvas-body">
         <div class="d-flex align-items-center mb-3">
             <h5 class="text-secondary my-1 me-3">
@@ -147,8 +148,8 @@
 
             <select class="form-select form-select-sm unit-select"
                     aria-label="Length unit" x-model="length_unit">
-                <option selected value="mm">mm</option>
-                <option value="cm">cm</option>
+                <option value="mm">mm</option>
+                <option selected value="cm">cm</option>
                 <option value="m">m</option>
             </select>
         </div>
@@ -160,7 +161,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
-                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                <input class="form-control form-range" min="100" max="10000" step="10" type="range"
                        x-model.number="zome_height_in_mm" x-ref="zome_height_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="zome_height">
@@ -172,7 +173,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
-                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
                        x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_width">
@@ -184,7 +185,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
-                <input class="form-control form-range" min="1" max="9999" step="1" type="range"
+                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
                        x-model.number="timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_thickness">
@@ -193,294 +194,296 @@
     </div>
 </div>
 
-<div class="container-xl row m-auto">
-    <div class="col mb-3 mt-3">
-        <div class="d-flex align-items-center">
-            <h2 id="#title" class="text-primary me-auto mb-0">
-                <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
-                Z<span class="fs-4">o</span>oOo<span
-                    class="fs-4">o</span>mes v2
-            </h2>
+<div class="auto-shift">
+    <div class="container-xl row m-auto">
+        <div class="col mb-3 mt-3">
+            <div class="d-flex align-items-center">
+                <h2 id="#title" class="text-primary me-auto mb-0">
+                    <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
+                    Z<span class="fs-4">o</span>oOo<span
+                        class="fs-4">o</span>mes v2
+                </h2>
 
-            <a href="https://github.com/florianwns/z5omes"
-               class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip" title="Go to Github">
-                <i class="fa-brands fa-github"></i>
-            </a>
+                <a href="https://github.com/florianwns/z5omes"
+                   class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip" title="Go to Github">
+                    <i class="fa-brands fa-github"></i>
+                </a>
 
-            <button class="btn btn-primary" type="button"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
-                <i class="fa-solid fa-cog"></i>
-            </button>
+                <button class="btn btn-primary" type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
+                    <i class="fa-solid fa-cog"></i>
+                </button>
 
-        </div>
+            </div>
 
-        <div class="d-flex flex-column">
-            <nav class="navbar mx-auto mt-2">
-                <ul class="nav nav-pills" id="nav-tab" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab" data-bs-target="#nav-3D"
-                                type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
-                            <i class="fa-solid fa-chart-pyramid me-1"></i>
-                            3D View
-                        </button>
-                    </li>
-                    <li>
-                        <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab" data-bs-target="#nav-print"
-                                type="button" role="tab" aria-controls="nav-print" aria-selected="false">
-                            <i class="fa-solid fa-print me-1"></i>
-                            Print
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-            <div class="tab-content h-100 mt-3">
-                <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
-                     tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
-                     @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center">
-                        <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
-                            <!-- Export to -->
-                            <div class="ps-2 exports-container" style="top:0px;">
-                                <div class="vstack">
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to STL format"
-                                          @click="download_stl()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">STL</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to PLY format"
-                                          @click="download_ply()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">PLY</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to GLTF format"
-                                          @click="download_gltf()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">GLTF</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to OBJ format"
-                                          @click="download_obj()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">OBJ</span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Canvas for Zome 3D rendering -->
-                            <div x-ref="canvas" style="height:500px; cursor: move;"
-                                 class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
-
-                            <div class="d-flex flex-wrap justify-content-evenly">
-                                <!-- Draw Axis -->
-                                <div class="form-check form-switch me-2 mb-3">
-                                    <label class="form-check-label" for="draw-axis-switch">Axis</label>
-                                    <input class="form-check-input" type="checkbox" role="switch"
-                                           id="draw-axis-switch" x-model="draw_axis">
+            <div class="d-flex flex-column">
+                <nav class="navbar mx-auto mt-2">
+                    <ul class="nav nav-pills" id="nav-tab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab" data-bs-target="#nav-3D"
+                                    type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
+                                <i class="fa-solid fa-chart-pyramid me-1"></i>
+                                3D View
+                            </button>
+                        </li>
+                        <li>
+                            <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab" data-bs-target="#nav-print"
+                                    type="button" role="tab" aria-controls="nav-print" aria-selected="false">
+                                <i class="fa-solid fa-print me-1"></i>
+                                Print
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="tab-content h-100 mt-3">
+                    <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
+                         tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
+                         @zome-is-made.window="process">
+                        <div class="d-flex justify-content-center">
+                            <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
+                                <!-- Export to -->
+                                <div class="ps-2 exports-container" style="top:0px;">
+                                    <div class="vstack">
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to STL format"
+                                              @click="download_stl()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">STL</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to PLY format"
+                                              @click="download_ply()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">PLY</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to GLTF format"
+                                              @click="download_gltf()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">GLTF</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to OBJ format"
+                                              @click="download_obj()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">OBJ</span>
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <!-- Spin -->
-                                <div class="form-check form-switch mb-3">
-                                    <label class="form-check-label" for="spin-switch">Spin</label>
-                                    <input class="form-check-input" type="checkbox" role="switch"
-                                           id="spin-switch" x-model="is_spinning">
+                                <!-- Canvas for Zome 3D rendering -->
+                                <div x-ref="canvas" style="height:500px; cursor: move;"
+                                     class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
+
+                                <div class="d-flex flex-wrap justify-content-evenly">
+                                    <!-- Draw Axis -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-axis-switch" x-model="draw_axis">
+                                    </div>
+
+                                    <!-- Spin -->
+                                    <div class="form-check form-switch mb-3">
+                                        <label class="form-check-label" for="spin-switch">Spin</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="spin-switch" x-model="is_spinning">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
-                     tabindex="0"
-                     x-data="renderer_a4" @zome-is-made.window="process">
-                    <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
-                        <div class="position-relative">
-                            <!-- Export to -->
-                            <div class="ps-2 exports-container" style="top:48px;">
-                                <div class="vstack">
-                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to SVG format"
-                                          @click="download_svg()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">SVG</span>
-                                    </span>
-                                    <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                          data-bs-toggle="tooltip" title="Export to PDF format"
-                                          @click="download_pdf()">
-                                        <i class="fa-solid fa-file"></i>
-                                        <span class="fa-icon-file-type">PDF</span>
-                                    </span>
+                    <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
+                         tabindex="0"
+                         x-data="renderer_a4" @zome-is-made.window="process">
+                        <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
+                            <div class="position-relative">
+                                <!-- Export to -->
+                                <div class="ps-2 exports-container" style="top:48px;">
+                                    <div class="vstack">
+                                        <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to SVG format"
+                                              @click="download_svg()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">SVG</span>
+                                        </span>
+                                        <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                              data-bs-toggle="tooltip" title="Export to PDF format"
+                                              @click="download_pdf()">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span class="fa-icon-file-type">PDF</span>
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-2">
-                                <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
-                                    <option selected value="mandala_faces">Mandala Origami</option>
-                                    <option value="spiral_faces">Spiral Origami</option>
-                                    <option value="faces">Faces</option>
-                                </select>
+                                <div class="mb-2">
+                                    <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
+                                        <option selected value="mandala_faces">Mandala Origami</option>
+                                        <option value="spiral_faces">Spiral Origami</option>
+                                        <option value="faces">Faces</option>
+                                    </select>
 
-                            </div>
-
-                            <div class="ratio ratio-A4 bg-white rounded border position-relative">
-                                <!-- Svg Drawing -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
-                                     viewbox="0 0 210 297" x-ref="A4_sheet">
-                                </svg>
-
-                                <!-- Grid Drawing -->
-                                <div class="position-absolute top-0 start-0" x-show="num_col > 1">
-                                    <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
-                                        <div class="float-start border border-top-0 border-start-0"
-                                             :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
-                                             + ((i >= num_col * (num_col - 1)) ? ' border-bottom-0' : '')"
-                                             :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
-                                        </div>
-                                    </template>
                                 </div>
-                            </div>
 
-                            <div class="input-group input-group-sm mt-2">
-                                <!-- Draw color -->
-                                <button class="btn btn-primary" type="button"
-                                        data-bs-toggle="tooltip"
-                                        title="Draw polygon color"
-                                        :class="draw_color ? '' : 'btn-secondary'"
-                                        @click="draw_color = !draw_color">
-                                    <i class="fa-regular fa-droplet fa-fw"></i>
-                                </button>
-
-                                <!-- Draw centroid -->
-                                <button class="btn btn-primary" type="button"
-                                        data-bs-toggle="tooltip"
-                                        title="Draw polygon centroid"
-                                        :class="draw_centroid ? '' : 'btn-secondary'"
-                                        @click="draw_centroid = !draw_centroid">
-                                    <i class="fa-regular fa-circle-dot fa-fw"></i>
-                                </button>
-
-                                <!-- Zoom Level -->
-                                <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </span>
-                                <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
-                                       x-model.number="zoom" x-ref="zoom_slider">
-
-                                <!-- Num Col of Grid -->
-                                <button class="btn btn-primary" type="button"
-                                        data-bs-toggle="tooltip"
-                                        title="Split the drawing into multiple A4 sheets for export to PDF"
-                                        @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
-                                    <i class="fa-regular fa-grid-2-plus fa-fw"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
-                         style="max-height: 96px;overflow-y: auto;">
-                        <template x-for="(color, i) in bulleted_list_colors" :key="i">
-                            <div class="px-1" @click="page_index = i">
-                                <div class="bulleted_list_item"
-                                     :class="(page_index == i)? 'active' : ''"
-                                     :style="`background-color: ${color};`"></div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
-        <hr>
-
-        <div class="d-flex align-items-center">
-            <h5 class="text-secondary mt-4 mb-4 me-auto">
-                <i class="fa-solid fa-ruler-triangle me-1"></i>
-                Measurements
-            </h5>
-            <!-- CSV Button -->
-            <div>
-                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                      title="Export to TSV format"
-                      @click="download_tsv()">
-                    <i class="fa-solid fa-file"></i>
-                    <span class="fa-icon-file-type">TSV</span>
-                </span>
-            </div>
-            <div>
-                <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                      title="Export to CSV format"
-                      @click="download_csv()">
-                    <i class="fa-solid fa-file"></i>
-                    <span class="fa-icon-file-type">CSV</span>
-                </span>
-            </div>
-        </div>
-
-        <div class="row justify-content-between">
-            <div class="col-md-6 col-xl-5 mt-2">
-                <ul class="list-group small">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Num Faces
-                        <span class="badge bg-info rounded-pill" x-text="body_num_faces"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Widest Ø
-                        <span class="badge bg-info rounded-pill" x-text="body_widest_diameter"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Body Area
-                        <span class="badge bg-info rounded-pill" x-text="body_area"></span>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
-                <ul class="list-group small">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Base Perimeter
-                        <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Base Ø
-                        <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Base Area
-                        <span class="badge bg-info rounded-pill" x-text="base_area"></span>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-12 mt-3 mb-5">
-                <div class="table-responsive border border-bottom-0 bg-white rounded">
-                    <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
-                        <thead class="bg-info text-white">
-                        <tr>
-                            <th></th>
-                            <template x-for="(obj, i) in table_column_names" :key="i">
-                                <th x-text="obj"></th>
-                            </template>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <template x-for="(row, i) in table_rows" :key="i">
-                            <tr class="align-middle">
-                                <td>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                         :fill="row[0].color.hex">
-                                        <polygon :points="to_svg_points(row[0], 32)"/>
+                                <div class="ratio ratio-A4 bg-white rounded border position-relative">
+                                    <!-- Svg Drawing -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                                         viewbox="0 0 210 297" x-ref="A4_sheet">
                                     </svg>
-                                </td>
-                                <template x-for="(value, j) in row[1]" :key="j">
-                                    <td x-text="value"></td>
+
+                                    <!-- Grid Drawing -->
+                                    <div class="position-absolute top-0 start-0" x-show="num_col > 1">
+                                        <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
+                                            <div class="float-start border border-top-0 border-start-0"
+                                                 :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
+                                                 + ((i >= num_col * (num_col - 1)) ? ' border-bottom-0' : '')"
+                                                 :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="input-group input-group-sm mt-2">
+                                    <!-- Draw color -->
+                                    <button class="btn btn-primary" type="button"
+                                            data-bs-toggle="tooltip"
+                                            title="Draw polygon color"
+                                            :class="draw_color ? '' : 'btn-secondary'"
+                                            @click="draw_color = !draw_color">
+                                        <i class="fa-regular fa-droplet fa-fw"></i>
+                                    </button>
+
+                                    <!-- Draw centroid -->
+                                    <button class="btn btn-primary" type="button"
+                                            data-bs-toggle="tooltip"
+                                            title="Draw polygon centroid"
+                                            :class="draw_centroid ? '' : 'btn-secondary'"
+                                            @click="draw_centroid = !draw_centroid">
+                                        <i class="fa-regular fa-circle-dot fa-fw"></i>
+                                    </button>
+
+                                    <!-- Zoom Level -->
+                                    <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </span>
+                                    <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
+                                           x-model.number="zoom" x-ref="zoom_slider">
+
+                                    <!-- Num Col of Grid -->
+                                    <button class="btn btn-primary" type="button"
+                                            data-bs-toggle="tooltip"
+                                            title="Split the drawing into multiple A4 sheets for export to PDF"
+                                            @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
+                                        <i class="fa-regular fa-grid-2-plus fa-fw"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
+                             style="max-height: 96px;overflow-y: auto;">
+                            <template x-for="(color, i) in bulleted_list_colors" :key="i">
+                                <div class="px-1" @click="page_index = i">
+                                    <div class="bulleted_list_item"
+                                         :class="(page_index == i)? 'active' : ''"
+                                         :style="`background-color: ${color};`"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
+            <hr>
+
+            <div class="d-flex align-items-center">
+                <h5 class="text-secondary mt-4 mb-4 me-auto">
+                    <i class="fa-solid fa-ruler-triangle me-1"></i>
+                    Measurements
+                </h5>
+                <!-- CSV Button -->
+                <div>
+                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                          title="Export to TSV format"
+                          @click="download_tsv()">
+                        <i class="fa-solid fa-file"></i>
+                        <span class="fa-icon-file-type">TSV</span>
+                    </span>
+                </div>
+                <div>
+                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                          title="Export to CSV format"
+                          @click="download_csv()">
+                        <i class="fa-solid fa-file"></i>
+                        <span class="fa-icon-file-type">CSV</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row justify-content-between">
+                <div class="col-md-6 col-xl-5 mt-2">
+                    <ul class="list-group small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Envelop Num Faces
+                            <span class="badge bg-info rounded-pill" x-text="envelop_num_faces"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Envelop Widest Ø
+                            <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Envelop Area
+                            <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
+                    <ul class="list-group small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Base Perimeter
+                            <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Base Ø
+                            <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Base Area
+                            <span class="badge bg-info rounded-pill" x-text="base_area"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-12 mt-3 mb-5">
+                    <div class="table-responsive border border-bottom-0 bg-white rounded">
+                        <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
+                            <thead class="bg-info text-white">
+                            <tr>
+                                <th></th>
+                                <template x-for="(obj, i) in table_column_names" :key="i">
+                                    <th x-text="obj"></th>
                                 </template>
                             </tr>
-                        </template>
-                        </tbody>
-                        <tfoot>
-                        </tfoot>
-                    </table>
+                            </thead>
+                            <tbody>
+                            <template x-for="(row, i) in table_rows" :key="i">
+                                <tr class="align-middle">
+                                    <td>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                             :fill="row[0].color.hex">
+                                            <polygon :points="to_svg_points(row[0], 32)"/>
+                                        </svg>
+                                    </td>
+                                    <template x-for="(value, j) in row[1]" :key="j">
+                                        <td x-text="value"></td>
+                                    </template>
+                                </tr>
+                            </template>
+                            </tbody>
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -494,8 +497,8 @@
 <!-- Lodash -->
 <script src="js/lodash.min.js"></script>
 
-<!-- Geometry functions -->
-<script src="js/geom.js?v2.0"></script>
+<!-- Core and geometry functions -->
+<script src="js/core.js"></script>
 
 <!-- ThreeJS -->
 <script src="js/three.min.js"></script>
@@ -529,14 +532,15 @@
 
     // Use a global variable to store ZOME data
     let ZOME = {
-        body_rings: [],
+        envelop_rings: [],
         base: null,
+        connection_point: null,
         num: 0,
     };
 
     function is_valid_zome(obj) {
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-        return !(!obj || !["body_rings", "base", "num"].reduce(hasKey, true));
+        return !(!obj || !["envelop_rings", "base", "connection_point", "num"].reduce(hasKey, true));
     };
 
     // Enable tooltips
@@ -551,56 +555,49 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
             return {
-                body_faces: [],
+                envelop_faces: [],
                 base: null,
 
                 __to_real_world: null,
                 async init() {
                     this.__to_real_world = _.debounce(this.to_real_world, 1);
-
-                    this.$watch("height", (value) => {
-                        this.clamp("height", value);
-                        this.__to_real_world();
-                    });
-
-                    this.$watch("length_unit", () => this.__to_real_world());
                 },
                 get faces() {
-                    return this.has_base ? [...this.body_faces, this.base] : this.body_faces;
+                    return this.has_base ? [...this.envelop_faces, this.base] : this.envelop_faces;
                 },
                 get has_base() {
                     return this.base !== null;
                 },
-                get body_widest_diameter() {
-                    const value = _.reduce(this.body_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
-                    return reprDistance(value);
+                get envelop_widest_diameter() {
+                    const value = _.reduce(this.envelop_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                    return humanize_distance(value);
                 },
-                get body_area() {
-                    const value = _.reduce(this.body_faces, (res, p) => res + p.area * ZOME.num, 0);
-                    return reprArea(value);
+                get envelop_area() {
+                    const value = _.reduce(this.envelop_faces, (res, p) => res + p.area * ZOME.num, 0);
+                    return humanize_area(value);
                 },
-                get body_num_faces() {
-                    return ZOME.num * this.body_faces.length;
+                get envelop_num_faces() {
+                    return ZOME.num * this.envelop_faces.length;
                 },
                 get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
-                    return reprDistance(value);
+                    return humanize_distance(value);
                 },
                 get base_area() {
                     const value = this.base ? this.base.area : 0
-                    return reprArea(value);
+                    return humanize_area(value);
                 },
                 get base_perimeter() {
                     const value = this.base ? this.base.perimeter : 0
-                    return reprDistance(value);
+                    return humanize_distance(value);
                 },
                 format(key, value) {
-                    return toDecimal(value, 2);
+                    return to_decimal(value, 2);
                 },
                 format_str(value, unit) {
                     switch (key) {
                         default:
-                            return toDecimal(value, FLOAT_PRECISION);
+                            return to_decimal(value, FLOAT_PRECISION);
                     }
                 },
                 get_slider(key) {
@@ -620,9 +617,9 @@
                     let obj = hr;
                     obj += "# This zome was made with https://florianwns.github.io/z5omes/\n";
                     obj += hr;
-                    obj += `# Body Num Faces : ${this.body_num_faces}\n`;
-                    obj += `# Body Widest Ø : ${this.body_widest_diameter}\n`;
-                    obj += `# Body Area : ${this.body_area}\n`;
+                    obj += `# Envelop Num Faces : ${this.envelop_num_faces}\n`;
+                    obj += `# Envelop Widest Ø : ${this.envelop_widest_diameter}\n`;
+                    obj += `# Envelop Area : ${this.envelop_area}\n`;
                     obj += `# Base Perimeter : ${this.base_perimeter}\n`;
                     obj += `# Base Ø : ${this.base_diameter}\n`;
                     obj += `# Base Area : ${this.base_area}\n`;
@@ -652,14 +649,14 @@
                     _.forEach(this.faces, (face, i) => {
                         rows[i] = [face, [
                             i + 1,
-                            reprDistance(face.width),
-                            reprDistance(face.height),
-                            reprArr(uniqueArr(_.map(face.edge_distances, v => reprDistance(v)))),
-                            reprArr(uniqueArr(_.map(face.angles, a => reprAngle(rad2deg(a))))),
-                            reprAngle(rad2deg(face.slope)),
-                            reprAngle(rad2deg(face.σ)),
-                            reprArea(face.area),
-                            reprDistance(face.diameter),
+                            humanize_distance(face.width),
+                            humanize_distance(face.height),
+                            humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
+                            humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
+                            humanize_angle(rad2deg(face.slope)),
+                            humanize_angle(rad2deg(face.σ)),
+                            humanize_area(face.area),
+                            humanize_distance(face.diameter),
                         ]];
                     });
                     return rows;
@@ -683,37 +680,37 @@
                 },
                 to_real_world() {
                     // Clone faces
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
                     const base = _.cloneDeep(ZOME.base);
 
                     // Compute height ratio then convert dimensions to real world
-                    const num_rings = body_rings.length;
+                    const num_rings = envelop_rings.length;
 
-                    // Resize Body faces
-                    const body_faces = new Array(body_rings.length);
-                    _.forEach(body_rings, (ring, iR) => {
+                    // Resize Envelop faces
+                    const envelop_faces = new Array(envelop_rings.length);
+                    _.forEach(envelop_rings, (ring, iR) => {
                         const face = ring.polygon;
                         face.compute();
 
-                        // Compute σ, the Dihedral angle only for the Zome body with at least 2 faces
+                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 faces
                         if (num_rings > 1) {
                             if (iR == 0) {
-                                const next_face = body_rings[1].polygon;
+                                const next_face = envelop_rings[1].polygon;
                                 face.σ = dihedral_angle(next_face.φ, face.ω, face.ω);
                             } else {
-                                const prev_face = body_rings[iR - 1].polygon;
+                                const prev_face = envelop_rings[iR - 1].polygon;
                                 const α = angle(face.A, face.B, prev_face.B);
                                 const δ = angle(face.A, face.B, face.C);
                                 const λ = angle(prev_face.B, face.B, face.C);
                                 face.σ = dihedral_angle(λ, δ, α);
                             }
                         }
-                        body_faces[iR] = face;
+                        envelop_faces[iR] = face;
                     });
 
                     // Refresh proxy
                     this.base = base;
-                    this.body_faces = body_faces;
+                    this.envelop_faces = envelop_faces;
                 },
             };
         });
@@ -917,7 +914,7 @@
                                 const centroid = d3.polygonCentroid(points);
                                 c.setAttribute('cx', `${centroid[0]}`);
                                 c.setAttribute('cy', `${centroid[1]}`);
-                                c.setAttribute('r', `${pixel_ratio}`);
+                                c.setAttribute('r', '1');
                                 svg_elements[iF] = c;
                                 iF++;
                             }
@@ -937,13 +934,13 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                build_spiral_faces(body_rings) {
-                    const spiral_faces = new Array(body_rings.length);
+                build_spiral_faces(envelop_rings) {
+                    const spiral_faces = new Array(envelop_rings.length);
 
-                    // Compute body planar faces
+                    // Compute envelop planar faces
                     let O = [0, 0, 0], planar_points = [];
                     let A, a, rotated_A;
-                    _.forEach(body_rings, (ring, iR) => {
+                    _.forEach(envelop_rings, (ring, iR) => {
                         const polygon = ring.polygon;
 
                         // Move to Origin and rotate to match with previous piece
@@ -953,7 +950,7 @@
                             rotated_A = rot2d(planar_points[1], a, O);
 
                             // Rotate the other way if rotatedA is not too close to A
-                            if (toDecimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
+                            if (to_decimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
                                 a = -a;
                             }
                             planar_points = planar_points.map(p => rot2d(p, a, O));
@@ -968,12 +965,12 @@
                     return spiral_faces;
                 },
                 draw_faces() {
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
                     const base = _.cloneDeep(ZOME.base);
 
                     // for each color and each face add a page
                     const range = _.range(0, ZOME.num);
-                    for (const ring of body_rings) {
+                    for (const ring of envelop_rings) {
                         for (const i of range) {
                             const face = _.cloneDeep(ring.polygon);
                             face.color = ring.colors[i];
@@ -987,15 +984,15 @@
                     }
                 },
                 draw_mandala_faces() {
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
-                    const spiral_faces = this.build_spiral_faces(body_rings)
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
+                    const spiral_faces = this.build_spiral_faces(envelop_rings)
                     const base = _.cloneDeep(ZOME.base)
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
                         _.forEach(spiral_faces, (spiral_face, j) => {
-                            const ring = body_rings[j];
+                            const ring = envelop_rings[j];
                             const face = _.cloneDeep(spiral_face);
                             face.planar_points = face.planar_points.map(p => rot2d(p, ring.angles[i], O));
                             face.color = ring.colors[i];
@@ -1010,8 +1007,8 @@
                     }
                 },
                 draw_spiral_faces() {
-                    const body_rings = _.cloneDeep(ZOME.body_rings);
-                    const spiral_faces = this.build_spiral_faces(body_rings)
+                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
+                    const spiral_faces = this.build_spiral_faces(envelop_rings)
                     const base = _.cloneDeep(ZOME.base)
 
                     // For each color, Add a page with spiral faces
@@ -1019,7 +1016,7 @@
                         const colored_spiral_faces = [];
                         _.forEach(spiral_faces, (spiral_face, j) => {
                             const face = _.cloneDeep(spiral_face);
-                            face.color = body_rings[j].colors[i];
+                            face.color = envelop_rings[j].colors[i];
                             colored_spiral_faces.push(face)
                         });
                         pages.push(colored_spiral_faces);
@@ -1189,15 +1186,15 @@
                         vertexColors: true,
                     });
 
-                    // Build 3D Body Faces
+                    // Build 3D Envelop Faces
                     {
                         // Pre-Compute geometry points, ring colors and num_faces
                         const points = [];
-                        const num_rings = ZOME.body_rings.length;
+                        const num_rings = ZOME.envelop_rings.length;
                         const colors = new Array(num_rings);
                         const num_faces = new Array(num_rings);
                         const face_colors = new Array(num_rings);
-                        _.forEach(ZOME.body_rings, (ring, iR) => {
+                        _.forEach(ZOME.envelop_rings, (ring, iR) => {
                             const polygon = ring.polygon;
                             points.push(...polygon.faces);
                             colors[iR] = ring.colors;
@@ -1214,7 +1211,7 @@
                             const rot_geometry = geometry.clone()
 
                             // Rotate the new geometry
-                            const a = ZOME.body_rings[0].angles[iN];
+                            const a = ZOME.envelop_rings[0].angles[iN];
                             rot_geometry.rotateY(a);
 
                             // Get colors
@@ -1331,8 +1328,8 @@
         });
 
         Alpine.data('settings', () => {
-            let vertices = [];          // 3D point vector
-            let body_rings = [];
+            let vertices = [];                  // 3D point vector
+            let envelop_rings = [];                //
 
             return {
                 // Shape Parameters
@@ -1344,10 +1341,10 @@
                 suggested_height_ratio: null,    // Value to magnetize the zome to the nearest cut
 
                 // Sizing Parameters
-                length_unit: "mm",                      // Length unit by default is mm
-                zome_height_in_mm: WORLD_HEIGHT,       // Height in mm
-                timber_width_in_mm: 10,                // Timber width in mm
-                timber_thickness_in_mm: 5,              // Timber thickness in mm
+                length_unit: "cm",                                  // Length unit by default is cm
+                zome_height_in_mm: WORLD_HEIGHT,                     // Height in mm
+                timber_width_in_mm: WORLD_HEIGHT / 10,               // Timber width in mm
+                timber_thickness_in_mm: WORLD_HEIGHT / 10,           // Timber thickness in mm
 
                 // Commons parameters
                 help_is_displayed: false,
@@ -1378,9 +1375,9 @@
                 get theta() {
                     switch (this.angle_unit) {
                         case "rad":
-                            return toDecimal(deg2rad(this.theta_deg), FLOAT_PRECISION);
+                            return to_decimal(deg2rad(this.theta_deg), FLOAT_PRECISION);
                         case "tan":
-                            return toDecimal(Math.tan(deg2rad(this.theta_deg)), FLOAT_PRECISION);
+                            return to_decimal(Math.tan(deg2rad(this.theta_deg)), FLOAT_PRECISION);
                         case "deg":
                         default:
                             return this.theta_deg;
@@ -1401,11 +1398,11 @@
                 },
 
                 get num_rhombus() {
-                    return toDecimal(this.num * this.height_ratio - 1, 0);
+                    return to_decimal(this.num * this.height_ratio - 1, 0);
                 },
                 set num_rhombus(value) {
                     this.kite_ratio = 1;
-                    this.height_ratio = toDecimal((value + 1) / this.num, FLOAT_PRECISION);
+                    this.height_ratio = to_decimal((value + 1) / this.num, FLOAT_PRECISION);
                 },
                 get is_rhombus() {
                     return this.kite_ratio === 1;
@@ -1442,9 +1439,9 @@
                     // Format Zome parameters by pair of [key, value]
                     switch (key) {
                         case 'num':
-                            return toDecimal(value, 0);
+                            return to_decimal(value, 0);
                         default:
-                            return toDecimal(value, FLOAT_PRECISION);
+                            return to_decimal(value, FLOAT_PRECISION);
                     }
                 },
                 randomize() {
@@ -1467,10 +1464,10 @@
                 clear() {
                     // Clear data
                     vertices = [];
-                    body_rings = [];
+                    envelop_rings = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
-                    return toDecimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
+                    return to_decimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
                 },
                 add_vertice(p) {
                     vertices.push(p);
@@ -1545,10 +1542,10 @@
                             C = vertices[iC];
 
                             // Compute the new point to close diamond/kite face
-                            D = add(A, mul(sub(mid(B, C), A), 1 + K));
+                            D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
-                            y = toDecimal(D[1], FLOAT_PRECISION);
+                            y = to_decimal(D[1], FLOAT_PRECISION);
 
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
@@ -1558,11 +1555,11 @@
                                 // Add only the first piece, because only color after that
                                 if (iN == 0) {
                                     face = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
-                                    body_rings.push(new PolygonRing(face, N));
+                                    envelop_rings.push(new PolygonRing(face, N));
                                 }
 
                                 // Close the zome => Deal with case where this ring is exactly on the ground
-                                hit_ground = toDecimal(y, 2) == 0;
+                                hit_ground = to_decimal(y, 2) == 0;
                                 if (hit_ground) {
                                     triangles.push(iD, iD, iC);
                                 }
@@ -1579,7 +1576,7 @@
                                 // Add Truncated Kite to faces
                                 if (iN == 0) {
                                     face = new TruncatedKite([A, B, E, F, C])
-                                    body_rings.push(new PolygonRing(face, N));
+                                    envelop_rings.push(new PolygonRing(face, N));
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -1614,12 +1611,12 @@
                             C = vertices[iC];
 
                             // Deal with case where B and C are too close, so we don't add them
-                            const far_enough = toDecimal(dist(B, C), 2) !== 0;
+                            const far_enough = to_decimal(dist(B, C), 2) !== 0;
                             if (far_enough) {
                                 // Add triangle to faces
                                 if (iT == 0) {
                                     face = new Triangle([A, B, C]);
-                                    body_rings.push(new PolygonRing(face, N));
+                                    envelop_rings.push(new PolygonRing(face, N));
                                 }
                             }
 
@@ -1639,16 +1636,24 @@
                         face = new ZomeBase(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
-                        const far_enough = toDecimal(dist(face.points[0], face.points[1]), 2) !== 0;
+                        const far_enough = to_decimal(dist(face.points[0], face.points[1]), 2) !== 0;
                         if (far_enough) {
                             base = face;
                         }
                     }
 
+
+                    // Compute the connection point
+                    const connection_point = [0, 0, 0];
+
+
+
+
                     // Save Zome and dispatch it
                     ZOME = {
-                        body_rings: body_rings,
+                        envelop_rings: envelop_rings,
                         base: base,
+                        connection_point: connection_point,
                         num: N,
                     }
 
