@@ -513,9 +513,6 @@
 <!-- Lodash -->
 <script src="js/lodash.min.js"></script>
 
-<!-- Core and geometry functions -->
-<script src="js/core.js"></script>
-
 <!-- ThreeJS -->
 <script src="js/three.min.js"></script>
 <script src="js/OrbitControls.min.js"></script>
@@ -537,6 +534,9 @@
 
 <!-- Hammer : Touch events -->
 <script src="js/hammer.min.js"></script>
+
+<!-- Core and geometry functions -->
+<script src="js/core.js"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1216,25 +1216,25 @@
                         });
 
                         // Build geometry of first spiral
-                        const geometry = new THREE.BufferGeometry();
-                        geometry.setFromPoints(points)
-                        geometry.computeVertexNormals()
+                        const spiral_geometry = new THREE.BufferGeometry();
+                        spiral_geometry.setFromPoints(points)
+                        spiral_geometry.computeVertexNormals()
 
                         // Compute All faces geometries and colors
                         for (let iN = 0; iN < ZOME.num; iN++) {
-                            const rot_geometry = geometry.clone()
+                            const rotated_spiral_geometry = spiral_geometry.clone()
 
                             // Rotate the new geometry
                             const a = ZOME.spiral[0].angles[iN];
-                            rot_geometry.rotateY(a);
+                            rotated_spiral_geometry.rotateY(a);
 
                             // Get colors
                             for (let iR = 0; iR < num_crowns; iR++) {
                                 face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
                             }
+                            rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
 
-                            rot_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                            meshes.zome.add(new THREE.Mesh(rot_geometry, material))
+                            meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
                         }
                     }
 
