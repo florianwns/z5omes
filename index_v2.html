@@ -75,7 +75,7 @@
 
             <!--  Shape angle of Zome -->
             <div x-show="help_is_displayed">
-                <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first ring of zome. F =
+                <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first crown of zome. F =
                 tan(Θ)<br>
             </div>
             <div class="input-group input-group-sm mb-3">
@@ -88,7 +88,7 @@
                 <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
                        x-model.number="theta_deg" x-ref="theta_deg_slider">
                 <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
-                <select class="form-select" aria-label="Angle unit"
+                <select class="form-select unit-select" aria-label="Angle unit"
                         x-show="angle_unit != 'tan'" x-model="angle_unit">
                     <option selected value="deg">deg</option>
                     <option value="rad">rad</option>
@@ -190,6 +190,22 @@
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_thickness">
             </div>
+
+            <!-- Connection type -->
+            <div x-show="help_is_displayed">
+                <b>CT</b> : Connection type
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Connection type">CT</span>
+                <input class="form-control form-range" min="0" :max="CONNECTION_TYPES.length - 1" step="1" type="range"
+                       x-model.number="connection_type" x-ref="connection_type_slider">
+
+                <select class="form-select" aria-label="Connection type" x-model="connection_type">
+                    <template x-for="(conn, index) in CONNECTION_TYPES">
+                        <option :value="index" x-text="conn"></option>
+                    </template>
+                </select>
+            </div>
         </div>
     </div>
 </div>
@@ -220,7 +236,8 @@
                 <nav class="navbar mx-auto mt-2">
                     <ul class="nav nav-pills" id="nav-tab" role="tablist">
                         <li class="nav-item">
-                            <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab" data-bs-target="#nav-3D"
+                            <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-3D"
                                     type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
                                 <i class="fa-solid fa-chart-pyramid me-1"></i>
                                 3D View
@@ -318,9 +335,9 @@
 
                                 <div class="mb-2">
                                     <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
-                                        <option selected value="mandala_faces">Mandala Origami</option>
-                                        <option value="spiral_faces">Spiral Origami</option>
-                                        <option value="faces">Faces</option>
+                                        <option selected value="mandala_figs">Mandala Origami</option>
+                                        <option value="spiral_figs">Spiral Origami</option>
+                                        <option value="figs">Figures</option>
                                     </select>
 
                                 </div>
@@ -347,7 +364,7 @@
                                     <!-- Draw color -->
                                     <button class="btn btn-primary" type="button"
                                             data-bs-toggle="tooltip"
-                                            title="Draw polygon color"
+                                            title="Draw figure color"
                                             :class="draw_color ? '' : 'btn-secondary'"
                                             @click="draw_color = !draw_color">
                                         <i class="fa-regular fa-droplet fa-fw"></i>
@@ -356,7 +373,7 @@
                                     <!-- Draw centroid -->
                                     <button class="btn btn-primary" type="button"
                                             data-bs-toggle="tooltip"
-                                            title="Draw polygon centroid"
+                                            title="Draw figure centroid"
                                             :class="draw_centroid ? '' : 'btn-secondary'"
                                             @click="draw_centroid = !draw_centroid">
                                         <i class="fa-regular fa-circle-dot fa-fw"></i>
@@ -424,8 +441,8 @@
                 <div class="col-md-6 col-xl-5 mt-2">
                     <ul class="list-group small">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Envelop Num Faces
-                            <span class="badge bg-info rounded-pill" x-text="envelop_num_faces"></span>
+                            Envelop Num Figures
+                            <span class="badge bg-info rounded-pill" x-text="envelop_num_figs"></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Envelop Widest Ø
@@ -531,15 +548,15 @@
 
     // Use a global variable to store ZOME data
     let ZOME = {
-        envelop_rings: [],
+        spiral: [],
         base: null,
-        connection_point: null,
+        vanishing_point: null,
         num: 0,
     };
 
     function is_valid_zome(obj) {
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-        return !(!obj || !["envelop_rings", "base", "connection_point", "num"].reduce(hasKey, true));
+        return !(!obj || !["spiral", "base", "vanishing_point", "num"].reduce(hasKey, true));
     };
 
     // Enable tooltips
@@ -554,29 +571,29 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
             return {
-                envelop_faces: [],
+                envelop_figs: [],
                 base: null,
 
                 __to_real_world: null,
                 async init() {
                     this.__to_real_world = _.debounce(this.to_real_world, 1);
                 },
-                get faces() {
-                    return this.has_base ? [...this.envelop_faces, this.base] : this.envelop_faces;
+                get figs() {
+                    return this.has_base ? [...this.envelop_figs, this.base] : this.envelop_figs;
                 },
                 get has_base() {
                     return this.base !== null;
                 },
                 get envelop_widest_diameter() {
-                    const value = _.reduce(this.envelop_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                    const value = _.reduce(this.envelop_figs, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
                 get envelop_area() {
-                    const value = _.reduce(this.envelop_faces, (res, p) => res + p.area * ZOME.num, 0);
+                    const value = _.reduce(this.envelop_figs, (res, p) => res + p.area * ZOME.num, 0);
                     return humanize_area(value);
                 },
-                get envelop_num_faces() {
-                    return ZOME.num * this.envelop_faces.length;
+                get envelop_num_figs() {
+                    return ZOME.num * this.envelop_figs.length;
                 },
                 get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
@@ -616,7 +633,7 @@
                     let obj = hr;
                     obj += "# This zome was made with https://florianwns.github.io/z5omes/\n";
                     obj += hr;
-                    obj += `# Envelop Num Faces : ${this.envelop_num_faces}\n`;
+                    obj += `# Envelop Num Figures : ${this.envelop_num_figs}\n`;
                     obj += `# Envelop Widest Ø : ${this.envelop_widest_diameter}\n`;
                     obj += `# Envelop Area : ${this.envelop_area}\n`;
                     obj += `# Base Perimeter : ${this.base_perimeter}\n`;
@@ -644,18 +661,18 @@
                     ]
                 },
                 get table_rows() {
-                    const rows = new Array(this.faces.length);
-                    _.forEach(this.faces, (face, i) => {
-                        rows[i] = [face, [
+                    const rows = new Array(this.figs.length);
+                    _.forEach(this.figs, (fig, i) => {
+                        rows[i] = [fig, [
                             i + 1,
-                            humanize_distance(face.width),
-                            humanize_distance(face.height),
-                            humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
-                            humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
-                            humanize_angle(rad2deg(face.slope)),
-                            humanize_angle(rad2deg(face.σ)),
-                            humanize_area(face.area),
-                            humanize_distance(face.diameter),
+                            humanize_distance(fig.width),
+                            humanize_distance(fig.height),
+                            humanize_arr(unique_arr(_.map(fig.edge_distances, v => humanize_distance(v)))),
+                            humanize_arr(unique_arr(_.map(fig.angles, a => humanize_angle(rad2deg(a))))),
+                            humanize_angle(rad2deg(fig.slope)),
+                            humanize_angle(rad2deg(fig.σ)),
+                            humanize_area(fig.area),
+                            humanize_distance(fig.diameter),
                         ]];
                     });
                     return rows;
@@ -678,37 +695,36 @@
                     ]);
                 },
                 to_real_world() {
-                    // Clone faces
-                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
+                    // Clone structure
+                    const spiral = _.cloneDeep(ZOME.spiral);
                     const base = _.cloneDeep(ZOME.base);
 
-                    // Compute height ratio then convert dimensions to real world
-                    const num_rings = envelop_rings.length;
+                    const num_crowns = spiral.length;
 
-                    // Resize Envelop faces
-                    const envelop_faces = new Array(envelop_rings.length);
-                    _.forEach(envelop_rings, (ring, iR) => {
-                        const face = ring.polygon;
+                    // Resize envelop figs
+                    const envelop_figs = new Array(num_crowns);
+                    _.forEach(spiral, (crown, iR) => {
+                        const fig = crown.fig;
 
-                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 faces
-                        if (num_rings > 1) {
+                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 figs
+                        if (num_crowns > 1) {
                             if (iR == 0) {
-                                const next_face = envelop_rings[1].polygon;
-                                face.σ = dihedral_angle(next_face.φ, face.ω, face.ω);
+                                const next_fig = spiral[1].fig;
+                                fig.σ = dihedral_angle(next_fig.φ, fig.ω, fig.ω);
                             } else {
-                                const prev_face = envelop_rings[iR - 1].polygon;
-                                const α = angle(face.A, face.B, prev_face.B);
-                                const δ = angle(face.A, face.B, face.C);
-                                const λ = angle(prev_face.B, face.B, face.C);
-                                face.σ = dihedral_angle(λ, δ, α);
+                                const prev_fig = spiral[iR - 1].fig;
+                                const α = angle(fig.A, fig.B, prev_fig.B);
+                                const δ = angle(fig.A, fig.B, fig.C);
+                                const λ = angle(prev_fig.B, fig.B, fig.C);
+                                fig.σ = dihedral_angle(λ, δ, α);
                             }
                         }
-                        envelop_faces[iR] = face;
+                        envelop_figs[iR] = fig;
                     });
 
                     // Refresh proxy
                     this.base = base;
-                    this.envelop_faces = envelop_faces;
+                    this.envelop_figs = envelop_figs;
                 },
             };
         });
@@ -726,7 +742,7 @@
                 bulleted_list_colors: [],
                 zoom: 1,
                 num_col: 1,
-                kind_of_drawing: "mandala_faces",
+                kind_of_drawing: "mandala_figs",
                 draw_color: true,
                 draw_centroid: false,
 
@@ -809,7 +825,7 @@
                     doc.end();
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
-                        download("planar_faces.pdf", url);
+                        download("planar_figs.pdf", url);
                     });
 
                     // Tricks because svg is empty otherwise ;)
@@ -818,7 +834,7 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    download("planar_faces.svg", window.URL.createObjectURL(blob));
+                    download("planar_figs.svg", window.URL.createObjectURL(blob));
                 },
                 process() {
                     if (!is_valid_zome(ZOME)) {
@@ -829,27 +845,27 @@
                     // Init variables
                     pages = [];
                     switch (this.kind_of_drawing) {
-                        case 'spiral_faces':
-                            this.draw_spiral_faces();
+                        case 'spiral_figs':
+                            this.draw_spiral_figs();
                             break;
-                        case 'mandala_faces':
-                            this.draw_mandala_faces();
+                        case 'mandala_figs':
+                            this.draw_mandala_figs();
                             break;
-                        case 'faces':
-                            this.draw_faces();
+                        case 'figs':
+                            this.draw_figs();
                             break;
                     }
 
                     // Compute boundaries for all pages
                     page_bounds = new Array(pages.length);
-                    _.forEach(pages, (page_faces, iP) => {
+                    _.forEach(pages, (page_figs, iP) => {
                         // Reset boundaries
                         let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
                             xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
 
-                        // Compute boundaries of all faces
-                        for (const face of page_faces) {
-                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(face.planar_points);
+                        // Compute boundaries of all figs
+                        for (const fig of page_figs) {
+                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(fig.planar_points);
 
                             // Save boundaries
                             if (xPMin < xMin) xMin = xPMin;
@@ -865,9 +881,9 @@
 
                     // Add bulleted list
                     const bulleted_list_colors = new Array(pages.length);
-                    _.forEach(pages, (page_faces, iP) => {
+                    _.forEach(pages, (page_figs, iP) => {
                         // Add color of the first piece to bulleted list
-                        bulleted_list_colors[iP] = page_faces[0].color.hex;
+                        bulleted_list_colors[iP] = page_figs[0].color.hex;
                     });
 
                     // Save proxies
@@ -887,24 +903,24 @@
                     ) * this.zoom;
                     const center = [210 / 2, 297 / 2];
 
-                    // Build pages polygons
+                    // Build pages figs
                     svg_elements_per_page = new Array(pages.length);
                     let iF, points;
                     _.forEach(pages, (page, iPa) => {
                         const num_elements = this.draw_centroid ? page.length * 2 + 1 : page.length + 1;
                         const svg_elements = new Array(num_elements);
                         iF = 0;
-                        _.forEach(page, face => {
+                        _.forEach(page, fig => {
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
-                            points = face.planar_points.map(p => [
+                            points = fig.planar_points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
                             ]);
                             el.setAttribute('points', `${points}`);
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', this.draw_color ? face.color.hex : 'transparent');
+                            el.setAttribute('fill', this.draw_color ? fig.color.hex : 'transparent');
                             svg_elements[iF] = el;
                             iF++
                             if (this.draw_centroid) {
@@ -932,17 +948,17 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                build_spiral_faces(envelop_rings) {
-                    const spiral_faces = new Array(envelop_rings.length);
+                build_spiral_figs(spiral) {
+                    const spiral_figs = new Array(spiral.length);
 
-                    // Compute envelop planar faces
+                    // Compute envelop planar figs
                     let O = [0, 0, 0], planar_points = [];
                     let A, a, rotated_A;
-                    _.forEach(envelop_rings, (ring, iR) => {
-                        const polygon = ring.polygon;
+                    _.forEach(spiral, (crown, iR) => {
+                        const fig = crown.fig;
 
                         // Move to Origin and rotate to match with previous piece
-                        planar_points = polygon.planar_points.map(p => add(p, O));
+                        planar_points = fig.planar_points.map(p => add(p, O));
                         if (iR > 0) {
                             a = angle(A, O, planar_points[1]);
                             rotated_A = rot2d(planar_points[1], a, O);
@@ -956,23 +972,23 @@
                         O = planar_points[planar_points.length - 1];
                         A = planar_points[planar_points.length - 2];
 
-                        // Save planar faces
-                        polygon.planar_points = planar_points;
-                        spiral_faces[iR] = polygon;
+                        // Save planar figs
+                        fig.planar_points = planar_points;
+                        spiral_figs[iR] = fig;
                     });
-                    return spiral_faces;
+                    return spiral_figs;
                 },
-                draw_faces() {
-                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
+                draw_figs() {
+                    const spiral = _.cloneDeep(ZOME.spiral);
                     const base = _.cloneDeep(ZOME.base);
 
-                    // for each color and each face add a page
+                    // for each color and each fig add a page
                     const range = _.range(0, ZOME.num);
-                    for (const ring of envelop_rings) {
+                    for (const crown of spiral) {
                         for (const i of range) {
-                            const face = _.cloneDeep(ring.polygon);
-                            face.color = ring.colors[i];
-                            pages.push([face]);
+                            const fig = _.cloneDeep(crown.fig);
+                            fig.color = crown.colors[i];
+                            pages.push([fig]);
                         }
                     }
 
@@ -981,43 +997,43 @@
                         pages.push([base]);
                     }
                 },
-                draw_mandala_faces() {
-                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
-                    const spiral_faces = this.build_spiral_faces(envelop_rings)
+                draw_mandala_figs() {
+                    const spiral = _.cloneDeep(ZOME.spiral);
+                    const spiral_figs = this.build_spiral_figs(spiral)
                     const base = _.cloneDeep(ZOME.base)
 
                     // For each color, rotate piece around the origin
-                    const mandala_faces = [], O = [0, 0, 0];
+                    const mandala_figs = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(spiral_faces, (spiral_face, j) => {
-                            const ring = envelop_rings[j];
-                            const face = _.cloneDeep(spiral_face);
-                            face.planar_points = face.planar_points.map(p => rot2d(p, ring.angles[i], O));
-                            face.color = ring.colors[i];
-                            mandala_faces.push(face)
+                        _.forEach(spiral_figs, (spiral_fig, j) => {
+                            const crown = spiral[j];
+                            const fig = _.cloneDeep(spiral_fig);
+                            fig.planar_points = fig.planar_points.map(p => rot2d(p, crown.angles[i], O));
+                            fig.color = crown.colors[i];
+                            mandala_figs.push(fig)
                         });
                     }
-                    pages.push(mandala_faces);
+                    pages.push(mandala_figs);
 
                     // Add a last page if base exists
                     if (base !== null) {
                         pages.push([base]);
                     }
                 },
-                draw_spiral_faces() {
-                    const envelop_rings = _.cloneDeep(ZOME.envelop_rings);
-                    const spiral_faces = this.build_spiral_faces(envelop_rings)
+                draw_spiral_figs() {
+                    const spiral = _.cloneDeep(ZOME.spiral);
+                    const spiral_figs = this.build_spiral_figs(spiral)
                     const base = _.cloneDeep(ZOME.base)
 
-                    // For each color, Add a page with spiral faces
+                    // For each color, Add a page with spiral figs
                     for (let i = 0; i < ZOME.num; i++) {
-                        const colored_spiral_faces = [];
-                        _.forEach(spiral_faces, (spiral_face, j) => {
-                            const face = _.cloneDeep(spiral_face);
-                            face.color = envelop_rings[j].colors[i];
-                            colored_spiral_faces.push(face)
+                        const colored_spiral_figs = [];
+                        _.forEach(spiral_figs, (spiral_fig, j) => {
+                            const fig = _.cloneDeep(spiral_fig);
+                            fig.color = spiral[j].colors[i];
+                            colored_spiral_figs.push(fig)
                         });
-                        pages.push(colored_spiral_faces);
+                        pages.push(colored_spiral_figs);
                     }
 
                     // Add Base at last page if base exists
@@ -1186,17 +1202,17 @@
 
                     // Build 3D Envelop Faces
                     {
-                        // Pre-Compute geometry points, ring colors and num_faces
+                        // Pre-Compute geometry points, crown colors and num_faces
                         const points = [];
-                        const num_rings = ZOME.envelop_rings.length;
-                        const colors = new Array(num_rings);
-                        const num_faces = new Array(num_rings);
-                        const face_colors = new Array(num_rings);
-                        _.forEach(ZOME.envelop_rings, (ring, iR) => {
-                            const polygon = ring.polygon;
-                            points.push(...polygon.faces);
-                            colors[iR] = ring.colors;
-                            num_faces[iR] = polygon.num_faces;
+                        const num_crowns = ZOME.spiral.length;
+                        const colors = new Array(num_crowns);
+                        const num_faces = new Array(num_crowns);
+                        const face_colors = new Array(num_crowns);
+                        _.forEach(ZOME.spiral, (crown, iR) => {
+                            const fig = crown.fig;
+                            points.push(...fig.faces);
+                            colors[iR] = crown.colors;
+                            num_faces[iR] = fig.num_faces;
                         });
 
                         // Build geometry of first spiral
@@ -1209,11 +1225,11 @@
                             const rot_geometry = geometry.clone()
 
                             // Rotate the new geometry
-                            const a = ZOME.envelop_rings[0].angles[iN];
+                            const a = ZOME.spiral[0].angles[iN];
                             rot_geometry.rotateY(a);
 
                             // Get colors
-                            for (let iR = 0; iR < num_rings; iR++) {
+                            for (let iR = 0; iR < num_crowns; iR++) {
                                 face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
                             }
 
@@ -1327,11 +1343,11 @@
 
         Alpine.data('settings', () => {
             let vertices = [];                  // 3D point vector
-            let envelop_rings = [];                //
+            let spiral = [];                    //
 
             return {
                 // Shape Parameters
-                num: 7,                     // number of faces (kites or diamonds)
+                num: 7,                     // number of figs (kites or diamonds)
                 theta_deg: 50,              // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
                 angle_unit: "deg",          // Degrees or Radians
                 height_ratio: 0.7142857,         // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
@@ -1343,6 +1359,9 @@
                 zome_height_in_mm: WORLD_HEIGHT,                     // Height in mm
                 timber_width_in_mm: WORLD_HEIGHT / 10,               // Timber width in mm
                 timber_thickness_in_mm: WORLD_HEIGHT / 10,           // Timber thickness in mm
+
+                connection_type: 0,
+
 
                 // Commons parameters
                 help_is_displayed: false,
@@ -1358,7 +1377,7 @@
                     // Add shape parameter listeners
                     _.forEach([
                             "num", "theta_deg", "height_ratio", "kite_ratio",
-                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm"
+                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm", "connection_type"
                         ], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
@@ -1462,7 +1481,7 @@
                 clear() {
                     // Clear data
                     vertices = [];
-                    envelop_rings = [];
+                    spiral = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return to_decimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
@@ -1472,15 +1491,21 @@
                     return vertices.length - 1;
                 },
                 make_zome() {
-                    // Constants, sizing are in mm
-                    const [N, THETA_DEG, HEIGHT_RATIO, K, IS_RHOMBUS, ZOME_HEIGHT] = [
-                        this.num,
-                        this.theta_deg,
-                        this.height_ratio,
-                        this.kite_ratio,
-                        this.is_rhombus,
-                        this.zome_height_in_mm,
-                    ]
+                    // Clear all data
+                    this.clear();
+
+                    // Config Parameters
+                    const N = this.num;
+                    const THETA_DEG = this.theta_deg;
+                    const HEIGHT_RATIO = this.height_ratio;
+                    const K = this.kite_ratio;
+                    const IS_RHOMBUS = this.is_rhombus;
+                    const ZOME_HEIGHT = this.zome_height_in_mm;
+                    const TIMBER_WIDTH = this.timber_width_in_mm;
+                    const TIMBER_THICKNESS = this.timber_thickness_in_mm;
+                    const CONNECTION_TYPE = this.connection_type;
+
+                    // Constants
                     const M = N - 1;
                     const THETA_RAD = deg2rad(THETA_DEG);
                     const INCR_RAD = TAU / N;
@@ -1490,44 +1515,40 @@
 
                     // We calculate the total height of entire zome, top to top
                     const TOTAL_HEIGHT = ZOME_HEIGHT / HEIGHT_RATIO;
-
                     const K_SUM = IS_RHOMBUS ? N : (1 - Math.pow(K, N)) / (1 - K);
-
-                    // Clear all data
-                    this.clear();
 
                     // First Point at the top
                     this.add_vertice([0, ZOME_HEIGHT, 0]);
 
-                    // First ring properties
+                    // First crown properties
                     const TOP_EDGE = TOTAL_HEIGHT / (K_SUM * COS_THETA);
-                    const FIRST_RING_RADIUS = TOP_EDGE * SIN_THETA;
-                    const FIRST_RING_HEIGHT = TOP_EDGE * COS_THETA;
+                    const FIRST_CROWN_RADIUS = TOP_EDGE * SIN_THETA;
+                    const FIRST_CROWN_HEIGHT = TOP_EDGE * COS_THETA;
 
                     // Initialize variables
-                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, dist_to_ground, y, face;
+                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, dist_to_ground, y, fig;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
-                    // Add points on first ring every 'incr_rad' from left to right
+                    // Add points on first crown every 'incr_rad' from left to right
                     for (let iN = 0; iN < N; iN++) {
                         a = iN * INCR_RAD;
                         B = [
-                            FIRST_RING_RADIUS * Math.sin(a),
-                            Math.max(0, ZOME_HEIGHT - FIRST_RING_HEIGHT),
-                            FIRST_RING_RADIUS * Math.cos(a)
+                            FIRST_CROWN_RADIUS * Math.sin(a),
+                            Math.max(0, ZOME_HEIGHT - FIRST_CROWN_HEIGHT),
+                            FIRST_CROWN_RADIUS * Math.cos(a)
                         ];
                         this.add_vertice(B);
                     }
 
-                    // Loop over rings (M = N - 1), while zome does not hit ground
+                    // Loop over crowns (M = N - 1), while zome does not hit ground
                     let hit_ground = false;
                     const triangles = [];
-                    for (let iR = 0; iR < M && !hit_ground; iR++) {         // iR => Ring index
-                        ficr = iR * N + 1;                      // First Index on current ring
-                        fipr = ficr - N;                        // First index on previous ring
+                    for (let iR = 0; iR < M && !hit_ground; iR++) {         // iR => Crown index
+                        ficr = iR * N + 1;                      // First Index on current crown
+                        fipr = ficr - N;                        // First index on previous crown
 
-                        // On current ring, Loop over points from left to right
+                        // On current crown, Loop over points from left to right
                         for (let iN = 0; iN < N; iN++) {
                             k = (iN + 1) % N
 
@@ -1539,7 +1560,7 @@
                             B = vertices[iB];
                             C = vertices[iC];
 
-                            // Compute the new point to close diamond/kite face
+                            // Compute the new point to close diamond/kite fig
                             D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
@@ -1552,11 +1573,11 @@
 
                                 // Add only the first piece, because only color after that
                                 if (iN == 0) {
-                                    face = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
-                                    envelop_rings.push(new PolygonRing(face, N));
+                                    fig = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
+                                    spiral.push(new CircularDistribution(fig, N));
                                 }
 
-                                // Close the zome => Deal with case where this ring is exactly on the ground
+                                // Close the zome => Deal with case where this crown is exactly on the ground
                                 hit_ground = to_decimal(y, 2) == 0;
                                 if (hit_ground) {
                                     triangles.push(iD, iD, iC);
@@ -1571,10 +1592,10 @@
                                 iE = this.add_vertice(E);
                                 iF = this.add_vertice(F);
 
-                                // Add Truncated Kite to faces
+                                // Add Truncated Kite to figs
                                 if (iN == 0) {
-                                    face = new TruncatedKite([A, B, E, F, C])
-                                    envelop_rings.push(new PolygonRing(face, N));
+                                    fig = new TruncatedKite([A, B, E, F, C])
+                                    spiral.push(new CircularDistribution(fig, N));
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -1611,10 +1632,10 @@
                             // Deal with case where B and C are too close, so we don't add them
                             const far_enough = to_decimal(dist(B, C), 2) !== 0;
                             if (far_enough) {
-                                // Add triangle to faces
+                                // Add triangle to figs
                                 if (iT == 0) {
-                                    face = new Triangle([A, B, C]);
-                                    envelop_rings.push(new PolygonRing(face, N));
+                                    fig = new Triangle([A, B, C]);
+                                    spiral.push(new CircularDistribution(fig, N));
                                 }
                             }
 
@@ -1631,24 +1652,39 @@
                     // Finally add the base piece
                     let base = null;
                     if (base_vertices.length >= 3) {
-                        face = new ZomeBase(base_vertices.map(iV => vertices[iV]))
+                        fig = new ZomeBase(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
-                        const far_enough = to_decimal(dist(face.points[0], face.points[1]), 2) !== 0;
+                        const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
                         if (far_enough) {
-                            base = face;
+                            base = fig;
                         }
                     }
 
+                    // Compute the vanishing point depends on parameters (?)
+                    const vanishing_point = [0, 0, 0];
 
-                    // Compute the connection point
-                    const connection_point = [0, 0, 0];
+                    // Find the parallel line at timber width on vanishing plan
+
+
+                    // Build timbers
+                    switch (CONNECTION_TYPE) {
+                        case 0:     // GoodKarma
+                            console.log('GoodKarma')
+                            break;
+                        case 1:     // Piped:
+                            console.log('Piped')
+                            break;
+                        case 2 :    // SemiCone:
+                            console.log('SemiCone')
+                            break;
+                    }
 
                     // Save Zome and dispatch it
                     ZOME = {
-                        envelop_rings: envelop_rings,
+                        spiral: spiral,
                         base: base,
-                        connection_point: connection_point,
+                        vanishing_point: vanishing_point,
                         num: N,
                     }
 
