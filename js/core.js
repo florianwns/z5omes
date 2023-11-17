@@ -1,3 +1,15 @@
+// -----------------------------
+// ========== Lexical ==========
+// -----------------------------
+
+// * "fig" is a polygon/figure
+// * "faces" are 3D is the division of a figure into triangles for 3D representation
+// * "vertices" are just 3D point array [x, y, z]
+// * "crown" is a circular distribution to avoid multiple creation of objects
+// * "spiral" is a spiral of circular distribution, like a zome without the base
+// * "base" is the last figure which close the zome
+
+
 // ------------------------------------
 // ========== Constants ==========
 // ------------------------------------
@@ -264,7 +276,7 @@ class Color {
 
 class CircularDistribution {
     // Also named "crown" in code
-    
+
     constructor(fig, num) {
         // Define an crown of figure (triangle, kite, etc...) with N instances around the crown.
         this.fig = fig
