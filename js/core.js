@@ -1,9 +1,11 @@
 // ------------------------------------
-// ========== Math Constants ==========
+// ========== Constants ==========
 // ------------------------------------
 
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
+
+const CONNECTION_TYPES = ["GoodKarma", "Piped", "SemiCone"];
 
 
 // -----------------------------------
@@ -260,16 +262,19 @@ class Color {
     }
 }
 
-class PolygonRing {
-    constructor(polygon, num) {
-        // Define an ring of polygon (triangle, kite, etc...) with N instances around the ring.
-        this.polygon = polygon
+class CircularDistribution {
+    // Also named "crown" in code
+    
+    constructor(fig, num) {
+        // Define an crown of figure (triangle, kite, etc...) with N instances around the crown.
+        this.fig = fig
 
         // Compute angles and colors
         this.angles = new Array(num);
         this.colors = new Array(num); // list of colors
 
-        const slope = this.polygon.slope;
+        // Color depends on figure slope
+        const slope = this.fig.slope;
         const incr_rad = TAU / num;
         for (let i = 0; i < num; i++) {
             const a = i * incr_rad;
@@ -457,4 +462,7 @@ class TruncatedKite extends Kite {
 
 class ZomeBase extends ConvexPolygon {
 }
+
+
+
 

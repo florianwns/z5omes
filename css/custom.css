@@ -86,8 +86,11 @@
 }
 
 .unit-select, .input-group .form-select {
-    max-width: 70px;
     padding-right: 1rem;
+}
+
+.unit-select {
+    max-width: 70px;
 }
 
 .exports-container {
@@ -112,7 +115,7 @@
 
 @media (min-width: 1280px) {
     .offcanvas.show + .auto-shift {
-        margin-right: 400px!important;
+        margin-right: 400px !important;
     }
 }
 
