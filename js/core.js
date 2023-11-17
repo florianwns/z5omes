@@ -3,7 +3,7 @@
 // -----------------------------
 
 // * "fig" is a polygon/figure
-// * "faces" are 3D is the division of a figure into triangles for 3D representation
+// * "faces" are the division of a figure into triangles for 3D representation
 // * "vertices" are just 3D point array [x, y, z]
 // * "crown" is a circular distribution to avoid multiple creation of objects
 // * "spiral" is a spiral of circular distribution, like a zome without the base
