@@ -8,7 +8,8 @@
 // * "crown" is a circular distribution to avoid multiple creation of objects
 // * "spiral" is a spiral of circular distribution, like a zome without the base
 // * "base" is the last figure which close the zome
-
+// * "vector" is a direction
+// * "segment" is an array of two points
 
 // ------------------------------------
 // ========== Constants ==========
@@ -38,9 +39,9 @@ function sub(p1, p2) {
 
 function mul(p1, k) {
     // Multiply a 3D point by k
-    // Increasing or decreasing the coordinates of the point by the k factor.
     return [p1[0] * k, p1[1] * k, p1[2] * k];
 }
+
 
 function dot_product(vec1, vec2) {
     // The dot product or scalar product of two 3D vectors (or points
@@ -87,8 +88,45 @@ function point_at(p1, p2, d) {
     // ex : find_point([50, 0, 0], [100, 0, 0], 20)  =>  [70, 0, 0]
     const vec = sub(p2, p1)
     const normalized_vec = normalize(vec);
-    return add(p1, mul(normalized_vec, d))
+
+    const point = add(p1, mul(normalized_vec, d))
+    return point;
 }
+
+function intersect(p, v, q, u) {
+    // Find the intersection between two lines in 3D defined by
+    // p = line1 point, v = line1 direction, q = line2 point, u = line2 direction
+    const a = cross_product(v, u)
+    const dot = dot_product(a, a)
+
+    // if v and u are parallel (v x u = 0), then no intersection, return NaN point
+    if (dot == 0) {
+        return [NaN, NaN, NaN];
+    }
+
+    // b = (q-p) x u
+    const b = cross_product(sub(q, p), u);
+
+    // t = (b.a)/(a.a) = ((Q1-P1) x u) .(v x u) / (v x u) . (v x u)
+    const t = dot_product(b, a) / dot;
+
+    // find intersection point by substituting t to the line1 eq
+    const point = add(p, mul(v, t))
+    return point;
+}
+
+
+//
+//     // find b = (Q1-P1) x u
+//     Vector3 b = (q - p).cross(u);      // cross product
+//
+//     // find t = (b.a)/(a.a) = ((Q1-P1) x u) .(v x u) / (v x u) . (v x u)
+//     float t = b.dot(a) / dot;
+//
+//     // find intersection point by substituting t to the line1 eq
+//     Vector3 point = p + (t * v);
+//     return point;
+// }
 
 function normalize(vec) {
     // Normalizing a vector consists of transforming it so that its norm (or magnitude)
