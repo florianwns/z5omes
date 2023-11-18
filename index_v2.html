@@ -105,7 +105,7 @@
                     HR
                 </span>
                 <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                       :min="to_decimal(2 / num, FLOAT_PRECISION)"
+                       :min="to_decimal(2 / num)"
                        x-model.number="height_ratio" x-ref="height_ratio_slider">
                 <input class="form-control" step="0.01" type="number"
                        x-model.lazy.number="height_ratio">
@@ -544,10 +544,10 @@
 <!-- Custom Javascript -->
 <script type="text/javascript">
     const WORLD_HEIGHT = 2500;       // or 3D HEIGHT OF ZOME in mm
-    const FLOAT_PRECISION = 7;
 
     // Use a global variable to store ZOME data
     let ZOME = {
+        vertices: [],
         spiral: [],
         base: null,
         vanishing_point: null,
@@ -608,13 +608,7 @@
                     return humanize_distance(value);
                 },
                 format(key, value) {
-                    return to_decimal(value, 2);
-                },
-                format_str(value, unit) {
-                    switch (key) {
-                        default:
-                            return to_decimal(value, FLOAT_PRECISION);
-                    }
+                    return to_decimal(value, FLOAT_2_STR_PRECISION);
                 },
                 get_slider(key) {
                     return eval(`this.$refs.${key}_slider`);
@@ -961,13 +955,13 @@
                         planar_points = fig.planar_points.map(p => add(p, O));
                         if (iR > 0) {
                             a = angle(A, O, planar_points[1]);
-                            rotated_A = rot2d(planar_points[1], a, O);
+                            rotated_A = rotate_2d(planar_points[1], a, O);
 
                             // Rotate the other way if rotatedA is not too close to A
-                            if (to_decimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
+                            if (to_decimal(distance(rotated_A, A)) != 0) {
                                 a = -a;
                             }
-                            planar_points = planar_points.map(p => rot2d(p, a, O));
+                            planar_points = planar_points.map(p => rotate_2d(p, a, O));
                         }
                         O = planar_points[planar_points.length - 1];
                         A = planar_points[planar_points.length - 2];
@@ -1008,7 +1002,7 @@
                         _.forEach(spiral_figs, (spiral_fig, j) => {
                             const crown = spiral[j];
                             const fig = _.cloneDeep(spiral_fig);
-                            fig.planar_points = fig.planar_points.map(p => rot2d(p, crown.angles[i], O));
+                            fig.planar_points = fig.planar_points.map(p => rotate_2d(p, crown.angles[i], O));
                             fig.color = crown.colors[i];
                             mandala_figs.push(fig)
                         });
@@ -1088,7 +1082,7 @@
 
             return {
                 // 3D Rendering Parameters
-                is_spinning: true,
+                is_spinning: false,
                 speed: 0.01,
                 draw_axis: true,
 
@@ -1194,6 +1188,30 @@
 
                     meshes.zome = new THREE.Group();
 
+
+                    // const mat = new THREE.LineBasicMaterial({
+                    //     color: 0x00FFFF
+                    // });
+
+                    // const points = [];
+                    // points.push( new THREE.Vector3( - 100, 0, 0 ) );
+                    // points.push( new THREE.Vector3( 0, 100, 0 ) );
+                    // points.push( new THREE.Vector3( 100, 0, 0 ) );
+                    //
+                    // const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                    //
+                    // const line = new THREE.Line( geometry, mat );
+                    // scene.add( line );
+
+
+                    const geometry = new THREE.BufferGeometry();
+                    geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
+
+                    const mat = new THREE.PointsMaterial({color: 0x888888, size: 30});
+                    const points = new THREE.Points(geometry, mat);
+                    scene.add(points);
+
+
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({
                         side: THREE.DoubleSide,
@@ -1254,6 +1272,8 @@
 
                         meshes.zome.add(new THREE.Mesh(geometry, material))
                     }
+
+
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome)
                 },
@@ -1392,9 +1412,9 @@
                 get theta() {
                     switch (this.angle_unit) {
                         case "rad":
-                            return to_decimal(deg2rad(this.theta_deg), FLOAT_PRECISION);
+                            return to_decimal(deg2rad(this.theta_deg));
                         case "tan":
-                            return to_decimal(Math.tan(deg2rad(this.theta_deg)), FLOAT_PRECISION);
+                            return to_decimal(Math.tan(deg2rad(this.theta_deg)));
                         case "deg":
                         default:
                             return this.theta_deg;
@@ -1419,7 +1439,7 @@
                 },
                 set num_rhombus(value) {
                     this.kite_ratio = 1;
-                    this.height_ratio = to_decimal((value + 1) / this.num, FLOAT_PRECISION);
+                    this.height_ratio = to_decimal((value + 1) / this.num);
                 },
                 get is_rhombus() {
                     return this.kite_ratio === 1;
@@ -1458,7 +1478,7 @@
                         case 'num':
                             return to_decimal(value, 0);
                         default:
-                            return to_decimal(value, FLOAT_PRECISION);
+                            return to_decimal(value);
                     }
                 },
                 randomize() {
@@ -1484,7 +1504,7 @@
                     spiral = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
-                    return to_decimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
+                    return to_decimal((WORLD_HEIGHT - y) / polar_height);
                 },
                 add_vertice(p) {
                     vertices.push(p);
@@ -1564,7 +1584,7 @@
                             D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
-                            y = to_decimal(D[1], FLOAT_PRECISION);
+                            y = to_decimal(D[1]);
 
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
@@ -1630,7 +1650,7 @@
                             C = vertices[iC];
 
                             // Deal with case where B and C are too close, so we don't add them
-                            const far_enough = to_decimal(dist(B, C), 2) !== 0;
+                            const far_enough = to_decimal(distance(B, C), 2) !== 0;
                             if (far_enough) {
                                 // Add triangle to figs
                                 if (iT == 0) {
@@ -1655,7 +1675,7 @@
                         fig = new ZomeBase(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
-                        const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
+                        const far_enough = to_decimal(distance(fig.points[0], fig.points[1]), 2) !== 0;
                         if (far_enough) {
                             base = fig;
                         }
@@ -1665,7 +1685,18 @@
                     const vanishing_point = [0, 0, 0];
 
                     // Find the parallel line at timber width on vanishing plan
+                    _.forEach(spiral, (crown, iR) => {
+                        const fig = crown.fig;
+                        console.log(fig.points);
 
+                        _.forEach(fig.points, (A, i) => {
+                            const B = fig.points[(i + 1) % fig.num_points];
+                            const mid = midpoint(A, B)
+                            this.add_vertice(mid);
+
+                            // 45° point to
+                        });
+                    });
 
                     // Build timbers
                     switch (CONNECTION_TYPE) {
@@ -1681,7 +1712,10 @@
                     }
 
                     // Save Zome and dispatch it
+                    console.log(vertices);
+
                     ZOME = {
+                        vertices: vertices,
                         spiral: spiral,
                         base: base,
                         vanishing_point: vanishing_point,

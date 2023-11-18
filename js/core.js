@@ -4,7 +4,7 @@
 
 // * "fig" is a polygon/figure
 // * "faces" are the division of a figure into triangles for 3D representation
-// * "vertices" are just 3D point array [x, y, z]
+// * "vertices", "point" or "vector" are just 3D point array [x, y, z]
 // * "crown" is a circular distribution to avoid multiple creation of objects
 // * "spiral" is a spiral of circular distribution, like a zome without the base
 // * "base" is the last figure which close the zome
@@ -16,6 +16,8 @@
 
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
+const FLOAT_PRECISION = 7;
+const FLOAT_2_STR_PRECISION = 2;
 
 const CONNECTION_TYPES = ["GoodKarma", "Piped", "SemiCone"];
 
@@ -40,15 +42,34 @@ function mul(p1, k) {
     return [p1[0] * k, p1[1] * k, p1[2] * k];
 }
 
-function dot(vec1, vec2) {
+function dot_product(vec1, vec2) {
     // The dot product or scalar product of two 3D vectors (or points
     // because a point can be represented as a position vector from the origin).
     return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
 }
 
+
+function cross_product(vec1, vec2) {
+    return [
+        vec1[1] * vec2[2] - vec1[2] * vec2[1],
+        vec1[2] * vec2[0] - vec1[0] * vec2[2],
+        vec1[0] * vec2[1] - vec1[1] * vec2[0]
+    ];
+}
+
+function project(vec1, vec2) {
+    // Project vec2 on vec1
+    var square2 = squared_norm(vec2, vec2);
+    return mul(vec2, dot_product(vec1, vec2) / square2);
+}
+
+function perpendicular(vec1, vec2) {
+    return sub(vec1, project(vec1, vec2));
+}
+
 function squared_norm(vec) {
     // Compute the squared norm of the vector
-    return dot(vec, vec);
+    return dot_product(vec, vec);
 }
 
 function len(vec) {
@@ -56,7 +77,7 @@ function len(vec) {
     return Math.sqrt(squared_norm(vec));
 }
 
-function dist(p1, p2) {
+function distance(p1, p2) {
     // Compute the distance between two 3D points
     return len(sub(p1, p2));
 }
@@ -67,8 +88,16 @@ function normalize(vec) {
     return mul(vec, 1 / len(vec));
 }
 
-function cross(a, b) {
-    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
+function rotate_2d(vec, theta, origin = [0, 0, 0]) {
+    const sin_theta = Math.sin(theta);
+    const cos_theta = Math.cos(theta);
+
+    // Rotate an 2D vector [x, y, 0] around an origin
+    let delta = sub(vec, origin);
+    let x = delta[0] * cos_theta - delta[1] * sin_theta + origin[0];
+    let y = delta[0] * sin_theta + delta[1] * cos_theta + origin[1];
+    return [x, y, 0]
 }
 
 function midpoint(p1, p2) {
@@ -78,9 +107,9 @@ function midpoint(p1, p2) {
 
 function angle(p1, p2, p3) {
     // Compute the angle of 3 points in radians
-    const a = dist(p2, p3);
-    const b = dist(p1, p2);
-    const c = dist(p1, p3);
+    const a = distance(p2, p3);
+    const b = distance(p1, p2);
+    const c = distance(p1, p3);
     return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
@@ -90,16 +119,6 @@ function dihedral_angle(a, b, c) {
     return Math.acos(
         (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
     )
-}
-
-function rot2d(v, theta, o = [0, 0, 0]) {
-    const sin_theta = Math.sin(theta);
-    const cos_theta = Math.cos(theta);
-    let xM = v[0] - o[0];
-    let yM = v[1] - o[1];
-    let x = xM * cos_theta - yM * sin_theta + o[0];
-    let y = xM * sin_theta + yM * cos_theta + o[1];
-    return [x, y, 0]
 }
 
 
@@ -117,8 +136,8 @@ function rad2deg(rad) {
     return 180.0 * rad / Math.PI;
 }
 
-function to_decimal(x, fractionDigits = 2) {
-    return parseFloat(x.toFixed(fractionDigits));
+function to_decimal(x, num_digits = FLOAT_PRECISION) {
+    return parseFloat(x.toFixed(num_digits));
 }
 
 function to_mm(v, unit) {
@@ -168,24 +187,24 @@ function rgb2hex(rgb) {
 // ========== Helpers ==========
 // -----------------------------
 
-function humanize_distance(d) {
+function humanize_distance(d, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display distances
     if (isNaN(d)) {
         return "";
     }
     // Distance are in milimeters
     if (d >= 1e6) {
-        return to_decimal(d / 1e6) + "km";
+        return to_decimal(d / 1e6, num_digits) + "km";
     } else if (d >= 1e3) {
-        return to_decimal(d / 1e3) + "m";
+        return to_decimal(d / 1e3, num_digits) + "m";
     } else if (d >= 10) {
-        return to_decimal(d / 10) + "cm";
+        return to_decimal(d / 10, num_digits) + "cm";
     } else {
-        return to_decimal(d) + "mm";
+        return to_decimal(d, num_digits) + "mm";
     }
 }
 
-function humanize_area(d) {
+function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display areas
     if (isNaN(d)) {
         return "";
@@ -193,13 +212,13 @@ function humanize_area(d) {
 
     // Area are in mm²
     if (d >= 1e12) {
-        return to_decimal(d / 1e12) + "km²";
+        return to_decimal(d / 1e12, num_digits) + "km²";
     } else if (d >= 1e6) {
-        return to_decimal(d / 1e6) + "m²";
+        return to_decimal(d / 1e6, num_digits) + "m²";
     } else if (d >= 100) {
-        return to_decimal(d / 100) + "cm²";
+        return to_decimal(d / 100, num_digits) + "cm²";
     } else {
-        return to_decimal(d) + "mm²";
+        return to_decimal(d, num_digits) + "mm²";
     }
 }
 
@@ -320,7 +339,7 @@ class ConvexPolygon {
     }
 
     get diameter() {
-        return 2 * dist(this.O, [0, this.O[1], 0]);
+        return 2 * distance(this.O, [0, this.O[1], 0]);
     }
 
     compute() {
@@ -338,10 +357,10 @@ class ConvexPolygon {
         // 2D
         this.planar_points = new Array(this.num_points);    // Array of planar points [x, y, z] for 2D visualization
 
-        // Make a reference to planar 3D points to 2D
-        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
+        // Make a reference to planar 3D points to 2D, Take first point like origin
+        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]];
         const x_ref = normalize(sub(C, O));
-        const y_ref = normalize(sub(sub(B, O), mul(x_ref, dot(sub(B, O), x_ref))));
+        const y_ref = normalize(sub(sub(B, O), mul(x_ref, dot_product(sub(B, O), x_ref))));
         const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
         let x_min = Number.MAX_VALUE, x_max = Number.MIN_VALUE;
         let y_min = Number.MAX_VALUE, y_max = Number.MIN_VALUE;
@@ -354,12 +373,9 @@ class ConvexPolygon {
             const B = this.points[(i + 1) % this.num_points];
             const D = this.points[(i + 2) % this.num_points];
 
-            // Create the new 2D point
-            [x, y, z] = rot2d(
-                [
-                    dot(sub(A, O), x_ref),
-                    dot(sub(A, O), y_ref)
-                ],
+            // Apply the transformation for planar point
+            [x, y, z] = rotate_2d(
+                [dot_product(sub(A, O), x_ref), dot_product(sub(A, O), y_ref), 0],
                 ref_angle
             )
             this.planar_points[i] = [x, y, z];
@@ -374,7 +390,7 @@ class ConvexPolygon {
             this.angles[i] = angle(C, A, B);
 
             // Compute edges distances, and perimeter
-            ab = dist(A, B)
+            ab = distance(A, B)
             this.edge_distances[i] = ab;
             this.perimeter += ab;
 
@@ -387,9 +403,9 @@ class ConvexPolygon {
                 this.faces[iF + 2] = new THREE.Vector3(...D)
 
                 // Heron formula to compute area of the triangle
-                ob = dist(O, B);
-                bd = dist(B, D);
-                od = dist(O, D);
+                ob = distance(O, B);
+                bd = distance(B, D);
+                od = distance(O, D);
                 const s = (ob + bd + od) / 2;
                 this.area += Math.sqrt(s * (s - ob) * (s - bd) * (s - od));
             }
@@ -434,7 +450,7 @@ class PolygonWithHat extends ConvexPolygon {
     }
 
     get diameter() {
-        return 2 * dist(this.B, [0, this.B[1], 0]);
+        return 2 * distance(this.B, [0, this.B[1], 0]);
     }
 
     get slope() {
