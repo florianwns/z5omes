@@ -51,6 +51,7 @@ function dot_product(vec1, vec2) {
 
 
 function cross_product(vec1, vec2) {
+    // Also named 'vector product', the cross product is perpendicular to vec1 and vec2
     return [
         vec1[1] * vec2[2] - vec1[2] * vec2[1],
         vec1[2] * vec2[0] - vec1[0] * vec2[2],
@@ -62,10 +63,6 @@ function project(vec1, vec2) {
     // Project vec2 on vec1
     var square2 = squared_norm(vec2, vec2);
     return mul(vec2, dot_product(vec1, vec2) / square2);
-}
-
-function perpendicular(vec1, vec2) {
-    return sub(vec1, project(vec1, vec2));
 }
 
 function squared_norm(vec) {
