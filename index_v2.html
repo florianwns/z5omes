@@ -1209,7 +1209,7 @@
                     const pt_geometry = new THREE.BufferGeometry();
                     pt_geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
-                    const pt_material = new THREE.PointsMaterial({color: 0x888888, size: 30});
+                    const pt_material = new THREE.PointsMaterial({color: 0x888888, size: 12});
                     meshes.zome.add(new THREE.Points(pt_geometry, pt_material))
 
                     scene.add(meshes.zome);
@@ -1693,6 +1693,7 @@
                         console.log(fig.points);
 
                         _.forEach(fig.points, (A, i) => {
+                            // Add vanishing line OK
                             vanishing_lines.push([vanishing_point, mul(A, 1.2)])
 
                             const B = fig.points[(i + 1) % fig.num_points];
