@@ -1189,32 +1189,30 @@
                     meshes.zome = new THREE.Group();
 
 
-                    // const mat = new THREE.LineBasicMaterial({
-                    //     color: 0x00FFFF
-                    // });
+                    // Display vanishing lines
+                    const line_material = new THREE.LineBasicMaterial({
+                        color: 0x00FFFF
+                    });
 
-                    // const points = [];
-                    // points.push( new THREE.Vector3( - 100, 0, 0 ) );
-                    // points.push( new THREE.Vector3( 0, 100, 0 ) );
-                    // points.push( new THREE.Vector3( 100, 0, 0 ) );
-                    //
-                    // const geometry = new THREE.BufferGeometry().setFromPoints( points );
-                    //
-                    // const line = new THREE.Line( geometry, mat );
-                    // scene.add( line );
+                    _.forEach(ZOME.vanishing_lines, (line, i) => {
+                        const points = [
+                            new THREE.Vector3(...line[0]),
+                            new THREE.Vector3(...line[1]),
+                        ]
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const vanishing_line = new THREE.Line(geometry, line_material);
+                        meshes.zome.add(vanishing_line)
+                    });
 
 
                     // Display vertices
-                    const geometry = new THREE.BufferGeometry();
-                    geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
+                    const pt_geometry = new THREE.BufferGeometry();
+                    pt_geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
-                    const mat = new THREE.PointsMaterial({color: 0x888888, size: 30});
-                    const points = new THREE.Points(geometry, mat);
-                    meshes.zome.add(points)
+                    const pt_material = new THREE.PointsMaterial({color: 0x888888, size: 30});
+                    meshes.zome.add(new THREE.Points(pt_geometry, pt_material))
 
                     scene.add(meshes.zome);
-
-                    return;
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({
@@ -1380,9 +1378,9 @@
 
                 // Sizing Parameters
                 length_unit: "cm",                                  // Length unit by default is cm
-                zome_height_in_mm: WORLD_HEIGHT,                     // Height in mm
-                timber_width_in_mm: WORLD_HEIGHT / 10,               // Timber width in mm
-                timber_thickness_in_mm: WORLD_HEIGHT / 10,           // Timber thickness in mm
+                zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
+                timber_width_in_mm: 120,                            // Timber width in mm
+                timber_thickness_in_mm: 40,                         // Timber thickness in mm
 
                 connection_type: 0,
 
@@ -1687,6 +1685,7 @@
 
                     // Compute the vanishing point depends on parameters (?)
                     const vanishing_point = [0, 0, 0];
+                    let vanishing_lines = [];
 
                     // Find the parallel line at timber width on vanishing plan
                     _.forEach(spiral, (crown, iR) => {
@@ -1694,17 +1693,23 @@
                         console.log(fig.points);
 
                         _.forEach(fig.points, (A, i) => {
+                            vanishing_lines.push([vanishing_point, mul(A, 1.2)])
+
                             const B = fig.points[(i + 1) % fig.num_points];
-                            // const mid = midpoint(A, B)
-                            // this.add_vertice(mid);
+                            const mid = midpoint(A, B)
+                            this.add_vertice(mid);
 
                             // Find point at TIMBER_WIDTH from mid to vanishing_point
-                            // const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
-                            // this.add_vertice(C);
+                            const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
+                            this.add_vertice(C);
 
                             // Compute distance of TIMBER_WIDTH from A to vanishing point
                             const theta = angle(B, A, vanishing_point);
                             const d = TIMBER_WIDTH / Math.sin(theta);
+                            console.log("A", A)
+                            console.log("B", B)
+                            console.log("theta", rad2deg(theta))
+                            console.log("d", d)
 
                             // Find point at distance of TIMBER_WIDTH
                             const D = point_at(A, vanishing_point, d);
@@ -1737,6 +1742,7 @@
                         vertices: vertices,
                         spiral: spiral,
                         base: base,
+                        vanishing_lines: vanishing_lines,
                         vanishing_point: vanishing_point,
                         num: N,
                     }
