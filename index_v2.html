@@ -1696,6 +1696,7 @@
                             // Add vanishing line OK
                             vanishing_lines.push([vanishing_point, mul(A, 1.2)])
 
+                            // Add midpoint OK
                             const B = fig.points[(i + 1) % fig.num_points];
                             const mid = midpoint(A, B)
                             this.add_vertice(mid);
