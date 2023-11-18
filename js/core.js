@@ -89,6 +89,11 @@ function normalize(vec) {
     return mul(vec, 1 / len(vec));
 }
 
+function midpoint(p1, p2) {
+    // Find the midpoint of a segment/line
+    return mul(add(p1, p2), 0.5);
+}
+
 function point_at(p1, p2, d) {
     // Find point at distance d between two points (from p1 to p2)
     // ex : find_point([50, 0, 0], [100, 0, 0], 20)  =>  [70, 0, 0]
@@ -121,6 +126,13 @@ function intersect(p, v, q, u) {
     return point;
 }
 
+function angle(p1, p2, p3) {
+    // Compute the angle of 3 points in radians
+    const a = dist(p2, p3);
+    const b = dist(p1, p2);
+    const c = dist(p1, p3);
+    return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
+}
 
 function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
@@ -131,20 +143,6 @@ function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     let x = delta[0] * cos_theta - delta[1] * sin_theta + origin[0];
     let y = delta[0] * sin_theta + delta[1] * cos_theta + origin[1];
     return [x, y, 0]
-}
-
-function midpoint(p1, p2) {
-    // Find the midpoint of a segment
-    return mul(add(p1, p2), 0.5);
-}
-
-
-function angle(p1, p2, p3) {
-    // Compute the angle of 3 points in radians
-    const a = dist(p2, p3);
-    const b = dist(p1, p2);
-    const c = dist(p1, p3);
-    return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
 function dihedral_angle(a, b, c) {
