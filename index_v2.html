@@ -173,7 +173,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
-                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
+                <input class="form-control form-range" min="0" max="1000" step="1" type="range"
                        x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_width">
@@ -185,7 +185,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
-                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
+                <input class="form-control form-range" min="0" max="1000" step="1" type="range"
                        x-model.number="timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_thickness">
@@ -1204,6 +1204,7 @@
                     // scene.add( line );
 
 
+                    // Display vertices
                     const geometry = new THREE.BufferGeometry();
                     geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
@@ -1212,8 +1213,8 @@
                     meshes.zome.add(points)
 
                     scene.add(meshes.zome);
-                    return;
 
+                    return;
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({
@@ -1694,18 +1695,25 @@
 
                         _.forEach(fig.points, (A, i) => {
                             const B = fig.points[(i + 1) % fig.num_points];
-                            const mid = midpoint(A, B)
-                            this.add_vertice(mid);
+                            // const mid = midpoint(A, B)
+                            // this.add_vertice(mid);
 
                             // Find point at TIMBER_WIDTH from mid to vanishing_point
-                            const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
-                            this.add_vertice(C);
+                            // const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
+                            // this.add_vertice(C);
 
                             // Compute distance of TIMBER_WIDTH from A to vanishing point
                             const theta = angle(B, A, vanishing_point);
                             const d = TIMBER_WIDTH / Math.sin(theta);
+
+                            // Find point at distance of TIMBER_WIDTH
                             const D = point_at(A, vanishing_point, d);
                             this.add_vertice(D);
+
+                            // Compute perpendicular direction(cross product of 2 vecs) for timber building
+                            const vecZ = cross_product(sub(B, A), sub(vanishing_point, A));
+                            const E = point_at(A, vecZ, TIMBER_THICKNESS);
+                            this.add_vertice(E);
                         });
                     });
 
