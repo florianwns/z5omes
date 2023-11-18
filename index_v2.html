@@ -958,7 +958,7 @@
                             rotated_A = rotate_2d(planar_points[1], a, O);
 
                             // Rotate the other way if rotatedA is not too close to A
-                            if (to_decimal(distance(rotated_A, A)) != 0) {
+                            if (to_decimal(dist(rotated_A, A)) != 0) {
                                 a = -a;
                             }
                             planar_points = planar_points.map(p => rotate_2d(p, a, O));
@@ -1209,7 +1209,10 @@
 
                     const mat = new THREE.PointsMaterial({color: 0x888888, size: 30});
                     const points = new THREE.Points(geometry, mat);
-                    scene.add(points);
+                    meshes.zome.add(points)
+
+                    scene.add(meshes.zome);
+                    return;
 
 
                     // Use same material for all faces
@@ -1650,7 +1653,7 @@
                             C = vertices[iC];
 
                             // Deal with case where B and C are too close, so we don't add them
-                            const far_enough = to_decimal(distance(B, C), 2) !== 0;
+                            const far_enough = to_decimal(dist(B, C), 2) !== 0;
                             if (far_enough) {
                                 // Add triangle to figs
                                 if (iT == 0) {
@@ -1675,7 +1678,7 @@
                         fig = new ZomeBase(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
-                        const far_enough = to_decimal(distance(fig.points[0], fig.points[1]), 2) !== 0;
+                        const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
                         if (far_enough) {
                             base = fig;
                         }
@@ -1694,7 +1697,9 @@
                             const mid = midpoint(A, B)
                             this.add_vertice(mid);
 
-                            // 45° point to
+                            // find point at TIMBER_WIDTH from mid to vanishing_point
+                            const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
+                            this.add_vertice(C);
                         });
                     });
 

@@ -77,9 +77,17 @@ function len(vec) {
     return Math.sqrt(squared_norm(vec));
 }
 
-function distance(p1, p2) {
+function dist(p1, p2) {
     // Compute the distance between two 3D points
-    return len(sub(p1, p2));
+    return len(sub(p2, p1));
+}
+
+function point_at(p1, p2, d) {
+    // Find point at distance d between two points (from p1 to p2)
+    // ex : find_point([50, 0, 0], [100, 0, 0], 20)  =>  [70, 0, 0]
+    const vec = sub(p2, p1)
+    const normalized_vec = normalize(vec);
+    return add(p1, mul(normalized_vec, d))
 }
 
 function normalize(vec) {
@@ -87,7 +95,6 @@ function normalize(vec) {
     // becomes equal to 1 while preserving its direction.
     return mul(vec, 1 / len(vec));
 }
-
 
 function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
@@ -105,11 +112,12 @@ function midpoint(p1, p2) {
     return mul(add(p1, p2), 0.5);
 }
 
+
 function angle(p1, p2, p3) {
     // Compute the angle of 3 points in radians
-    const a = distance(p2, p3);
-    const b = distance(p1, p2);
-    const c = distance(p1, p3);
+    const a = dist(p2, p3);
+    const b = dist(p1, p2);
+    const c = dist(p1, p3);
     return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
@@ -339,7 +347,7 @@ class ConvexPolygon {
     }
 
     get diameter() {
-        return 2 * distance(this.O, [0, this.O[1], 0]);
+        return 2 * dist(this.O, [0, this.O[1], 0]);
     }
 
     compute() {
@@ -390,7 +398,7 @@ class ConvexPolygon {
             this.angles[i] = angle(C, A, B);
 
             // Compute edges distances, and perimeter
-            ab = distance(A, B)
+            ab = dist(A, B)
             this.edge_distances[i] = ab;
             this.perimeter += ab;
 
@@ -403,9 +411,9 @@ class ConvexPolygon {
                 this.faces[iF + 2] = new THREE.Vector3(...D)
 
                 // Heron formula to compute area of the triangle
-                ob = distance(O, B);
-                bd = distance(B, D);
-                od = distance(O, D);
+                ob = dist(O, B);
+                bd = dist(B, D);
+                od = dist(O, D);
                 const s = (ob + bd + od) / 2;
                 this.area += Math.sqrt(s * (s - ob) * (s - bd) * (s - od));
             }
@@ -450,7 +458,7 @@ class PolygonWithHat extends ConvexPolygon {
     }
 
     get diameter() {
-        return 2 * distance(this.B, [0, this.B[1], 0]);
+        return 2 * dist(this.B, [0, this.B[1], 0]);
     }
 
     get slope() {
