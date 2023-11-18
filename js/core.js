@@ -115,19 +115,6 @@ function intersect(p, v, q, u) {
     return point;
 }
 
-
-//
-//     // find b = (Q1-P1) x u
-//     Vector3 b = (q - p).cross(u);      // cross product
-//
-//     // find t = (b.a)/(a.a) = ((Q1-P1) x u) .(v x u) / (v x u) . (v x u)
-//     float t = b.dot(a) / dot;
-//
-//     // find intersection point by substituting t to the line1 eq
-//     Vector3 point = p + (t * v);
-//     return point;
-// }
-
 function normalize(vec) {
     // Normalizing a vector consists of transforming it so that its norm (or magnitude)
     // becomes equal to 1 while preserving its direction.
