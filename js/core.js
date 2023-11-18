@@ -98,9 +98,9 @@ function point_at(p1, p2, d) {
     // Find point at distance d between two points (from p1 to p2)
     // ex : find_point([50, 0, 0], [100, 0, 0], 20)  =>  [70, 0, 0]
     const vec = sub(p2, p1)
-    const normalized_vec = normalize(vec);
+    const norm = normalize(vec);
 
-    const point = add(p1, mul(normalized_vec, d))
+    const point = add(p1, mul(norm, d))
     return point;
 }
 

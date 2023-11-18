@@ -1697,9 +1697,15 @@
                             const mid = midpoint(A, B)
                             this.add_vertice(mid);
 
-                            // find point at TIMBER_WIDTH from mid to vanishing_point
+                            // Find point at TIMBER_WIDTH from mid to vanishing_point
                             const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
                             this.add_vertice(C);
+
+                            // Compute distance of TIMBER_WIDTH from A to vanishing point
+                            const theta = angle(B, A, vanishing_point);
+                            const d = TIMBER_WIDTH / Math.sin(theta);
+                            const D = point_at(A, vanishing_point, d);
+                            this.add_vertice(D);
                         });
                     });
 
