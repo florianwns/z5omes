@@ -83,6 +83,12 @@ function dist(p1, p2) {
     return len(sub(p2, p1));
 }
 
+function normalize(vec) {
+    // Normalizing a vector consists of transforming it so that its norm (or magnitude)
+    // becomes equal to 1 while preserving its direction.
+    return mul(vec, 1 / len(vec));
+}
+
 function point_at(p1, p2, d) {
     // Find point at distance d between two points (from p1 to p2)
     // ex : find_point([50, 0, 0], [100, 0, 0], 20)  =>  [70, 0, 0]
@@ -115,11 +121,6 @@ function intersect(p, v, q, u) {
     return point;
 }
 
-function normalize(vec) {
-    // Normalizing a vector consists of transforming it so that its norm (or magnitude)
-    // becomes equal to 1 while preserving its direction.
-    return mul(vec, 1 / len(vec));
-}
 
 function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
