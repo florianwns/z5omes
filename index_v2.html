@@ -1209,7 +1209,7 @@
                     const pt_geometry = new THREE.BufferGeometry();
                     pt_geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
-                    const pt_material = new THREE.PointsMaterial({color: 0x888888, size: 12});
+                    const pt_material = new THREE.PointsMaterial({color: 0x888888, size: 20});
                     meshes.zome.add(new THREE.Points(pt_geometry, pt_material))
 
                     scene.add(meshes.zome);
@@ -1684,7 +1684,8 @@
                     }
 
                     // Compute the vanishing point depends on parameters (?)
-                    const vanishing_point = [0, 0, 0];
+                    // we call it O
+                    const O = [0, 0, 0];
                     let vanishing_lines = [];
 
                     // Find the parallel line at timber width on vanishing plan
@@ -1694,33 +1695,40 @@
 
                         _.forEach(fig.points, (A, i) => {
                             // Add vanishing line OK
-                            vanishing_lines.push([vanishing_point, mul(A, 1.2)])
+                            vanishing_lines.push([O, A])
 
                             // Add midpoint OK
                             const B = fig.points[(i + 1) % fig.num_points];
                             const mid = midpoint(A, B)
                             this.add_vertice(mid);
 
+                            const vec_ab = sub(B, A);
+                            const vec_b2vp = sub(O, B);
+                            const vec_a2vp = sub(O, A);
+
+                            // compute perpendicular plan
+                            // const vec_timber = cross_product(vec_ab, vec_b2vp);
+
+
                             // Find point at TIMBER_WIDTH from mid to vanishing_point
-                            const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
+                            // const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
+                            // this.add_vertice(C);
+
+                            // Based on trigonometry, compute distance of TIMBER_WIDTH
+                            // from A to vanishing point
+                            const theta = angle(O, A, B);
+                            const d = TIMBER_WIDTH / Math.sin(theta);
+                            const C = point_at(A, O, d);
                             this.add_vertice(C);
 
-                            // Compute distance of TIMBER_WIDTH from A to vanishing point
-                            const theta = angle(B, A, vanishing_point);
-                            const d = TIMBER_WIDTH / Math.sin(theta);
-                            console.log("A", A)
-                            console.log("B", B)
-                            console.log("theta", rad2deg(theta))
-                            console.log("d", d)
 
-                            // Find point at distance of TIMBER_WIDTH
-                            const D = point_at(A, vanishing_point, d);
-                            this.add_vertice(D);
 
-                            // Compute perpendicular direction(cross product of 2 vecs) for timber building
-                            const vecZ = cross_product(sub(B, A), sub(vanishing_point, A));
-                            const E = point_at(A, vecZ, TIMBER_THICKNESS);
-                            this.add_vertice(E);
+
+                            //
+                            // // Compute perpendicular direction(cross product of 2 vecs) for timber building
+                            // const vecZ = cross_product(sub(B, A), sub(vanishing_point, A));
+                            // const E = point_at(A, vecZ, TIMBER_THICKNESS);
+                            // this.add_vertice(E);
                         });
                     });
 
@@ -1742,10 +1750,10 @@
 
                     ZOME = {
                         vertices: vertices,
-                        spiral: spiral,
+                        spiral: [], //spiral,
                         base: base,
                         vanishing_lines: vanishing_lines,
-                        vanishing_point: vanishing_point,
+                        vanishing_point: O,
                         num: N,
                     }
 
