@@ -1705,9 +1705,9 @@
                         console.log(fig.points);
 
                         _.forEach(fig.points, (current_pt, i) => {
-
                             const next_pt = fig.points[(i + 1) % fig.num_points];
                             const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
+
 
                             // Add vanishing line OK
                             vanishing_lines.push([vanishing_pt, current_pt])
@@ -1742,10 +1742,9 @@
                             vanishing_lines.push([thickness_pt, width_pt])
                             vanishing_lines.push([mid_pt, vanishing_pt])
 
-
                             // Based with trigo, compute base of triangle to find hypotenuse
                             // with TIMBER_THICKNESS like height
-                            const theta = angle(prev_pt, current_pt, next_pt);
+                            const theta = fig.angles[i];
                             const aligned_distance = TIMBER_THICKNESS / Math.tan(theta);
                             const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
 
@@ -1759,9 +1758,19 @@
                             vanishing_lines.push([current_pt, new_point])
                             vanishing_lines.push([thickness_pt, new_point])
 
-                            // const b = point_between(next_pt, mid_pt, aligned_distance);
-                            // const new_point2 = point_to(b, thickness_hypothenuse_vec, hypotenuse);
-                            // this.add_vertice(new_point2);
+                            const beta = fig.angles[(fig.num_points + i - 1) % fig.num_points];
+                            const aligned_distance2 = TIMBER_THICKNESS / Math.tan(beta);
+
+                            const hypotenuse2 = TIMBER_THICKNESS / Math.sin(beta);
+
+                            console.log(rad2deg(theta), rad2deg(beta));
+                            console.log(hypotenuse, hypotenuse2);
+                            console.log(aligned_distance, aligned_distance2);
+
+                            const b = point_between(next_pt, mid_pt, hypotenuse2); // seems OK
+
+                            this.add_vertice(b);
+                            // const new_point2 = point_to(b, thickness_hypothenuse_vec, hypotenuse2);
 
                             // vanishing_lines.push([b, new_point2])
                             // vanishing_lines.push([thickness_pt, new_point2])

@@ -361,6 +361,19 @@ class ConvexPolygon {
 
         // Init variables
         this.points = points;
+        this.num_points = this.points.length;
+        this.angles = new Array(this.num_points);           // Array of angles in radians
+        this.edge_distances = new Array(this.num_points);   // Edges distances
+        this.perimeter = 0;                                 // Decl
+        this.area = 0;                                      // Decl
+
+        // 3D
+        this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
+        this.faces = new Array(this.num_faces);             // Array of THREE.Vector3 for 3D visualization
+
+        // 2D
+        this.planar_points = new Array(this.num_points);    // Array of planar points [x, y, z] for 2D visualization
+
         this.compute()
     }
 
@@ -377,20 +390,6 @@ class ConvexPolygon {
     }
 
     compute() {
-        // Geometry
-        this.num_points = this.points.length;
-        this.angles = new Array(this.num_points);           // Array of angles in radians
-        this.edge_distances = new Array(this.num_points);   // Edges distances
-        this.perimeter = 0;                                 // Decl
-        this.area = 0;                                      // Decl
-
-        // 3D
-        this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
-        this.faces = new Array(this.num_faces);             // Array of THREE.Vector3 for 3D visualization
-
-        // 2D
-        this.planar_points = new Array(this.num_points);    // Array of planar points [x, y, z] for 2D visualization
-
         // Make a reference to planar 3D points to 2D, Take first point like origin
         const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]];
         const x_ref = norm(sub(C, O));
