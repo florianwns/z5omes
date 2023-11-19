@@ -1007,7 +1007,10 @@
                             mandala_figs.push(fig)
                         });
                     }
-                    pages.push(mandala_figs);
+
+                    if(mandala_figs.length > 0){
+                        pages.push(mandala_figs);
+                    }
 
                     // Add a last page if base exists
                     if (base !== null) {
@@ -1225,36 +1228,38 @@
                         // Pre-Compute geometry points, crown colors and num_faces
                         const points = [];
                         const num_crowns = ZOME.spiral.length;
-                        const colors = new Array(num_crowns);
-                        const num_faces = new Array(num_crowns);
-                        const face_colors = new Array(num_crowns);
-                        _.forEach(ZOME.spiral, (crown, iR) => {
-                            const fig = crown.fig;
-                            points.push(...fig.faces);
-                            colors[iR] = crown.colors;
-                            num_faces[iR] = fig.num_faces;
-                        });
+                        if(num_crowns){
+                            const colors = new Array(num_crowns);
+                            const num_faces = new Array(num_crowns);
+                            const face_colors = new Array(num_crowns);
+                            _.forEach(ZOME.spiral, (crown, iR) => {
+                                const fig = crown.fig;
+                                points.push(...fig.faces);
+                                colors[iR] = crown.colors;
+                                num_faces[iR] = fig.num_faces;
+                            });
 
-                        // Build geometry of first spiral
-                        const spiral_geometry = new THREE.BufferGeometry();
-                        spiral_geometry.setFromPoints(points)
-                        spiral_geometry.computeVertexNormals()
+                            // Build geometry of first spiral
+                            const spiral_geometry = new THREE.BufferGeometry();
+                            spiral_geometry.setFromPoints(points)
+                            spiral_geometry.computeVertexNormals()
 
-                        // Compute All faces geometries and colors
-                        for (let iN = 0; iN < ZOME.num; iN++) {
-                            const rotated_spiral_geometry = spiral_geometry.clone()
+                            // Compute All faces geometries and colors
+                            for (let iN = 0; iN < ZOME.num; iN++) {
+                                const rotated_spiral_geometry = spiral_geometry.clone()
 
-                            // Rotate the new geometry
-                            const a = ZOME.spiral[0].angles[iN];
-                            rotated_spiral_geometry.rotateY(a);
+                                // Rotate the new geometry
+                                const a = ZOME.spiral[0].angles[iN];
+                                rotated_spiral_geometry.rotateY(a);
 
-                            // Get colors
-                            for (let iR = 0; iR < num_crowns; iR++) {
-                                face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
+                                // Get colors
+                                for (let iR = 0; iR < num_crowns; iR++) {
+                                    face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
+                                }
+                                rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+
+                                meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
                             }
-                            rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-
-                            meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
                         }
                     }
 
@@ -1685,7 +1690,7 @@
 
                     // Compute the vanishing point depends on parameters (?)
                     // we call it O
-                    const O = [0, 0, 0];
+                    const vanishing_pt = [0, 0, 0];
                     let vanishing_lines = [];
 
                     // Find the parallel line at timber width on vanishing plan
@@ -1693,21 +1698,23 @@
                         const fig = crown.fig;
                         console.log(fig.points);
 
-                        _.forEach(fig.points, (A, i) => {
+                        _.forEach(fig.points, (current_pt, i) => {
+
+                            const next_pt = fig.points[(i + 1) % fig.num_points];
+                            const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
+
                             // Add vanishing line OK
-                            vanishing_lines.push([O, A])
+                            vanishing_lines.push([vanishing_pt, current_pt])
+                            vanishing_lines.push([current_pt, next_pt])
 
                             // Add midpoint OK
-                            const B = fig.points[(i + 1) % fig.num_points];
-                            const mid = midpoint(A, B)
-                            this.add_vertice(mid);
+                            // const mid = midpoint(current_pt, next_pt)
+                            // this.add_vertice(mid);
 
-                            const vec_ab = sub(B, A);
-                            const vec_b2vp = sub(O, B);
-                            const vec_a2vp = sub(O, A);
-
-                            // compute perpendicular plan
-                            // const vec_timber = cross_product(vec_ab, vec_b2vp);
+                            const current_2_next_vec = sub(next_pt, current_pt);
+                            const current_2_prev_vec = sub(prev_pt, current_pt);
+                            const current_2_vanishing_vec = sub(vanishing_pt, current_pt);
+                            const next_2_vanishing_vec = sub(vanishing_pt, next_pt);
 
 
                             // Find point at TIMBER_WIDTH from mid to vanishing_point
@@ -1716,16 +1723,35 @@
 
                             // Based on trigonometry, compute distance of TIMBER_WIDTH
                             // from A to vanishing point
-                            const theta = angle(O, A, B);
-                            const d = TIMBER_WIDTH / Math.sin(theta);
-                            const C = point_at(A, O, d);
-                            this.add_vertice(C);
+                            const theta = angle(vanishing_pt, current_pt, next_pt);
+                            const d1 = TIMBER_WIDTH / Math.sin(theta);
+                            const pt1 = point_at(current_pt, vanishing_pt, d1);
+                            this.add_vertice(pt1);
 
+                            // Always with trigo, compute base of triangle to find hypotenuse
+                            // with TIMBER_THICKNESS like height
+                            const beta = angle(prev_pt, current_pt, next_pt);
+                            const d2 = TIMBER_THICKNESS / Math.tan(beta);
+                            const pt2 = point_at(current_pt, next_pt, d2);
+                            this.add_vertice(pt2);
+
+
+                            // Compute perpendicular direction(cross product of 2 vecs) for timber building
+                            const perpendicular_vec = cross_product(current_2_next_vec, current_2_vanishing_vec);
+
+                            const pt3 = point_at(pt2, perpendicular_vec, TIMBER_THICKNESS);
+                            this.add_vertice(pt3);
+
+                            vanishing_lines.push([pt2, pt3]);
 
 
 
                             //
-                            // // Compute perpendicular direction(cross product of 2 vecs) for timber building
+                            // const pt4 = point_at(pt1, current_2_vanishing_vec, d1);
+                            // this.add_vertice(pt4);
+
+
+                            //
                             // const vecZ = cross_product(sub(B, A), sub(vanishing_point, A));
                             // const E = point_at(A, vecZ, TIMBER_THICKNESS);
                             // this.add_vertice(E);
@@ -1750,10 +1776,10 @@
 
                     ZOME = {
                         vertices: vertices,
-                        spiral: [], //spiral,
+                        spiral: spiral,
                         base: base,
                         vanishing_lines: vanishing_lines,
-                        vanishing_point: O,
+                        vanishing_point: vanishing_pt,
                         num: N,
                     }
 
