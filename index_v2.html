@@ -1745,9 +1745,30 @@
 
                             // Based with trigo, compute base of triangle to find hypotenuse
                             // with TIMBER_THICKNESS like height
-                            // const theta = angle(prev_pt, current_pt, next_pt);
-                            // const d1 = Math.abs(TIMBER_THICKNESS / Math.tan(theta));
-                            // const pt1 = point_between(current_pt, prev_pt, d1);
+                            const theta = angle(prev_pt, current_pt, next_pt);
+                            const aligned_distance = TIMBER_THICKNESS / Math.tan(theta);
+                            const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
+
+                            const a = point_between(mid_pt, current_pt, aligned_distance);
+                            this.add_vertice(a);
+
+                            const thickness_hypothenuse_vec = sub(thickness_pt, a);
+                            const new_point = point_to(current_pt, thickness_hypothenuse_vec, hypotenuse);
+                            this.add_vertice(new_point);
+
+                            vanishing_lines.push([current_pt, new_point])
+                            vanishing_lines.push([thickness_pt, new_point])
+
+                            // const b = point_between(next_pt, mid_pt, aligned_distance);
+                            // const new_point2 = point_to(b, thickness_hypothenuse_vec, hypotenuse);
+                            // this.add_vertice(new_point2);
+
+                            // vanishing_lines.push([b, new_point2])
+                            // vanishing_lines.push([thickness_pt, new_point2])
+
+                            // const beta = angle(mid_pt, a, thickness_pt);
+                            // console.log(rad2deg(theta), rad2deg(beta));
+
                             // this.add_vertice(pt1);
                             // console.log(rad2deg(theta), TIMBER_THICKNESS, d1);
 
