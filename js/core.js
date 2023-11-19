@@ -81,7 +81,7 @@ function dist(p1, p2) {
     return len(sub(p2, p1));
 }
 
-function normalize(vec) {
+function norm(vec) {
     // Normalizing a vector consists of transforming it so that its norm (or magnitude)
     // becomes equal to 1 while preserving its direction.
     return mul(vec, 1 / len(vec));
@@ -92,13 +92,17 @@ function midpoint(p1, p2) {
     return mul(add(p1, p2), 0.5);
 }
 
-function point_at(p1, p2, d) {
+function point_between(p1, p2, d) {
     // Find point at distance d between two points (from p1 to p2)
     // ex : find_point([50, 0, 0], [100, 0, 0], 20)  =>  [70, 0, 0]
     const vec = sub(p2, p1)
-    const norm = normalize(vec);
+    return point_to(p1, vec, d);
+}
 
-    const point = add(p1, mul(norm, d))
+function point_to(p1, vec, d) {
+    // Find point at distance d from origin p1 to direction vec
+    const normalized_vec = norm(vec);
+    const point = add(p1, mul(normalized_vec, d))
     return point;
 }
 
@@ -389,8 +393,8 @@ class ConvexPolygon {
 
         // Make a reference to planar 3D points to 2D, Take first point like origin
         const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]];
-        const x_ref = normalize(sub(C, O));
-        const y_ref = normalize(sub(sub(B, O), mul(x_ref, dot_product(sub(B, O), x_ref))));
+        const x_ref = norm(sub(C, O));
+        const y_ref = norm(sub(sub(B, O), mul(x_ref, dot_product(sub(B, O), x_ref))));
         const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
         let x_min = Number.MAX_VALUE, x_max = Number.MIN_VALUE;
         let y_min = Number.MAX_VALUE, y_max = Number.MIN_VALUE;
@@ -416,7 +420,7 @@ class ConvexPolygon {
             if (y < y_min) y_min = y;
             if (y > y_max) y_max = y;
 
-            // Compute angle
+            // Compute angle in radians
             this.angles[i] = angle(C, A, B);
 
             // Compute edges distances, and perimeter

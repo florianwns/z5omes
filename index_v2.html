@@ -1008,7 +1008,7 @@
                         });
                     }
 
-                    if(mandala_figs.length > 0){
+                    if (mandala_figs.length > 0) {
                         pages.push(mandala_figs);
                     }
 
@@ -1228,7 +1228,7 @@
                         // Pre-Compute geometry points, crown colors and num_faces
                         const points = [];
                         const num_crowns = ZOME.spiral.length;
-                        if(num_crowns){
+                        if (num_crowns) {
                             const colors = new Array(num_crowns);
                             const num_faces = new Array(num_crowns);
                             const face_colors = new Array(num_crowns);
@@ -1542,6 +1542,8 @@
 
                     // We calculate the total height of entire zome, top to top
                     const TOTAL_HEIGHT = ZOME_HEIGHT / HEIGHT_RATIO;
+                    const Z_CENTROID = Math.max(0, ZOME_HEIGHT - (TOTAL_HEIGHT / 2));
+
                     const K_SUM = IS_RHOMBUS ? N : (1 - Math.pow(K, N)) / (1 - K);
 
                     // First Point at the top
@@ -1690,7 +1692,11 @@
 
                     // Compute the vanishing point depends on parameters (?)
                     // we call it O
-                    const vanishing_pt = [0, 0, 0];
+                    const vanishing_pt = [0, Z_CENTROID, 0];
+                    this.add_vertice(vanishing_pt);
+
+                    console.log("Z_CENTROID", Z_CENTROID)
+
                     let vanishing_lines = [];
 
                     // Find the parallel line at timber width on vanishing plan
@@ -1708,52 +1714,67 @@
                             vanishing_lines.push([current_pt, next_pt])
 
                             // Add midpoint OK
-                            // const mid = midpoint(current_pt, next_pt)
-                            // this.add_vertice(mid);
+                            const mid_pt = midpoint(current_pt, next_pt)
+                            this.add_vertice(mid_pt);
 
                             const current_2_next_vec = sub(next_pt, current_pt);
                             const current_2_prev_vec = sub(prev_pt, current_pt);
                             const current_2_vanishing_vec = sub(vanishing_pt, current_pt);
+                            const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt);
                             const next_2_vanishing_vec = sub(vanishing_pt, next_pt);
 
 
+                            // Find point at TIMBER_THICKNESS from mid to vanishing_point
+                            const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, sub(vanishing_pt, mid_pt));
+                            const thickness_pt = point_to(mid_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
+                            this.add_vertice(thickness_pt);
+
+                            console.log("90° ?", rad2deg(angle(current_pt, mid_pt, thickness_pt)));
+
                             // Find point at TIMBER_WIDTH from mid to vanishing_point
-                            // const C = point_at(mid, vanishing_point, TIMBER_WIDTH);
-                            // this.add_vertice(C);
+                            const width_pt = point_to(thickness_pt, mid_2_vanishing_vec, TIMBER_WIDTH);
+                            this.add_vertice(width_pt);
+
+                            const width_pt2 = point_to(mid_pt, mid_2_vanishing_vec, TIMBER_WIDTH);
+                            this.add_vertice(width_pt2);
+
+                            vanishing_lines.push([mid_pt, thickness_pt])
+                            vanishing_lines.push([thickness_pt, width_pt])
+                            vanishing_lines.push([mid_pt, vanishing_pt])
+
+
+                            // Based with trigo, compute base of triangle to find hypotenuse
+                            // with TIMBER_THICKNESS like height
+                            // const theta = angle(prev_pt, current_pt, next_pt);
+                            // const d1 = Math.abs(TIMBER_THICKNESS / Math.tan(theta));
+                            // const pt1 = point_between(current_pt, prev_pt, d1);
+                            // this.add_vertice(pt1);
+                            // console.log(rad2deg(theta), TIMBER_THICKNESS, d1);
 
                             // Based on trigonometry, compute distance of TIMBER_WIDTH
                             // from A to vanishing point
-                            const theta = angle(vanishing_pt, current_pt, next_pt);
-                            const d1 = TIMBER_WIDTH / Math.sin(theta);
-                            const pt1 = point_at(current_pt, vanishing_pt, d1);
-                            this.add_vertice(pt1);
-
-                            // Always with trigo, compute base of triangle to find hypotenuse
-                            // with TIMBER_THICKNESS like height
-                            const beta = angle(prev_pt, current_pt, next_pt);
-                            const d2 = TIMBER_THICKNESS / Math.tan(beta);
-                            const pt2 = point_at(current_pt, next_pt, d2);
-                            this.add_vertice(pt2);
-
+                            // const beta = angle(vanishing_pt, current_pt, next_pt);
+                            // const d2 = Math.abs(TIMBER_WIDTH / Math.sin(beta));
+                            // const pt2 = point_between(current_pt, vanishing_pt, d2);
+                            // this.add_vertice(pt2);
 
                             // Compute perpendicular direction(cross product of 2 vecs) for timber building
-                            const perpendicular_vec = cross_product(current_2_next_vec, current_2_vanishing_vec);
-
-                            const pt3 = point_at(pt2, perpendicular_vec, TIMBER_THICKNESS);
-                            this.add_vertice(pt3);
-
-                            vanishing_lines.push([pt2, pt3]);
-
+                            // const perpendicular_vec = cross_product(current_2_next_vec, current_2_vanishing_vec);
+                            //
+                            // const pt3 = point_between(pt2, perpendicular_vec, TIMBER_THICKNESS);
+                            // this.add_vertice(pt3);
+                            //
+                            // vanishing_lines.push([pt2, pt3]);
 
 
                             //
-                            // const pt4 = point_at(pt1, current_2_vanishing_vec, d1);
+                            // const pt4 = point_between(pt1, current_2_vanishing_vec, d1);
                             // this.add_vertice(pt4);
 
 
                             //
                             // const vecZ = cross_product(sub(B, A), sub(vanishing_point, A));
-                            // const E = point_at(A, vecZ, TIMBER_THICKNESS);
+                            // const E = point_between(A, vecZ, TIMBER_THICKNESS);
                             // this.add_vertice(E);
                         });
                     });
@@ -1780,7 +1801,7 @@
                         base: base,
                         vanishing_lines: vanishing_lines,
                         vanishing_point: vanishing_pt,
-                        num: N,
+                        num: 0, //N,
                     }
 
                     // Dispatch zome
