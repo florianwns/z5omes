@@ -1693,6 +1693,7 @@
                     // Compute the vanishing point depends on parameters (?)
                     // we call it O
                     const vanishing_pt = [0, Z_CENTROID, 0];
+                    // const vanishing_pt = [0, 0, 0];
                     this.add_vertice(vanishing_pt);
 
                     console.log("Z_CENTROID", Z_CENTROID)
@@ -1706,41 +1707,18 @@
 
                         _.forEach(fig.points, (current_pt, i) => {
                             const next_pt = fig.points[(i + 1) % fig.num_points];
-                            const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
-
-
-                            // Add vanishing line OK
-                            vanishing_lines.push([vanishing_pt, current_pt])
-                            vanishing_lines.push([current_pt, next_pt])
 
                             // Add midpoint OK
                             const mid_pt = midpoint(current_pt, next_pt)
-                            this.add_vertice(mid_pt);
 
                             const current_2_next_vec = sub(next_pt, current_pt);
-                            const current_2_prev_vec = sub(prev_pt, current_pt);
-                            const current_2_vanishing_vec = sub(vanishing_pt, current_pt);
                             const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt);
-                            const next_2_vanishing_vec = sub(vanishing_pt, next_pt);
-
 
                             // Find point at TIMBER_THICKNESS from mid to vanishing_point
-                            const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, sub(vanishing_pt, mid_pt));
+                            const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, mid_2_vanishing_vec);
                             const thickness_pt = point_to(mid_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
                             this.add_vertice(thickness_pt);
 
-                            console.log("90° ?", rad2deg(angle(current_pt, mid_pt, thickness_pt)));
-
-                            // Find point at TIMBER_WIDTH from mid to vanishing_point
-                            const width_pt = point_to(thickness_pt, mid_2_vanishing_vec, TIMBER_WIDTH);
-                            this.add_vertice(width_pt);
-
-                            const width_pt2 = point_to(mid_pt, mid_2_vanishing_vec, TIMBER_WIDTH);
-                            this.add_vertice(width_pt2);
-
-                            vanishing_lines.push([mid_pt, thickness_pt])
-                            vanishing_lines.push([thickness_pt, width_pt])
-                            vanishing_lines.push([mid_pt, vanishing_pt])
 
                             // Based with trigo, compute base of triangle to find hypotenuse
                             // with TIMBER_THICKNESS like height
@@ -1749,63 +1727,55 @@
                             const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
 
                             const a = point_between(mid_pt, current_pt, aligned_distance);
-                            this.add_vertice(a);
-
+                            // this.add_vertice(a);
                             const thickness_hypothenuse_vec = sub(thickness_pt, a);
-                            const new_point = point_to(current_pt, thickness_hypothenuse_vec, hypotenuse);
-                            this.add_vertice(new_point);
 
-                            vanishing_lines.push([current_pt, new_point])
-                            vanishing_lines.push([thickness_pt, new_point])
-
-                            const beta = fig.angles[(fig.num_points + i - 1) % fig.num_points];
-                            const aligned_distance2 = TIMBER_THICKNESS / Math.tan(beta);
-
-                            const hypotenuse2 = TIMBER_THICKNESS / Math.sin(beta);
-
-                            console.log(rad2deg(theta), rad2deg(beta));
-                            console.log(hypotenuse, hypotenuse2);
-                            console.log(aligned_distance, aligned_distance2);
-
-                            const b = point_between(next_pt, mid_pt, hypotenuse2); // seems OK
-
+                            const b = point_to(current_pt, thickness_hypothenuse_vec, hypotenuse);
                             this.add_vertice(b);
-                            // const new_point2 = point_to(b, thickness_hypothenuse_vec, hypotenuse2);
 
-                            // vanishing_lines.push([b, new_point2])
-                            // vanishing_lines.push([thickness_pt, new_point2])
+                            const beta = fig.angles[(i + 1) % fig.num_points];
+                            const hypotenuse2 = TIMBER_THICKNESS / Math.sin(beta);
+                            const c = point_between(next_pt, mid_pt, hypotenuse2);
 
-                            // const beta = angle(mid_pt, a, thickness_pt);
-                            // console.log(rad2deg(theta), rad2deg(beta));
+                            const d = point_to(c, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
+                            this.add_vertice(c);
 
-                            // this.add_vertice(pt1);
-                            // console.log(rad2deg(theta), TIMBER_THICKNESS, d1);
+                            let t1 = TIMBER_THICKNESS / Math.tan(beta);
+                            const e = point_to(d, current_2_next_vec, -t1)
+                            this.add_vertice(e);
 
-                            // Based on trigonometry, compute distance of TIMBER_WIDTH
-                            // from A to vanishing point
-                            // const beta = angle(vanishing_pt, current_pt, next_pt);
-                            // const d2 = Math.abs(TIMBER_WIDTH / Math.sin(beta));
-                            // const pt2 = point_between(current_pt, vanishing_pt, d2);
-                            // this.add_vertice(pt2);
+                            // Add vanishing line OK
 
-                            // Compute perpendicular direction(cross product of 2 vecs) for timber building
-                            // const perpendicular_vec = cross_product(current_2_next_vec, current_2_vanishing_vec);
-                            //
-                            // const pt3 = point_between(pt2, perpendicular_vec, TIMBER_THICKNESS);
-                            // this.add_vertice(pt3);
-                            //
-                            // vanishing_lines.push([pt2, pt3]);
+                            vanishing_lines.push([vanishing_pt, current_pt])
+
+                            vanishing_lines.push([current_pt, b])
+                            vanishing_lines.push([b, e])
+                            vanishing_lines.push([e, c])
+                            vanishing_lines.push([c, current_pt])
+
+                            // Find point at TIMBER_WIDTH to vanishing_point
+                            // For vertical projection
+
+                            const current_pt_bottom = point_to(current_pt, sub(vanishing_pt, current_pt), TIMBER_WIDTH);
+                            const b_bottom = point_to(b, sub(vanishing_pt, b), TIMBER_WIDTH);
+                            const c_bottom = point_to(c, sub(vanishing_pt, c), TIMBER_WIDTH);
+                            const e_bottom = point_to(e, sub(vanishing_pt, e), TIMBER_WIDTH);
+
+                            this.add_vertice(current_pt_bottom);
+                            this.add_vertice(b_bottom);
+                            this.add_vertice(c_bottom);
+                            this.add_vertice(e_bottom);
+
+                            vanishing_lines.push([current_pt_bottom, b_bottom])
+                            vanishing_lines.push([b_bottom, e_bottom])
+                            vanishing_lines.push([e_bottom, c_bottom])
+                            vanishing_lines.push([c_bottom, current_pt_bottom])
 
 
-                            //
-                            // const pt4 = point_between(pt1, current_2_vanishing_vec, d1);
-                            // this.add_vertice(pt4);
-
-
-                            //
-                            // const vecZ = cross_product(sub(B, A), sub(vanishing_point, A));
-                            // const E = point_between(A, vecZ, TIMBER_THICKNESS);
-                            // this.add_vertice(E);
+                            vanishing_lines.push([current_pt_bottom, current_pt])
+                            vanishing_lines.push([b_bottom, b])
+                            vanishing_lines.push([e_bottom, e])
+                            vanishing_lines.push([c_bottom, c])
                         });
                     });
 
