@@ -197,9 +197,8 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
-                <input class="form-control form-range" min="0" :max="zome_height_in_mm - timber_width_in_mm" step="1"
-                       type="range"
-                       x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
+                <input class="form-control form-range" min="0" :max="z_centroid" step="1"
+                       type="range" x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="z_vanishing_point">
                 <button class="btn btn-primary" type="button"
@@ -1314,8 +1313,6 @@
 
                             // Build geometry of first env_spiral
                             const env_spiral_geometry = new THREE.BufferGeometry();
-                            console.log(points);
-
                             env_spiral_geometry.setFromPoints(points)
                             env_spiral_geometry.computeVertexNormals()
 
@@ -1495,6 +1492,12 @@
                     // Refresh the height_ratio if you change the zome num
                     this.$watch("num", (value) => {
                         this.clamp("height_ratio", this.height_ratio);
+                    });
+
+                    // Refresh the z_vanishing_point_in_mm
+                    // if you change the zome height
+                    this.$watch("zome_height_in_mm", (value) => {
+                        this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
                     });
 
                     this.z_vanishing_point_in_mm = this.z_centroid;
