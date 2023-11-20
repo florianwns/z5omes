@@ -191,21 +191,40 @@
                        x-model.lazy.number="timber_thickness">
             </div>
 
-            <!-- Connection type -->
+            <!-- Vanishing point -->
             <div x-show="help_is_displayed">
-                <b>CT</b> : Connection type
+                <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
             </div>
             <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Connection type">CT</span>
-                <input class="form-control form-range" min="0" :max="CONNECTION_TYPES.length - 1" step="1" type="range"
-                       x-model.number="connection_type" x-ref="connection_type_slider">
-
-                <select class="form-select" aria-label="Connection type" x-model="connection_type">
-                    <template x-for="(conn, index) in CONNECTION_TYPES">
-                        <option :value="index" x-text="conn"></option>
-                    </template>
-                </select>
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
+                <input class="form-control form-range" min="0" :max="zome_height_in_mm - timber_width_in_mm" step="1"
+                       type="range"
+                       x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
+                <input class="form-control" step="1" type="number"
+                       x-model.lazy.number="z_vanishing_point">
+                <button class="btn btn-primary" type="button"
+                        data-bs-toggle="tooltip" title="Set vanishing point to vertical center of entire zome"
+                        :class="(is_vanishing_centered) ? 'btn-secondary' : ''"
+                        @click="is_vanishing_centered = true">
+                    <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
+                </button>
             </div>
+
+            <!-- Connection type -->
+            <!--            <div x-show="help_is_displayed">-->
+            <!--                <b>CT</b> : Connection type-->
+            <!--            </div>-->
+            <!--            <div class="input-group input-group-sm mb-3">-->
+            <!--                <span class="input-group-text" data-bs-toggle="tooltip" title="Connection type">CT</span>-->
+            <!--                <input class="form-control form-range" min="0" :max="CONNECTION_TYPES.length - 1" step="1" type="range"-->
+            <!--                       x-model.number="connection_type" x-ref="connection_type_slider">-->
+
+            <!--                <select class="form-select" aria-label="Connection type" x-model="connection_type">-->
+            <!--                    <template x-for="(conn, index) in CONNECTION_TYPES">-->
+            <!--                        <option :value="index" x-text="conn"></option>-->
+            <!--                    </template>-->
+            <!--                </select>-->
+            <!--            </div>-->
         </div>
     </div>
 </div>
@@ -301,19 +320,19 @@
                                                id="draw-zome-body-switch" x-model="draw_zome_body">
                                     </div>
 
-                                    <!-- Draw Axis -->
-                                    <div class="form-check form-switch me-2 mb-3">
-                                        <label class="form-check-label" for="draw-axis-switch">Axis</label>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                               id="draw-axis-switch" x-model="draw_axis">
-                                    </div>
-
                                     <!-- Draw Vanishing Lines -->
                                     <div class="form-check form-switch me-2 mb-3">
                                         <label class="form-check-label" for="draw-vanishing-lines">Vanishing
                                             Lines</label>
                                         <input class="form-check-input" type="checkbox" role="switch"
                                                id="draw-vanishing-lines" x-model="draw_vanishing_lines">
+                                    </div>
+
+                                    <!-- Draw Axis -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-axis-switch" x-model="draw_axis">
                                     </div>
 
                                     <!-- Draw Zome Vertices -->
@@ -583,7 +602,7 @@
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
         return !(!obj || ![
             "vertices", "env_spiral", "body_spiral", "base",
-            "vanishing_lines", "vanishing_point",  "num"
+            "vanishing_lines", "vanishing_point", "num"
         ].reduce(hasKey, true));
     };
 
@@ -1119,7 +1138,7 @@
                 speed: 0.01,
                 draw_axis: true,
                 draw_zome_body: true,
-                draw_vanishing_lines: false,
+                draw_vanishing_lines: true,
                 draw_zome_vertices: false,
 
                 init() {
@@ -1445,6 +1464,7 @@
                 zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
                 timber_width_in_mm: 120,                            // Timber width in mm
                 timber_thickness_in_mm: 40,                         // Timber thickness in mm
+                z_vanishing_point_in_mm: 0,
 
                 connection_type: 0,
 
@@ -1463,7 +1483,9 @@
                     // Add shape parameter listeners
                     _.forEach([
                             "num", "theta_deg", "height_ratio", "kite_ratio",
-                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm", "connection_type"
+                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm",
+                            "z_vanishing_point_in_mm"
+                            //"connection_type",
                         ], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
@@ -1474,6 +1496,8 @@
                     this.$watch("num", (value) => {
                         this.clamp("height_ratio", this.height_ratio);
                     });
+
+                    this.z_vanishing_point_in_mm = this.z_centroid;
                 },
                 get theta() {
                     switch (this.angle_unit) {
@@ -1515,6 +1539,20 @@
                         this.kite_ratio = 1
                     }
                 },
+                get z_centroid() {
+                    return to_decimal(
+                        Math.max(0, this.zome_height_in_mm - (this.zome_height_in_mm / this.height_ratio / 2)),
+                        FLOAT_2_STR_PRECISION
+                    );
+                },
+                get is_vanishing_centered() {
+                    return to_decimal(this.z_vanishing_point_in_mm) === this.z_centroid;
+                },
+                set is_vanishing_centered(value) {
+                    if (value === true) {
+                        this.z_vanishing_point_in_mm = this.z_centroid;
+                    }
+                },
                 get zome_height() {
                     return from_mm(this.zome_height_in_mm, this.length_unit);
                 },
@@ -1529,6 +1567,12 @@
                 },
                 get timber_thickness() {
                     return from_mm(this.timber_thickness_in_mm, this.length_unit);
+                },
+                set z_vanishing_point(value) {
+                    this.clamp("z_vanishing_point_in_mm", to_mm(value, this.length_unit));
+                },
+                get z_vanishing_point() {
+                    return from_mm(this.z_vanishing_point_in_mm, this.length_unit);
                 },
                 set timber_thickness(value) {
                     this.clamp("timber_thickness_in_mm", to_mm(value, this.length_unit));
@@ -1591,6 +1635,7 @@
                     const TIMBER_WIDTH = this.timber_width_in_mm;
                     const TIMBER_THICKNESS = this.timber_thickness_in_mm;
                     const CONNECTION_TYPE = this.connection_type;
+                    const VANISHING_PT = [0, this.z_vanishing_point_in_mm, 0];
 
                     // Constants
                     const M = N - 1;
@@ -1602,7 +1647,6 @@
 
                     // We calculate the total height of entire zome, top to top
                     const TOTAL_HEIGHT = ZOME_HEIGHT / HEIGHT_RATIO;
-                    const Z_CENTROID = Math.max(0, ZOME_HEIGHT - (TOTAL_HEIGHT / 2));
 
                     const K_SUM = IS_RHOMBUS ? N : (1 - Math.pow(K, N)) / (1 - K);
 
@@ -1751,7 +1795,6 @@
                     }
 
                     // Compute the vanishing point depends on parameters (?)
-                    const vanishing_pt = [0, Z_CENTROID, 0];
                     let vanishing_lines = [];
                     let theta, opposite_side, hypotenuse, pivot_pt;
 
@@ -1767,7 +1810,7 @@
                             const next_pt = fig.points[(i + 1) % fig.num_points];
                             const mid_pt = midpoint(A, next_pt)
                             const current_2_next_vec = sub(next_pt, A);
-                            const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, sub(vanishing_pt, mid_pt));
+                            const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, sub(VANISHING_PT, mid_pt));
 
                             // Find perpendicular TIMBER_THICKNESS point
                             const perpendicular_thickness_pt = point_to(mid_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
@@ -1790,11 +1833,11 @@
                             D = point_to(pivot_pt, current_2_next_vec, -opposite_side)
 
                             // Find vertical projection points at distance TIMBER_WIDTH to vanishing_point
-                            const A_2_E_vec = sub(vanishing_pt, A);
+                            const A_2_E_vec = sub(VANISHING_PT, A);
                             const E = point_to(A, A_2_E_vec, TIMBER_WIDTH);
                             const F = point_to(B, A_2_E_vec, TIMBER_WIDTH);
 
-                            const A_2_G_vec = sub(vanishing_pt, next_pt);
+                            const A_2_G_vec = sub(VANISHING_PT, next_pt);
                             const G = point_to(C, A_2_G_vec, TIMBER_WIDTH);
                             const H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
 
@@ -1802,22 +1845,22 @@
                             body_spiral.push(new CircularDistribution(timber_prism, N))
 
                             // Add vanishing line OK
-                            vanishing_lines.push([vanishing_pt, A])
+                            vanishing_lines.push([VANISHING_PT, A])
                         });
                     });
 
                     // Build timbers
-                    switch (CONNECTION_TYPE) {
-                        case 0:     // GoodKarma
-                            console.log('GoodKarma')
-                            break;
-                        case 1:     // Piped:
-                            console.log('Piped')
-                            break;
-                        case 2 :    // SemiCone:
-                            console.log('SemiCone')
-                            break;
-                    }
+                    // switch (CONNECTION_TYPE) {
+                    //     case 0:     // GoodKarma
+                    //         console.log('GoodKarma')
+                    //         break;
+                    //     case 1:     // Piped:
+                    //         console.log('Piped')
+                    //         break;
+                    //     case 2 :    // SemiCone:
+                    //         console.log('SemiCone')
+                    //         break;
+                    // }
 
                     // Save Zome and dispatch it
                     ZOME = {
@@ -1826,7 +1869,7 @@
                         body_spiral: body_spiral,
                         base: base,
                         vanishing_lines: vanishing_lines,
-                        vanishing_point: vanishing_pt,
+                        vanishing_point: VANISHING_PT,
                         num: N,
                     }
 
