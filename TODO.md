@@ -26,10 +26,14 @@ Goodkarma seulement pour le moment
 0. Rajouter les réglages de dimensionnement (DONE)
 1. Export modèle à l'échelle (DONE)
 2. Clean de la lib geom.js => core.js
+3 Dessiner les montants
 
 ## A faire 
 
-* Dessiner les montants
+* Clean goodkarma code
+* Ajouter le mode horaire/anti_horaire pour le goodkarma
+  
+* Créer un objet
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
 * Mandala : export en 3D : .obj
 * la caméra tourne autour du zome et le zome ne toune pas
