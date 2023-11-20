@@ -1811,6 +1811,7 @@
 
                             // Take next point and find midpoint and perpendicular direction
                             const next_pt = fig.points[(i + 1) % fig.num_points];
+                            const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
                             const mid_pt = midpoint(A, next_pt)
                             const current_2_next_vec = sub(next_pt, A);
                             const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, sub(VANISHING_PT, mid_pt));
@@ -1823,8 +1824,9 @@
                             theta = fig.angles[i];
                             opposite_side = TIMBER_THICKNESS / Math.tan(theta);
                             hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                            pivot_pt = point_between(mid_pt, A, opposite_side);
-                            B = point_to(A, sub(perpendicular_thickness_pt, pivot_pt), hypotenuse);
+
+                            // pivot_pt = point_between(mid_pt, A, opposite_side);
+                            B = point_between(A, prev_pt, hypotenuse);
 
                             // Always with trigonometry, find C and D points
                             theta = fig.angles[(i + 1) % fig.num_points];       // take next angle

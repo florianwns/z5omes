@@ -30,7 +30,7 @@ Goodkarma seulement pour le moment
 
 ## A faire 
 
-* Clean goodkarma code
+* Fix du goodkarma (intersection des plans)
 * Ajouter le mode horaire/anti_horaire pour le goodkarma
   
 * Créer un objet
