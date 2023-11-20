@@ -4,11 +4,12 @@
 
 // * "fig" is a polygon/figure
 // * "faces" are the division of a figure into triangles for 3D representation
-// * "vertices" are just 3D point array [x, y, z]
+// * "vertices", "point" or "vector" are just 3D point array [x, y, z]
 // * "crown" is a circular distribution to avoid multiple creation of objects
 // * "spiral" is a spiral of circular distribution, like a zome without the base
 // * "base" is the last figure which close the zome
-
+// * "vector" is a direction
+// * "segment" is an array of two points
 
 // ------------------------------------
 // ========== Constants ==========
@@ -16,6 +17,8 @@
 
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
+const FLOAT_PRECISION = 7;
+const FLOAT_2_STR_PRECISION = 2;
 
 const CONNECTION_TYPES = ["GoodKarma", "Piped", "SemiCone"];
 
@@ -36,19 +39,36 @@ function sub(p1, p2) {
 
 function mul(p1, k) {
     // Multiply a 3D point by k
-    // Increasing or decreasing the coordinates of the point by the k factor.
     return [p1[0] * k, p1[1] * k, p1[2] * k];
 }
 
-function dot(vec1, vec2) {
+
+function dot_product(vec1, vec2) {
     // The dot product or scalar product of two 3D vectors (or points
     // because a point can be represented as a position vector from the origin).
     return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
 }
 
+
+function cross_product(vec1, vec2) {
+    // Also named 'vector product', the cross product is perpendicular to vec1 and vec2
+    // https://en.wikipedia.org/wiki/Cross_product
+    return [
+        vec1[1] * vec2[2] - vec1[2] * vec2[1],
+        vec1[2] * vec2[0] - vec1[0] * vec2[2],
+        vec1[0] * vec2[1] - vec1[1] * vec2[0]
+    ];
+}
+
+function project(vec1, vec2) {
+    // Project vec2 on vec1
+    var square2 = squared_norm(vec2, vec2);
+    return mul(vec2, dot_product(vec1, vec2) / square2);
+}
+
 function squared_norm(vec) {
     // Compute the squared norm of the vector
-    return dot(vec, vec);
+    return dot_product(vec, vec);
 }
 
 function len(vec) {
@@ -58,22 +78,54 @@ function len(vec) {
 
 function dist(p1, p2) {
     // Compute the distance between two 3D points
-    return len(sub(p1, p2));
+    return len(sub(p2, p1));
 }
 
-function normalize(vec) {
+function norm(vec) {
     // Normalizing a vector consists of transforming it so that its norm (or magnitude)
     // becomes equal to 1 while preserving its direction.
     return mul(vec, 1 / len(vec));
 }
 
-function cross(a, b) {
-    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+function midpoint(p1, p2) {
+    // Find the midpoint of a segment/line
+    return mul(add(p1, p2), 0.5);
 }
 
-function midpoint(p1, p2) {
-    // Find the midpoint of a segment
-    return mul(add(p1, p2), 0.5);
+function point_between(p1, p2, d) {
+    // Find point at distance d between two points (from p1 to p2)
+    // ex : find_point([50, 0, 0], [100, 0, 0], 20)  =>  [70, 0, 0]
+    const vec = sub(p2, p1)
+    return point_to(p1, vec, d);
+}
+
+function point_to(p1, vec, d) {
+    // Find point at distance d from origin p1 to direction vec
+    const normalized_vec = norm(vec);
+    const point = add(p1, mul(normalized_vec, d))
+    return point;
+}
+
+function intersect(p, v, q, u) {
+    // Find the intersection between two lines in 3D defined by
+    // p = line1 point, v = line1 direction, q = line2 point, u = line2 direction
+    const a = cross_product(v, u)
+    const dot = dot_product(a, a)
+
+    // if v and u are parallel (v x u = 0), then no intersection, return NaN point
+    if (dot == 0) {
+        return [NaN, NaN, NaN];
+    }
+
+    // b = (q-p) x u
+    const b = cross_product(sub(q, p), u);
+
+    // t = (b.a)/(a.a) = ((Q1-P1) x u) .(v x u) / (v x u) . (v x u)
+    const t = dot_product(b, a) / dot;
+
+    // find intersection point by substituting t to the line1 eq
+    const point = add(p, mul(v, t))
+    return point;
 }
 
 function angle(p1, p2, p3) {
@@ -84,22 +136,23 @@ function angle(p1, p2, p3) {
     return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
+function rotate_2d(vec, theta, origin = [0, 0, 0]) {
+    const sin_theta = Math.sin(theta);
+    const cos_theta = Math.cos(theta);
+
+    // Rotate an 2D vector [x, y, 0] around an origin
+    let delta = sub(vec, origin);
+    let x = delta[0] * cos_theta - delta[1] * sin_theta + origin[0];
+    let y = delta[0] * sin_theta + delta[1] * cos_theta + origin[1];
+    return [x, y, 0]
+}
+
 function dihedral_angle(a, b, c) {
     // Compute the dihedral angle from 3 angles
     // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
     return Math.acos(
         (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
     )
-}
-
-function rot2d(v, theta, o = [0, 0, 0]) {
-    const sin_theta = Math.sin(theta);
-    const cos_theta = Math.cos(theta);
-    let xM = v[0] - o[0];
-    let yM = v[1] - o[1];
-    let x = xM * cos_theta - yM * sin_theta + o[0];
-    let y = xM * sin_theta + yM * cos_theta + o[1];
-    return [x, y, 0]
 }
 
 
@@ -117,8 +170,8 @@ function rad2deg(rad) {
     return 180.0 * rad / Math.PI;
 }
 
-function to_decimal(x, fractionDigits = 2) {
-    return parseFloat(x.toFixed(fractionDigits));
+function to_decimal(x, num_digits = FLOAT_PRECISION) {
+    return parseFloat(x.toFixed(num_digits));
 }
 
 function to_mm(v, unit) {
@@ -168,24 +221,24 @@ function rgb2hex(rgb) {
 // ========== Helpers ==========
 // -----------------------------
 
-function humanize_distance(d) {
+function humanize_distance(d, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display distances
     if (isNaN(d)) {
         return "";
     }
     // Distance are in milimeters
     if (d >= 1e6) {
-        return to_decimal(d / 1e6) + "km";
+        return to_decimal(d / 1e6, num_digits) + "km";
     } else if (d >= 1e3) {
-        return to_decimal(d / 1e3) + "m";
+        return to_decimal(d / 1e3, num_digits) + "m";
     } else if (d >= 10) {
-        return to_decimal(d / 10) + "cm";
+        return to_decimal(d / 10, num_digits) + "cm";
     } else {
-        return to_decimal(d) + "mm";
+        return to_decimal(d, num_digits) + "mm";
     }
 }
 
-function humanize_area(d) {
+function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display areas
     if (isNaN(d)) {
         return "";
@@ -193,13 +246,13 @@ function humanize_area(d) {
 
     // Area are in mm²
     if (d >= 1e12) {
-        return to_decimal(d / 1e12) + "km²";
+        return to_decimal(d / 1e12, num_digits) + "km²";
     } else if (d >= 1e6) {
-        return to_decimal(d / 1e6) + "m²";
+        return to_decimal(d / 1e6, num_digits) + "m²";
     } else if (d >= 100) {
-        return to_decimal(d / 100) + "cm²";
+        return to_decimal(d / 100, num_digits) + "cm²";
     } else {
-        return to_decimal(d) + "mm²";
+        return to_decimal(d, num_digits) + "mm²";
     }
 }
 
@@ -277,16 +330,16 @@ class Color {
 class CircularDistribution {
     // Also named "crown" in code
 
-    constructor(fig, num) {
-        // Define an crown of figure (triangle, kite, etc...) with N instances around the crown.
-        this.fig = fig
+    constructor(obj, num) {
+        // Define an crown of objects (prism, triangle, kite, etc...) with N instances around the crown.
+        this.obj = obj
 
         // Compute angles and colors
         this.angles = new Array(num);
-        this.colors = new Array(num); // list of colors
+        this.colors = new Array(num);
 
         // Color depends on figure slope
-        const slope = this.fig.slope;
+        const slope = this.obj.slope;
         const incr_rad = TAU / num;
         for (let i = 0; i < num; i++) {
             const a = i * incr_rad;
@@ -296,6 +349,38 @@ class CircularDistribution {
     }
 }
 
+class TrapezoidalPrism {
+    constructor(points) {
+        const num_points = points.length;
+        if (num_points != 8) {
+            console.error("TrapezoidalPrism must have 8 point");
+            return;
+        }
+
+        const [A, B, C, D, E, F, G, H] = points;
+
+        // Build the 6 sides of TrapezoidalPrism with Polygon
+        this.polygons = [
+            new ConvexPolygon([A, B, D, C]), // Top side
+            new ConvexPolygon([E, F, H, G]), // Bottom side
+            new ConvexPolygon([A, B, F, E]), // Left side
+            new ConvexPolygon([C, D, H, G]), // Right side
+            new ConvexPolygon([A, C, G, E]), // Front side
+            new ConvexPolygon([B, D, H, F]), // Back side
+        ]
+
+        // Array of THREE.Vector3 for 3D visualization
+        this.faces = [];
+        _.forEach(this.polygons, (fig) => {
+            this.faces.push(...fig.faces);
+
+        });
+        this.num_faces = this.faces.length
+
+        // Hack for color
+        this.slope = this.polygons[0].slope;
+    }
+}
 
 class ConvexPolygon {
     constructor(points) {
@@ -308,6 +393,19 @@ class ConvexPolygon {
 
         // Init variables
         this.points = points;
+        this.num_points = this.points.length;
+        this.angles = new Array(this.num_points);           // Array of angles in radians
+        this.edge_distances = new Array(this.num_points);   // Edges distances
+        this.perimeter = 0;                                 // Decl
+        this.area = 0;                                      // Decl
+
+        // 3D
+        this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
+        this.faces = new Array(this.num_faces);             // Array of THREE.Vector3 for 3D visualization
+
+        // 2D
+        this.planar_points = new Array(this.num_points);    // Array of planar points [x, y, z] for 2D visualization
+
         this.compute()
     }
 
@@ -324,24 +422,10 @@ class ConvexPolygon {
     }
 
     compute() {
-        // Geometry
-        this.num_points = this.points.length;
-        this.angles = new Array(this.num_points);           // Array of angles in radians
-        this.edge_distances = new Array(this.num_points);   // Edges distances
-        this.perimeter = 0;                                 // Decl
-        this.area = 0;                                      // Decl
-
-        // 3D
-        this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
-        this.faces = new Array(this.num_faces);             // Array of THREE.Vector3 for 3D visualization
-
-        // 2D
-        this.planar_points = new Array(this.num_points);    // Array of planar points [x, y, z] for 2D visualization
-
-        // Make a reference to planar 3D points to 2D
-        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]]; // Take first point like origin
-        const x_ref = normalize(sub(C, O));
-        const y_ref = normalize(sub(sub(B, O), mul(x_ref, dot(sub(B, O), x_ref))));
+        // Make a reference to planar 3D points to 2D, Take first point like origin
+        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]];
+        const x_ref = norm(sub(C, O));
+        const y_ref = norm(sub(sub(B, O), mul(x_ref, dot_product(sub(B, O), x_ref))));
         const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
         let x_min = Number.MAX_VALUE, x_max = Number.MIN_VALUE;
         let y_min = Number.MAX_VALUE, y_max = Number.MIN_VALUE;
@@ -354,12 +438,9 @@ class ConvexPolygon {
             const B = this.points[(i + 1) % this.num_points];
             const D = this.points[(i + 2) % this.num_points];
 
-            // Create the new 2D point
-            [x, y, z] = rot2d(
-                [
-                    dot(sub(A, O), x_ref),
-                    dot(sub(A, O), y_ref)
-                ],
+            // Apply the transformation for planar point
+            [x, y, z] = rotate_2d(
+                [dot_product(sub(A, O), x_ref), dot_product(sub(A, O), y_ref), 0],
                 ref_angle
             )
             this.planar_points[i] = [x, y, z];
@@ -370,7 +451,7 @@ class ConvexPolygon {
             if (y < y_min) y_min = y;
             if (y > y_max) y_max = y;
 
-            // Compute angle
+            // Compute angle in radians
             this.angles[i] = angle(C, A, B);
 
             // Compute edges distances, and perimeter

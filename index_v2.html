@@ -105,7 +105,7 @@
                     HR
                 </span>
                 <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                       :min="to_decimal(2 / num, FLOAT_PRECISION)"
+                       :min="to_decimal(2 / num)"
                        x-model.number="height_ratio" x-ref="height_ratio_slider">
                 <input class="form-control" step="0.01" type="number"
                        x-model.lazy.number="height_ratio">
@@ -173,7 +173,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
-                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
+                <input class="form-control form-range" min="0" max="1000" step="1" type="range"
                        x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_width">
@@ -185,27 +185,46 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
-                <input class="form-control form-range" min="100" max="1000" step="10" type="range"
+                <input class="form-control form-range" min="0" max="1000" step="1" type="range"
                        x-model.number="timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_thickness">
             </div>
 
-            <!-- Connection type -->
+            <!-- Vanishing point -->
             <div x-show="help_is_displayed">
-                <b>CT</b> : Connection type
+                <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
             </div>
             <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Connection type">CT</span>
-                <input class="form-control form-range" min="0" :max="CONNECTION_TYPES.length - 1" step="1" type="range"
-                       x-model.number="connection_type" x-ref="connection_type_slider">
-
-                <select class="form-select" aria-label="Connection type" x-model="connection_type">
-                    <template x-for="(conn, index) in CONNECTION_TYPES">
-                        <option :value="index" x-text="conn"></option>
-                    </template>
-                </select>
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
+                <input class="form-control form-range" min="0" :max="zome_height_in_mm - timber_width_in_mm" step="1"
+                       type="range"
+                       x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
+                <input class="form-control" step="1" type="number"
+                       x-model.lazy.number="z_vanishing_point">
+                <button class="btn btn-primary" type="button"
+                        data-bs-toggle="tooltip" title="Set vanishing point to vertical center of entire zome"
+                        :class="(is_vanishing_centered) ? 'btn-secondary' : ''"
+                        @click="is_vanishing_centered = true">
+                    <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
+                </button>
             </div>
+
+            <!-- Connection type -->
+            <!--            <div x-show="help_is_displayed">-->
+            <!--                <b>CT</b> : Connection type-->
+            <!--            </div>-->
+            <!--            <div class="input-group input-group-sm mb-3">-->
+            <!--                <span class="input-group-text" data-bs-toggle="tooltip" title="Connection type">CT</span>-->
+            <!--                <input class="form-control form-range" min="0" :max="CONNECTION_TYPES.length - 1" step="1" type="range"-->
+            <!--                       x-model.number="connection_type" x-ref="connection_type_slider">-->
+
+            <!--                <select class="form-select" aria-label="Connection type" x-model="connection_type">-->
+            <!--                    <template x-for="(conn, index) in CONNECTION_TYPES">-->
+            <!--                        <option :value="index" x-text="conn"></option>-->
+            <!--                    </template>-->
+            <!--                </select>-->
+            <!--            </div>-->
         </div>
     </div>
 </div>
@@ -293,11 +312,34 @@
                                      class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
 
                                 <div class="d-flex flex-wrap justify-content-evenly">
+                                    <!-- Draw Zome Env or Body -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-zome-body-switch"
+                                               x-text="draw_zome_body ? `Body` : `Envelop`"></label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-zome-body-switch" x-model="draw_zome_body">
+                                    </div>
+
+                                    <!-- Draw Vanishing Lines -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-vanishing-lines">Vanishing
+                                            Lines</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-vanishing-lines" x-model="draw_vanishing_lines">
+                                    </div>
+
                                     <!-- Draw Axis -->
                                     <div class="form-check form-switch me-2 mb-3">
                                         <label class="form-check-label" for="draw-axis-switch">Axis</label>
                                         <input class="form-check-input" type="checkbox" role="switch"
                                                id="draw-axis-switch" x-model="draw_axis">
+                                    </div>
+
+                                    <!-- Draw Zome Vertices -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-zome-vertices-switch">Vertices</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
                                     </div>
 
                                     <!-- Spin -->
@@ -544,19 +586,24 @@
 <!-- Custom Javascript -->
 <script type="text/javascript">
     const WORLD_HEIGHT = 2500;       // or 3D HEIGHT OF ZOME in mm
-    const FLOAT_PRECISION = 7;
 
     // Use a global variable to store ZOME data
     let ZOME = {
-        spiral: [],
+        vertices: [],
+        env_spiral: [],
+        body_spiral: [],
         base: null,
-        vanishing_point: null,
+        vanishing_lines: [],
+        vanishing_point: [0, 0, 0],
         num: 0,
     };
 
     function is_valid_zome(obj) {
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-        return !(!obj || !["spiral", "base", "vanishing_point", "num"].reduce(hasKey, true));
+        return !(!obj || ![
+            "vertices", "env_spiral", "body_spiral", "base",
+            "vanishing_lines", "vanishing_point", "num"
+        ].reduce(hasKey, true));
     };
 
     // Enable tooltips
@@ -608,13 +655,7 @@
                     return humanize_distance(value);
                 },
                 format(key, value) {
-                    return to_decimal(value, 2);
-                },
-                format_str(value, unit) {
-                    switch (key) {
-                        default:
-                            return to_decimal(value, FLOAT_PRECISION);
-                    }
+                    return to_decimal(value, FLOAT_2_STR_PRECISION);
                 },
                 get_slider(key) {
                     return eval(`this.$refs.${key}_slider`);
@@ -696,23 +737,23 @@
                 },
                 to_real_world() {
                     // Clone structure
-                    const spiral = _.cloneDeep(ZOME.spiral);
+                    const env_spiral = _.cloneDeep(ZOME.env_spiral);
                     const base = _.cloneDeep(ZOME.base);
 
-                    const num_crowns = spiral.length;
+                    const num_crowns = env_spiral.length;
 
                     // Resize envelop figs
                     const envelop_figs = new Array(num_crowns);
-                    _.forEach(spiral, (crown, iR) => {
-                        const fig = crown.fig;
+                    _.forEach(env_spiral, (crown, iR) => {
+                        const fig = crown.obj;
 
                         // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 figs
                         if (num_crowns > 1) {
                             if (iR == 0) {
-                                const next_fig = spiral[1].fig;
+                                const next_fig = env_spiral[1].obj;
                                 fig.σ = dihedral_angle(next_fig.φ, fig.ω, fig.ω);
                             } else {
-                                const prev_fig = spiral[iR - 1].fig;
+                                const prev_fig = env_spiral[iR - 1].obj;
                                 const α = angle(fig.A, fig.B, prev_fig.B);
                                 const δ = angle(fig.A, fig.B, fig.C);
                                 const λ = angle(prev_fig.B, fig.B, fig.C);
@@ -948,26 +989,26 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                build_spiral_figs(spiral) {
-                    const spiral_figs = new Array(spiral.length);
+                build_spiral_figs(env_spiral) {
+                    const spiral_figs = new Array(env_spiral.length);
 
                     // Compute envelop planar figs
                     let O = [0, 0, 0], planar_points = [];
                     let A, a, rotated_A;
-                    _.forEach(spiral, (crown, iR) => {
-                        const fig = crown.fig;
+                    _.forEach(env_spiral, (crown, iR) => {
+                        const fig = crown.obj;
 
                         // Move to Origin and rotate to match with previous piece
                         planar_points = fig.planar_points.map(p => add(p, O));
                         if (iR > 0) {
                             a = angle(A, O, planar_points[1]);
-                            rotated_A = rot2d(planar_points[1], a, O);
+                            rotated_A = rotate_2d(planar_points[1], a, O);
 
                             // Rotate the other way if rotatedA is not too close to A
-                            if (to_decimal(dist(rotated_A, A), FLOAT_PRECISION) != 0) {
+                            if (to_decimal(dist(rotated_A, A)) != 0) {
                                 a = -a;
                             }
-                            planar_points = planar_points.map(p => rot2d(p, a, O));
+                            planar_points = planar_points.map(p => rotate_2d(p, a, O));
                         }
                         O = planar_points[planar_points.length - 1];
                         A = planar_points[planar_points.length - 2];
@@ -979,14 +1020,14 @@
                     return spiral_figs;
                 },
                 draw_figs() {
-                    const spiral = _.cloneDeep(ZOME.spiral);
+                    const env_spiral = _.cloneDeep(ZOME.env_spiral);
                     const base = _.cloneDeep(ZOME.base);
 
                     // for each color and each fig add a page
                     const range = _.range(0, ZOME.num);
-                    for (const crown of spiral) {
+                    for (const crown of env_spiral) {
                         for (const i of range) {
-                            const fig = _.cloneDeep(crown.fig);
+                            const fig = _.cloneDeep(crown.obj);
                             fig.color = crown.colors[i];
                             pages.push([fig]);
                         }
@@ -998,22 +1039,25 @@
                     }
                 },
                 draw_mandala_figs() {
-                    const spiral = _.cloneDeep(ZOME.spiral);
-                    const spiral_figs = this.build_spiral_figs(spiral)
+                    const env_spiral = _.cloneDeep(ZOME.env_spiral);
+                    const spiral_figs = this.build_spiral_figs(env_spiral)
                     const base = _.cloneDeep(ZOME.base)
 
                     // For each color, rotate piece around the origin
                     const mandala_figs = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
                         _.forEach(spiral_figs, (spiral_fig, j) => {
-                            const crown = spiral[j];
+                            const crown = env_spiral[j];
                             const fig = _.cloneDeep(spiral_fig);
-                            fig.planar_points = fig.planar_points.map(p => rot2d(p, crown.angles[i], O));
+                            fig.planar_points = fig.planar_points.map(p => rotate_2d(p, crown.angles[i], O));
                             fig.color = crown.colors[i];
                             mandala_figs.push(fig)
                         });
                     }
-                    pages.push(mandala_figs);
+
+                    if (mandala_figs.length > 0) {
+                        pages.push(mandala_figs);
+                    }
 
                     // Add a last page if base exists
                     if (base !== null) {
@@ -1021,16 +1065,16 @@
                     }
                 },
                 draw_spiral_figs() {
-                    const spiral = _.cloneDeep(ZOME.spiral);
-                    const spiral_figs = this.build_spiral_figs(spiral)
+                    const env_spiral = _.cloneDeep(ZOME.env_spiral);
+                    const spiral_figs = this.build_spiral_figs(env_spiral)
                     const base = _.cloneDeep(ZOME.base)
 
-                    // For each color, Add a page with spiral figs
+                    // For each color, Add a page with env_spiral figs
                     for (let i = 0; i < ZOME.num; i++) {
                         const colored_spiral_figs = [];
                         _.forEach(spiral_figs, (spiral_fig, j) => {
                             const fig = _.cloneDeep(spiral_fig);
-                            fig.color = spiral[j].colors[i];
+                            fig.color = env_spiral[j].colors[i];
                             colored_spiral_figs.push(fig)
                         });
                         pages.push(colored_spiral_figs);
@@ -1083,22 +1127,33 @@
             let scene, camera, renderer, controls, canvas;              // Three JS Parameters
             const meshes = {
                 "axis": null,
-                "zome": null,
+                "zome_obj": null,
+                "zome_vertices": null,
+                "vanishing_lines": null,
             }
 
             return {
                 // 3D Rendering Parameters
-                is_spinning: true,
+                is_spinning: false,
                 speed: 0.01,
                 draw_axis: true,
+                draw_zome_body: true,
+                draw_vanishing_lines: true,
+                draw_zome_vertices: false,
 
                 init() {
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
 
-                    ["axis"].forEach(
+                    ["axis", "vanishing_lines", "zome_vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
+                        })
+                    );
+
+                    ["zome_body"].forEach(
+                        (key) => this.$watch(`draw_${key}`, (value) => {
+                            this.process();
                         })
                     );
 
@@ -1181,18 +1236,58 @@
                     const blob = new Blob([str], {type: 'text/plain'});
                     download(`zome_3D.${ext}`, window.URL.createObjectURL(blob));
                 },
+                clear() {
+                    // Clean old meshes
+                    if (meshes.zome_obj instanceof THREE.Group) {
+                        scene.remove(meshes.zome_obj)
+                    }
+                    meshes.zome_obj = new THREE.Group();
+
+                    if (meshes.zome_body instanceof THREE.Group) {
+                        scene.remove(meshes.zome_body)
+                    }
+                    meshes.zome_body = new THREE.Group();
+
+                    if (meshes.zome_vertices instanceof THREE.Group) {
+                        scene.remove(meshes.zome_vertices)
+                    }
+                    meshes.zome_vertices = new THREE.Group();
+
+                    if (meshes.vanishing_lines instanceof THREE.Group) {
+                        scene.remove(meshes.vanishing_lines)
+                    }
+                    meshes.vanishing_lines = new THREE.Group();
+                },
                 process() {
                     if (!is_valid_zome(ZOME)) {
                         console.error("Zome is not valid", ZOME)
                         return;
                     }
+                    this.clear();
 
-                    // Clean old mesh
-                    if (meshes.zome instanceof THREE.Group) {
-                        scene.remove(meshes.zome)
+                    // Display vanishing lines
+                    {
+                        const material = new THREE.LineBasicMaterial({color: 0x00FFFF});
+                        _.forEach(ZOME.vanishing_lines, (line) => {
+                            const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
+                            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                            meshes.vanishing_lines.add(new THREE.Line(geometry, material))
+                            this.set_visibility("vanishing_lines", this.draw_vanishing_lines);
+                        });
                     }
+                    scene.add(meshes.vanishing_lines);
 
-                    meshes.zome = new THREE.Group();
+                    // Display zome vertices
+                    {
+                        const geometry = new THREE.BufferGeometry();
+                        geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
+
+                        const material = new THREE.PointsMaterial({color: 0x888888, size: 20});
+                        meshes.zome_vertices.add(new THREE.Points(geometry, material))
+                        this.set_visibility("zome_vertices", this.draw_zome_vertices);
+                    }
+                    scene.add(meshes.zome_vertices);
+
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({
@@ -1200,62 +1295,71 @@
                         vertexColors: true,
                     });
 
-                    // Build 3D Envelop Faces
+                    // Build 3D Body Faces
                     {
+                        const spiral = (this.draw_zome_body) ? ZOME.body_spiral : ZOME.env_spiral;
+
                         // Pre-Compute geometry points, crown colors and num_faces
                         const points = [];
-                        const num_crowns = ZOME.spiral.length;
-                        const colors = new Array(num_crowns);
-                        const num_faces = new Array(num_crowns);
-                        const face_colors = new Array(num_crowns);
-                        _.forEach(ZOME.spiral, (crown, iR) => {
-                            const fig = crown.fig;
-                            points.push(...fig.faces);
-                            colors[iR] = crown.colors;
-                            num_faces[iR] = fig.num_faces;
-                        });
+                        const num_crowns = spiral.length;
+                        if (num_crowns) {
+                            const colors = new Array(num_crowns);
+                            const num_faces = new Array(num_crowns);
+                            const face_colors = new Array(num_crowns);
+                            _.forEach(spiral, (crown, iR) => {
+                                points.push(...crown.obj.faces);
+                                colors[iR] = crown.colors;
+                                num_faces[iR] = crown.obj.num_faces;
+                            });
 
-                        // Build geometry of first spiral
-                        const spiral_geometry = new THREE.BufferGeometry();
-                        spiral_geometry.setFromPoints(points)
-                        spiral_geometry.computeVertexNormals()
+                            // Build geometry of first env_spiral
+                            const env_spiral_geometry = new THREE.BufferGeometry();
+                            console.log(points);
 
-                        // Compute All faces geometries and colors
-                        for (let iN = 0; iN < ZOME.num; iN++) {
-                            const rotated_spiral_geometry = spiral_geometry.clone()
+                            env_spiral_geometry.setFromPoints(points)
+                            env_spiral_geometry.computeVertexNormals()
 
-                            // Rotate the new geometry
-                            const a = ZOME.spiral[0].angles[iN];
-                            rotated_spiral_geometry.rotateY(a);
+                            // Compute All faces geometries and colors
+                            for (let iN = 0; iN < ZOME.num; iN++) {
+                                const rotated_env_spiral_geometry = env_spiral_geometry.clone()
 
-                            // Get colors
-                            for (let iR = 0; iR < num_crowns; iR++) {
-                                face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
+                                // Rotate the new geometry
+                                const a = spiral[0].angles[iN];
+                                rotated_env_spiral_geometry.rotateY(a);
+
+                                // Get colors
+                                for (let iR = 0; iR < num_crowns; iR++) {
+                                    face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
+                                }
+                                rotated_env_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+
+                                meshes.zome_obj.add(new THREE.Mesh(rotated_env_spiral_geometry, material))
                             }
-                            rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-
-                            meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
                         }
                     }
 
-                    // Build 3D Base Faces
-                    const base = ZOME.base;
-                    if (base !== null) {
-                        const geometry = new THREE.BufferGeometry();
-                        geometry.setFromPoints(base.faces)
+                    // Draw Zome Base only if draw envelop
+                    if (!this.draw_zome_body) {
+                        // Build 3D Base Faces
+                        const base = ZOME.base;
+                        if (base !== null) {
+                            const geometry = new THREE.BufferGeometry();
+                            geometry.setFromPoints(base.faces)
 
-                        const face_colors = [];
-                        _.forEach(base.faces, () => {
-                            face_colors.push(...base.color.rgb);
-                        });
+                            const face_colors = [];
+                            _.forEach(base.faces, () => {
+                                face_colors.push(...base.color.rgb);
+                            });
 
-                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                        geometry.computeVertexNormals()
+                            geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                            geometry.computeVertexNormals()
 
-                        meshes.zome.add(new THREE.Mesh(geometry, material))
+                            meshes.zome_obj.add(new THREE.Mesh(geometry, material))
+                        }
                     }
+
                     // Add the final obj mesh to the scene
-                    scene.add(meshes.zome)
+                    scene.add(meshes.zome_obj)
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -1280,8 +1384,8 @@
                     }
                 },
                 update() {
-                    if (this.is_spinning && meshes.zome instanceof THREE.Group) {
-                        meshes.zome.rotation.y -= this.speed
+                    if (this.is_spinning && meshes.zome_obj instanceof THREE.Group) {
+                        meshes.zome_obj.rotation.y -= this.speed
                     }
                 },
                 render() {
@@ -1342,8 +1446,9 @@
         });
 
         Alpine.data('settings', () => {
-            let vertices = [];                  // 3D point vector
-            let spiral = [];                    //
+            let vertices = [];      // 3D point vector
+            let env_spiral = [];    // Envelop spiral
+            let body_spiral = [];   // Body spiral
 
             return {
                 // Shape Parameters
@@ -1356,9 +1461,10 @@
 
                 // Sizing Parameters
                 length_unit: "cm",                                  // Length unit by default is cm
-                zome_height_in_mm: WORLD_HEIGHT,                     // Height in mm
-                timber_width_in_mm: WORLD_HEIGHT / 10,               // Timber width in mm
-                timber_thickness_in_mm: WORLD_HEIGHT / 10,           // Timber thickness in mm
+                zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
+                timber_width_in_mm: 120,                            // Timber width in mm
+                timber_thickness_in_mm: 40,                         // Timber thickness in mm
+                z_vanishing_point_in_mm: 0,
 
                 connection_type: 0,
 
@@ -1377,7 +1483,9 @@
                     // Add shape parameter listeners
                     _.forEach([
                             "num", "theta_deg", "height_ratio", "kite_ratio",
-                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm", "connection_type"
+                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm",
+                            "z_vanishing_point_in_mm"
+                            //"connection_type",
                         ], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
@@ -1388,13 +1496,15 @@
                     this.$watch("num", (value) => {
                         this.clamp("height_ratio", this.height_ratio);
                     });
+
+                    this.z_vanishing_point_in_mm = this.z_centroid;
                 },
                 get theta() {
                     switch (this.angle_unit) {
                         case "rad":
-                            return to_decimal(deg2rad(this.theta_deg), FLOAT_PRECISION);
+                            return to_decimal(deg2rad(this.theta_deg));
                         case "tan":
-                            return to_decimal(Math.tan(deg2rad(this.theta_deg)), FLOAT_PRECISION);
+                            return to_decimal(Math.tan(deg2rad(this.theta_deg)));
                         case "deg":
                         default:
                             return this.theta_deg;
@@ -1419,7 +1529,7 @@
                 },
                 set num_rhombus(value) {
                     this.kite_ratio = 1;
-                    this.height_ratio = to_decimal((value + 1) / this.num, FLOAT_PRECISION);
+                    this.height_ratio = to_decimal((value + 1) / this.num);
                 },
                 get is_rhombus() {
                     return this.kite_ratio === 1;
@@ -1427,6 +1537,20 @@
                 set is_rhombus(value) {
                     if (value === true) {
                         this.kite_ratio = 1
+                    }
+                },
+                get z_centroid() {
+                    return to_decimal(
+                        Math.max(0, this.zome_height_in_mm - (this.zome_height_in_mm / this.height_ratio / 2)),
+                        FLOAT_2_STR_PRECISION
+                    );
+                },
+                get is_vanishing_centered() {
+                    return to_decimal(this.z_vanishing_point_in_mm) === this.z_centroid;
+                },
+                set is_vanishing_centered(value) {
+                    if (value === true) {
+                        this.z_vanishing_point_in_mm = this.z_centroid;
                     }
                 },
                 get zome_height() {
@@ -1444,6 +1568,12 @@
                 get timber_thickness() {
                     return from_mm(this.timber_thickness_in_mm, this.length_unit);
                 },
+                set z_vanishing_point(value) {
+                    this.clamp("z_vanishing_point_in_mm", to_mm(value, this.length_unit));
+                },
+                get z_vanishing_point() {
+                    return from_mm(this.z_vanishing_point_in_mm, this.length_unit);
+                },
                 set timber_thickness(value) {
                     this.clamp("timber_thickness_in_mm", to_mm(value, this.length_unit));
                 },
@@ -1458,7 +1588,7 @@
                         case 'num':
                             return to_decimal(value, 0);
                         default:
-                            return to_decimal(value, FLOAT_PRECISION);
+                            return to_decimal(value);
                     }
                 },
                 randomize() {
@@ -1481,10 +1611,11 @@
                 clear() {
                     // Clear data
                     vertices = [];
-                    spiral = [];
+                    env_spiral = [];
+                    body_spiral = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
-                    return to_decimal((WORLD_HEIGHT - y) / polar_height, FLOAT_PRECISION);
+                    return to_decimal((WORLD_HEIGHT - y) / polar_height);
                 },
                 add_vertice(p) {
                     vertices.push(p);
@@ -1504,6 +1635,7 @@
                     const TIMBER_WIDTH = this.timber_width_in_mm;
                     const TIMBER_THICKNESS = this.timber_thickness_in_mm;
                     const CONNECTION_TYPE = this.connection_type;
+                    const VANISHING_PT = [0, this.z_vanishing_point_in_mm, 0];
 
                     // Constants
                     const M = N - 1;
@@ -1515,6 +1647,7 @@
 
                     // We calculate the total height of entire zome, top to top
                     const TOTAL_HEIGHT = ZOME_HEIGHT / HEIGHT_RATIO;
+
                     const K_SUM = IS_RHOMBUS ? N : (1 - Math.pow(K, N)) / (1 - K);
 
                     // First Point at the top
@@ -1526,7 +1659,7 @@
                     const FIRST_CROWN_HEIGHT = TOP_EDGE * COS_THETA;
 
                     // Initialize variables
-                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, a, dist_to_ground, y, fig;
+                    let fipr, ficr, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, G, H, a, dist_to_ground, y, fig;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -1564,7 +1697,7 @@
                             D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
-                            y = to_decimal(D[1], FLOAT_PRECISION);
+                            y = to_decimal(D[1]);
 
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
@@ -1574,7 +1707,7 @@
                                 // Add only the first piece, because only color after that
                                 if (iN == 0) {
                                     fig = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
-                                    spiral.push(new CircularDistribution(fig, N));
+                                    env_spiral.push(new CircularDistribution(fig, N));
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
@@ -1595,7 +1728,7 @@
                                 // Add Truncated Kite to figs
                                 if (iN == 0) {
                                     fig = new TruncatedKite([A, B, E, F, C])
-                                    spiral.push(new CircularDistribution(fig, N));
+                                    env_spiral.push(new CircularDistribution(fig, N));
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -1635,7 +1768,7 @@
                                 // Add triangle to figs
                                 if (iT == 0) {
                                     fig = new Triangle([A, B, C]);
-                                    spiral.push(new CircularDistribution(fig, N));
+                                    env_spiral.push(new CircularDistribution(fig, N));
                                 }
                             }
 
@@ -1662,29 +1795,81 @@
                     }
 
                     // Compute the vanishing point depends on parameters (?)
-                    const vanishing_point = [0, 0, 0];
+                    let vanishing_lines = [];
+                    let theta, opposite_side, hypotenuse, pivot_pt;
 
-                    // Find the parallel line at timber width on vanishing plan
+                    // Build Timbers using the GoodKarma assembly method
+                    _.forEach(env_spiral, (crown, iR) => {
+                        const fig = crown.obj;
 
+                        // A, B, C, D is the top part (trapezoid) of the timber
+                        // E, F, G, H is the bottom part (trapezoid) of the timber
+                        _.forEach(fig.points, (A, i) => {
+
+                            // Take next point and find midpoint and perpendicular direction
+                            const next_pt = fig.points[(i + 1) % fig.num_points];
+                            const mid_pt = midpoint(A, next_pt)
+                            const current_2_next_vec = sub(next_pt, A);
+                            const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, sub(VANISHING_PT, mid_pt));
+
+                            // Find perpendicular TIMBER_THICKNESS point
+                            const perpendicular_thickness_pt = point_to(mid_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
+
+                            // Based on trigonometry, compute measurements of triangle
+                            // (hypotenuse, opposite side) to find B point which depends on TIMBER_THICKNESS
+                            theta = fig.angles[i];
+                            opposite_side = TIMBER_THICKNESS / Math.tan(theta);
+                            hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
+                            pivot_pt = point_between(mid_pt, A, opposite_side);
+                            B = point_to(A, sub(perpendicular_thickness_pt, pivot_pt), hypotenuse);
+
+                            // Always with trigonometry, find C and D points
+                            theta = fig.angles[(i + 1) % fig.num_points];       // take next angle
+                            hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
+                            C = point_between(next_pt, mid_pt, hypotenuse);
+
+                            pivot_pt = point_to(C, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
+                            opposite_side = TIMBER_THICKNESS / Math.tan(theta);
+                            D = point_to(pivot_pt, current_2_next_vec, -opposite_side)
+
+                            // Find vertical projection points at distance TIMBER_WIDTH to vanishing_point
+                            const A_2_E_vec = sub(VANISHING_PT, A);
+                            const E = point_to(A, A_2_E_vec, TIMBER_WIDTH);
+                            const F = point_to(B, A_2_E_vec, TIMBER_WIDTH);
+
+                            const A_2_G_vec = sub(VANISHING_PT, next_pt);
+                            const G = point_to(C, A_2_G_vec, TIMBER_WIDTH);
+                            const H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
+
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
+                            body_spiral.push(new CircularDistribution(timber_prism, N))
+
+                            // Add vanishing line OK
+                            vanishing_lines.push([VANISHING_PT, A])
+                        });
+                    });
 
                     // Build timbers
-                    switch (CONNECTION_TYPE) {
-                        case 0:     // GoodKarma
-                            console.log('GoodKarma')
-                            break;
-                        case 1:     // Piped:
-                            console.log('Piped')
-                            break;
-                        case 2 :    // SemiCone:
-                            console.log('SemiCone')
-                            break;
-                    }
+                    // switch (CONNECTION_TYPE) {
+                    //     case 0:     // GoodKarma
+                    //         console.log('GoodKarma')
+                    //         break;
+                    //     case 1:     // Piped:
+                    //         console.log('Piped')
+                    //         break;
+                    //     case 2 :    // SemiCone:
+                    //         console.log('SemiCone')
+                    //         break;
+                    // }
 
                     // Save Zome and dispatch it
                     ZOME = {
-                        spiral: spiral,
+                        vertices: vertices,
+                        env_spiral: env_spiral,
+                        body_spiral: body_spiral,
                         base: base,
-                        vanishing_point: vanishing_point,
+                        vanishing_lines: vanishing_lines,
+                        vanishing_point: VANISHING_PT,
                         num: N,
                     }
 
