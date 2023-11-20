@@ -330,16 +330,16 @@ class Color {
 class CircularDistribution {
     // Also named "crown" in code
 
-    constructor(fig, num) {
-        // Define an crown of figure (triangle, kite, etc...) with N instances around the crown.
-        this.fig = fig
+    constructor(obj, num) {
+        // Define an crown of objects (prism, triangle, kite, etc...) with N instances around the crown.
+        this.obj = obj
 
         // Compute angles and colors
         this.angles = new Array(num);
         this.colors = new Array(num); // list of colors
 
         // Color depends on figure slope
-        const slope = this.fig.slope;
+        const slope = this.obj.slope;
         const incr_rad = TAU / num;
         for (let i = 0; i < num; i++) {
             const a = i * incr_rad;
@@ -349,6 +349,30 @@ class CircularDistribution {
     }
 }
 
+class TrapezoidalPrism {
+    constructor(points) {
+        const num_points = points.length;
+        if (num_points != 8) {
+            console.error("TrapezoidalPrism must have 8 point");
+            return;
+        }
+
+        const [A, B, C, D, E, F, G, H] = points;
+
+        // Build the 6 sides of TrapezoidalPrism with Polygon
+        this.polygons = [
+            new ConvexPolygon([A, B, C, D]), // Top side
+            new ConvexPolygon([E, F, G, H]), // Bottom side
+            new ConvexPolygon([A, B, F, E]), // Left side
+            new ConvexPolygon([C, D, G, H]), // Right side
+            new ConvexPolygon([A, B, G, E]), // Front side
+            new ConvexPolygon([C, D, H, B]), // Back side
+        ]
+
+        // Hack for color
+        this.slope = this.polygons[0].slope;
+    }
+}
 
 class ConvexPolygon {
     constructor(points) {
