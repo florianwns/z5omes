@@ -106,6 +106,38 @@ function point_to(p1, vec, d) {
     return point;
 }
 
+
+function angle_between_vectors(u, v) {
+    const dot = dot_product(u, v);
+    const u_length = len(u);
+    const v_length = len(v);
+
+    const theta = Math.acos(dot / (u_length * v_length));
+    return theta;
+}
+
+function points_2_plane(p1, p2, p3) {
+    // Create plan from 3 points
+    const vec1 = sub(p2, p1)
+    const vec2 = sub(p3, p1)
+
+    const norm_vec = cross_product(vec1, vec2)
+    const d = -dot_product(norm_vec, p1)
+    return [norm_vec[0], norm_vec[1], norm_vec[2], d]
+}
+
+function plan_intersection(p1, vec1, plane1) {
+    const [a, b, c, d] = plane1;
+
+    // Calcul du paramètre t de la droite à l'intersection avec le plan
+    const t = -(a * p1[0] + b * p1[1] + c * p1[2] + d) /
+        (a * vec1[0] + b * vec1[1] + c * vec1[2]);
+
+    // Calcul des coordonnées du point d'intersection
+    const intersection_point = add(p1, mul(vec1, t))
+    return intersection_point;
+}
+
 function intersect(p, v, q, u) {
     // Find the intersection between two lines in 3D defined by
     // p = line1 point, v = line1 direction, q = line2 point, u = line2 direction
