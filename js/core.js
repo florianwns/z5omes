@@ -336,7 +336,7 @@ class CircularDistribution {
 
         // Compute angles and colors
         this.angles = new Array(num);
-        this.colors = new Array(num); // list of colors
+        this.colors = new Array(num);
 
         // Color depends on figure slope
         const slope = this.obj.slope;
@@ -361,13 +361,21 @@ class TrapezoidalPrism {
 
         // Build the 6 sides of TrapezoidalPrism with Polygon
         this.polygons = [
-            new ConvexPolygon([A, B, C, D]), // Top side
-            new ConvexPolygon([E, F, G, H]), // Bottom side
+            new ConvexPolygon([A, B, D, C]), // Top side
+            new ConvexPolygon([E, F, H, G]), // Bottom side
             new ConvexPolygon([A, B, F, E]), // Left side
-            new ConvexPolygon([C, D, G, H]), // Right side
-            new ConvexPolygon([A, B, G, E]), // Front side
-            new ConvexPolygon([C, D, H, B]), // Back side
+            new ConvexPolygon([C, D, H, G]), // Right side
+            new ConvexPolygon([A, C, G, E]), // Front side
+            new ConvexPolygon([B, D, H, F]), // Back side
         ]
+
+        // Array of THREE.Vector3 for 3D visualization
+        this.faces = [];
+        _.forEach(this.polygons, (fig) => {
+            this.faces.push(...fig.faces);
+
+        });
+        this.num_faces = this.faces.length
 
         // Hack for color
         this.slope = this.polygons[0].slope;

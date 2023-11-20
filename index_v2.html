@@ -293,11 +293,34 @@
                                      class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
 
                                 <div class="d-flex flex-wrap justify-content-evenly">
+                                    <!-- Draw Zome Env or Body -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-zome-body-switch"
+                                               x-text="draw_zome_body ? `Body` : `Envelop`"></label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-zome-body-switch" x-model="draw_zome_body">
+                                    </div>
+
                                     <!-- Draw Axis -->
                                     <div class="form-check form-switch me-2 mb-3">
                                         <label class="form-check-label" for="draw-axis-switch">Axis</label>
                                         <input class="form-check-input" type="checkbox" role="switch"
                                                id="draw-axis-switch" x-model="draw_axis">
+                                    </div>
+
+                                    <!-- Draw Vanishing Lines -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-vanishing-lines">Vanishing
+                                            Lines</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-vanishing-lines" x-model="draw_vanishing_lines">
+                                    </div>
+
+                                    <!-- Draw Zome Vertices -->
+                                    <div class="form-check form-switch me-2 mb-3">
+                                        <label class="form-check-label" for="draw-zome-vertices-switch">Vertices</label>
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
                                     </div>
 
                                     <!-- Spin -->
@@ -549,14 +572,19 @@
     let ZOME = {
         vertices: [],
         env_spiral: [],
+        body_spiral: [],
         base: null,
-        vanishing_point: null,
+        vanishing_lines: [],
+        vanishing_point: [0, 0, 0],
         num: 0,
     };
 
     function is_valid_zome(obj) {
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-        return !(!obj || !["env_spiral", "base", "vanishing_point", "num"].reduce(hasKey, true));
+        return !(!obj || ![
+            "vertices", "env_spiral", "body_spiral", "base",
+            "vanishing_lines", "vanishing_point",  "num"
+        ].reduce(hasKey, true));
     };
 
     // Enable tooltips
@@ -1080,7 +1108,9 @@
             let scene, camera, renderer, controls, canvas;              // Three JS Parameters
             const meshes = {
                 "axis": null,
-                "zome": null,
+                "zome_obj": null,
+                "zome_vertices": null,
+                "vanishing_lines": null,
             }
 
             return {
@@ -1088,14 +1118,23 @@
                 is_spinning: false,
                 speed: 0.01,
                 draw_axis: true,
+                draw_zome_body: true,
+                draw_vanishing_lines: false,
+                draw_zome_vertices: false,
 
                 init() {
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e), false);
 
-                    ["axis"].forEach(
+                    ["axis", "vanishing_lines", "zome_vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
+                        })
+                    );
+
+                    ["zome_body"].forEach(
+                        (key) => this.$watch(`draw_${key}`, (value) => {
+                            this.process();
                         })
                     );
 
@@ -1178,44 +1217,58 @@
                     const blob = new Blob([str], {type: 'text/plain'});
                     download(`zome_3D.${ext}`, window.URL.createObjectURL(blob));
                 },
+                clear() {
+                    // Clean old meshes
+                    if (meshes.zome_obj instanceof THREE.Group) {
+                        scene.remove(meshes.zome_obj)
+                    }
+                    meshes.zome_obj = new THREE.Group();
+
+                    if (meshes.zome_body instanceof THREE.Group) {
+                        scene.remove(meshes.zome_body)
+                    }
+                    meshes.zome_body = new THREE.Group();
+
+                    if (meshes.zome_vertices instanceof THREE.Group) {
+                        scene.remove(meshes.zome_vertices)
+                    }
+                    meshes.zome_vertices = new THREE.Group();
+
+                    if (meshes.vanishing_lines instanceof THREE.Group) {
+                        scene.remove(meshes.vanishing_lines)
+                    }
+                    meshes.vanishing_lines = new THREE.Group();
+                },
                 process() {
                     if (!is_valid_zome(ZOME)) {
                         console.error("Zome is not valid", ZOME)
                         return;
                     }
-
-                    // Clean old mesh
-                    if (meshes.zome instanceof THREE.Group) {
-                        scene.remove(meshes.zome)
-                    }
-
-                    meshes.zome = new THREE.Group();
-
+                    this.clear();
 
                     // Display vanishing lines
-                    const line_material = new THREE.LineBasicMaterial({
-                        color: 0x00FFFF
-                    });
+                    {
+                        const material = new THREE.LineBasicMaterial({color: 0x00FFFF});
+                        _.forEach(ZOME.vanishing_lines, (line) => {
+                            const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
+                            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                            meshes.vanishing_lines.add(new THREE.Line(geometry, material))
+                            this.set_visibility("vanishing_lines", this.draw_vanishing_lines);
+                        });
+                    }
+                    scene.add(meshes.vanishing_lines);
 
-                    _.forEach(ZOME.vanishing_lines, (line, i) => {
-                        const points = [
-                            new THREE.Vector3(...line[0]),
-                            new THREE.Vector3(...line[1]),
-                        ]
-                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                        const vanishing_line = new THREE.Line(geometry, line_material);
-                        meshes.zome.add(vanishing_line)
-                    });
+                    // Display zome vertices
+                    {
+                        const geometry = new THREE.BufferGeometry();
+                        geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
+                        const material = new THREE.PointsMaterial({color: 0x888888, size: 20});
+                        meshes.zome_vertices.add(new THREE.Points(geometry, material))
+                        this.set_visibility("zome_vertices", this.draw_zome_vertices);
+                    }
+                    scene.add(meshes.zome_vertices);
 
-                    // Display vertices
-                    const pt_geometry = new THREE.BufferGeometry();
-                    pt_geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
-
-                    const pt_material = new THREE.PointsMaterial({color: 0x888888, size: 20});
-                    meshes.zome.add(new THREE.Points(pt_geometry, pt_material))
-
-                    scene.add(meshes.zome);
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({
@@ -1223,24 +1276,27 @@
                         vertexColors: true,
                     });
 
-                    // Build 3D Envelop Faces
+                    // Build 3D Body Faces
                     {
+                        const spiral = (this.draw_zome_body) ? ZOME.body_spiral : ZOME.env_spiral;
+
                         // Pre-Compute geometry points, crown colors and num_faces
                         const points = [];
-                        const num_crowns = ZOME.env_spiral.length;
+                        const num_crowns = spiral.length;
                         if (num_crowns) {
                             const colors = new Array(num_crowns);
                             const num_faces = new Array(num_crowns);
                             const face_colors = new Array(num_crowns);
-                            _.forEach(ZOME.env_spiral, (crown, iR) => {
-                                const fig = crown.obj;
-                                points.push(...fig.faces);
+                            _.forEach(spiral, (crown, iR) => {
+                                points.push(...crown.obj.faces);
                                 colors[iR] = crown.colors;
-                                num_faces[iR] = fig.num_faces;
+                                num_faces[iR] = crown.obj.num_faces;
                             });
 
                             // Build geometry of first env_spiral
                             const env_spiral_geometry = new THREE.BufferGeometry();
+                            console.log(points);
+
                             env_spiral_geometry.setFromPoints(points)
                             env_spiral_geometry.computeVertexNormals()
 
@@ -1249,7 +1305,7 @@
                                 const rotated_env_spiral_geometry = env_spiral_geometry.clone()
 
                                 // Rotate the new geometry
-                                const a = ZOME.env_spiral[0].angles[iN];
+                                const a = spiral[0].angles[iN];
                                 rotated_env_spiral_geometry.rotateY(a);
 
                                 // Get colors
@@ -1258,31 +1314,33 @@
                                 }
                                 rotated_env_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
 
-                                meshes.zome.add(new THREE.Mesh(rotated_env_spiral_geometry, material))
+                                meshes.zome_obj.add(new THREE.Mesh(rotated_env_spiral_geometry, material))
                             }
                         }
                     }
 
-                    // Build 3D Base Faces
-                    const base = ZOME.base;
-                    if (base !== null) {
-                        const geometry = new THREE.BufferGeometry();
-                        geometry.setFromPoints(base.faces)
+                    // Draw Zome Base only if draw envelop
+                    if (!this.draw_zome_body) {
+                        // Build 3D Base Faces
+                        const base = ZOME.base;
+                        if (base !== null) {
+                            const geometry = new THREE.BufferGeometry();
+                            geometry.setFromPoints(base.faces)
 
-                        const face_colors = [];
-                        _.forEach(base.faces, () => {
-                            face_colors.push(...base.color.rgb);
-                        });
+                            const face_colors = [];
+                            _.forEach(base.faces, () => {
+                                face_colors.push(...base.color.rgb);
+                            });
 
-                        geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                        geometry.computeVertexNormals()
+                            geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                            geometry.computeVertexNormals()
 
-                        meshes.zome.add(new THREE.Mesh(geometry, material))
+                            meshes.zome_obj.add(new THREE.Mesh(geometry, material))
+                        }
                     }
 
-
                     // Add the final obj mesh to the scene
-                    scene.add(meshes.zome)
+                    scene.add(meshes.zome_obj)
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -1307,8 +1365,8 @@
                     }
                 },
                 update() {
-                    if (this.is_spinning && meshes.zome instanceof THREE.Group) {
-                        meshes.zome.rotation.y -= this.speed
+                    if (this.is_spinning && meshes.zome_obj instanceof THREE.Group) {
+                        meshes.zome_obj.rotation.y -= this.speed
                     }
                 },
                 render() {
@@ -1369,8 +1427,9 @@
         });
 
         Alpine.data('settings', () => {
-            let vertices = [];                  // 3D point vector
-            let env_spiral = [];                    //
+            let vertices = [];      // 3D point vector
+            let env_spiral = [];    // Envelop spiral
+            let body_spiral = [];   // Body spiral
 
             return {
                 // Shape Parameters
@@ -1509,6 +1568,7 @@
                     // Clear data
                     vertices = [];
                     env_spiral = [];
+                    body_spiral = [];
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return to_decimal((WORLD_HEIGHT - y) / polar_height);
@@ -1739,23 +1799,10 @@
                             const H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
 
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
+                            body_spiral.push(new CircularDistribution(timber_prism, N))
 
                             // Add vanishing line OK
                             vanishing_lines.push([vanishing_pt, A])
-                            vanishing_lines.push([A, B])
-                            vanishing_lines.push([B, D])
-                            vanishing_lines.push([D, C])
-                            vanishing_lines.push([C, A])
-
-                            vanishing_lines.push([E, F])
-                            vanishing_lines.push([F, H])
-                            vanishing_lines.push([H, G])
-                            vanishing_lines.push([G, E])
-
-                            vanishing_lines.push([E, A])
-                            vanishing_lines.push([F, B])
-                            vanishing_lines.push([H, D])
-                            vanishing_lines.push([G, C])
                         });
                     });
 
@@ -1776,6 +1823,7 @@
                     ZOME = {
                         vertices: vertices,
                         env_spiral: env_spiral,
+                        body_spiral: body_spiral,
                         base: base,
                         vanishing_lines: vanishing_lines,
                         vanishing_point: vanishing_pt,
