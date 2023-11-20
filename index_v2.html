@@ -1821,12 +1821,13 @@
                             const mid_thickness_pt = point_to(mid_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
 
 
+                            // Trigo is not the good way for this problem of goodkarma
 
                             // Always with trigonometry, find C and D points
                             theta = fig.angles[(i + 1) % fig.num_points];       // take next angle
                             hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
                             C = point_between(next_pt, mid_pt, hypotenuse);
-                            this.add_vertice(C);
+                            // this.add_vertice(C);
 
                             const adjacent_side = TIMBER_THICKNESS / Math.tan(Math.PI - theta);
                             pivot_pt = point_to(C, current_2_next_vec, adjacent_side);
@@ -1846,15 +1847,15 @@
                             const pl1 = points_2_plane(A, prev_pt, E);
                             const corner = point_to(A, perpendicular_2_vanishing_vec, TIMBER_THICKNESS)
                             B = plan_intersection(mid_thickness_pt, sub(corner, mid_thickness_pt), pl1);
-                            this.add_vertice(corner);
+                            // this.add_vertice(corner);
 
-                            const pl2 = points_2_plane(C, next_next_pt, G);
+                            const pl2 = points_2_plane(C, point_to(C, sub(next_next_pt, next_pt), TIMBER_THICKNESS), G);
                             D = plan_intersection(mid_thickness_pt, sub(mid_thickness_pt, corner), pl2);
 
 
-                            this.add_vertice(D);
-                            vanishing_lines.push([C, next_next_pt])
-                            console.log(D)
+                            // this.add_vertice(D);
+                            // vanishing_lines.push([C, next_next_pt])
+                            // console.log(D)
 
                             // Other method
                             // const pl1 = points_2_plane(perpendicular_thickness_pt, corner, bottom);
