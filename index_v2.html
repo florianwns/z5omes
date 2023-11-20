@@ -1757,14 +1757,18 @@
                             // For vertical projection
 
                             const current_pt_bottom = point_to(current_pt, sub(vanishing_pt, current_pt), TIMBER_WIDTH);
-                            const b_bottom = point_to(b, sub(vanishing_pt, b), TIMBER_WIDTH);
+                            const b_bottom = point_to(b, sub(vanishing_pt, current_pt), TIMBER_WIDTH);
                             const c_bottom = point_to(c, sub(vanishing_pt, c), TIMBER_WIDTH);
-                            const e_bottom = point_to(e, sub(vanishing_pt, e), TIMBER_WIDTH);
+                            const e_bottom = point_to(e, sub(vanishing_pt, c), TIMBER_WIDTH);
 
                             this.add_vertice(current_pt_bottom);
                             this.add_vertice(b_bottom);
                             this.add_vertice(c_bottom);
                             this.add_vertice(e_bottom);
+
+                            console.log("d1", dist(current_pt_bottom, b_bottom), dist(current_pt, b))
+                            console.log("d2", dist(c_bottom, e_bottom), dist(c, e))
+
 
                             vanishing_lines.push([current_pt_bottom, b_bottom])
                             vanishing_lines.push([b_bottom, e_bottom])
