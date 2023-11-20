@@ -37,3 +37,4 @@ Goodkarma seulement pour le moment
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
 * Mandala : export en 3D : .obj
 * la caméra tourne autour du zome et le zome ne toune pas
+* Ajout des langues
