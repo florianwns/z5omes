@@ -197,9 +197,8 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
-                <input class="form-control form-range" min="0" :max="zome_height_in_mm - timber_width_in_mm" step="1"
-                       type="range"
-                       x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
+                <input class="form-control form-range" min="0" :max="z_centroid" step="1"
+                       type="range" x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="z_vanishing_point">
                 <button class="btn btn-primary" type="button"
@@ -1314,8 +1313,6 @@
 
                             // Build geometry of first env_spiral
                             const env_spiral_geometry = new THREE.BufferGeometry();
-                            console.log(points);
-
                             env_spiral_geometry.setFromPoints(points)
                             env_spiral_geometry.computeVertexNormals()
 
@@ -1463,7 +1460,7 @@
                 length_unit: "cm",                                  // Length unit by default is cm
                 zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
                 timber_width_in_mm: 120,                            // Timber width in mm
-                timber_thickness_in_mm: 40,                         // Timber thickness in mm
+                timber_thickness_in_mm: 60,                         // Timber thickness in mm
                 z_vanishing_point_in_mm: 0,
 
                 connection_type: 0,
@@ -1495,6 +1492,12 @@
                     // Refresh the height_ratio if you change the zome num
                     this.$watch("num", (value) => {
                         this.clamp("height_ratio", this.height_ratio);
+                    });
+
+                    // Refresh the z_vanishing_point_in_mm
+                    // if you change the zome height
+                    this.$watch("zome_height_in_mm", (value) => {
+                        this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
                     });
 
                     this.z_vanishing_point_in_mm = this.z_centroid;
@@ -1808,39 +1811,64 @@
 
                             // Take next point and find midpoint and perpendicular direction
                             const next_pt = fig.points[(i + 1) % fig.num_points];
+                            const next_next_pt = fig.points[(i + 2) % fig.num_points];
+                            const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
                             const mid_pt = midpoint(A, next_pt)
                             const current_2_next_vec = sub(next_pt, A);
                             const perpendicular_2_vanishing_vec = cross_product(current_2_next_vec, sub(VANISHING_PT, mid_pt));
 
                             // Find perpendicular TIMBER_THICKNESS point
-                            const perpendicular_thickness_pt = point_to(mid_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
+                            const mid_thickness_pt = point_to(mid_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
 
-                            // Based on trigonometry, compute measurements of triangle
-                            // (hypotenuse, opposite side) to find B point which depends on TIMBER_THICKNESS
-                            theta = fig.angles[i];
-                            opposite_side = TIMBER_THICKNESS / Math.tan(theta);
-                            hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                            pivot_pt = point_between(mid_pt, A, opposite_side);
-                            B = point_to(A, sub(perpendicular_thickness_pt, pivot_pt), hypotenuse);
+
+                            // Trigo is not the good way for this problem of goodkarma
 
                             // Always with trigonometry, find C and D points
                             theta = fig.angles[(i + 1) % fig.num_points];       // take next angle
                             hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
                             C = point_between(next_pt, mid_pt, hypotenuse);
+                            // this.add_vertice(C);
 
-                            pivot_pt = point_to(C, perpendicular_2_vanishing_vec, TIMBER_THICKNESS);
-                            opposite_side = TIMBER_THICKNESS / Math.tan(theta);
-                            D = point_to(pivot_pt, current_2_next_vec, -opposite_side)
+                            const adjacent_side = TIMBER_THICKNESS / Math.tan(Math.PI - theta);
+                            pivot_pt = point_to(C, current_2_next_vec, adjacent_side);
+
+                            D = point_to(pivot_pt, perpendicular_2_vanishing_vec, TIMBER_THICKNESS)
 
                             // Find vertical projection points at distance TIMBER_WIDTH to vanishing_point
                             const A_2_E_vec = sub(VANISHING_PT, A);
-                            const E = point_to(A, A_2_E_vec, TIMBER_WIDTH);
-                            const F = point_to(B, A_2_E_vec, TIMBER_WIDTH);
+                            E = point_to(A, A_2_E_vec, TIMBER_WIDTH);
 
                             const A_2_G_vec = sub(VANISHING_PT, next_pt);
-                            const G = point_to(C, A_2_G_vec, TIMBER_WIDTH);
-                            const H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
+                            G = point_to(C, A_2_G_vec, TIMBER_WIDTH);
+                            H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
 
+                            // Make intersection with plane
+
+                            const pl1 = points_2_plane(A, prev_pt, E);
+                            const corner = point_to(A, perpendicular_2_vanishing_vec, TIMBER_THICKNESS)
+                            B = plan_intersection(mid_thickness_pt, sub(corner, mid_thickness_pt), pl1);
+                            // this.add_vertice(corner);
+
+                            const pl2 = points_2_plane(C, point_to(C, sub(next_next_pt, next_pt), TIMBER_THICKNESS), G);
+                            D = plan_intersection(mid_thickness_pt, sub(mid_thickness_pt, corner), pl2);
+
+
+                            // this.add_vertice(D);
+                            // vanishing_lines.push([C, next_next_pt])
+                            // console.log(D)
+
+                            // Other method
+                            // const bottom = point_to(corner, A_2_E_vec, TIMBER_THICKNESS)
+                            // const pl_other = points_2_plane(perpendicular_thickness_pt, corner, bottom);
+                            // B = plan_intersection(A, sub(A, prev_pt), pl_other);
+                            // D = plan_intersection(C, sub(C, next_next_pt), pl_other);
+
+                            F = point_to(B, A_2_E_vec, TIMBER_WIDTH);
+                            H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
+
+
+
+                            // It's not good karma but
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
                             body_spiral.push(new CircularDistribution(timber_prism, N))
 

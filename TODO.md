@@ -30,10 +30,11 @@ Goodkarma seulement pour le moment
 
 ## A faire 
 
-* Clean goodkarma code
+* Fix du goodkarma (intersection des plans)
 * Ajouter le mode horaire/anti_horaire pour le goodkarma
   
 * Créer un objet
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
 * Mandala : export en 3D : .obj
 * la caméra tourne autour du zome et le zome ne toune pas
+* Ajout des langues
