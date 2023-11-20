@@ -1138,7 +1138,7 @@
                 draw_axis: true,
                 draw_zome_body: true,
                 draw_vanishing_lines: true,
-                draw_zome_vertices: true,
+                draw_zome_vertices: false,
 
                 init() {
                     // Add listeners
@@ -1460,7 +1460,7 @@
                 length_unit: "cm",                                  // Length unit by default is cm
                 zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
                 timber_width_in_mm: 120,                            // Timber width in mm
-                timber_thickness_in_mm: 40,                         // Timber thickness in mm
+                timber_thickness_in_mm: 60,                         // Timber thickness in mm
                 z_vanishing_point_in_mm: 0,
 
                 connection_type: 0,
@@ -1858,9 +1858,10 @@
                             // console.log(D)
 
                             // Other method
-                            // const pl1 = points_2_plane(perpendicular_thickness_pt, corner, bottom);
-                            // B = plan_intersection(A, sub(A, prev_pt), pl1);
-                            // D = plan_intersection(C, sub(C, next_next_pt), pl1);
+                            // const bottom = point_to(corner, A_2_E_vec, TIMBER_THICKNESS)
+                            // const pl_other = points_2_plane(perpendicular_thickness_pt, corner, bottom);
+                            // B = plan_intersection(A, sub(A, prev_pt), pl_other);
+                            // D = plan_intersection(C, sub(C, next_next_pt), pl_other);
 
                             F = point_to(B, A_2_E_vec, TIMBER_WIDTH);
                             H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
