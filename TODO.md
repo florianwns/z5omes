@@ -27,14 +27,25 @@ Goodkarma seulement pour le moment
 1. Export modèle à l'échelle (DONE)
 2. Clean de la lib geom.js => core.js
 3 Dessiner les montants
+* Fix du goodkarma (intersection des plans)
 
 ## A faire 
 
-* Fix du goodkarma (intersection des plans)
+
 * Ajouter le mode horaire/anti_horaire pour le goodkarma
-  
-* Créer un objet
+   
+* Rajouter montant horizontal (1, 2, 3)
+
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
+
 * Mandala : export en 3D : .obj
-* la caméra tourne autour du zome et le zome ne toune pas
+  
+* Raccourci clavier à afficher
+  
+
+  
 * Ajout des langues
+  
+* wizdome HR => WR width ratio::: plus compliqué mais faisable
+
+* Couleur par triangle qui sont les mêmes
