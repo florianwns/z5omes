@@ -1381,8 +1381,16 @@
                     }
                 },
                 update() {
-                    if (this.is_spinning && meshes.zome_obj instanceof THREE.Group) {
-                        meshes.zome_obj.rotation.y -= this.speed
+                    if (this.is_spinning) {
+                        if(meshes.zome_vertices instanceof THREE.Group){
+                            meshes.zome_vertices.rotation.y -= this.speed
+                        }
+                        if(meshes.vanishing_lines instanceof THREE.Group){
+                            meshes.vanishing_lines.rotation.y -= this.speed
+                        }
+                        if(meshes.zome_obj instanceof THREE.Group){
+                            meshes.zome_obj.rotation.y -= this.speed
+                        }
                     }
                 },
                 render() {
