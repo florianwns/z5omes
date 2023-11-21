@@ -1849,7 +1849,21 @@
                             B = plan_intersection(mid_thickness_pt, sub(corner, mid_thickness_pt), pl1);
                             // this.add_vertice(corner);
 
-                            const pl2 = points_2_plane(C, point_to(C, sub(next_next_pt, next_pt), TIMBER_THICKNESS), G);
+                            const next_mid_pt= midpoint(next_next_pt, next_pt);
+                            const perpendicular_2_vanishing_next_vec = cross_product(
+                                sub(next_next_pt, next_pt),
+                                sub(VANISHING_PT, next_mid_pt)
+                            );
+
+                            const next_mid_thickness_pt = point_to(next_mid_pt, perpendicular_2_vanishing_next_vec, TIMBER_THICKNESS);
+                            this.add_vertice(next_mid_thickness_pt);
+                            const corner2 = point_to(next_next_pt, perpendicular_2_vanishing_next_vec, TIMBER_THICKNESS)
+                            const next_mid_2_vanishing_vec = sub(VANISHING_PT, next_mid_pt)
+                            const pl2 = points_2_plane(
+                                next_mid_thickness_pt,
+                                corner2,
+                                point_to(next_mid_thickness_pt, next_mid_2_vanishing_vec, TIMBER_THICKNESS)
+                            );
                             D = plan_intersection(mid_thickness_pt, sub(mid_thickness_pt, corner), pl2);
 
 
