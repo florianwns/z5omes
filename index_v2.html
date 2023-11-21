@@ -1838,9 +1838,6 @@
                             const A_2_E_vec = sub(VANISHING_PT, A);
                             E = point_to(A, A_2_E_vec, TIMBER_WIDTH);
 
-                            const A_2_G_vec = sub(VANISHING_PT, next_pt);
-                            G = point_to(C, A_2_G_vec, TIMBER_WIDTH);
-                            H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
 
                             // Make intersection with plane
 
@@ -1865,7 +1862,7 @@
                                 point_to(next_mid_thickness_pt, next_mid_2_vanishing_vec, TIMBER_THICKNESS)
                             );
                             D = plan_intersection(mid_thickness_pt, sub(mid_thickness_pt, corner), pl2);
-
+                            C = plan_intersection(A, sub(mid_pt, A), pl2)
 
                             // this.add_vertice(D);
                             // vanishing_lines.push([C, next_next_pt])
@@ -1878,9 +1875,10 @@
                             // D = plan_intersection(C, sub(C, next_next_pt), pl_other);
 
                             F = point_to(B, A_2_E_vec, TIMBER_WIDTH);
+
+                            const A_2_G_vec = sub(VANISHING_PT, next_pt);
                             H = point_to(D, A_2_G_vec, TIMBER_WIDTH);
-
-
+                            G = point_to(C, A_2_G_vec, TIMBER_WIDTH);
 
                             // It's not good karma but
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
