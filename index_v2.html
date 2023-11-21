@@ -197,7 +197,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
-                <input class="form-control form-range" min="0" :max="z_centroid" step="1"
+                <input class="form-control form-range" min="0" :max="zome_height_in_mm" step="1"
                        type="range" x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="z_vanishing_point">
@@ -1849,7 +1849,21 @@
                             B = plan_intersection(mid_thickness_pt, sub(corner, mid_thickness_pt), pl1);
                             // this.add_vertice(corner);
 
-                            const pl2 = points_2_plane(C, point_to(C, sub(next_next_pt, next_pt), TIMBER_THICKNESS), G);
+                            const next_mid_pt= midpoint(next_next_pt, next_pt);
+                            const perpendicular_2_vanishing_next_vec = cross_product(
+                                sub(next_next_pt, next_pt),
+                                sub(VANISHING_PT, next_mid_pt)
+                            );
+
+                            const next_mid_thickness_pt = point_to(next_mid_pt, perpendicular_2_vanishing_next_vec, TIMBER_THICKNESS);
+                            this.add_vertice(next_mid_thickness_pt);
+                            const corner2 = point_to(next_next_pt, perpendicular_2_vanishing_next_vec, TIMBER_THICKNESS)
+                            const next_mid_2_vanishing_vec = sub(VANISHING_PT, next_mid_pt)
+                            const pl2 = points_2_plane(
+                                next_mid_thickness_pt,
+                                corner2,
+                                point_to(next_mid_thickness_pt, next_mid_2_vanishing_vec, TIMBER_THICKNESS)
+                            );
                             D = plan_intersection(mid_thickness_pt, sub(mid_thickness_pt, corner), pl2);
 
 
