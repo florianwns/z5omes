@@ -1903,24 +1903,28 @@
                                         thickness_and_width_offset_pt, mul(horizontal_proj_vec, -1), along_plane
                                     )
 
+                                    let start_plane, end_plane;
+                                    if (ASSEMBLY_METHOD == 0) {
+                                        start_plane = (this.clockwise_rotation)
+                                            ? points_2_plane(
+                                                point_to(first_pt, first_2_prev_perpendicular_vec, -TIMBER_THICKNESS),
+                                                point_to(prev_pt, first_2_prev_perpendicular_vec, -TIMBER_THICKNESS),
+                                                point_to(VANISHING_PT, first_2_prev_perpendicular_vec, -TIMBER_THICKNESS),
+                                            )
+                                            : points_2_plane(first_pt, prev_pt, VANISHING_PT);
 
-                                    const start_plane = (this.clockwise_rotation)
-                                        ? points_2_plane(
-                                            point_to(first_pt, first_2_prev_perpendicular_vec, -TIMBER_THICKNESS),
-                                            point_to(prev_pt, first_2_prev_perpendicular_vec, -TIMBER_THICKNESS),
-                                            point_to(VANISHING_PT, first_2_prev_perpendicular_vec, -TIMBER_THICKNESS),
-                                        )
-                                        : points_2_plane(first_pt, prev_pt, VANISHING_PT);
-
-                                    // We shift all point to make the end plane
-                                    const end_plane = (this.clockwise_rotation)
-                                        ? points_2_plane(sec_pt, third_pt, VANISHING_PT)
-                                        : points_2_plane(
-                                            point_to(sec_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
-                                            point_to(third_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
-                                            point_to(VANISHING_PT, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
-                                        );
-
+                                        // We shift all point to make the end plane
+                                        end_plane = (this.clockwise_rotation)
+                                            ? points_2_plane(sec_pt, third_pt, VANISHING_PT)
+                                            : points_2_plane(
+                                                point_to(sec_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
+                                                point_to(third_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
+                                                point_to(VANISHING_PT, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
+                                            );
+                                    }else{
+                                        start_plane = points_2_plane(first_pt, prev_pt, VANISHING_PT);
+                                        end_plane = points_2_plane(sec_pt, third_pt, VANISHING_PT);
+                                    }
                                     // Build a TrapezoidalPrism using plane intersections
 
                                     // A, B, C, D is the top part (trapezoid) of the timber
