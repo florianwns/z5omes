@@ -23,29 +23,37 @@ Goodkarma seulement pour le moment
 
 ## Evos
 
-0. Rajouter les réglages de dimensionnement (DONE)
-1. Export modèle à l'échelle (DONE)
-2. Clean de la lib geom.js => core.js
-3 Dessiner les montants
-* Fix du goodkarma (intersection des plans)
+* Rajouter les réglages de dimensionnement (DONE)
+* Export modèle à l'échelle (DONE)
+* Clean de la lib geom.js => core.js
+* Dessiner les montants en  goodkarma (intersection des plans)
+* Ajouter le mode horaire/anti_horaire pour le goodkarma
+
 
 ## A faire 
 
 
-* Ajouter le mode horaire/anti_horaire pour le goodkarma
-   
-* Rajouter montant horizontal (1, 2, 3)
+* Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
 
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
-
 * Mandala : export en 3D : .obj
-  
 * Raccourci clavier à afficher
-  
-
-  
+* Construire la base (Env et Montants séparement)
 * Ajout des langues
   
-* wizdome HR => WR width ratio::: plus compliqué mais faisable
-
+* Ajoût des autres méthodes de contructions (
+  Semicone
+  Beveled GoodKarma
+  Piped : Faire seulement N-1 montans centrés sur la largeur  
+)
+  
+* Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 * Couleur par triangle qui sont les mêmes
+* Sauver et revenir à l'état d'origine pour éviter le rafraichissement de la page.
+* Url parametrée et Lien de partage de l'URL qui copie colle dans le presse papier. 
+* Affichage de message (toast: https://getbootstrap.com/docs/5.2/components/toasts/) pour   
+    * Copier/Coller
+    * Sauvegarde du lien
+    * Téléchargement d'un fichier 3D ou PRINT
+
+

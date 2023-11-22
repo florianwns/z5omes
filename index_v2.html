@@ -209,17 +209,17 @@
                 </button>
             </div>
 
-             <!-- Connection type -->
+             <!-- Assembly method -->
             <div x-show="help_is_displayed">
-                <b>CT</b> : Connection type
+                <b>AM</b> : Assembly method
             </div>
             <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Connection type">CT</span>
-                <input class="form-control form-range" min="0" :max="CONNECTION_TYPES.length - 1" step="1" type="range"
-                       x-model.number="connection_type" x-ref="connection_type_slider">
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">AM</span>
+                <input class="form-control form-range" min="0" :max="ASSEMBLY_METHODS.length - 1" step="1" type="range"
+                       x-model.number="assembly_method" x-ref="assembly_method_slider">
 
-                <select class="form-select" aria-label="Connection type" x-model="connection_type">
-                    <template x-for="(conn, index) in CONNECTION_TYPES">
+                <select class="form-select" aria-label="Assembly method" x-model="assembly_method">
+                    <template x-for="(conn, index) in ASSEMBLY_METHODS">
                         <option :value="index" x-text="conn"></option>
                     </template>
                 </select>
@@ -1479,7 +1479,7 @@
                 timber_thickness_in_mm: 60,                         // Timber thickness in mm
                 z_vanishing_point_in_mm: 0,
                 clockwise_rotation: true,
-                connection_type: 0,
+                assembly_method: 0,
 
 
                 // Commons parameters
@@ -1497,8 +1497,8 @@
                     _.forEach([
                             "num", "theta_deg", "height_ratio", "kite_ratio",
                             "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm",
-                            "z_vanishing_point_in_mm", "clockwise_rotation"
-                            //"connection_type",
+                            "z_vanishing_point_in_mm",
+                            "assembly_method", "clockwise_rotation",
                         ], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
@@ -1812,112 +1812,112 @@
                     }
 
                     // Compute the vanishing point depends on parameters (?)
-                    const CONNECTION_TYPE = this.connection_type;
+                    const ASSEMBLY_METHOD = this.assembly_method;
                     const VANISHING_PT = [0, this.z_vanishing_point_in_mm, 0];
                     let vanishing_lines = [];
 
-                    // Build Timbers using the GoodKarma assembly method
-                    _.forEach(env_spiral, (crown) => {
-                        const fig = crown.obj;
-                        _.forEach(fig.points, (first_pt, i) => {
-                            // Get polygon points, first is the current point and last is n-1 point
-                            const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
-                            const sec_pt = fig.points[(i + 1) % fig.num_points];
-                            const third_pt = fig.points[(i + 2) % fig.num_points];
 
-                            // A Find mid point between current
-                            const prev_2_first_mid_pt = midpoint(prev_pt, first_pt)
-                            const first_2_sec_mid_pt = midpoint(first_pt, sec_pt)
-                            const sec_2_third_mid_pt = midpoint(sec_pt, third_pt);
-
-                            // Compute All vectors
-                            const first_2_sec_vec = sub(sec_pt, first_pt);
-                            const sec_2_first_vec = sub(first_pt, sec_pt);
-
-                            const first_2_sec_vanishing_vec = sub(VANISHING_PT, first_2_sec_mid_pt)
-                            const first_2_sec_perpendicular_vec = cross_product(
-                                first_2_sec_vec, first_2_sec_vanishing_vec
-                            );
-
-                            const sec_2_third_vec = sub(third_pt, sec_pt);
-                            const sec_2_third_vanishing_vec = sub(VANISHING_PT, sec_2_third_mid_pt)
-                            const sec_2_third_perpendicular_vec = cross_product(
-                                sec_2_third_vec, sec_2_third_vanishing_vec
-                            );
-
-                            const prev_2_first_vec = sub(prev_pt, first_pt);
-                            const prev_2_first_vanishing_vec = sub(VANISHING_PT, prev_2_first_mid_pt)
-                            const prev_2_first_perpendicular_vec = cross_product(
-                                prev_2_first_vec, prev_2_first_vanishing_vec
-                            );
-
-                            // Find points with horizontal TIMBER_THICKNESS and vertical TIMBER_WIDTH offsets
-                            const mid_pt_with_thickness_offset = point_to(
-                                first_2_sec_mid_pt, first_2_sec_perpendicular_vec, TIMBER_THICKNESS
-                            );
-                            const mid_pt_with_width_offset = point_to(
-                                first_2_sec_mid_pt, first_2_sec_vanishing_vec, TIMBER_WIDTH
-                            );
-                            const mid_pt_with_thickness_and_width_offset = point_to(
-                                mid_pt_with_thickness_offset, first_2_sec_vanishing_vec, TIMBER_WIDTH
-                            );
-
-                            this.add_vertice(mid_pt_with_thickness_offset);
-                            this.add_vertice(mid_pt_with_width_offset);
-                            this.add_vertice(mid_pt_with_thickness_and_width_offset);
-
-                            // Compute planes to find intersection points
-                            const start_plane = (this.clockwise_rotation)
-                                ? points_2_plane(
-                                    point_to(first_pt, prev_2_first_perpendicular_vec, -TIMBER_THICKNESS),
-                                    point_to(prev_pt, prev_2_first_perpendicular_vec, -TIMBER_THICKNESS),
-                                    point_to(VANISHING_PT, prev_2_first_perpendicular_vec, -TIMBER_THICKNESS),
-                                )
-                                : points_2_plane(first_pt, prev_pt, VANISHING_PT);
-
-                            // We shift all point to make the end plane
-                            let end_plane = (this.clockwise_rotation)
-                                ? points_2_plane(sec_pt, third_pt, VANISHING_PT)
-                                : points_2_plane(
-                                point_to(sec_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
-                                point_to(third_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
-                                point_to(VANISHING_PT, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
-                            );
-
-                            // Build a TrapezoidalPrism using plane intersections
-
-                            // A, B, C, D is the top part (trapezoid) of the timber
-                            A = first_pt;
-                            B = plan_intersection(mid_pt_with_thickness_offset, sec_2_first_vec, start_plane);
-                            C = plan_intersection(first_pt, first_2_sec_vec, end_plane)
-                            D = plan_intersection(mid_pt_with_thickness_offset, first_2_sec_vec, end_plane)
-
-                            // E, F, G, H is the bottom part (trapezoid) of the timber
-                            E = plan_intersection(mid_pt_with_width_offset, sec_2_first_vec, start_plane);
-                            F = plan_intersection(mid_pt_with_thickness_and_width_offset, sec_2_first_vec, start_plane);
-                            G = plan_intersection(mid_pt_with_width_offset, first_2_sec_vec, end_plane);
-                            H = plan_intersection(mid_pt_with_thickness_and_width_offset, first_2_sec_vec, end_plane);
-
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
-                            body_spiral.push(new CircularDistribution(timber_prism, N))
-
-                            // Add vanishing line OK
-                            vanishing_lines.push([VANISHING_PT, A])
-                        });
-                    });
 
                     // Build timbers
-                    // switch (CONNECTION_TYPE) {
-                    //     case 0:     // GoodKarma
-                    //         console.log('GoodKarma')
-                    //         break;
-                    //     case 1:     // Piped:
-                    //         console.log('Piped')
-                    //         break;
-                    //     case 2 :    // SemiCone:
-                    //         console.log('SemiCone')
-                    //         break;
-                    // }
+                    switch (ASSEMBLY_METHOD) {
+                        case 0:     // GoodKarma
+                            // Build Timbers using the GoodKarma assembly method
+                            _.forEach(env_spiral, (crown) => {
+                                const fig = crown.obj;
+                                _.forEach(fig.points, (first_pt, i) => {
+                                    // Get polygon points, first is the current point and last is n-1 point
+                                    const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
+                                    const sec_pt = fig.points[(i + 1) % fig.num_points];
+                                    const third_pt = fig.points[(i + 2) % fig.num_points];
+
+                                    // A Find mid point between current
+                                    const prev_2_first_mid_pt = midpoint(prev_pt, first_pt)
+                                    const first_2_sec_mid_pt = midpoint(first_pt, sec_pt)
+                                    const sec_2_third_mid_pt = midpoint(sec_pt, third_pt);
+
+                                    // Compute All vectors
+                                    const first_2_sec_vec = sub(sec_pt, first_pt);
+                                    const sec_2_first_vec = sub(first_pt, sec_pt);
+
+                                    const first_2_sec_vanishing_vec = sub(VANISHING_PT, first_2_sec_mid_pt)
+                                    const first_2_sec_perpendicular_vec = cross_product(
+                                        first_2_sec_vec, first_2_sec_vanishing_vec
+                                    );
+
+                                    const sec_2_third_vec = sub(third_pt, sec_pt);
+                                    const sec_2_third_vanishing_vec = sub(VANISHING_PT, sec_2_third_mid_pt)
+                                    const sec_2_third_perpendicular_vec = cross_product(
+                                        sec_2_third_vec, sec_2_third_vanishing_vec
+                                    );
+
+                                    const prev_2_first_vec = sub(prev_pt, first_pt);
+                                    const prev_2_first_vanishing_vec = sub(VANISHING_PT, prev_2_first_mid_pt)
+                                    const prev_2_first_perpendicular_vec = cross_product(
+                                        prev_2_first_vec, prev_2_first_vanishing_vec
+                                    );
+
+                                    // Find points with horizontal TIMBER_THICKNESS and vertical TIMBER_WIDTH offsets
+                                    const mid_pt_with_thickness_offset = point_to(
+                                        first_2_sec_mid_pt, first_2_sec_perpendicular_vec, TIMBER_THICKNESS
+                                    );
+                                    const mid_pt_with_width_offset = point_to(
+                                        first_2_sec_mid_pt, first_2_sec_vanishing_vec, TIMBER_WIDTH
+                                    );
+                                    const mid_pt_with_thickness_and_width_offset = point_to(
+                                        mid_pt_with_thickness_offset, first_2_sec_vanishing_vec, TIMBER_WIDTH
+                                    );
+
+                                    this.add_vertice(mid_pt_with_thickness_offset);
+                                    this.add_vertice(mid_pt_with_width_offset);
+                                    this.add_vertice(mid_pt_with_thickness_and_width_offset);
+
+                                    // Compute planes to find intersection points
+                                    const start_plane = (this.clockwise_rotation)
+                                        ? points_2_plane(
+                                            point_to(first_pt, prev_2_first_perpendicular_vec, -TIMBER_THICKNESS),
+                                            point_to(prev_pt, prev_2_first_perpendicular_vec, -TIMBER_THICKNESS),
+                                            point_to(VANISHING_PT, prev_2_first_perpendicular_vec, -TIMBER_THICKNESS),
+                                        )
+                                        : points_2_plane(first_pt, prev_pt, VANISHING_PT);
+
+                                    // We shift all point to make the end plane
+                                    let end_plane = (this.clockwise_rotation)
+                                        ? points_2_plane(sec_pt, third_pt, VANISHING_PT)
+                                        : points_2_plane(
+                                            point_to(sec_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
+                                            point_to(third_pt, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
+                                            point_to(VANISHING_PT, sec_2_third_perpendicular_vec, TIMBER_THICKNESS),
+                                        );
+
+                                    // Build a TrapezoidalPrism using plane intersections
+
+                                    // A, B, C, D is the top part (trapezoid) of the timber
+                                    A = first_pt;
+                                    B = plan_intersection(mid_pt_with_thickness_offset, sec_2_first_vec, start_plane);
+                                    C = plan_intersection(first_pt, first_2_sec_vec, end_plane)
+                                    D = plan_intersection(mid_pt_with_thickness_offset, first_2_sec_vec, end_plane)
+
+                                    // E, F, G, H is the bottom part (trapezoid) of the timber
+                                    E = plan_intersection(mid_pt_with_width_offset, sec_2_first_vec, start_plane);
+                                    F = plan_intersection(mid_pt_with_thickness_and_width_offset, sec_2_first_vec, start_plane);
+                                    G = plan_intersection(mid_pt_with_width_offset, first_2_sec_vec, end_plane);
+                                    H = plan_intersection(mid_pt_with_thickness_and_width_offset, first_2_sec_vec, end_plane);
+
+                                    const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
+                                    body_spiral.push(new CircularDistribution(timber_prism, N))
+
+                                    // Add vanishing line OK
+                                    vanishing_lines.push([VANISHING_PT, A])
+                                });
+                            });
+                            break;
+                        case 1:     // Beveled GoodKarma:
+
+                            break;
+                        // case 2 :    // SemiCone:
+                        //     console.log('SemiCone')
+                        //     break;
+                    }
 
                     // Save Zome and dispatch it
                     ZOME = {
