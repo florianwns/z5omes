@@ -20,7 +20,8 @@ const TAU_Q = Math.PI / 2;  // 90° in rad
 const FLOAT_PRECISION = 7;
 const FLOAT_2_STR_PRECISION = 2;
 
-const ASSEMBLY_METHODS = ["GoodKarma", "Beveled GoodKarma"] // , "Piped", "SemiCone"];
+const ASSEMBLY_METHODS = ["GoodKarma", "Beveled"] //, "Strut"]
+const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
 
 // -----------------------------------
@@ -106,7 +107,6 @@ function point_to(p1, vec, d) {
     return point;
 }
 
-
 function angle_between_vectors(u, v) {
     const dot = dot_product(u, v);
     const u_length = len(u);
@@ -126,14 +126,25 @@ function points_2_plane(p1, p2, p3) {
     return [norm_vec[0], norm_vec[1], norm_vec[2], d]
 }
 
+
+function dihedral_angle_between_planes(plane1, plane2) {
+    // Calcul du produit scalaire des normale
+    const dot = dot_product(plane1, plane2);
+
+    // Calculation of dihedral angle in radians
+    const theta = Math.acos(dot / (len(plane1) * len(plane2)));
+    return theta
+}
+
+
 function plan_intersection(p1, vec1, plane1) {
     const [a, b, c, d] = plane1;
 
-    // Calcul du paramètre t de la droite à l'intersection avec le plan
+    // Calculation of the parameter t of the line at the intersection with the plane
     const t = -(a * p1[0] + b * p1[1] + c * p1[2] + d) /
         (a * vec1[0] + b * vec1[1] + c * vec1[2]);
 
-    // Calcul des coordonnées du point d'intersection
+    // Calculation of intersection point coordinates
     const intersection_point = add(p1, mul(vec1, t))
     return intersection_point;
 }
