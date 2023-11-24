@@ -269,11 +269,11 @@ function humanize_distance(d, num_digits = FLOAT_2_STR_PRECISION) {
         return "";
     }
     // Distance are in milimeters
-    if (d >= 1e6) {
+    if (d >= 1e7) {
         return to_decimal(d / 1e6, num_digits) + "km";
-    } else if (d >= 1e3) {
+    } else if (d >= 1e4) {
         return to_decimal(d / 1e3, num_digits) + "m";
-    } else if (d >= 10) {
+    } else if (d >= 1e2) {
         return to_decimal(d / 10, num_digits) + "cm";
     } else {
         return to_decimal(d, num_digits) + "mm";

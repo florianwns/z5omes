@@ -597,7 +597,7 @@
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
-    const WORLD_HEIGHT = 2500;       // or 3D HEIGHT OF ZOME in mm
+    const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
 
     // Use a global variable to store ZOME data
@@ -1468,18 +1468,18 @@
         Alpine.data('settings', () => {
             return {
                 // Shape Parameters
-                num: 7,                     // number of figs (kites or diamonds)
-                theta_deg: 50,              // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
-                angle_unit: "deg",          // Degrees or Radians
-                height_ratio: 0.7142857,         // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
-                kite_ratio: 1,                   // Kite ratio, lower half to upper half (1 => is rhombus else kites)
-                suggested_height_ratio: null,    // Value to magnetize the zome to the nearest cut
+                num: 10,                            // number of figs (kites or diamonds)
+                theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
+                angle_unit: "deg",                  // Degrees or Radians
+                height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
+                kite_ratio: 1,                      // Kite ratio, lower half to upper half (1 => is rhombus else kites)
+                suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
 
                 // Sizing Parameters
                 length_unit: "cm",                                  // Length unit by default is cm
                 zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
-                timber_width_in_mm: 80,                             // Timber width in mm
-                timber_thickness_in_mm: 60,                         // Timber thickness in mm
+                timber_width_in_mm: 60,                             // Timber width in mm
+                timber_thickness_in_mm: 40,                         // Timber thickness in mm
                 z_vanishing_point_in_mm: 0,
                 assembly_method: 0,
                 assembly_direction: 0,
@@ -1862,7 +1862,7 @@
                                 // GoodKarma
                                 case 0:
                                     const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
-                                    
+
                                     horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
@@ -1910,15 +1910,11 @@
                             const next_index = (i + 1) % fig.num_points;                     // next index
 
                             // Get polygon points, first is the current point and last is n-1 point
-                            const sec_pt = fig.points[next_index];
-
                             thickness_offset_pt = thickness_offset_pts[i];
                             width_offset_pt = width_offset_pts[i];
 
-                            // A Find mid point between current
-                            const first_2_sec_mid_pt = midpoint(first_pt, sec_pt)
-
-                            // Compute All vectors
+                            // Get vectors
+                            const first_2_sec_mid_pt = mid_pts[i];
                             const first_2_sec_vec = ccw_vecs[i];
                             const sec_2_first_vec = cw_vecs[next_index];
 
@@ -1971,10 +1967,19 @@
                                     break;
                                 // RussianDolls
                                 case 1:
-                                    E = add(mul(A, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
-                                    F = add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
-                                    G = add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
-                                    H = add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    // E = add(mul(A, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    // F = add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    // G = add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    // H = add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+
+
+                                    E = point_between(A, add(mul(A, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
+                                    F = point_between(B, add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
+                                    G = point_between(C, add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
+                                    H = point_between(D, add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
+
+
+
                                     break;
                             }
 
