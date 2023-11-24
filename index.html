@@ -1478,8 +1478,8 @@
                 // Sizing Parameters
                 length_unit: "cm",                                  // Length unit by default is cm
                 zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
-                timber_width_in_mm: 60,                             // Timber width in mm
-                timber_thickness_in_mm: 120,                        // Timber thickness in mm
+                timber_width_in_mm: 80,                             // Timber width in mm
+                timber_thickness_in_mm: 60,                         // Timber thickness in mm
                 z_vanishing_point_in_mm: 0,
                 assembly_method: 0,
                 assembly_direction: 0,
@@ -1862,24 +1862,24 @@
                                 // GoodKarma
                                 case 0:
                                     const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
-                                    vertical_proj_vec = mid_2_vanishing_vec;
-
-                                    horizontal_proj_vec = cross_product(first_2_sec_vec, vertical_proj_vec);
+                                    
+                                    horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
-                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
+                                    vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
                                     break;
+                                // RussianDolls
                                 case 1:
                                     const theta = fig.angles[0];
                                     const opposite_side = TIMBER_THICKNESS / Math.sin(theta)
                                     const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
-
-                                    thickness_offset_pt = point_to(mid_pt, first_2_prev_vec, opposite_side);
                                     const pivot_pt = point_to(mid_pt, first_2_sec_vec, adjacent_side);
 
+                                    thickness_offset_pt = point_to(mid_pt, first_2_prev_vec, opposite_side);
                                     horizontal_proj_vec = sub(thickness_offset_pt, pivot_pt);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
-                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
                             }
+
+                            width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                             // Push vectors
                             ccw_vecs.push(first_2_sec_vec);
