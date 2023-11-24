@@ -716,8 +716,8 @@
                         "Id",
                         "Width",
                         "Height",
-                        "CCW Edges",
-                        "CCW Angles",
+                        "Edges",    // CCW Edges
+                        "Angles",   // CCW Angles
                         "θ (Slope angle)",
                         "σ (Dihedral angle)",
                         "Area",
@@ -1841,13 +1841,12 @@
                     const ASSEMBLY_DIRECTION = this.assembly_direction;
                     let vanishing_lines = [];
 
-                    // RussianDolls method
-                    const russian_doll_ratio = ((TOTAL_HEIGHT - (2 * TIMBER_WIDTH)) * HEIGHT_RATIO) / ZOME_HEIGHT
-
                     // Freeze vanishing pt
                     const vanishing_pt = [
                         0,
-                        (ASSEMBLY_METHOD === 0) ? this.z_vanishing_point_in_mm : this.z_centroid,
+                        (ASSEMBLY_METHOD === 0)
+                            ? this.z_vanishing_point_in_mm
+                            : this.z_centroid,
                         0
                     ];
 
@@ -1878,7 +1877,7 @@
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
                                     break;
-                                // RussianDolls
+                                // BeveledLengthwise
                                 case 1:
                                     const theta = fig.angles[0];
                                     const opposite_side = TIMBER_THICKNESS / Math.sin(theta)
@@ -1966,8 +1965,9 @@
 
                             // E, F, G, H is the bottom part (trapezoid) of the timber
                             switch (ASSEMBLY_METHOD) {
-                                // GoodKarma
+                                // GoodKarma & BeveledLengthwise
                                 case 0:
+                                case 1:
                                     E = plan_intersection(mid_pt_with_vertical_proj, sec_2_first_vec, planes[0]);
                                     F = plan_intersection(width_offset_pt, sec_2_first_vec, planes[1]);
                                     G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
@@ -1975,21 +1975,6 @@
 
                                     // Add vanishing line OK
                                     vanishing_lines.push([vanishing_pt, A])
-                                    break;
-                                // RussianDolls
-                                case 1:
-                                    // E = add(mul(A, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
-                                    // F = add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
-                                    // G = add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
-                                    // H = add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
-
-
-                                    E = point_between(A, add(mul(A, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
-                                    F = point_between(B, add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
-                                    G = point_between(C, add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
-                                    H = point_between(D, add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
-
-
                                     break;
                             }
 

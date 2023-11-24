@@ -20,7 +20,7 @@ const TAU_Q = Math.PI / 2;  // 90° in rad
 const FLOAT_PRECISION = 7;
 const FLOAT_2_STR_PRECISION = 2;
 
-const ASSEMBLY_METHODS = ["GoodKarma", "RussianDolls"]
+const ASSEMBLY_METHODS = ["GoodKarma", "BeveledLength"]
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
 // -----------------------------------
