@@ -1566,7 +1566,7 @@
                         FLOAT_2_STR_PRECISION
                     );
                 },
-                get is_vanishing_centered()  {
+                get is_vanishing_centered() {
                     return to_decimal(this.z_vanishing_point_in_mm) === this.z_centroid;
                 },
                 set is_vanishing_centered(value) {
@@ -1977,7 +1977,6 @@
                                     F = point_between(B, add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
                                     G = point_between(C, add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
                                     H = point_between(D, add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
-
 
 
                                     break;
