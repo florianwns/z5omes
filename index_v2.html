@@ -1904,7 +1904,7 @@
                             );
                         });
 
-
+                        // Build the prism
                         _.forEach(fig.points, (first_pt, i) => {
                             const prev_index = (fig.num_points + i - 1) % fig.num_points;    // previous index
                             const next_index = (i + 1) % fig.num_points;                     // next index
@@ -1921,8 +1921,6 @@
                             // Compute All vectors
                             const first_2_sec_vec = ccw_vecs[i];
                             const sec_2_first_vec = cw_vecs[next_index];
-
-
 
                             // Compute Planes to make point intersections
                             let planes = new Array(4);
