@@ -1459,10 +1459,6 @@
         });
 
         Alpine.data('settings', () => {
-            let vertices = [];      // 3D point vector
-            let env_spiral = [];    // Envelop spiral
-            let body_spiral = [];   // Body spiral
-
             return {
                 // Shape Parameters
                 num: 7,                     // number of figs (kites or diamonds)
@@ -1475,8 +1471,8 @@
                 // Sizing Parameters
                 length_unit: "cm",                                  // Length unit by default is cm
                 zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
-                timber_width_in_mm: 120,                            // Timber width in mm
-                timber_thickness_in_mm: 60,                         // Timber thickness in mm
+                timber_width_in_mm: 60,                             // Timber width in mm
+                timber_thickness_in_mm: 120,                        // Timber thickness in mm
                 z_vanishing_point_in_mm: 0,
                 clockwise_rotation: true,
                 assembly_method: 0,
@@ -1627,22 +1623,18 @@
                         this[key] = this.format(key, _.clamp(value, slider.min, slider.max));
                     }
                 },
-                clear() {
-                    // Clear data
-                    vertices = [];
-                    env_spiral = [];
-                    body_spiral = [];
-                },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return to_decimal((WORLD_HEIGHT - y) / polar_height);
                 },
-                add_vertice(p) {
+                add_vertex(vertices, p) {
                     vertices.push(p);
                     return vertices.length - 1;
                 },
                 make_zome() {
-                    // Clear all data
-                    this.clear();
+                    // Init arrays
+                    let vertices = [];      // 3D point vector
+                    let env_spiral = [];    // Envelop spiral
+                    let body_spiral = [];   // Body spiral
 
                     // Config Parameters
                     const N = this.num;
@@ -1668,7 +1660,7 @@
                     const K_SUM = IS_RHOMBUS ? N : (1 - Math.pow(K, N)) / (1 - K);
 
                     // First Point at the top
-                    this.add_vertice([0, ZOME_HEIGHT, 0]);
+                    this.add_vertex(vertices, [0, ZOME_HEIGHT, 0]);
 
                     // First crown properties
                     const TOP_EDGE = TOTAL_HEIGHT / (K_SUM * COS_THETA);
@@ -1688,7 +1680,7 @@
                             Math.max(0, ZOME_HEIGHT - FIRST_CROWN_HEIGHT),
                             FIRST_CROWN_RADIUS * Math.cos(a)
                         ];
-                        this.add_vertice(B);
+                        this.add_vertex(vertices, B);
                     }
 
                     // Loop over crowns (M = N - 1), while zome does not hit ground
@@ -1719,7 +1711,7 @@
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
                                 // Add Shape to 3D
-                                iD = this.add_vertice(D);
+                                iD = this.add_vertex(vertices, D);
 
                                 // Add only the first piece, because only color after that
                                 if (iN == 0) {
@@ -1739,8 +1731,8 @@
                                 F = add(C, mul(sub(D, C), u));
 
                                 // Add Truncated Kite to 3D
-                                iE = this.add_vertice(E);
-                                iF = this.add_vertice(F);
+                                iE = this.add_vertex(vertices, E);
+                                iF = this.add_vertex(vertices, F);
 
                                 // Add Truncated Kite to figs
                                 if (iN == 0) {
@@ -1833,6 +1825,20 @@
                     let vanishing_lines = [];
 
 
+                    // RussianDolls method
+                    const zome_russian_doll_ratio = ((TOTAL_HEIGHT - (2 * TIMBER_WIDTH)) * HEIGHT_RATIO) / ZOME_HEIGHT
+                    let zome_russian_doll_spiral = [];
+                    _.forEach(env_spiral, (crown) => {
+                        let points = []
+                        _.forEach(crown.obj.points, (pt, i) => {
+                            let resized_pt = mul(pt, zome_russian_doll_ratio);       // reduce doll size
+                            resized_pt[1] += TIMBER_WIDTH;                       // add delta on vertical axis
+                            points.push(resized_pt);
+                        });
+                        zome_russian_doll_spiral.push(points);
+                    });
+                    console.log(zome_russian_doll_spiral);
+
                     // Build Timbers using the GoodKarma assembly method
                     _.forEach(env_spiral, (crown, iR) => {
                         const fig = crown.obj;
@@ -1863,10 +1869,23 @@
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
                                     break;
                                 // Beveled
-                                case 1:
+                                // case 1:
+                                //     const theta = fig.angles[0];
+                                //     const opposite_side = TIMBER_THICKNESS / Math.sin(theta)
+                                //     const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
+                                //
+                                //     thickness_offset_pt = point_to(mid_pt, first_2_prev_vec, opposite_side);
+                                //     const pivot_pt = point_to(mid_pt, first_2_sec_vec, adjacent_side);
+                                //
+                                //     horizontal_proj_vec = sub(thickness_offset_pt, pivot_pt);
+                                //     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
+                                //     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
+                                //     break;
+                                // make_zome
+                                case 2:
                                     const theta = fig.angles[0];
                                     const opposite_side = TIMBER_THICKNESS / Math.sin(theta)
-                                    const adjacent_side = TIMBER_THICKNESS / Math.tan(theta)
+                                    const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
 
                                     thickness_offset_pt = point_to(mid_pt, first_2_prev_vec, opposite_side);
                                     const pivot_pt = point_to(mid_pt, first_2_sec_vec, adjacent_side);
@@ -1874,10 +1893,10 @@
                                     horizontal_proj_vec = sub(thickness_offset_pt, pivot_pt);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-                                    break;
-                                // Strut
-                                case 2:
 
+                                    vanishing_pt = zome_russian_doll_spiral[iR][i];
+                                    console.log(vanishing_pt)
+                                    vanishing_lines.push([first_pt, vanishing_pt]);
                                     break;
                             }
 
@@ -1897,16 +1916,24 @@
                             )
                             shifted_wall_planes.push(
                                 points_2_plane(
-                                    point_to(first_pt, horizontal_proj_vec, TIMBER_THICKNESS),
+                                    point_to(thickness_offset_pt, first_2_sec_vec, 100),
                                     thickness_offset_pt,
                                     width_offset_pt,
                                 )
                             );
 
                             // Debug
-                            this.add_vertice(point_to(first_pt, horizontal_proj_vec, TIMBER_THICKNESS));
-                            this.add_vertice(thickness_offset_pt);
-                            this.add_vertice(width_offset_pt);
+
+                            // vanishing_lines.push(
+                            //     [point_to(thickness_offset_pt, first_2_sec_vec, TIMBER_THICKNESS), thickness_offset_pt]
+                            // )
+                            // vanishing_lines.push(
+                            //     [width_offset_pt, thickness_offset_pt]
+                            // )
+                            // vanishing_lines.push(
+                            //     [point_to(thickness_offset_pt, first_2_sec_vec, TIMBER_THICKNESS), width_offset_pt]
+                            // )
+
                         });
 
 
@@ -1974,7 +2001,6 @@
                         });
                     });
 
-
                     // Save Zome and dispatch it
                     ZOME = {
                         vertices: vertices,
@@ -1985,6 +2011,7 @@
                         vanishing_point: vanishing_pt,
                         num: N,
                     }
+
 
                     // Dispatch zome
                     this.$dispatch('zome-is-made');
