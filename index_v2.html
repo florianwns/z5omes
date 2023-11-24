@@ -191,24 +191,6 @@
                        x-model.lazy.number="timber_thickness">
             </div>
 
-            <!-- Vanishing point -->
-            <div x-show="help_is_displayed">
-                <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
-            </div>
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
-                <input class="form-control form-range" min="0" :max="zome_height_in_mm" step="1"
-                       type="range" x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="z_vanishing_point">
-                <button class="btn btn-primary" type="button"
-                        data-bs-toggle="tooltip" title="Set vanishing point to vertical center of entire zome"
-                        :class="(is_vanishing_centered) ? 'btn-secondary' : ''"
-                        @click="is_vanishing_centered = true">
-                    <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
-                </button>
-            </div>
-
             <!-- Assembly method -->
             <div x-show="help_is_displayed">
                 <b>AM</b> : Assembly method
@@ -225,13 +207,36 @@
                 </select>
 
                 <button class="btn btn-primary" type="button"
-                        data-bs-toggle="tooltip" title="Direction of rotation : Clockwise or Counterclockwise "
-                        @click="clockwise_rotation = !clockwise_rotation">
+                        data-bs-toggle="tooltip"
+                        title="Assembly direction : Clockwise, Counterclockwise or Symmetry Axis"
+                        @click="assembly_direction = (assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
                     <i class="fa-solid fa-fw"
-                       :class="clockwise_rotation ? `fa-rotate-right` : `fa-rotate-left`"
+                       :class="ASSEMBLY_DIRECTION_ICONS[assembly_direction]"
                     ></i>
                 </button>
             </div>
+
+
+            <!-- Vanishing point -->
+            <div x-show="assembly_method == 0">
+                <div x-show="help_is_displayed">
+                    <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
+                    <input class="form-control form-range" min="0" :max="zome_height_in_mm" step="1"
+                           type="range" x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="z_vanishing_point">
+                    <button class="btn btn-primary" type="button"
+                            data-bs-toggle="tooltip" title="Set vanishing point to vertical center of entire zome"
+                            :class="(is_vanishing_centered) ? 'btn-secondary' : ''"
+                            @click="is_vanishing_centered = true">
+                        <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -328,7 +333,7 @@
                                     </div>
 
                                     <!-- Draw Vanishing Lines -->
-                                    <div class="form-check form-switch me-2 mb-3">
+                                    <div class="form-check form-switch me-2 mb-3" x-show="has_vanishing_lines">
                                         <label class="form-check-label" for="draw-vanishing-lines">Vanishing
                                             Lines</label>
                                         <input class="form-check-input" type="checkbox" role="switch"
@@ -593,6 +598,7 @@
 <!-- Custom Javascript -->
 <script type="text/javascript">
     const WORLD_HEIGHT = 2500;       // or 3D HEIGHT OF ZOME in mm
+    const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
 
     // Use a global variable to store ZOME data
     let ZOME = {
@@ -601,7 +607,6 @@
         body_spiral: [],
         base: null,
         vanishing_lines: [],
-        vanishing_point: [0, 0, 0],
         num: 0,
     };
 
@@ -609,7 +614,7 @@
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
         return !(!obj || ![
             "vertices", "env_spiral", "body_spiral", "base",
-            "vanishing_lines", "vanishing_point", "num"
+            "vanishing_lines", "num"
         ].reduce(hasKey, true));
     };
 
@@ -1147,6 +1152,7 @@
                 draw_zome_body: true,
                 draw_vanishing_lines: true,
                 draw_zome_vertices: false,
+                has_vanishing_lines: true,
 
                 init() {
                     // Add listeners
@@ -1274,6 +1280,7 @@
 
                     // Display vanishing lines
                     {
+                        this.has_vanishing_lines = ZOME.vanishing_lines && ZOME.vanishing_lines.length > 0;
                         const material = new THREE.LineBasicMaterial({color: 0x00FFFF});
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
@@ -1474,9 +1481,8 @@
                 timber_width_in_mm: 60,                             // Timber width in mm
                 timber_thickness_in_mm: 120,                        // Timber thickness in mm
                 z_vanishing_point_in_mm: 0,
-                clockwise_rotation: true,
                 assembly_method: 0,
-
+                assembly_direction: 0,
 
                 // Commons parameters
                 help_is_displayed: false,
@@ -1494,7 +1500,7 @@
                             "num", "theta_deg", "height_ratio", "kite_ratio",
                             "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm",
                             "z_vanishing_point_in_mm",
-                            "assembly_method", "clockwise_rotation",
+                            "assembly_method", "assembly_direction",
                         ], key => this.$watch(key, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
@@ -1509,7 +1515,7 @@
                     // Refresh the z_vanishing_point_in_mm
                     // if you change the zome height
                     this.$watch("zome_height_in_mm", (value) => {
-                        this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
+                        this.clamp("z_vanishing_point_in_mm", this.z_centroid);
                     });
 
                     this.z_vanishing_point_in_mm = this.z_centroid;
@@ -1821,23 +1827,18 @@
 
                     // Compute the vanishing point depends on parameters (?)
                     const ASSEMBLY_METHOD = this.assembly_method;
-                    let vanishing_pt = [0, this.z_vanishing_point_in_mm, 0];
+                    const ASSEMBLY_DIRECTION = this.assembly_direction;
                     let vanishing_lines = [];
 
-
                     // RussianDolls method
-                    const zome_russian_doll_ratio = ((TOTAL_HEIGHT - (2 * TIMBER_WIDTH)) * HEIGHT_RATIO) / ZOME_HEIGHT
-                    let zome_russian_doll_spiral = [];
-                    _.forEach(env_spiral, (crown) => {
-                        let points = []
-                        _.forEach(crown.obj.points, (pt, i) => {
-                            let resized_pt = mul(pt, zome_russian_doll_ratio);       // reduce doll size
-                            resized_pt[1] += TIMBER_WIDTH;                       // add delta on vertical axis
-                            points.push(resized_pt);
-                        });
-                        zome_russian_doll_spiral.push(points);
-                    });
-                    console.log(zome_russian_doll_spiral);
+                    const russian_doll_ratio = ((TOTAL_HEIGHT - (2 * TIMBER_WIDTH)) * HEIGHT_RATIO) / ZOME_HEIGHT
+
+                    // Freeze vanishing pt
+                    const vanishing_pt = [
+                        0,
+                        (ASSEMBLY_METHOD === 0) ? this.z_vanishing_point_in_mm : this.z_centroid,
+                        0
+                    ];
 
                     // Build Timbers using the GoodKarma assembly method
                     _.forEach(env_spiral, (crown, iR) => {
@@ -1846,7 +1847,6 @@
                         let ccw_vecs = [], cw_vecs = [], mid_pts = [], thickness_offset_pts = [], width_offset_pts = [],
                             horizontal_proj_vecs = [], wall_planes = [], shifted_wall_planes = [],
                             thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
-
 
                         // Calculate vectors and projected points to avoid multiple calculations
                         _.forEach(fig.points, (first_pt, i) => {
@@ -1868,21 +1868,7 @@
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
                                     break;
-                                // Beveled
-                                // case 1:
-                                //     const theta = fig.angles[0];
-                                //     const opposite_side = TIMBER_THICKNESS / Math.sin(theta)
-                                //     const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
-                                //
-                                //     thickness_offset_pt = point_to(mid_pt, first_2_prev_vec, opposite_side);
-                                //     const pivot_pt = point_to(mid_pt, first_2_sec_vec, adjacent_side);
-                                //
-                                //     horizontal_proj_vec = sub(thickness_offset_pt, pivot_pt);
-                                //     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
-                                //     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-                                //     break;
-                                // make_zome
-                                case 2:
+                                case 1:
                                     const theta = fig.angles[0];
                                     const opposite_side = TIMBER_THICKNESS / Math.sin(theta)
                                     const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
@@ -1893,11 +1879,6 @@
                                     horizontal_proj_vec = sub(thickness_offset_pt, pivot_pt);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-
-                                    vanishing_pt = zome_russian_doll_spiral[iR][i];
-                                    console.log(vanishing_pt)
-                                    vanishing_lines.push([first_pt, vanishing_pt]);
-                                    break;
                             }
 
                             // Push vectors
@@ -1921,19 +1902,6 @@
                                     width_offset_pt,
                                 )
                             );
-
-                            // Debug
-
-                            // vanishing_lines.push(
-                            //     [point_to(thickness_offset_pt, first_2_sec_vec, TIMBER_THICKNESS), thickness_offset_pt]
-                            // )
-                            // vanishing_lines.push(
-                            //     [width_offset_pt, thickness_offset_pt]
-                            // )
-                            // vanishing_lines.push(
-                            //     [point_to(thickness_offset_pt, first_2_sec_vec, TIMBER_THICKNESS), width_offset_pt]
-                            // )
-
                         });
 
 
@@ -1954,21 +1922,27 @@
                             const first_2_sec_vec = ccw_vecs[i];
                             const sec_2_first_vec = cw_vecs[next_index];
 
+
+
                             // Compute Planes to make point intersections
-                            let start_plane, end_plane;
-                            switch (this.clockwise_rotation) {
+                            let planes = new Array(4);
+                            switch (ASSEMBLY_DIRECTION) {
                                 // Clockwise Rotation
-                                case true:
-                                    start_plane = shifted_wall_planes[prev_index];
-                                    end_plane = wall_planes[next_index];
+                                case 0:
+                                    planes[0] = planes[1] = shifted_wall_planes[prev_index];
+                                    planes[2] = planes[3] = wall_planes[next_index];
                                     break;
                                 // Counterclockwise Rotation
-                                case false:
-                                    start_plane = wall_planes[prev_index];
-                                    end_plane = shifted_wall_planes[next_index];
+                                case 1:
+                                    planes[0] = planes[1] = wall_planes[prev_index];
+                                    planes[2] = planes[3] = shifted_wall_planes[next_index];
                                     break;
                                 // Symmetry Axis
                                 case 2:
+                                    planes[0] = wall_planes[prev_index];
+                                    planes[1] = shifted_wall_planes[prev_index];
+                                    planes[2] = wall_planes[next_index];
+                                    planes[3] = shifted_wall_planes[next_index];
                                     break;
                             }
 
@@ -1979,25 +1953,36 @@
                                 width_offset_pt, horizontal_proj_vec, along_plane
                             )
 
-                            // Build a TrapezoidalPrism using plane intersections
-
                             // A, B, C, D is the top part (trapezoid) of the timber
-                            A = plan_intersection(first_2_sec_mid_pt, sec_2_first_vec, start_plane);
-                            B = plan_intersection(thickness_offset_pt, sec_2_first_vec, start_plane);
-                            C = plan_intersection(first_2_sec_mid_pt, first_2_sec_vec, end_plane)
-                            D = plan_intersection(thickness_offset_pt, first_2_sec_vec, end_plane)
+                            A = plan_intersection(first_2_sec_mid_pt, sec_2_first_vec, planes[0]);
+                            B = plan_intersection(thickness_offset_pt, sec_2_first_vec, planes[1]);
+                            C = plan_intersection(first_2_sec_mid_pt, first_2_sec_vec, planes[2])
+                            D = plan_intersection(thickness_offset_pt, first_2_sec_vec, planes[3])
 
                             // E, F, G, H is the bottom part (trapezoid) of the timber
-                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_first_vec, start_plane);
-                            F = plan_intersection(width_offset_pt, sec_2_first_vec, start_plane);
-                            G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, end_plane);
-                            H = plan_intersection(width_offset_pt, first_2_sec_vec, end_plane);
+                            switch (ASSEMBLY_METHOD) {
+                                // GoodKarma
+                                case 0:
+                                    E = plan_intersection(mid_pt_with_vertical_proj, sec_2_first_vec, planes[0]);
+                                    F = plan_intersection(width_offset_pt, sec_2_first_vec, planes[1]);
+                                    G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
+                                    H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
+                                    // Add vanishing line OK
+                                    vanishing_lines.push([vanishing_pt, A])
+                                    break;
+                                // RussianDolls
+                                case 1:
+                                    E = add(mul(A, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    F = add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    G = add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    H = add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]);
+                                    break;
+                            }
+
+                            // Build a TrapezoidalPrism
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
                             body_spiral.push(new CircularDistribution(timber_prism, N))
-
-                            // Add vanishing line OK
-                            vanishing_lines.push([vanishing_pt, A])
                         });
                     });
 
@@ -2008,7 +1993,6 @@
                         body_spiral: body_spiral,
                         base: base,
                         vanishing_lines: vanishing_lines,
-                        vanishing_point: vanishing_pt,
                         num: N,
                     }
 
