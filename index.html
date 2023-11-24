@@ -193,7 +193,7 @@
 
             <!-- Assembly method -->
             <div x-show="help_is_displayed">
-                <b>AM</b> : Assembly method
+                <b>AM</b> : Assembly method (slider) and direction (button)
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">AM</span>
@@ -208,7 +208,7 @@
 
                 <button class="btn btn-primary" type="button"
                         data-bs-toggle="tooltip"
-                        title="Assembly direction : Clockwise, Counterclockwise or Symmetry Axis"
+                        title="Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)"
                         @click="assembly_direction = (assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
                     <i class="fa-solid fa-fw"
                        :class="ASSEMBLY_DIRECTION_ICONS[assembly_direction]"
@@ -1977,7 +1977,6 @@
                                     F = point_between(B, add(mul(B, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
                                     G = point_between(C, add(mul(C, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
                                     H = point_between(D, add(mul(D, russian_doll_ratio), [0, TIMBER_WIDTH, 0]), TIMBER_WIDTH);
-
 
 
                                     break;
