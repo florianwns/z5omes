@@ -22,7 +22,7 @@ Sylvain Huet from [La tanière à mémé](https://www.domegeodesique-yourte.com/
 to create a 3D module in GoodKarma. Thanks to his knowledge, we were able to develop the algorithm and today here is this new version of the application.
 
 Soon other new modules will arrive such as being able 
-to print the dimensions of the amounts.
+to print the dimensions of the timbers.
 
 I hope this app will help zome lovers to build their dream cabin/house. 🏠
 
