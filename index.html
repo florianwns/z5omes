@@ -5,13 +5,13 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
     <title>Z5omes | A Zome Maker</title>
-    <meta name="description" content="Z5omes allows you to create 3D models for free. You can now create your models in GoodKarma and Semicone (Axis of symmetry) and export them in STL (sketchup import: mm unit, inverted YZ), OBJ or other formats.">
+    <meta name="description"
+          content="Z5omes allows you to create 3D models for free. You can now create your models in GoodKarma and Semicone (Axis of symmetry) and export them in STL (sketchup import: mm unit, inverted YZ), OBJ or other formats.">
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="img/favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="img/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicons/favicon-16x16.png">
-    <link rel="manifest" href="img/favicons/site.webmanifest">
     <link rel="mask-icon" href="img/favicons/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#0d6efd">
     <meta name="theme-color" content="#ffffff">
@@ -42,8 +42,8 @@
 
             <!-- Show Help -->
             <button class="btn btn-sm p-1"
-                    @click="help_is_displayed = !help_is_displayed"
-                    :class="help_is_displayed ? 'text-primary' : 'text-secondary'"
+                    @click="params.help_is_displayed = !params.help_is_displayed"
+                    :class="params.help_is_displayed ? 'text-primary' : 'text-secondary'"
                     data-bs-toggle="tooltip" title="Display help">
                 <i class="fa-solid fa-question-circle fa-fw"></i>
             </button>
@@ -57,7 +57,7 @@
         </div>
 
         <div class="text-muted small aligned-form">
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <p>The shape of a <a href="https://en.wikipedia.org/wiki/Zome">zome</a> is determined by :</p>
 
                 <!-- Num of Order -->
@@ -66,40 +66,40 @@
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Num of order">N</span>
                 <input class="form-control form-range" max="21" min="3" step="1" type="range"
-                       x-model.number="num" x-ref="num_slider">
+                       x-model.number="params.num" x-ref="num_slider">
                 <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="num">
+                       x-model.lazy.number="params.num">
             </div>
 
             <!-- Num of rhombus from the top -->
-            <div x-show="help_is_displayed"><b>M</b> : Number of <a
+            <div x-show="params.help_is_displayed"><b>M</b> : Number of <a
                     href="https://en.wikipedia.org/wiki/Rhombus">rhombus</a> from top to bottom
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
-                <input class="form-control form-range" min="1" max="20" :max="num - 1" step="1" type="range"
+                <input class="form-control form-range" min="1" max="20" :max="params.num - 1" step="1" type="range"
                        x-model.number="num_rhombus" x-ref="num_rhombus_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="num_rhombus">
             </div>
 
             <!--  Shape angle of Zome -->
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first crown of zome. F =
                 tan(Θ)<br>
             </div>
             <div class="input-group input-group-sm mb-3">
                 <button class="btn btn-primary text-start" type="button"
                         data-bs-toggle="tooltip" title="Shape angle(Θ) | number(F) : F = tan(Θ)"
-                        @click="angle_unit = (angle_unit == 'tan') ? 'deg': 'tan'"
-                        x-text="(angle_unit == 'tan') ? 'F' : 'Θ'">
+                        @click="params.angle_unit = (params.angle_unit == 'tan') ? 'deg': 'tan'"
+                        x-text="(params.angle_unit == 'tan') ? 'F' : 'Θ'">
                 </button>
                 </span>
                 <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
-                       x-model.number="theta_deg" x-ref="theta_deg_slider">
+                       x-model.number="params.theta_deg" x-ref="theta_deg_slider">
                 <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
                 <select class="form-select unit-select" aria-label="Angle unit"
-                        x-show="angle_unit != 'tan'" x-model="angle_unit">
+                        x-show="params.angle_unit != 'tan'" x-model="params.angle_unit">
                     <option selected value="deg">deg</option>
                     <option value="rad">rad</option>
                     <option hidden value="tan">tan</option>
@@ -107,7 +107,7 @@
             </div>
 
             <!-- Height Ratio of Zome -->
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <b>HR</b> : The height ratio (Set HR to 1 for an entire zome)
             </div>
             <div class="input-group input-group-sm mb-3">
@@ -115,19 +115,19 @@
                     HR
                 </span>
                 <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                       :min="to_decimal(2 / num)"
-                       x-model.number="height_ratio" x-ref="height_ratio_slider">
+                       :min="to_decimal(2 / params.num)"
+                       x-model.number="params.height_ratio" x-ref="height_ratio_slider">
                 <input class="form-control" step="0.01" type="number"
-                       x-model.lazy.number="height_ratio">
+                       x-model.lazy.number="params.height_ratio">
                 <button class="btn btn-primary" data-bs-toggle="tooltip" title="Magnetize" type="button"
-                        :class="(height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
+                        :class="(params.height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
                         @click="magnetize">
                     <i class="fa-solid fa-magnet fa-fw"></i>
                 </button>
             </div>
 
             <!-- Kite Ratio of Zome -->
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <b>KR</b> : The kite ratio is the proportion between the length of the edges of the upper triangle
                 and that of the lower triangle of the rhombus
             </div>
@@ -136,9 +136,9 @@
                     KR
                 </span>
                 <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
-                       x-model.number="kite_ratio" x-ref="kite_ratio_slider">
+                       x-model.number="params.kite_ratio" x-ref="kite_ratio_slider">
                 <input class="form-control" step="0.01" type="number"
-                       x-model.lazy.number="kite_ratio">
+                       x-model.lazy.number="params.kite_ratio">
                 <button class="btn btn-primary"
                         data-bs-toggle="tooltip" title="Set rhombus" type="button"
                         :class="(is_rhombus) ? 'btn-secondary' : ''"
@@ -157,7 +157,7 @@
             </h5>
 
             <select class="form-select form-select-sm unit-select"
-                    aria-label="Length unit" x-model="length_unit">
+                    aria-label="Length unit" x-model="params.length_unit">
                 <option value="mm">mm</option>
                 <option selected value="cm">cm</option>
                 <option value="m">m</option>
@@ -166,77 +166,76 @@
 
         <div class="text-muted small aligned-form">
             <!-- Height of Zome -->
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <b>ZH</b> : Zome height
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
                 <input class="form-control form-range" min="100" max="10000" step="10" type="range"
-                       x-model.number="zome_height_in_mm" x-ref="zome_height_in_mm_slider">
+                       x-model.number="params.zome_height_in_mm" x-ref="zome_height_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="zome_height">
             </div>
 
             <!-- Timber width -->
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <b>TW</b> : Timber width
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
                 <input class="form-control form-range" min="1" :max="max_timber_width" step="1" type="range"
-                       x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
+                       x-model.number="params.timber_width_in_mm" x-ref="timber_width_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_width">
             </div>
 
             <!-- Timber thickness -->
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <b>TT</b> : Timber thickness
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
                 <input class="form-control form-range" min="1" :max="max_timber_thickness" step="1"
                        type="range"
-                       x-model.number="timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
+                       x-model.number="params.timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_thickness">
             </div>
 
             <!-- Assembly method -->
-            <div x-show="help_is_displayed">
+            <div x-show="params.help_is_displayed">
                 <b>AM</b> : Assembly method (slider) and direction (button)
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">AM</span>
                 <input class="form-control form-range" min="0" :max="ASSEMBLY_METHODS.length - 1" step="1" type="range"
-                       x-model.number="assembly_method" x-ref="assembly_method_slider">
+                       x-model.number="params.assembly_method" x-ref="assembly_method_slider">
 
-                <select class="form-select" aria-label="Assembly method" x-model="assembly_method">
-                    <template x-for="(conn, index) in ASSEMBLY_METHODS">
-                        <option :value="index" x-text="conn"></option>
-                    </template>
+                <select class="form-select" aria-label="Assembly method" x-model.lazy.number="params.assembly_method">
+                    <option selected value=0>GoodKarma</option>
+                    <option value=1>BeveledLength</option>
                 </select>
 
                 <button class="btn btn-primary" type="button"
                         data-bs-toggle="tooltip"
                         title="Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)"
-                        @click="assembly_direction = (assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
+                        @click="params.assembly_direction = (params.assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
                     <i class="fa-solid fa-fw"
-                       :class="ASSEMBLY_DIRECTION_ICONS[assembly_direction]"
+                       :class="ASSEMBLY_DIRECTION_ICONS[params.assembly_direction]"
                     ></i>
                 </button>
             </div>
 
 
             <!-- Vanishing point -->
-            <div x-show="assembly_method == 0">
-                <div x-show="help_is_displayed">
+            <div x-show="params.assembly_method == 0">
+                <div x-show="params.help_is_displayed">
                     <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
-                    <input class="form-control form-range" min="0" :max="zome_height_in_mm" step="1"
-                           type="range" x-model.number="z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
+                    <input class="form-control form-range" min="0" :max="params.zome_height_in_mm" step="1"
+                           type="range" x-model.number="params.z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="z_vanishing_point">
                     <button class="btn btn-primary" type="button"
@@ -698,7 +697,7 @@
                 },
                 clamp(key, value) {
                     const slider = this.get_slider(key);
-                    this[key] = this.format(key, _.clamp(value, slider.min, slider.max));
+                    this.params[key] = this.format(key, _.clamp(value, slider.min, slider.max));
                 },
                 download_tsv() {
                     this.download_csv("\t", "tsv");
@@ -1491,25 +1490,29 @@
 
         Alpine.data('settings', () => {
             return {
-                // Shape Parameters
-                num: 10,                            // number of figs (kites or diamonds)
-                theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
-                angle_unit: "deg",                  // Degrees or Radians
-                height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
-                kite_ratio: 1,                      // Kite ratio, lower half to upper half (1 => is rhombus else kites)
+                // Group zome parameters
+                params: {
+                    // Shape Parameters
+                    num: 10,                            // number of figs (kites or diamonds)
+                    theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
+                    angle_unit: "deg",                  // Degrees or Radians
+                    height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
+                    kite_ratio: 1,                      // Kite ratio, lower half to upper half (1 => is rhombus else kites)
+
+                    // Sizing Parameters
+                    length_unit: "cm",                                  // Length unit by default is cm
+                    zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
+                    timber_width_in_mm: 60,                             // Timber width in mm
+                    timber_thickness_in_mm: 40,                         // Timber thickness in mm
+                    z_vanishing_point_in_mm: 0,
+                    assembly_method: 0,
+                    assembly_direction: 0,
+
+                    // Commons parameters
+                    help_is_displayed: false,
+                },
+
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
-
-                // Sizing Parameters
-                length_unit: "cm",                                  // Length unit by default is cm
-                zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
-                timber_width_in_mm: 60,                             // Timber width in mm
-                timber_thickness_in_mm: 40,                         // Timber thickness in mm
-                z_vanishing_point_in_mm: 0,
-                assembly_method: 0,
-                assembly_direction: 0,
-
-                // Commons parameters
-                help_is_displayed: false,
                 colors: [],
 
                 // Debouncers
@@ -1518,141 +1521,145 @@
                 async init() {
                     this.__make_zome = _.debounce(this.make_zome, 1);
 
+                    // Init params
+                    this.params.z_vanishing_point_in_mm = this.z_centroid;
+                    this.params = sync_params_from_url(this.params);
+
+                    // First time push param in url
+                    sync_url_from_param(this.params);
+
                     // Add shape parameter listeners
-                    _.forEach([
-                            "num", "theta_deg", "height_ratio", "kite_ratio",
-                            "zome_height_in_mm", "timber_width_in_mm", "timber_thickness_in_mm",
-                            "z_vanishing_point_in_mm",
-                            "assembly_method", "assembly_direction",
-                        ], key => this.$watch(key, (value) => {
+                    _.forEach(Object.keys(this.params), key => {
+                        this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
+                            sync_url_from_param(key, value);
                             this.__make_zome();
                         })
-                    );
+                    });
 
-                    // Refresh the height_ratio if you change the zome num
-                    this.$watch("num", (value) => {
-                        this.clamp("height_ratio", this.height_ratio);
+                    // Refresh the height_ratio if you change the zome params.num
+                    this.$watch("params.num", (value) => {
+                        this.clamp("height_ratio", this.params.height_ratio);
                     });
 
                     // Refresh data related to the height
                     // if you change the zome height
-                    this.$watch("zome_height_in_mm", (value) => {
+                    this.$watch("params.zome_height_in_mm", (value) => {
                         this.clamp("z_vanishing_point_in_mm", this.z_centroid);
                     });
-
-                    this.z_vanishing_point_in_mm = this.z_centroid;
                 },
+
+
                 get theta() {
-                    switch (this.angle_unit) {
+                    switch (this.params.angle_unit) {
                         case "rad":
-                            return to_decimal(deg2rad(this.theta_deg));
+                            return to_decimal(deg2rad(this.params.theta_deg));
                         case "tan":
-                            return to_decimal(Math.tan(deg2rad(this.theta_deg)));
+                            return to_decimal(Math.tan(deg2rad(this.params.theta_deg)));
                         case "deg":
                         default:
-                            return this.theta_deg;
+                            return this.params.theta_deg;
                     }
                 },
                 set theta(angle) {
-                    switch (this.angle_unit) {
+                    switch (this.params.angle_unit) {
                         case "rad":
-                            this.theta_deg = rad2deg(angle)
+                            this.params.theta_deg = rad2deg(angle)
                             break;
                         case "tan":
-                            this.theta_deg = rad2deg(Math.atan(angle))
+                            this.params.theta_deg = rad2deg(Math.atan(angle))
                             break;
                         case "deg":
                         default:
-                            this.theta_deg = angle;
+                            this.params.theta_deg = angle;
                     }
                 },
 
                 get num_rhombus() {
-                    return to_decimal(this.num * this.height_ratio - 1, 0);
+                    return to_decimal(this.params.num * this.params.height_ratio - 1, 0);
                 },
                 set num_rhombus(value) {
-                    this.kite_ratio = 1;
-                    this.height_ratio = to_decimal((value + 1) / this.num);
+                    this.params.kite_ratio = 1;
+                    this.params.height_ratio = to_decimal((value + 1) / this.params.num);
                 },
                 get is_rhombus() {
-                    return this.kite_ratio === 1;
+                    return this.params.kite_ratio === 1;
                 },
                 set is_rhombus(value) {
                     if (value === true) {
-                        this.kite_ratio = 1
+                        this.params.kite_ratio = 1
                     }
                 },
 
                 get zome_height() {
-                    return from_mm(this.zome_height_in_mm, this.length_unit);
+                    return from_mm(this.params.zome_height_in_mm, this.params.length_unit);
                 },
                 set zome_height(value) {
-                    this.clamp("zome_height_in_mm", to_mm(value, this.length_unit));
+                    this.clamp("zome_height_in_mm", to_mm(value, this.params.length_unit));
                 },
                 get timber_width() {
-                    return to_decimal(from_mm(this.timber_width_in_mm, this.length_unit));
+                    return to_decimal(from_mm(this.params.timber_width_in_mm, this.params.length_unit));
                 },
                 set timber_width(value) {
-                    this.clamp("timber_width_in_mm", to_mm(value, this.length_unit));
+                    this.clamp("timber_width_in_mm", to_mm(value, this.params.length_unit));
                 },
                 get max_timber_width() {
                     return to_decimal(this.first_crown_radius / 2, FLOAT_2_STR_PRECISION);
                 },
                 get timber_thickness() {
-                    return to_decimal(from_mm(this.timber_thickness_in_mm, this.length_unit));
+                    return to_decimal(from_mm(this.params.timber_thickness_in_mm, this.params.length_unit));
                 },
                 set timber_thickness(value) {
-                    this.clamp("timber_thickness_in_mm", to_mm(value, this.length_unit));
+                    this.clamp("timber_thickness_in_mm", to_mm(value, this.params.length_unit));
                 },
                 get max_timber_thickness() {
-                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.num)), FLOAT_2_STR_PRECISION);
+                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.params.num)), FLOAT_2_STR_PRECISION);
                 },
                 set z_vanishing_point(value) {
-                    this.clamp("z_vanishing_point_in_mm", to_mm(value, this.length_unit));
+                    this.clamp("z_vanishing_point_in_mm", to_mm(value, this.params.length_unit));
                 },
                 get z_vanishing_point() {
-                    return to_decimal(from_mm(this.z_vanishing_point_in_mm, this.length_unit), FLOAT_PRECISION);
+                    return to_decimal(from_mm(this.params.z_vanishing_point_in_mm, this.params.length_unit), FLOAT_PRECISION);
                 },
                 get z_centroid() {
-                    return Math.max(0, this.zome_height_in_mm - (this.zome_height_in_mm / this.height_ratio / 2))
+                    return Math.max(0, this.params.zome_height_in_mm - (this.params.zome_height_in_mm / this.params.height_ratio / 2))
                 },
                 get is_vanishing_centered() {
-                    return to_decimal(this.z_vanishing_point_in_mm) === to_decimal(this.z_centroid);
+                    return to_decimal(this.params.z_vanishing_point_in_mm) === to_decimal(this.z_centroid);
                 },
                 set is_vanishing_centered(value) {
                     if (value === true) {
-                        this.z_vanishing_point_in_mm = this.z_centroid;
+                        this.params.z_vanishing_point_in_mm = this.z_centroid;
                     }
                 },
                 get is_partial() {
-                    return !(this.height_ratio == 1 && this.kite_ratio == 1);
+                    return !(this.params.height_ratio == 1 && this.params.kite_ratio == 1);
                 },
                 get total_height() {
-                    return this.zome_height_in_mm / this.height_ratio;
+                    return this.params.zome_height_in_mm / this.params.height_ratio;
                 },
                 get k_sum() {
-                    return this.is_rhombus ? this.num : (1 - Math.pow(this.kite_ratio, this.num)) / (1 - this.kite_ratio);
+                    return this.is_rhombus ? this.params.num : (1 - Math.pow(this.params.kite_ratio, this.params.num)) / (1 - this.params.kite_ratio);
                 },
                 // First crown properties
                 get first_edge() {
-                    return this.total_height / (this.k_sum * Math.cos(deg2rad(this.theta_deg)));
+                    return this.total_height / (this.k_sum * Math.cos(deg2rad(this.params.theta_deg)));
                 },
                 get first_crown_radius() {
-                    return this.first_edge * Math.sin(deg2rad(this.theta_deg));
+                    return this.first_edge * Math.sin(deg2rad(this.params.theta_deg));
                 },
                 get first_crown_height() {
-                    return this.first_edge * Math.cos(deg2rad(this.theta_deg));
+                    return this.first_edge * Math.cos(deg2rad(this.params.theta_deg));
                 },
                 magnetize() {
-                    if (this.suggested_height_ratio && this.suggested_height_ratio != this.height_ratio) {
-                        this.height_ratio = this.suggested_height_ratio;
+                    if (this.suggested_height_ratio && this.suggested_height_ratio != this.params.height_ratio) {
+                        this.params.height_ratio = this.suggested_height_ratio;
                     }
                 },
                 format(key, value) {
                     // Format Zome parameters by pair of [key, value]
                     switch (key) {
-                        case 'num':
+                        case 'params.num':
                             return to_decimal(value, 0);
                         default:
                             return to_decimal(value);
@@ -1661,10 +1668,10 @@
                 randomize() {
                     _.forEach(["num", "theta_deg", "num_rhombus"], (key) => {
                             const slider = this.get_slider(key);
-                            this[key] = _.random(slider.min, slider.max)
+                            this.params[key] = _.random(slider.min, slider.max)
                         },
                     );
-                    this.kite_ratio = 1;
+                    this.params.kite_ratio = 1;
                 },
                 get_slider(key) {
                     return eval(`this.$refs.${key}_slider`);
@@ -1672,7 +1679,7 @@
                 clamp(key, value) {
                     const slider = this.get_slider(key);
                     if (slider) {
-                        this[key] = this.format(key, _.clamp(value, slider.min, slider.max));
+                        this.params[key] = this.format(key, _.clamp(value, slider.min, slider.max));
                     }
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
@@ -1689,12 +1696,12 @@
                     let body_spiral = [];   // Body spiral
 
                     // Config Parameters
-                    const N = this.num;
-                    const K = this.kite_ratio;
+                    const N = this.params.num;
+                    const K = this.params.kite_ratio;
                     const IS_RHOMBUS = this.is_rhombus;
-                    const ZOME_HEIGHT = this.zome_height_in_mm;
-                    const TIMBER_WIDTH = this.timber_width_in_mm;
-                    const TIMBER_THICKNESS = this.timber_thickness_in_mm;
+                    const ZOME_HEIGHT = this.params.zome_height_in_mm;
+                    const TIMBER_WIDTH = this.params.timber_width_in_mm;
+                    const TIMBER_THICKNESS = this.params.timber_thickness_in_mm;
 
                     // Constants
                     const M = N - 1;
@@ -1795,6 +1802,7 @@
                         dist_to_ground = Math.abs(y);
                         if (dist_to_ground < closest_dist_to_ground) {
                             closest_dist_to_ground = dist_to_ground;
+                            console.log("dist_to_ground")
                             this.suggested_height_ratio = this.to_suggested_height_ratio(y, ZOME_HEIGHT, TOTAL_HEIGHT);
                         }
                     }
@@ -1864,15 +1872,15 @@
                     });
 
                     // Compute the vanishing point depends on parameters (?)
-                    const ASSEMBLY_METHOD = this.assembly_method;
-                    const ASSEMBLY_DIRECTION = this.assembly_direction;
+                    const ASSEMBLY_METHOD = this.params.assembly_method;
+                    const ASSEMBLY_DIRECTION = this.params.assembly_direction;
                     let vanishing_lines = [];
 
                     // Freeze vanishing pt
                     const vanishing_pt = [
                         0,
                         (ASSEMBLY_METHOD === 0)
-                            ? this.z_vanishing_point_in_mm
+                            ? this.params.z_vanishing_point_in_mm
                             : this.z_centroid,
                         0
                     ];

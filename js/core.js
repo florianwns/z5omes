@@ -23,6 +23,56 @@ const FLOAT_2_STR_PRECISION = 2;
 const ASSEMBLY_METHODS = ["GoodKarma", "BeveledLength"]
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
+
+// --------------------------------
+// ========== URL Params ==========
+// --------------------------------
+
+function decode_url_param(key){
+    const url = new URLSearchParams(window.location.search);
+    const query_param = url.get(key)
+    const decoded_params = (query_param) ? JSON.parse(atob(url.get("q"))) : {};
+    return decoded_params;
+}
+
+
+function encode_url_param(value){
+    return btoa(JSON.stringify(value));
+}
+
+function sync_params_from_url(params) {
+    const decoded_params = decode_url_param("q")
+
+    // Merge params with decoded params
+    if(decoded_params){
+        _.forEach(params, (value, key) => {
+            // Check if decoded_params has the property
+            if(decoded_params.hasOwnProperty(key)){
+                params[key] = decoded_params[key] || value;
+            }
+        });
+    }
+    return params;
+}
+
+function sync_url_from_param(key, value) {
+    if(!key) return;
+
+    const decoded_params = decode_url_param("q")
+    decoded_params[key] = value;
+
+    sync_url_from_params(decoded_params)
+}
+
+
+function sync_url_from_params(params) {
+    if(!params) return;
+
+    let url = new URL(window.location.href);
+    url.searchParams.set("q", encode_url_param(params));
+    history.pushState(null, document.title, url.toString());
+}
+
 // -----------------------------------
 // ========== 3D Operations ==========
 // -----------------------------------
