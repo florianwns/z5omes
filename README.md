@@ -35,7 +35,7 @@ Have fun and don't hesitate to share the creation of your Zome.
 ## Release 
 
 The release of version 1.0.1 of Z5omes which will allow you to create 3D models for free. 
-You can now create your models in GoodKarma and Semicone (Axis of symmetry) 
+You can now create your 3D models in GoodKarma and Semicone (Axis of symmetry) 
 and export them in STL (sketchup import: mm unit, inverted YZ), OBJ or other formats.
 
 Just open this link and have fun.
