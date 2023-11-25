@@ -18,7 +18,7 @@ for the trigonometry calculations ◁ and who allowed me to launch this project.
 While I wasn't a big fan originally and need to check what he writes, 
 🤖 ChatGPT has helped me a lot with understanding vector calculations and the intersection of planes.
 
-Sylvain Huet from “la tanière à mémé” called me one day 
+Sylvain Huet from [La tanière à mémé](https://www.domegeodesique-yourte.com/) called me one day 
 to create a 3D module in GoodKarma. Thanks to his knowledge, we were able to develop the algorithm and today here is this new version of the application.
 
 Soon other new modules will arrive such as being able 
