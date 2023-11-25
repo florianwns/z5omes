@@ -1,9 +1,11 @@
 ![logo of Z5omes.](/img/logo_zome.png)
 
 
-# Z5omes 
+# Z5omes | A Zome Maker
 
-It's a zome maker.
+<b>Z5omes</b> allows you to create 3D models for free.
+You can now create your models in GoodKarma and Semicone (Axis of symmetry)
+and export them in STL (sketchup import: mm unit, inverted YZ), OBJ or other formats.
 
 To make your own Zome, check the app [here](https://florianwns.github.io/z5omes/).
 
@@ -26,23 +28,16 @@ to print the dimensions of the timbers.
 
 I hope this app will help zome lovers to build their dream cabin/house. 🏠
 
-If you have any requests, ✍ feel free to write an issue.
+
 
 Have fun and don't hesitate to share the creation of your Zome.
 
-🌟
-
-## Release 
-
-The release of version 1.0.1 of Z5omes which will allow you to create 3D models for free. 
-You can now create your models in GoodKarma and Semicone (Axis of symmetry) 
-and export them in STL (sketchup import: mm unit, inverted YZ), OBJ or other formats.
-
-Just open this link and have fun.
 https://florianwns.github.io/z5omes/
 
-If you see any bugs or have any questions, 
-please open an issue on Github.
+🌟
+
+If you have any requests/questions, see any bugs,
+✍ feel free to write an issue.
 
 ![Screenshot of Z5omes.](/img/screenshot.png)
 
