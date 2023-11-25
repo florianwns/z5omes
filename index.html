@@ -173,7 +173,7 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
-                <input class="form-control form-range" min="1" max="1000" step="1" type="range"
+                <input class="form-control form-range" min="1" :max="max_timber_width" step="1" type="range"
                        x-model.number="timber_width_in_mm" x-ref="timber_width_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_width">
@@ -185,7 +185,8 @@
             </div>
             <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
-                <input class="form-control form-range" min="1" max="1000" step="1" type="range"
+                <input class="form-control form-range" min="1" :max="max_timber_thickness" step="1"
+                       type="range"
                        x-model.number="timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                 <input class="form-control" step="1" type="number"
                        x-model.lazy.number="timber_thickness">
@@ -258,12 +259,14 @@
                 </a>
 
                 <a href="https://github.com/florianwns/z5omes"
-                   class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip" title="Go to Github if you have any questions">
+                   class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip"
+                   title="Go to Github if you have any questions">
                     <i class="fa-brands fa-github"></i>
                 </a>
 
                 <a href="https://www.linkedin.com/in/florian-rey-346857185/"
-                   class="text-primary btn btn-sm fs-4 p-2 me-4" data-bs-toggle="tooltip" title="Visit my profile on Linkedin">
+                   class="text-primary btn btn-sm fs-4 p-2 me-4" data-bs-toggle="tooltip"
+                   title="Visit my profile on Linkedin">
                     <i class="fa-brands fa-linkedin"></i>
                 </a>
 
@@ -1497,7 +1500,6 @@
 
                 // Commons parameters
                 help_is_displayed: false,
-
                 colors: [],
 
                 // Debouncers
@@ -1523,7 +1525,7 @@
                         this.clamp("height_ratio", this.height_ratio);
                     });
 
-                    // Refresh the z_vanishing_point_in_mm
+                    // Refresh data related to the height
                     // if you change the zome height
                     this.$watch("zome_height_in_mm", (value) => {
                         this.clamp("z_vanishing_point_in_mm", this.z_centroid);
@@ -1571,20 +1573,7 @@
                         this.kite_ratio = 1
                     }
                 },
-                get z_centroid() {
-                    return to_decimal(
-                        Math.max(0, this.zome_height_in_mm - (this.zome_height_in_mm / this.height_ratio / 2)),
-                        FLOAT_2_STR_PRECISION
-                    );
-                },
-                get is_vanishing_centered() {
-                    return to_decimal(this.z_vanishing_point_in_mm) === this.z_centroid;
-                },
-                set is_vanishing_centered(value) {
-                    if (value === true) {
-                        this.z_vanishing_point_in_mm = this.z_centroid;
-                    }
-                },
+
                 get zome_height() {
                     return from_mm(this.zome_height_in_mm, this.length_unit);
                 },
@@ -1592,22 +1581,58 @@
                     this.clamp("zome_height_in_mm", to_mm(value, this.length_unit));
                 },
                 get timber_width() {
-                    return from_mm(this.timber_width_in_mm, this.length_unit);
+                    return to_decimal(from_mm(this.timber_width_in_mm, this.length_unit));
                 },
                 set timber_width(value) {
                     this.clamp("timber_width_in_mm", to_mm(value, this.length_unit));
                 },
+                get max_timber_width() {
+                    return to_decimal(this.first_crown_radius / 2, FLOAT_2_STR_PRECISION);
+                },
                 get timber_thickness() {
-                    return from_mm(this.timber_thickness_in_mm, this.length_unit);
+                    return to_decimal(from_mm(this.timber_thickness_in_mm, this.length_unit));
+                },
+                set timber_thickness(value) {
+                    this.clamp("timber_thickness_in_mm", to_mm(value, this.length_unit));
+                },
+                get max_timber_thickness() {
+                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.num)), FLOAT_2_STR_PRECISION);
                 },
                 set z_vanishing_point(value) {
                     this.clamp("z_vanishing_point_in_mm", to_mm(value, this.length_unit));
                 },
                 get z_vanishing_point() {
-                    return from_mm(this.z_vanishing_point_in_mm, this.length_unit);
+                    return to_decimal(from_mm(this.z_vanishing_point_in_mm, this.length_unit), FLOAT_PRECISION);
                 },
-                set timber_thickness(value) {
-                    this.clamp("timber_thickness_in_mm", to_mm(value, this.length_unit));
+                get z_centroid() {
+                    return Math.max(0, this.zome_height_in_mm - (this.zome_height_in_mm / this.height_ratio / 2))
+                },
+                get is_vanishing_centered() {
+                    return to_decimal(this.z_vanishing_point_in_mm) === to_decimal(this.z_centroid);
+                },
+                set is_vanishing_centered(value) {
+                    if (value === true) {
+                        this.z_vanishing_point_in_mm = this.z_centroid;
+                    }
+                },
+                get is_partial() {
+                    return !(this.height_ratio == 1 && this.kite_ratio == 1);
+                },
+                get total_height() {
+                    return this.zome_height_in_mm / this.height_ratio;
+                },
+                get k_sum() {
+                    return this.is_rhombus ? this.num : (1 - Math.pow(this.kite_ratio, this.num)) / (1 - this.kite_ratio);
+                },
+                // First crown properties
+                get first_edge() {
+                    return this.total_height / (this.k_sum * Math.cos(deg2rad(this.theta_deg)));
+                },
+                get first_crown_radius() {
+                    return this.first_edge * Math.sin(deg2rad(this.theta_deg));
+                },
+                get first_crown_height() {
+                    return this.first_edge * Math.cos(deg2rad(this.theta_deg));
                 },
                 magnetize() {
                     if (this.suggested_height_ratio && this.suggested_height_ratio != this.height_ratio) {
@@ -1655,8 +1680,6 @@
 
                     // Config Parameters
                     const N = this.num;
-                    const THETA_DEG = this.theta_deg;
-                    const HEIGHT_RATIO = this.height_ratio;
                     const K = this.kite_ratio;
                     const IS_RHOMBUS = this.is_rhombus;
                     const ZOME_HEIGHT = this.zome_height_in_mm;
@@ -1665,24 +1688,18 @@
 
                     // Constants
                     const M = N - 1;
-                    const THETA_RAD = deg2rad(THETA_DEG);
                     const INCR_RAD = TAU / N;
-                    const IS_PARTIAL = !(HEIGHT_RATIO == 1 && K == 1);
-                    const COS_THETA = Math.cos(THETA_RAD);
-                    const SIN_THETA = Math.sin(THETA_RAD);
+                    const IS_PARTIAL = this.is_partial;
 
                     // We calculate the total height of entire zome, top to top
-                    const TOTAL_HEIGHT = ZOME_HEIGHT / HEIGHT_RATIO;
-
-                    const K_SUM = IS_RHOMBUS ? N : (1 - Math.pow(K, N)) / (1 - K);
+                    const TOTAL_HEIGHT = this.total_height;
 
                     // First Point at the top
                     this.add_vertex(vertices, [0, ZOME_HEIGHT, 0]);
 
                     // First crown properties
-                    const TOP_EDGE = TOTAL_HEIGHT / (K_SUM * COS_THETA);
-                    const FIRST_CROWN_RADIUS = TOP_EDGE * SIN_THETA;
-                    const FIRST_CROWN_HEIGHT = TOP_EDGE * COS_THETA;
+                    const FIRST_CROWN_RADIUS = this.first_crown_radius;
+                    const FIRST_CROWN_HEIGHT = this.first_crown_height;
 
                     // Initialize variables
                     let fipc, ficc, k, u, iB, iA, iC, iD, iE, iF, A, B, C, D, E, F, G, H, a, dist_to_ground, y, fig;

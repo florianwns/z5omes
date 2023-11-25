@@ -30,6 +30,8 @@ Goodkarma seulement pour le moment
 * Ajouter le mode horaire/anti_horaire pour le goodkarma
 * Ajoût des autres méthodes de contructions (Semicone)
 * Validation de nos modèles
+* Ajoût du "BizeledLength" 
+* Contraindre les limites de timber width/thickness
 
 ## A faire 
 
@@ -37,15 +39,12 @@ Goodkarma seulement pour le moment
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
 
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
+
 * Mandala : export en 3D : .obj
 
 * Raccourci clavier à afficher
 
 * Construire la base (Env et Montants séparement)
-* Ajoût des méthodes 
-  *  Russian Dolls
-  *  Beveled GoodKarma
-  *  Piped : Faire seulement N-1 montans centrés sur la largeur
 
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 * Couleur par triangle qui sont les mêmes
