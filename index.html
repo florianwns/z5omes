@@ -35,9 +35,27 @@
             </h5>
 
             <!-- Randomize Button -->
-            <button @click="randomize" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
+            <button @click="randomize" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
                     title="Randomize settings">
-                <i class="fa-solid fa-dice fa-fw"></i>
+                <i class="fa-solid fa-dice"></i>
+            </button>
+
+            <!-- Reset Params Button -->
+            <button @click="reset_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
+                    title="Reset settings">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+
+            <!-- Save Params Button -->
+            <button @click="save_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
+                    title="Save settings">
+                <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+
+            <!-- Copy Link -->
+            <button @click="copy_url_in_clipboard" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
+                    title="Copy link">
+                <i class="fa-solid fa-link"></i>
             </button>
 
             <!-- Show Help -->
@@ -235,7 +253,8 @@
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
                     <input class="form-control form-range" min="0" :max="params.zome_height_in_mm" step="1"
-                           type="range" x-model.number="params.z_vanishing_point_in_mm" x-ref="z_vanishing_point_in_mm_slider">
+                           type="range" x-model.number="params.z_vanishing_point_in_mm"
+                           x-ref="z_vanishing_point_in_mm_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="z_vanishing_point">
                     <button class="btn btn-primary" type="button"
@@ -251,7 +270,7 @@
     </div>
 </div>
 
-<div class="auto-shift">
+<div class="auto-shift position-relative">
     <div class="container-xl row m-auto">
         <div class="col mb-3 mt-3">
             <div class="d-flex align-items-center">
@@ -581,6 +600,19 @@
             </div>
         </div>
     </div>
+
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div id="live_toast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toast_msg" class="me-auto">
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 <!-- Scripts / Bootstrap 5 runs without jQuery -->
@@ -645,7 +677,7 @@
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(
         tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
-            placement: "auto",
+            placement: "bottom",
             trigger: "hover",
         })
     )
@@ -1511,6 +1543,8 @@
                     // Commons parameters
                     help_is_displayed: false,
                 },
+                params_backup: null,
+
 
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
@@ -1524,9 +1558,10 @@
                     // Init params
                     this.params.z_vanishing_point_in_mm = this.z_centroid;
                     this.params = sync_params_from_url(this.params);
+                    this.save_params(false);
 
                     // First time push param in url
-                    sync_url_from_param(this.params);
+                    sync_url_from_params(this.params);
 
                     // Add shape parameter listeners
                     _.forEach(Object.keys(this.params), key => {
@@ -1547,8 +1582,11 @@
                     this.$watch("params.zome_height_in_mm", (value) => {
                         this.clamp("z_vanishing_point_in_mm", this.z_centroid);
                     });
-                },
 
+                    this.$watch("params.zome_height_in_mm", (value) => {
+                        this.clamp("z_vanishing_point_in_mm", this.z_centroid);
+                    });
+                },
 
                 get theta() {
                     switch (this.params.angle_unit) {
@@ -1650,6 +1688,50 @@
                 },
                 get first_crown_height() {
                     return this.first_edge * Math.cos(deg2rad(this.params.theta_deg));
+                },
+
+                reset_params() {
+                    this.params = _.cloneDeep(this.params_backup);
+                    this.show_toast("Settings have been restored !", "rotate")
+                },
+                save_params(toast = true) {
+                    this.params_backup = _.cloneDeep(this.params);
+                    if (toast) {
+                        this.show_toast("Settings have been saved !", "floppy-disk")
+                    }
+                },
+                show_toast(txt, icon = null, error = false) {
+                    // Update toast message and display it
+                    const toast_msg = document.getElementById('toast_msg')
+                    const txt_class = (error) ? "text-danger" : "text-primary";
+                    let msg = (icon)
+                        ? '<i class="fa-solid fa-' + icon + ' ' + txt_class + ' me-2 "></i>'
+                        : '<img src="img/logo_zome.svg" width="24" class="me-2" alt="Zome Logo">';
+                    msg += txt;
+                    toast_msg.innerHTML = msg
+
+                    const live_toast = document.getElementById('live_toast')
+                    const toast = new bootstrap.Toast(live_toast)
+                    toast.show()
+                },
+                copy_url_in_clipboard() {
+                    // Copy URL to clipboard
+                    try {
+                        const self = this;
+                        navigator.permissions.query({name: "clipboard-write"}).then(
+                            (permissionStatus) => {
+                                if (permissionStatus.state == "granted") {
+                                    navigator.clipboard.writeText(document.location.href).then(
+                                        () => self.show_toast("Link copied to clipboard !", "link"),
+                                        () => self.show_toast("An error has occurred.", "triangle-exclamation", true),
+                                    );
+                                }
+                            },
+                            () => self.show_toast("An error has occurred.", "triangle-exclamation", true),
+                        );
+                    } catch (error) {
+                        self.show_toast("An error has occurred.", "triangle-exclamation", true);
+                    }
                 },
                 magnetize() {
                     if (this.suggested_height_ratio && this.suggested_height_ratio != this.params.height_ratio) {
@@ -1802,7 +1884,6 @@
                         dist_to_ground = Math.abs(y);
                         if (dist_to_ground < closest_dist_to_ground) {
                             closest_dist_to_ground = dist_to_ground;
-                            console.log("dist_to_ground")
                             this.suggested_height_ratio = this.to_suggested_height_ratio(y, ZOME_HEIGHT, TOTAL_HEIGHT);
                         }
                     }

@@ -10,6 +10,8 @@
 * Ajoût du "BizeledLength" 
 * Contraindre les limites de timber width/thickness
 * Url parametrée
+* Sauver et revenir à l'état d'origine pour éviter le rafraichissement de la page.
+* Lien de partage de l'URL qui copie colle dans le presse papier.
 
 ## A faire 
 
@@ -20,10 +22,6 @@
 * Construire la base (Env et Montants séparement)
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 * Couleur par triangle qui sont les mêmes
-* Sauver et revenir à l'état d'origine pour éviter le rafraichissement de la page.
-  
-
-* Lien de partage de l'URL qui copie colle dans le presse papier. 
 * Affichage de message (toast: https://getbootstrap.com/docs/5.2/components/toasts/) pour   
     * Copier/Coller
     * Sauvegarde du lien
