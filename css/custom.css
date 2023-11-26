@@ -67,13 +67,15 @@
 }
 
 .aligned-form .input-group > *:first-child {
-    min-width: 48px;
+    min-width: 52px;
+    text-align: center !important;
+    display: inline-block;
 }
 
 .aligned-form .input-group .form-range,
 .aligned-form .input-group .form-range {
-    min-width: 36%;
-    max-width: 36%;
+    min-width: 32%;
+    max-width: 32%;
 }
 
 

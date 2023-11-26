@@ -17,12 +17,10 @@
   * Save settings
   * reset settings
 * Mandala : export en 3D : .obj
-
+* rajout de la méthode jeam soum 
 
 ## A faire 
 
-* Cacher btn copier si failed
-  
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
 * Raccourci clavier à afficher
