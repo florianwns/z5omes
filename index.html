@@ -361,20 +361,21 @@
                                     </div>
                                 </div>
 
+
+                                <div class="mb-2">
+                                    <!-- Draw Zome Env/ Zome Body/ Zomandala -->
+                                    <select class="form-select" aria-label="Type of 3D objects"
+                                            x-model="type_of_3D_objects">
+                                        <option selected value="body_spiral">Zome body</option>
+                                        <option value="env_spiral">Zome envelop</option>
+                                        <option value="zomandala_spiral">Mandala</option>
+                                    </select>
+                                </div>
                                 <!-- Canvas for Zome 3D rendering -->
                                 <div x-ref="canvas" style="height:500px; cursor: move;"
                                      class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
 
                                 <div class="d-flex flex-wrap justify-content-evenly">
-                                    <!-- Draw Zome Env/ Zome Body/ Zomandala -->
-                                    <select class="form-select" aria-label="Type of 3D objects"
-                                            x-model="type_of_3D_objects">
-                                        <option selected value="body_spiral">Zome body (timbers)</option>
-                                        <option value="env_spiral">Zome envelop (kite)</option>
-                                        <option value="zomandala_spiral">Zomandala (planar)</option>
-                                    </select>
-
-
                                     <!-- Draw Vanishing Lines -->
                                     <div class="form-check form-switch me-2 mb-3" x-show="has_vanishing_lines">
                                         <label class="form-check-label" for="draw-vanishing-lines">Vanishing
@@ -436,7 +437,6 @@
                                         <option value="spiral_figs">Spiral Origami</option>
                                         <option value="figs">Figures</option>
                                     </select>
-
                                 </div>
 
                                 <div class="ratio ratio-A4 bg-white rounded border position-relative">
@@ -1089,7 +1089,7 @@
                         _.forEach(spiral_planar_figs, (spiral_fig, j) => {
                             const crown = env_spiral[j];
                             const fig = _.cloneDeep(spiral_fig);
-                            fig.planar_points = fig.planar_points.map(p => rotate_2d(p, crown.angles[i], O));
+                            fig.planar_points = fig.planar_points.map(p => rotate_2d(p, -crown.angles[i], O));
                             fig.color = crown.colors[i];
                             mandala_figs.push(fig)
                         });
