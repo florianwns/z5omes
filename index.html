@@ -53,7 +53,7 @@
             </button>
 
             <!-- Copy Link -->
-            <button @click="copy_url_in_clipboard" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
+            <button id="copy-url-btn" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
                     title="Copy link">
                 <i class="fa-solid fa-link"></i>
             </button>
@@ -645,6 +645,9 @@
 <!-- Hammer : Touch events -->
 <script src="js/hammer.min.js"></script>
 
+<!-- Clipboard JS -->
+<script src="js/clipboard.min.js"></script>
+
 <!-- Core and geometry functions -->
 <script src="js/core.js"></script>
 
@@ -685,6 +688,8 @@
             trigger: "hover",
         })
     )
+
+
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
@@ -1574,6 +1579,24 @@
                     this.$watch("params.zome_height_in_mm", (value) => {
                         this.clamp("z_vanishing_point_in_mm", this.z_centroid);
                     });
+
+                    // Use ClipboardJS to copy URL
+                    const clipboard = new ClipboardJS("#copy-url-btn", {
+                        text: function(trigger) {
+                            return document.location.href;
+                        }
+                    });
+
+                    const self = this;
+                    clipboard.on('success', function(e) {
+                        self.show_toast("Link copied to clipboard !", "link");
+                    });
+                    clipboard.on('error', function(e) {
+                        self.show_error();
+                    });
+                },
+                show_error(error = null){
+                    self.show_toast("An error has occurred", "triangle-exclamation", true);
                 },
 
                 get theta() {
@@ -1701,25 +1724,6 @@
                     const live_toast = document.getElementById('live_toast')
                     const toast = new bootstrap.Toast(live_toast)
                     toast.show()
-                },
-                copy_url_in_clipboard() {
-                    // Copy URL to clipboard
-                    try {
-                        const self = this;
-                        navigator.permissions.query({name: "clipboard-write"}).then(
-                            (permissionStatus) => {
-                                if (permissionStatus.state == "granted") {
-                                    navigator.clipboard.writeText(document.location.href).then(
-                                        () => self.show_toast("Link copied to clipboard !", "link"),
-                                        () => self.show_toast("An error has occurred.", "triangle-exclamation", true),
-                                    );
-                                }
-                            },
-                            () => self.show_toast("An error has occurred.", "triangle-exclamation", true),
-                        );
-                    } catch (error) {
-                        self.show_toast("An error has occurred.", "triangle-exclamation", true);
-                    }
                 },
                 magnetize() {
                     if (this.suggested_height_ratio && this.suggested_height_ratio != this.params.height_ratio) {
