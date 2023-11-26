@@ -377,7 +377,7 @@
 
                                 <div class="d-flex flex-wrap justify-content-evenly">
                                     <!-- Draw Vanishing Lines -->
-                                    <div class="form-check form-switch me-2 mb-3" x-show="has_vanishing_lines">
+                                    <div class="form-check form-switch me-2 mb-3" x-show="show_vanishing_lines_switch">
                                         <label class="form-check-label" for="draw-vanishing-lines">Vanishing
                                             Lines</label>
                                         <input class="form-check-input" type="checkbox" role="switch"
@@ -392,7 +392,7 @@
                                     </div>
 
                                     <!-- Draw Zome Vertices -->
-                                    <div class="form-check form-switch me-2 mb-3">
+                                    <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
                                         <label class="form-check-label" for="draw-zome-vertices-switch">Vertices</label>
                                         <input class="form-check-input" type="checkbox" role="switch"
                                                id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
@@ -655,6 +655,7 @@
 <script type="text/javascript">
     const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
+    const DEBUG = false;
 
     // Use a global variable to store ZOME data
     let ZOME = {
@@ -1181,7 +1182,9 @@
                 draw_axis: true,
                 draw_vanishing_lines: true,
                 draw_zome_vertices: false,
-                has_vanishing_lines: true,
+
+                show_vanishing_lines_switch: false,
+                show_vertices_switch: false,
 
                 init() {
                     // Add listeners
@@ -1298,16 +1301,28 @@
                     }
                     meshes.vanishing_lines = new THREE.Group();
                 },
+
                 process() {
                     if (!is_valid_zome(ZOME)) {
                         console.error("Zome is not valid", ZOME)
                         return;
                     }
+                    const zome_obj_rotation = (meshes.zome_obj instanceof THREE.Group)
+                        ? meshes.zome_obj.rotation.y
+                        : 0;
+
                     this.clear();
 
+                    // Display switch buttons
+                    this.show_vanishing_lines_switch = ZOME.vanishing_lines
+                        && ZOME.vanishing_lines.length > 0
+                        && this.type_of_3D_objects == "body_spiral";
+                    this.show_vertices_switch = DEBUG
+                        && ZOME.vertices
+                        && ZOME.vertices.length > 0;
+
                     // Display vanishing lines
-                    {
-                        this.has_vanishing_lines = ZOME.vanishing_lines && ZOME.vanishing_lines.length > 0;
+                    if (this.show_vanishing_lines_switch && this.draw_vanishing_lines) {
                         const material = new THREE.LineBasicMaterial({color: 0x00FFFF});
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
@@ -1316,10 +1331,11 @@
                             this.set_visibility("vanishing_lines", this.draw_vanishing_lines);
                         });
                     }
+                    meshes.vanishing_lines.rotation.y = zome_obj_rotation;
                     scene.add(meshes.vanishing_lines);
 
                     // Display zome vertices
-                    {
+                    if (this.show_vertices_switch && this.draw_zome_vertices) {
                         const geometry = new THREE.BufferGeometry();
                         geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
@@ -1327,8 +1343,8 @@
                         meshes.zome_vertices.add(new THREE.Points(geometry, material))
                         this.set_visibility("zome_vertices", this.draw_zome_vertices);
                     }
+                    meshes.zome_vertices.rotation.y = zome_obj_rotation;
                     scene.add(meshes.zome_vertices);
-
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({
@@ -1397,6 +1413,7 @@
                     }
 
                     // Add the final obj mesh to the scene
+                    meshes.zome_obj.rotation.y = zome_obj_rotation;
                     scene.add(meshes.zome_obj)
                 },
                 get right() {

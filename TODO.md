@@ -16,17 +16,18 @@
   * Copier/Coller
   * Save settings
   * reset settings
+* Mandala : export en 3D : .obj
+
 
 ## A faire 
 
+
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
-* Mandala : export en 3D : .obj
 * Raccourci clavier à afficher
 * Construire la base (Env et Montants séparement)
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 * Couleur par triangle qui sont les mêmes
 * Affichage de message :
     * Téléchargement d'un fichier 3D ou PRINT
-
-
+  
