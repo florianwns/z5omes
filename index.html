@@ -225,13 +225,17 @@
                 <b>AM</b> : Assembly method (slider) and direction (button)
             </div>
             <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">AM</span>
-                <input class="form-control form-range" min="0" :max="ASSEMBLY_METHODS.length - 1" step="1" type="range"
+                <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">
+                    AM
+                    <i class="fa-thin"
+                       :class="(params.assembly_method < 2)? `fa-arrow-down-from-line` : `fa-arrow-up-from-line`"></i>
+                </span>
+                <input class="form-control form-range" min="0" max="2" step="1" type="range"
                        x-model.number="params.assembly_method" x-ref="assembly_method_slider">
-
                 <select class="form-select" aria-label="Assembly method" x-model.lazy.number="params.assembly_method">
                     <option selected value=0>GoodKarma</option>
-                    <option value=1>BeveledLength</option>
+                    <option value=1>Beveled Length</option>
+                    <option value=2>Outward Xpansion</option>
                 </select>
 
                 <button class="btn btn-primary" type="button"
@@ -688,7 +692,6 @@
             trigger: "hover",
         })
     )
-
 
 
     document.addEventListener('alpine:init', () => {
@@ -1582,20 +1585,20 @@
 
                     // Use ClipboardJS to copy URL
                     const clipboard = new ClipboardJS("#copy-url-btn", {
-                        text: function(trigger) {
+                        text: function (trigger) {
                             return document.location.href;
                         }
                     });
 
                     const self = this;
-                    clipboard.on('success', function(e) {
+                    clipboard.on('success', function (e) {
                         self.show_toast("Link copied to clipboard !", "link");
                     });
-                    clipboard.on('error', function(e) {
+                    clipboard.on('error', function (e) {
                         self.show_error();
                     });
                 },
-                show_error(error = null){
+                show_error(error = null) {
                     self.show_toast("An error has occurred", "triangle-exclamation", true);
                 },
 
@@ -1962,12 +1965,13 @@
                     ];
 
                     // Build Timbers using the GoodKarma assembly method
-                    _.forEach(env_spiral, (crown) => {
+                    _.forEach(env_spiral, (crown, j) => {
                         const fig = crown.obj;
 
                         let ccw_vecs = [], cw_vecs = [], mid_pts = [], thickness_offset_pts = [], width_offset_pts = [],
                             horizontal_proj_vecs = [], wall_planes = [], shifted_wall_planes = [],
-                            thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
+                            thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec,
+                            wall_plane, shifted_wall_plane;
 
                         // Calculate vectors and projected points to avoid multiple calculations
                         _.forEach(fig.points, (first_pt, i) => {
@@ -1988,16 +1992,24 @@
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
                                     break;
-                                // BeveledLengthwise
+                                // Beveled Length && Outward Xpansion
                                 case 1:
-                                    const theta = fig.angles[0];
-                                    const opposite_side = TIMBER_THICKNESS / Math.sin(theta)
-                                    const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
-                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, adjacent_side);
+                                case 2:
+                                    const theta = fig.angles[i];
 
-                                    thickness_offset_pt = point_to(mid_pt, first_2_prev_vec, opposite_side);
-                                    horizontal_proj_vec = sub(thickness_offset_pt, pivot_pt);
+                                    const hypotenuse = TIMBER_THICKNESS / Math.sin(theta)
+                                    const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
+                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
+
+                                    thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
+                                    horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
+
+                                    // Reverse direction for outward Expansion
+                                    if (ASSEMBLY_METHOD == 2) {
+                                        vertical_proj_vec = mul(vertical_proj_vec, -1);
+                                    }
+                                    break;
                             }
 
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
@@ -2013,9 +2025,33 @@
                             width_offset_pts.push(width_offset_pt);
 
                             //Push Planes
-                            wall_planes.push(
-                                points_2_plane(first_pt, mid_pt, vanishing_pt)
-                            )
+                            switch (ASSEMBLY_METHOD) {
+                                // GoodKarma && Beveled Length
+                                case 0:
+                                case 1:
+                                    // Use vanishing pt for wall
+                                    wall_planes.push(
+                                        points_2_plane(
+                                            first_pt,
+                                            mid_pt,
+                                            vanishing_pt
+                                        ),
+                                    );
+                                    break;
+                                // Outward Xpansion
+                                case 2:
+                                    // Use vertical proj rather vanishing pt
+                                    wall_planes.push(
+                                        points_2_plane(
+                                            first_pt,
+                                            mid_pt,
+                                            point_to(mid_pt, vertical_proj_vec, 100)
+                                        ),
+                                    );
+                                    break;
+                            }
+
+                            // Same base for shifted wall
                             shifted_wall_planes.push(
                                 points_2_plane(
                                     point_to(thickness_offset_pt, first_2_sec_vec, 100),
@@ -2035,7 +2071,7 @@
                             width_offset_pt = width_offset_pts[i];
 
                             // Get vectors
-                            const first_2_sec_mid_pt = mid_pts[i];
+                            const mid_pt = mid_pts[i];
                             const first_2_sec_vec = ccw_vecs[i];
                             const sec_2_first_vec = cw_vecs[next_index];
 
@@ -2069,25 +2105,20 @@
                             )
 
                             // A, B, C, D is the top part (trapezoid) of the timber
-                            A = plan_intersection(first_2_sec_mid_pt, sec_2_first_vec, planes[0]);
+                            A = plan_intersection(mid_pt, sec_2_first_vec, planes[0]);
                             B = plan_intersection(thickness_offset_pt, sec_2_first_vec, planes[1]);
-                            C = plan_intersection(first_2_sec_mid_pt, first_2_sec_vec, planes[2])
+                            C = plan_intersection(mid_pt, first_2_sec_vec, planes[2])
                             D = plan_intersection(thickness_offset_pt, first_2_sec_vec, planes[3])
 
                             // E, F, G, H is the bottom part (trapezoid) of the timber
-                            switch (ASSEMBLY_METHOD) {
-                                // GoodKarma & BeveledLengthwise
-                                case 0:
-                                case 1:
-                                    E = plan_intersection(mid_pt_with_vertical_proj, sec_2_first_vec, planes[0]);
-                                    F = plan_intersection(width_offset_pt, sec_2_first_vec, planes[1]);
-                                    G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
-                                    H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
+                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_first_vec, planes[0]);
+                            F = plan_intersection(width_offset_pt, sec_2_first_vec, planes[1]);
+                            G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
+                            H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
-                                    // Add vanishing line OK
-                                    vanishing_lines.push([vanishing_pt, first_pt])
-                                    break;
-                            }
+
+                            // Add vanishing line OK
+                            vanishing_lines.push([vanishing_pt, first_pt])
 
                             // Build a TrapezoidalPrism
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
