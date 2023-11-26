@@ -28,7 +28,7 @@ const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", 
 // ========== URL Params ==========
 // --------------------------------
 
-function decode_url_param(key){
+function decode_url_param(key) {
     const url = new URLSearchParams(window.location.search);
     const query_param = url.get(key)
     const decoded_params = (query_param) ? JSON.parse(atob(url.get("q"))) : {};
@@ -36,7 +36,7 @@ function decode_url_param(key){
 }
 
 
-function encode_url_param(value){
+function encode_url_param(value) {
     return btoa(JSON.stringify(value));
 }
 
@@ -44,10 +44,10 @@ function sync_params_from_url(params) {
     const decoded_params = decode_url_param("q")
 
     // Merge params with decoded params
-    if(decoded_params){
+    if (decoded_params) {
         _.forEach(params, (value, key) => {
             // Check if decoded_params has the property
-            if(decoded_params.hasOwnProperty(key)){
+            if (decoded_params.hasOwnProperty(key)) {
                 params[key] = decoded_params[key] || value;
             }
         });
@@ -56,7 +56,7 @@ function sync_params_from_url(params) {
 }
 
 function sync_url_from_param(key, value) {
-    if(!key) return;
+    if (!key) return;
 
     const decoded_params = decode_url_param("q")
     decoded_params[key] = value;
@@ -66,7 +66,7 @@ function sync_url_from_param(key, value) {
 
 
 function sync_url_from_params(params) {
-    if(!params) return;
+    if (!params) return;
 
     let url = new URL(window.location.href);
     url.searchParams.set("q", encode_url_param(params));
@@ -475,7 +475,7 @@ class TrapezoidalPrism {
 }
 
 class ConvexPolygon {
-    constructor(points) {
+    constructor(points, color = null) {
         // Consider that polygon is made by triangle,
         const num_points = points.length;
         if (num_points < 3) {
@@ -499,6 +499,9 @@ class ConvexPolygon {
         this.planar_points = new Array(this.num_points);    // Array of planar points [x, y, z] for 2D visualization
 
         this.compute()
+
+        // Compute color which depends on slope
+        this.color = color || angle2color(this.slope);
     }
 
     get O() {
@@ -571,9 +574,6 @@ class ConvexPolygon {
         // Compute width and height from 2D boundaries
         this.width = Math.abs(x_max - x_min);
         this.height = Math.abs(y_max - y_min);
-
-        // Compute color which depends on slope
-        this.color = angle2color(this.slope);
     }
 }
 
@@ -647,7 +647,5 @@ class TruncatedKite extends Kite {
 
 class ZomeBase extends ConvexPolygon {
 }
-
-
 
 
