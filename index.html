@@ -171,7 +171,7 @@
         <div class="d-flex align-items-center mb-3">
             <h5 class="text-secondary my-1 me-auto">
                 <i class="fa-solid fa-ruler-triangle me-1"></i>
-                Sizing
+                Skeleton Sizing
             </h5>
 
             <select class="form-select form-select-sm unit-select"
@@ -363,10 +363,10 @@
 
 
                                 <div class="mb-2">
-                                    <!-- Draw Zome Env/ Zome Body/ Zomandala -->
+                                    <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
                                     <select class="form-select" aria-label="Type of 3D objects"
                                             x-model="type_of_3D_objects">
-                                        <option selected value="body_spiral">Zome body</option>
+                                        <option selected value="skeleton_spiral">Zome skeleton</option>
                                         <option value="env_spiral">Zome envelop</option>
                                         <option value="zomandala_spiral">Mandala</option>
                                     </select>
@@ -664,7 +664,7 @@
     let ZOME = {
         vertices: [],
         env_spiral: [],
-        body_spiral: [],
+        skeleton_spiral: [],
         zomandala_spiral: [],
         spiral_planar_figs: [],
         base: null,
@@ -675,7 +675,7 @@
     function is_valid_zome(obj) {
         const hasKey = (res, key) => res && obj.hasOwnProperty(key);
         return !(!obj || ![
-            "vertices", "env_spiral", "body_spiral", "zomandala_spiral",
+            "vertices", "env_spiral", "skeleton_spiral", "zomandala_spiral",
             "base", "vanishing_lines", "spiral_planar_figs", "num"
         ].reduce(hasKey, true));
     };
@@ -1182,7 +1182,7 @@
                 // 3D Rendering Parameters
                 is_spinning: false,
                 speed: 0.01,
-                type_of_3D_objects: "body_spiral",
+                type_of_3D_objects: "skeleton_spiral",
 
                 draw_axis: true,
                 draw_vanishing_lines: true,
@@ -1291,10 +1291,10 @@
                     }
                     meshes.zome_obj = new THREE.Group();
 
-                    if (meshes.zome_body instanceof THREE.Group) {
-                        scene.remove(meshes.zome_body)
+                    if (meshes.zome_skeleton instanceof THREE.Group) {
+                        scene.remove(meshes.zome_skeleton)
                     }
-                    meshes.zome_body = new THREE.Group();
+                    meshes.zome_skeleton = new THREE.Group();
 
                     if (meshes.zome_vertices instanceof THREE.Group) {
                         scene.remove(meshes.zome_vertices)
@@ -1321,7 +1321,7 @@
                     // Display switch buttons
                     this.show_vanishing_lines_switch = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
-                        && this.type_of_3D_objects == "body_spiral";
+                        && this.type_of_3D_objects == "skeleton_spiral";
                     this.show_vertices_switch = DEBUG
                         && ZOME.vertices
                         && ZOME.vertices.length > 0;
@@ -1357,7 +1357,7 @@
                         vertexColors: true,
                     });
 
-                    // Build 3D Body Faces
+                    // Build 3D Skeleton Faces
                     const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
                     if (spiral) {
                         // Pre-Compute geometry points, crown colors and num_faces
@@ -1767,7 +1767,7 @@
                     // Init arrays
                     let vertices = [];      // 3D point vector
                     let env_spiral = [];
-                    let body_spiral = [];
+                    let skeleton_spiral = [];
                     let zomandala_spiral = [];
                     let spiral_planar_figs = [];
 
@@ -2091,7 +2091,7 @@
 
                             // Build a TrapezoidalPrism
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
-                            body_spiral.push(new CircularDistribution(timber_prism, N))
+                            skeleton_spiral.push(new CircularDistribution(timber_prism, N))
                         });
                     });
 
@@ -2140,7 +2140,7 @@
                     ZOME = {
                         vertices: vertices,
                         env_spiral: env_spiral,
-                        body_spiral: body_spiral,
+                        skeleton_spiral: skeleton_spiral,
                         zomandala_spiral: zomandala_spiral,
                         spiral_planar_figs: spiral_planar_figs,
                         base: base,
