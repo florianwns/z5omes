@@ -1346,33 +1346,38 @@
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
-                    const edge_material = new THREE.LineBasicMaterial({color: 0x000000});
+                    const edge_material = new THREE.LineBasicMaterial({color: 0x333333});
 
                     // Build 3D Skeleton Faces
                     const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
                     if (spiral) {
                         // Pre-Compute geometry points, crown colors and num_faces
-                        const points = [];
+                        let face_points = [];
+                        let edge_points = [];
+
                         const num_crowns = spiral.length;
                         if (num_crowns) {
                             const colors = new Array(num_crowns);
                             const num_faces = new Array(num_crowns);
                             const face_colors = new Array(num_crowns);
                             _.forEach(spiral, (crown, iR) => {
-                                points.push(...crown.obj.faces);
+                                face_points.push(...crown.obj.faces);
+                                edge_points.push(...crown.obj.edge_points);
+
                                 colors[iR] = crown.colors;
                                 num_faces[iR] = crown.obj.num_faces;
                             });
 
                             // Build geometry of first env_spiral
-                            const spiral_geometry = new THREE.BufferGeometry();
-                            spiral_geometry.setFromPoints(points)
+                            const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
                             spiral_geometry.computeVertexNormals()
+
+                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
 
                             // Compute All faces geometries and colors
                             for (let iN = 0; iN < ZOME.num; iN++) {
                                 const rotated_spiral_geometry = spiral_geometry.clone()
-
+                                rotated_spiral_geometry.points
                                 // Rotate the new geometry
                                 const a = spiral[0].angles[iN];
                                 rotated_spiral_geometry.rotateY(a);
@@ -1385,8 +1390,10 @@
                                 rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
                                 meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
 
-                                const edges_geometry = new THREE.EdgesGeometry(rotated_spiral_geometry);
-                                const spiral_lines = new THREE.LineSegments(edges_geometry, edge_material);
+                                const rotated_edge_geometry = edge_geometry.clone()
+                                rotated_edge_geometry.rotateY(a);
+
+                                const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
                                 meshes.zome_lines.add(spiral_lines);
                             }
                         }
@@ -1410,8 +1417,8 @@
 
                             meshes.zome_obj.add(new THREE.Mesh(base_geometry, material))
 
-                            const edges_geometry = new THREE.EdgesGeometry(base_geometry);
-                            const spiral_lines = new THREE.LineSegments(edges_geometry, edge_material);
+                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(base.edge_points)
+                            const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
                             meshes.zome_lines.add(spiral_lines);
                         }
                     }

@@ -448,6 +448,7 @@ class TrapezoidalPrism {
             return;
         }
 
+        // Unpack points
         const [A, B, C, D, E, F, G, H] = points;
 
         // Build the 6 sides of TrapezoidalPrism with Polygon
@@ -460,10 +461,12 @@ class TrapezoidalPrism {
             new Convex3DPolygon([B, D, H, F]), // Back side
         ]
 
-        // Array of THREE.Vector3 for 3D visualization
+        // Arrays of THREE.Vector3 for 3D visualization
         this.faces = [];
+        this.edge_points = []
         _.forEach(this.polygons, (fig) => {
             this.faces.push(...fig.faces);
+            this.edge_points.push(...fig.edge_points)
         });
         this.num_faces = this.faces.length
 
@@ -488,7 +491,10 @@ class Convex3DPolygon {
 
         // 3D
         this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
-        this.faces = new Array(this.num_faces);             // Array of THREE.Vector3 for 3D visualization
+
+        // Arrays of THREE.Vector3 for 3D visualization
+        this.faces = new Array(this.num_faces);
+        this.edge_points = new Array(this.num_points * 2);
 
         this.compute()
 
@@ -519,6 +525,10 @@ class Convex3DPolygon {
             // Compute angle in radians
             this.angles[i] = angle(C, A, B);
 
+            // Prepare ligne segments points
+            this.edge_points[i * 2] = new THREE.Vector3(...A);
+            this.edge_points[i * 2 + 1] = new THREE.Vector3(...B);
+
             // Compute triangles
             iF = i * 3;
             if (iF < this.num_faces) {
@@ -538,7 +548,7 @@ class Convex3DPolygon {
         const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
 
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-        const planar_points = new Array(this.num_points)
+        const planar_points = new Array(this.num_points);
         _.forEach(this.points, (A, i) => {
             // Apply the transformation for planar point
             planar_points[i] = rotate_2d(
