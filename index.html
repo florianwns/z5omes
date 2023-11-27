@@ -24,599 +24,609 @@
 
 <body class="bg-light">
 
-<div x-data="settings" @zome-renderer-is-ready.window="__make_zome"
-     class="offcanvas offcanvas-end" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false"
-     id="offcanvasSettings" aria-labelledby="settingsLabel">
-    <div class="offcanvas-body">
-        <div class="d-flex align-items-center mb-3">
-            <h5 class="text-secondary my-1 me-3">
-                <i class="fa-solid fa-rhombus me-1"></i>
-                Shape
-            </h5>
+<div x-data="settings" @zome-renderer-is-ready.window="__make_zome">
+    <div class="loading-bar" x-show="is_computing">
+        <div></div>
+    </div>
 
-            <!-- Randomize Button -->
-            <button @click="randomize" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
-                    title="Randomize settings">
-                <i class="fa-solid fa-dice"></i>
-            </button>
+    <div class="offcanvas offcanvas-end" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false"
+         id="offcanvasSettings" aria-labelledby="settingsLabel">
 
-            <!-- Reset Params Button -->
-            <button @click="reset_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
-                    title="Reset settings">
-                <i class="fa-solid fa-rotate"></i>
-            </button>
+        <div class="offcanvas-body">
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="text-secondary my-1 me-3">
+                    <i class="fa-solid fa-rhombus me-1"></i>
+                    Shape
+                </h5>
 
-            <!-- Save Params Button -->
-            <button @click="save_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
-                    title="Save settings">
-                <i class="fa-solid fa-floppy-disk"></i>
-            </button>
-
-            <!-- Copy Link -->
-            <button id="copy-url-btn" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
-                    title="Copy link">
-                <i class="fa-solid fa-link"></i>
-            </button>
-
-            <!-- Show Help -->
-            <button class="btn btn-sm p-1"
-                    @click="params.help_is_displayed = !params.help_is_displayed"
-                    :class="params.help_is_displayed ? 'text-primary' : 'text-secondary'"
-                    data-bs-toggle="tooltip" title="Display help">
-                <i class="fa-solid fa-question-circle fa-fw"></i>
-            </button>
-
-            <!-- Close Button -->
-            <button type="button" class="btn btn-sm p-1"
-                    data-bs-dismiss="offcanvas"
-                    data-bs-toggle="tooltip" title="Close">
-                <i class="fa-solid fa-close fa-fw"></i>
-            </button>
-        </div>
-
-        <div class="text-muted small aligned-form">
-            <div x-show="params.help_is_displayed">
-                <p>The shape of a <a href="https://en.wikipedia.org/wiki/Zome">zome</a> is determined by :</p>
-
-                <!-- Num of Order -->
-                <b>N</b> : Number of edges starting from the top of zome
-            </div>
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Num of order">N</span>
-                <input class="form-control form-range" max="21" min="3" step="1" type="range"
-                       x-model.number="params.num" x-ref="num_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="params.num">
-            </div>
-
-            <!-- Num of rhombus from the top -->
-            <div x-show="params.help_is_displayed"><b>M</b> : Number of <a
-                    href="https://en.wikipedia.org/wiki/Rhombus">rhombus</a> from top to bottom
-            </div>
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
-                <input class="form-control form-range" min="1" max="20" :max="params.num - 1" step="1" type="range"
-                       x-model.number="num_rhombus" x-ref="num_rhombus_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="num_rhombus">
-            </div>
-
-            <!--  Shape angle of Zome -->
-            <div x-show="params.help_is_displayed">
-                <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first crown of zome. F =
-                tan(Θ)<br>
-            </div>
-            <div class="input-group input-group-sm mb-3">
-                <button class="btn btn-primary text-start" type="button"
-                        data-bs-toggle="tooltip" title="Shape angle(Θ) | number(F) : F = tan(Θ)"
-                        @click="params.angle_unit = (params.angle_unit == 'tan') ? 'deg': 'tan'"
-                        x-text="(params.angle_unit == 'tan') ? 'F' : 'Θ'">
+                <!-- Randomize Button -->
+                <button @click="randomize" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
+                        title="Randomize settings">
+                    <i class="fa-solid fa-dice"></i>
                 </button>
-                </span>
-                <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
-                       x-model.number="params.theta_deg" x-ref="theta_deg_slider">
-                <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
-                <select class="form-select unit-select" aria-label="Angle unit"
-                        x-show="params.angle_unit != 'tan'" x-model="params.angle_unit">
-                    <option selected value="deg">deg</option>
-                    <option value="rad">rad</option>
-                    <option hidden value="tan">tan</option>
-                </select>
+
+                <!-- Reset Params Button -->
+                <button @click="reset_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
+                        title="Reset settings">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+
+                <!-- Save Params Button -->
+                <button @click="save_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
+                        title="Save settings">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+
+                <!-- Copy Link -->
+                <button id="copy-url-btn" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
+                        title="Copy link">
+                    <i class="fa-solid fa-link"></i>
+                </button>
+
+                <!-- Show Help -->
+                <button class="btn btn-sm p-1"
+                        @click="params.help_is_displayed = !params.help_is_displayed"
+                        :class="params.help_is_displayed ? 'text-primary' : 'text-secondary'"
+                        data-bs-toggle="tooltip" title="Display help">
+                    <i class="fa-solid fa-question-circle fa-fw"></i>
+                </button>
+
+                <!-- Close Button -->
+                <button type="button" class="btn btn-sm p-1"
+                        data-bs-dismiss="offcanvas"
+                        data-bs-toggle="tooltip" title="Close">
+                    <i class="fa-solid fa-close fa-fw"></i>
+                </button>
             </div>
 
-            <!-- Height Ratio of Zome -->
-            <div x-show="params.help_is_displayed">
-                <b>HR</b> : The height ratio (Set HR to 1 for an entire zome)
-            </div>
-            <div class="input-group input-group-sm mb-3">
+            <div class="text-muted small aligned-form">
+                <div x-show="params.help_is_displayed">
+                    <p>The shape of a <a href="https://en.wikipedia.org/wiki/Zome">zome</a> is determined by :</p>
+
+                    <!-- Num of Order -->
+                    <b>N</b> : Number of edges starting from the top of zome
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Num of order">N</span>
+                    <input class="form-control form-range" max="21" min="3" step="1" type="range"
+                           x-model.number="params.num" x-ref="num_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="params.num">
+                </div>
+
+                <!-- Num of rhombus from the top -->
+                <div x-show="params.help_is_displayed"><b>M</b> : Number of <a
+                        href="https://en.wikipedia.org/wiki/Rhombus">rhombus</a> from top to bottom
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
+                    <input class="form-control form-range" min="1" max="20" :max="params.num - 1" step="1" type="range"
+                           x-model.number="num_rhombus" x-ref="num_rhombus_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="num_rhombus">
+                </div>
+
+                <!--  Shape angle of Zome -->
+                <div x-show="params.help_is_displayed">
+                    <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first crown of zome. F =
+                    tan(Θ)<br>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <button class="btn btn-primary text-start" type="button"
+                            data-bs-toggle="tooltip" title="Shape angle(Θ) | number(F) : F = tan(Θ)"
+                            @click="params.angle_unit = (params.angle_unit == 'tan') ? 'deg': 'tan'"
+                            x-text="(params.angle_unit == 'tan') ? 'F' : 'Θ'">
+                    </button>
+                    </span>
+                    <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
+                           x-model.number="params.theta_deg" x-ref="theta_deg_slider">
+                    <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
+                    <select class="form-select unit-select" aria-label="Angle unit"
+                            x-show="params.angle_unit != 'tan'" x-model="params.angle_unit">
+                        <option selected value="deg">deg</option>
+                        <option value="rad">rad</option>
+                        <option hidden value="tan">tan</option>
+                    </select>
+                </div>
+
+                <!-- Height Ratio of Zome -->
+                <div x-show="params.help_is_displayed">
+                    <b>HR</b> : The height ratio (Set HR to 1 for an entire zome)
+                </div>
+                <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Height ratio">
                     HR
                 </span>
-                <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                       :min="to_decimal(2 / params.num)"
-                       x-model.number="params.height_ratio" x-ref="height_ratio_slider">
-                <input class="form-control" step="0.01" type="number"
-                       x-model.lazy.number="params.height_ratio">
-                <button class="btn btn-primary" data-bs-toggle="tooltip" title="Magnetize" type="button"
-                        :class="(params.height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
-                        @click="magnetize">
-                    <i class="fa-solid fa-magnet fa-fw"></i>
-                </button>
-            </div>
+                    <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
+                           :min="to_decimal(2 / params.num)"
+                           x-model.number="params.height_ratio" x-ref="height_ratio_slider">
+                    <input class="form-control" step="0.01" type="number"
+                           x-model.lazy.number="params.height_ratio">
+                    <button class="btn btn-primary" data-bs-toggle="tooltip" title="Magnetize" type="button"
+                            :class="(params.height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
+                            @click="magnetize">
+                        <i class="fa-solid fa-magnet fa-fw"></i>
+                    </button>
+                </div>
 
-            <!-- Kite Ratio of Zome -->
-            <div x-show="params.help_is_displayed">
-                <b>KR</b> : The kite ratio is the proportion between the length of the edges of the upper triangle
-                and that of the lower triangle of the rhombus
-            </div>
-            <div class="input-group input-group-sm mb-3">
+                <!-- Kite Ratio of Zome -->
+                <div x-show="params.help_is_displayed">
+                    <b>KR</b> : The kite ratio is the proportion between the length of the edges of the upper triangle
+                    and that of the lower triangle of the rhombus
+                </div>
+                <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Kite ratio">
                     KR
                 </span>
-                <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
-                       x-model.number="params.kite_ratio" x-ref="kite_ratio_slider">
-                <input class="form-control" step="0.01" type="number"
-                       x-model.lazy.number="params.kite_ratio">
-                <button class="btn btn-primary"
-                        data-bs-toggle="tooltip" title="Set rhombus" type="button"
-                        :class="(is_rhombus) ? 'btn-secondary' : ''"
-                        @click="is_rhombus = true">
-                    <i class="fa-solid fa-rhombus fa-fw"></i>
-                </button>
-            </div>
-        </div>
-
-        <hr>
-
-        <div class="d-flex align-items-center mb-3">
-            <h5 class="text-secondary my-1 me-auto">
-                <i class="fa-solid fa-ruler-triangle me-1"></i>
-                Skeleton Sizing
-            </h5>
-
-            <select class="form-select form-select-sm unit-select"
-                    aria-label="Length unit" x-model="params.length_unit">
-                <option value="mm">mm</option>
-                <option selected value="cm">cm</option>
-                <option value="m">m</option>
-            </select>
-        </div>
-
-        <div class="text-muted small aligned-form">
-            <!-- Height of Zome -->
-            <div x-show="params.help_is_displayed">
-                <b>ZH</b> : Zome height
-            </div>
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
-                <input class="form-control form-range" min="100" max="10000" step="10" type="range"
-                       x-model.number="params.zome_height_in_mm" x-ref="zome_height_in_mm_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="zome_height">
+                    <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
+                           x-model.number="params.kite_ratio" x-ref="kite_ratio_slider">
+                    <input class="form-control" step="0.01" type="number"
+                           x-model.lazy.number="params.kite_ratio">
+                    <button class="btn btn-primary"
+                            data-bs-toggle="tooltip" title="Set rhombus" type="button"
+                            :class="(is_rhombus) ? 'btn-secondary' : ''"
+                            @click="is_rhombus = true">
+                        <i class="fa-solid fa-rhombus fa-fw"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- Timber width -->
-            <div x-show="params.help_is_displayed">
-                <b>TW</b> : Timber width
-            </div>
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
-                <input class="form-control form-range" min="1" :max="max_timber_width" step="1" type="range"
-                       x-model.number="params.timber_width_in_mm" x-ref="timber_width_in_mm_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="timber_width">
+            <hr>
+
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="text-secondary my-1 me-auto">
+                    <i class="fa-solid fa-ruler-triangle me-1"></i>
+                    Skeleton Sizing
+                </h5>
+
+                <select class="form-select form-select-sm unit-select"
+                        aria-label="Length unit" x-model="params.length_unit">
+                    <option value="mm">mm</option>
+                    <option selected value="cm">cm</option>
+                    <option value="m">m</option>
+                </select>
             </div>
 
-            <!-- Timber thickness -->
-            <div x-show="params.help_is_displayed">
-                <b>TT</b> : Timber thickness
-            </div>
-            <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
-                <input class="form-control form-range" min="1" :max="max_timber_thickness" step="1"
-                       type="range"
-                       x-model.number="params.timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
-                <input class="form-control" step="1" type="number"
-                       x-model.lazy.number="timber_thickness">
-            </div>
+            <div class="text-muted small aligned-form">
+                <!-- Height of Zome -->
+                <div x-show="params.help_is_displayed">
+                    <b>ZH</b> : Zome height
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
+                    <input class="form-control form-range" min="100" max="10000" step="10" type="range"
+                           x-model.number="params.zome_height_in_mm" x-ref="zome_height_in_mm_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="zome_height">
+                </div>
 
-            <!-- Assembly method -->
-            <div x-show="params.help_is_displayed">
-                <b>AM</b> : Assembly method (slider) and direction (button)
-            </div>
-            <div class="input-group input-group-sm mb-3">
+                <!-- Timber width -->
+                <div x-show="params.help_is_displayed">
+                    <b>TW</b> : Timber width
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
+                    <input class="form-control form-range" min="1" :max="max_timber_width" step="1" type="range"
+                           x-model.number="params.timber_width_in_mm" x-ref="timber_width_in_mm_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="timber_width">
+                </div>
+
+                <!-- Timber thickness -->
+                <div x-show="params.help_is_displayed">
+                    <b>TT</b> : Timber thickness
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
+                    <input class="form-control form-range" min="1" :max="max_timber_thickness" step="1"
+                           type="range"
+                           x-model.number="params.timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="timber_thickness">
+                </div>
+
+                <!-- Assembly method -->
+                <div x-show="params.help_is_displayed">
+                    <b>AM</b> : Assembly method (slider) and direction (button)
+                </div>
+                <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">
                     AM
                     <i class="fa-thin"
                        :class="(params.assembly_method < 2)? `fa-arrow-down-from-line` : `fa-arrow-up-from-line`"></i>
                 </span>
-                <input class="form-control form-range" min="0" max="2" step="1" type="range"
-                       x-model.number="params.assembly_method" x-ref="assembly_method_slider">
-                <select class="form-select" aria-label="Assembly method" x-model.lazy.number="params.assembly_method">
-                    <option selected value=0>GoodKarma</option>
-                    <option value=1>Beveled Length</option>
-                    <option value=2>Outward Xpansion</option>
-                </select>
+                    <input class="form-control form-range" min="0" max="2" step="1" type="range"
+                           x-model.number="params.assembly_method" x-ref="assembly_method_slider">
+                    <select class="form-select" aria-label="Assembly method"
+                            x-model.lazy.number="params.assembly_method">
+                        <option selected value=0>GoodKarma</option>
+                        <option value=1>Beveled Length</option>
+                        <option value=2>Outward Xpansion</option>
+                    </select>
 
-                <button class="btn btn-primary" type="button"
-                        data-bs-toggle="tooltip"
-                        title="Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)"
-                        @click="params.assembly_direction = (params.assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
-                    <i class="fa-solid fa-fw"
-                       :class="ASSEMBLY_DIRECTION_ICONS[params.assembly_direction]"
-                    ></i>
-                </button>
-            </div>
-
-
-            <!-- Vanishing point -->
-            <div x-show="params.assembly_method == 0">
-                <div x-show="params.help_is_displayed">
-                    <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
-                    <input class="form-control form-range" min="0" :max="params.zome_height_in_mm" step="1"
-                           type="range" x-model.number="params.z_vanishing_point_in_mm"
-                           x-ref="z_vanishing_point_in_mm_slider">
-                    <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="z_vanishing_point">
                     <button class="btn btn-primary" type="button"
-                            data-bs-toggle="tooltip" title="Set vanishing point to vertical center of entire zome"
-                            :class="(is_vanishing_centered) ? 'btn-secondary' : ''"
-                            @click="is_vanishing_centered = true">
-                        <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
+                            data-bs-toggle="tooltip"
+                            title="Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)"
+                            @click="params.assembly_direction = (params.assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
+                        <i class="fa-solid fa-fw"
+                           :class="ASSEMBLY_DIRECTION_ICONS[params.assembly_direction]"
+                        ></i>
                     </button>
                 </div>
-            </div>
 
+
+                <!-- Vanishing point -->
+                <div x-show="params.assembly_method == 0">
+                    <div x-show="params.help_is_displayed">
+                        <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
+                        <input class="form-control form-range" min="0" :max="params.zome_height_in_mm" step="1"
+                               type="range" x-model.number="params.z_vanishing_point_in_mm"
+                               x-ref="z_vanishing_point_in_mm_slider">
+                        <input class="form-control" step="1" type="number"
+                               x-model.lazy.number="z_vanishing_point">
+                        <button class="btn btn-primary" type="button"
+                                data-bs-toggle="tooltip" title="Set vanishing point to vertical center of entire zome"
+                                :class="(is_vanishing_centered) ? 'btn-secondary' : ''"
+                                @click="is_vanishing_centered = true">
+                            <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
-</div>
 
-<div class="auto-shift position-relative">
-    <div class="container-xl row m-auto">
-        <div class="col mb-3 mt-3">
-            <div class="d-flex align-items-center">
-                <h2 id="#title" class="text-primary me-auto mb-0">
-                    <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
-                    Z<span class="fs-4">o</span>oOo<span
-                        class="fs-4">o</span>mes
-                </h2>
+    <div class="auto-shift position-relative">
+        <div class="container-xl row m-auto">
+            <div class="col mb-3 mt-3">
+                <div class="d-flex align-items-center">
+                    <h2 id="#title" class="text-primary me-auto mb-0">
+                        <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
+                        Z<span class="fs-4">o</span>oOo<span
+                            class="fs-4">o</span>mes
+                    </h2>
 
-                <a href="https://www.buymeacoffee.com/z5omes"
-                   class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip"
-                   title="Buy me a coffee ☕ if you love Z5omes 🙏">
-                    <i class="fa-solid fa-coffee"></i>
-                </a>
+                    <a href="https://www.buymeacoffee.com/z5omes"
+                       class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip"
+                       title="Buy me a coffee ☕ if you love Z5omes 🙏">
+                        <i class="fa-solid fa-coffee"></i>
+                    </a>
 
-                <a href="https://github.com/florianwns/z5omes"
-                   class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip"
-                   title="Go to Github if you have any questions">
-                    <i class="fa-brands fa-github"></i>
-                </a>
+                    <a href="https://github.com/florianwns/z5omes"
+                       class="text-primary btn btn-sm fs-4 p-2" data-bs-toggle="tooltip"
+                       title="Go to Github if you have any questions">
+                        <i class="fa-brands fa-github"></i>
+                    </a>
 
-                <a href="https://www.linkedin.com/in/florian-rey-346857185/"
-                   class="text-primary btn btn-sm fs-4 p-2 me-4" data-bs-toggle="tooltip"
-                   title="Visit my profile on Linkedin">
-                    <i class="fa-brands fa-linkedin"></i>
-                </a>
+                    <a href="https://www.linkedin.com/in/florian-rey-346857185/"
+                       class="text-primary btn btn-sm fs-4 p-2 me-4" data-bs-toggle="tooltip"
+                       title="Visit my profile on Linkedin">
+                        <i class="fa-brands fa-linkedin"></i>
+                    </a>
 
-                <button class="btn btn-primary" type="button"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
-                    <i class="fa-solid fa-sliders"></i>
-                </button>
-            </div>
+                    <button class="btn btn-primary" type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
+                </div>
 
-            <div class="d-flex flex-column">
-                <nav class="navbar mx-auto mt-2">
-                    <ul class="nav nav-pills" id="nav-tab" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab"
-                                    data-bs-target="#nav-3D"
-                                    type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
-                                <i class="fa-solid fa-chart-pyramid me-1"></i>
-                                3D View
-                            </button>
-                        </li>
-                        <li>
-                            <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab" data-bs-target="#nav-print"
-                                    type="button" role="tab" aria-controls="nav-print" aria-selected="false">
-                                <i class="fa-solid fa-print me-1"></i>
-                                Print
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="tab-content h-100 mt-3">
-                    <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
-                         tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
-                         @zome-is-made.window="process">
-                        <div class="d-flex justify-content-center">
-                            <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
-                                <!-- Export to -->
-                                <div class="ps-2 exports-container" style="top:0px;">
-                                    <div class="vstack">
+                <div class="d-flex flex-column">
+                    <nav class="navbar mx-auto mt-2">
+                        <ul class="nav nav-pills" id="nav-tab" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="nav-3D-tab" data-bs-toggle="tab"
+                                        data-bs-target="#nav-3D"
+                                        type="button" role="tab" aria-controls="nav-3D" aria-selected="true">
+                                    <i class="fa-solid fa-chart-pyramid me-1"></i>
+                                    3D View
+                                </button>
+                            </li>
+                            <li>
+                                <button class="nav-link" id="nav-print-tab" data-bs-toggle="tab"
+                                        data-bs-target="#nav-print"
+                                        type="button" role="tab" aria-controls="nav-print" aria-selected="false">
+                                    <i class="fa-solid fa-print me-1"></i>
+                                    Print
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div class="tab-content h-100 mt-3">
+                        <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
+                             tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
+                             @zome-is-made.window="process">
+                            <div class="d-flex justify-content-center">
+                                <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
+                                    <!-- Export to -->
+                                    <div class="ps-2 exports-container" style="top:0px;">
+                                        <div class="vstack">
                                         <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                               data-bs-toggle="tooltip" title="Export to STL format"
                                               @click="download_stl()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">STL</span>
                                         </span>
-                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                              data-bs-toggle="tooltip" title="Export to PLY format"
-                                              @click="download_ply()">
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip" title="Export to PLY format"
+                                                  @click="download_ply()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">PLY</span>
                                         </span>
-                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                              data-bs-toggle="tooltip" title="Export to GLTF format"
-                                              @click="download_gltf()">
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip" title="Export to GLTF format"
+                                                  @click="download_gltf()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">GLTF</span>
                                         </span>
-                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                              data-bs-toggle="tooltip" title="Export to OBJ format"
-                                              @click="download_obj()">
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip" title="Export to OBJ format"
+                                                  @click="download_obj()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">OBJ</span>
                                         </span>
-                                    </div>
-                                </div>
-
-
-                                <div class="mb-2">
-                                    <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
-                                    <select class="form-select" aria-label="Type of 3D objects"
-                                            x-model="type_of_3D_objects">
-                                        <option selected value="skeleton_spiral">Zome skeleton</option>
-                                        <option value="env_spiral">Zome envelop</option>
-                                        <option value="zomandala_spiral">Mandala</option>
-                                    </select>
-                                </div>
-                                <!-- Canvas for Zome 3D rendering -->
-                                <div x-ref="canvas" style="height:500px; cursor: move;"
-                                     class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
-
-                                <div class="d-flex flex-wrap justify-content-evenly">
-                                    <!-- Draw Vanishing Lines -->
-                                    <div class="form-check form-switch me-2 mb-3" x-show="show_vanishing_lines_switch">
-                                        <label class="form-check-label" for="draw-vanishing-lines">Vanishing
-                                            Lines</label>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                               id="draw-vanishing-lines" x-model="draw_vanishing_lines">
+                                        </div>
                                     </div>
 
-                                    <!-- Draw Axis -->
-                                    <div class="form-check form-switch me-2 mb-3">
-                                        <label class="form-check-label" for="draw-axis-switch">Axis</label>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                               id="draw-axis-switch" x-model="draw_axis">
-                                    </div>
 
-                                    <!-- Draw Zome Vertices -->
-                                    <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
-                                        <label class="form-check-label" for="draw-zome-vertices-switch">Vertices</label>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                               id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
+                                    <div class="mb-2">
+                                        <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
+                                        <select class="form-select" aria-label="Type of 3D objects"
+                                                x-model="type_of_3D_objects">
+                                            <option selected value="skeleton_spiral">Zome skeleton</option>
+                                            <option value="env_spiral">Zome envelop</option>
+                                            <option value="zomandala_spiral">Mandala</option>
+                                        </select>
                                     </div>
+                                    <!-- Canvas for Zome 3D rendering -->
+                                    <div x-ref="canvas" style="height:500px; cursor: move;"
+                                         class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
 
-                                    <!-- Spin -->
-                                    <div class="form-check form-switch mb-3">
-                                        <label class="form-check-label" for="spin-switch">Spin</label>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                               id="spin-switch" x-model="is_spinning">
+                                    <div class="d-flex flex-wrap justify-content-evenly">
+                                        <!-- Draw Vanishing Lines -->
+                                        <div class="form-check form-switch me-2 mb-3"
+                                             x-show="show_vanishing_lines_switch">
+                                            <label class="form-check-label" for="draw-vanishing-lines">Vanishing
+                                                Lines</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-vanishing-lines" x-model="draw_vanishing_lines">
+                                        </div>
+
+                                        <!-- Draw Axis -->
+                                        <div class="form-check form-switch me-2 mb-3">
+                                            <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-axis-switch" x-model="draw_axis">
+                                        </div>
+
+                                        <!-- Draw Zome Vertices -->
+                                        <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
+                                            <label class="form-check-label"
+                                                   for="draw-zome-vertices-switch">Vertices</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
+                                        </div>
+
+                                        <!-- Spin -->
+                                        <div class="form-check form-switch mb-3">
+                                            <label class="form-check-label" for="spin-switch">Spin</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="spin-switch" x-model="is_spinning">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
-                         tabindex="0"
-                         x-data="renderer_a4" @zome-is-made.window="process">
-                        <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
-                            <div class="position-relative">
-                                <!-- Export to -->
-                                <div class="ps-2 exports-container" style="top:48px;">
-                                    <div class="vstack">
+                        <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
+                             tabindex="0"
+                             x-data="renderer_a4" @zome-is-made.window="process">
+                            <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
+                                <div class="position-relative">
+                                    <!-- Export to -->
+                                    <div class="ps-2 exports-container" style="top:48px;">
+                                        <div class="vstack">
                                         <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
                                               data-bs-toggle="tooltip" title="Export to SVG format"
                                               @click="download_svg()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">SVG</span>
                                         </span>
-                                        <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                              data-bs-toggle="tooltip" title="Export to PDF format"
-                                              @click="download_pdf()">
+                                            <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                                  data-bs-toggle="tooltip" title="Export to PDF format"
+                                                  @click="download_pdf()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">PDF</span>
                                         </span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-2">
-                                    <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
-                                        <option selected value="mandala_figs">Mandala Origami</option>
-                                        <option value="spiral_figs">Spiral Origami</option>
-                                    </select>
-                                </div>
+                                    <div class="mb-2">
+                                        <select class="form-select" aria-label="Kind of drawing"
+                                                x-model="kind_of_drawing">
+                                            <option selected value="mandala_figs">Mandala Origami</option>
+                                            <option value="spiral_figs">Spiral Origami</option>
+                                        </select>
+                                    </div>
 
-                                <div class="ratio ratio-A4 bg-white rounded border position-relative">
-                                    <!-- Svg Drawing -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
-                                         viewbox="0 0 210 297" x-ref="A4_sheet">
-                                    </svg>
+                                    <div class="ratio ratio-A4 bg-white rounded border position-relative">
+                                        <!-- Svg Drawing -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                                             viewbox="0 0 210 297" x-ref="A4_sheet">
+                                        </svg>
 
-                                    <!-- Grid Drawing -->
-                                    <div class="position-absolute top-0 start-0" x-show="num_col > 1">
-                                        <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
-                                            <div class="float-start border border-top-0 border-start-0"
-                                                 :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
+                                        <!-- Grid Drawing -->
+                                        <div class="position-absolute top-0 start-0" x-show="num_col > 1">
+                                            <template x-for="(i, j) in  _.range(0, num_col * num_col )" :key="j">
+                                                <div class="float-start border border-top-0 border-start-0"
+                                                     :class="(((i + 1) % num_col == 0) ? 'border-end-0' : '')
                                                  + ((i >= num_col * (num_col - 1)) ? ' border-bottom-0' : '')"
-                                                 :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
-                                            </div>
-                                        </template>
+                                                     :style="`width: ${grid_pct}%; height: ${grid_pct}%;`">
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="input-group input-group-sm mt-2">
-                                    <!-- Draw color -->
-                                    <button class="btn btn-primary" type="button"
-                                            data-bs-toggle="tooltip"
-                                            title="Draw figure color"
-                                            :class="draw_color ? '' : 'btn-secondary'"
-                                            @click="draw_color = !draw_color">
-                                        <i class="fa-regular fa-droplet fa-fw"></i>
-                                    </button>
+                                    <div class="input-group input-group-sm mt-2">
+                                        <!-- Draw color -->
+                                        <button class="btn btn-primary" type="button"
+                                                data-bs-toggle="tooltip"
+                                                title="Draw figure color"
+                                                :class="draw_color ? '' : 'btn-secondary'"
+                                                @click="draw_color = !draw_color">
+                                            <i class="fa-regular fa-droplet fa-fw"></i>
+                                        </button>
 
-                                    <!-- Draw centroid -->
-                                    <button class="btn btn-primary" type="button"
-                                            data-bs-toggle="tooltip"
-                                            title="Draw figure centroid"
-                                            :class="draw_centroid ? '' : 'btn-secondary'"
-                                            @click="draw_centroid = !draw_centroid">
-                                        <i class="fa-regular fa-circle-dot fa-fw"></i>
-                                    </button>
+                                        <!-- Draw centroid -->
+                                        <button class="btn btn-primary" type="button"
+                                                data-bs-toggle="tooltip"
+                                                title="Draw figure centroid"
+                                                :class="draw_centroid ? '' : 'btn-secondary'"
+                                                @click="draw_centroid = !draw_centroid">
+                                            <i class="fa-regular fa-circle-dot fa-fw"></i>
+                                        </button>
 
-                                    <!-- Zoom Level -->
-                                    <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
+                                        <!-- Zoom Level -->
+                                        <span class="input-group-text" data-bs-toggle="tooltip" title="Zoom level">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </span>
-                                    <input class="form-control form-range" min="0.1" max="1" step="0.01" type="range"
-                                           x-model.number="zoom" x-ref="zoom_slider">
+                                        <input class="form-control form-range" min="0.1" max="1" step="0.01"
+                                               type="range"
+                                               x-model.number="zoom" x-ref="zoom_slider">
 
-                                    <!-- Num Col of Grid -->
-                                    <button class="btn btn-primary" type="button"
-                                            data-bs-toggle="tooltip"
-                                            title="Split the drawing into multiple A4 sheets for export to PDF"
-                                            @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
-                                        <i class="fa-regular fa-grid-2-plus fa-fw"></i>
-                                    </button>
+                                        <!-- Num Col of Grid -->
+                                        <button class="btn btn-primary" type="button"
+                                                data-bs-toggle="tooltip"
+                                                title="Split the drawing into multiple A4 sheets for export to PDF"
+                                                @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
+                                            <i class="fa-regular fa-grid-2-plus fa-fw"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
-                             style="max-height: 96px;overflow-y: auto;">
-                            <template x-for="(color, i) in bulleted_list_colors" :key="i">
-                                <div class="px-1" @click="page_index = i">
-                                    <div class="bulleted_list_item"
-                                         :class="(page_index == i)? 'active' : ''"
-                                         :style="`background-color: ${color};`"></div>
-                                </div>
-                            </template>
+                            <div class="d-flex flex-wrap justify-content-center m-2 me-auto"
+                                 style="max-height: 96px;overflow-y: auto;">
+                                <template x-for="(color, i) in bulleted_list_colors" :key="i">
+                                    <div class="px-1" @click="page_index = i">
+                                        <div class="bulleted_list_item"
+                                             :class="(page_index == i)? 'active' : ''"
+                                             :style="`background-color: ${color};`"></div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
-            <hr>
+            <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
+                <hr>
 
-            <div class="d-flex align-items-center">
-                <h5 class="text-secondary mt-4 mb-4 me-auto">
-                    <i class="fa-solid fa-ruler-triangle me-1"></i>
-                    Measurements
-                </h5>
-                <!-- CSV Button -->
-                <div>
+                <div class="d-flex align-items-center">
+                    <h5 class="text-secondary mt-4 mb-4 me-auto">
+                        <i class="fa-solid fa-ruler-triangle me-1"></i>
+                        Measurements
+                    </h5>
+                    <!-- CSV Button -->
+                    <div>
                     <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
                           title="Export to TSV format"
                           @click="download_tsv()">
                         <i class="fa-solid fa-file"></i>
                         <span class="fa-icon-file-type">TSV</span>
                     </span>
-                </div>
-                <div>
+                    </div>
+                    <div>
                     <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
                           title="Export to CSV format"
                           @click="download_csv()">
                         <i class="fa-solid fa-file"></i>
                         <span class="fa-icon-file-type">CSV</span>
                     </span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="row justify-content-between">
-                <div class="col-md-6 col-xl-5 mt-2">
-                    <ul class="list-group small">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Envelop Num Figures
-                            <span class="badge bg-info rounded-pill" x-text="envelop_num_figs"></span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Envelop Widest Ø
-                            <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Envelop Area
-                            <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
-                    <ul class="list-group small">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Base Perimeter
-                            <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Base Ø
-                            <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Base Area
-                            <span class="badge bg-info rounded-pill" x-text="base_area"></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-12 mt-3 mb-5">
-                    <div class="table-responsive border border-bottom-0 bg-white rounded">
-                        <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
-                            <thead class="bg-info text-white">
-                            <tr>
-                                <th></th>
-                                <template x-for="(obj, i) in table_column_names" :key="i">
-                                    <th x-text="obj"></th>
-                                </template>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <template x-for="(row, i) in table_rows" :key="i">
-                                <tr class="align-middle">
-                                    <td>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                             :fill="row[0].color.hex">
-                                            <polygon :points="to_svg_points(row[0], 32)"/>
-                                        </svg>
-                                    </td>
-                                    <template x-for="(value, j) in row[1]" :key="j">
-                                        <td x-text="value"></td>
+                <div class="row justify-content-between">
+                    <div class="col-md-6 col-xl-5 mt-2">
+                        <ul class="list-group small">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Envelop Num Figures
+                                <span class="badge bg-info rounded-pill" x-text="envelop_num_figs"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Envelop Widest Ø
+                                <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Envelop Area
+                                <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
+                        <ul class="list-group small">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Base Perimeter
+                                <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Base Ø
+                                <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Base Area
+                                <span class="badge bg-info rounded-pill" x-text="base_area"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-12 mt-3 mb-5">
+                        <div class="table-responsive border border-bottom-0 bg-white rounded">
+                            <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
+                                <thead class="bg-info text-white">
+                                <tr>
+                                    <th></th>
+                                    <template x-for="(obj, i) in table_column_names" :key="i">
+                                        <th x-text="obj"></th>
                                     </template>
                                 </tr>
-                            </template>
-                            </tbody>
-                            <tfoot>
-                            </tfoot>
-                        </table>
+                                </thead>
+                                <tbody>
+                                <template x-for="(row, i) in table_rows" :key="i">
+                                    <tr class="align-middle">
+                                        <td>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                                 :fill="row[0].color.hex">
+                                                <polygon :points="to_svg_points(row[0], 32)"/>
+                                            </svg>
+                                        </td>
+                                        <template x-for="(value, j) in row[1]" :key="j">
+                                            <td x-text="value"></td>
+                                        </template>
+                                    </tr>
+                                </template>
+                                </tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="toast-container position-fixed bottom-0 start-0 p-3">
-        <div id="live_toast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="toast_msg" class="me-auto">
+        <div class="toast-container position-fixed bottom-0 start-0 p-3">
+            <div id="live_toast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body" id="toast_msg" class="me-auto">
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                            aria-label="Close"></button>
                 </div>
-                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
             </div>
         </div>
     </div>
-
-
 </div>
 
 <!-- Scripts / Bootstrap 5 runs without jQuery -->
@@ -1409,8 +1419,8 @@
                     // Add the final obj mesh to the scene
                     meshes.zome_obj.rotation.y = zome_obj_rotation;
                     meshes.zome_lines.rotation.y = zome_obj_rotation;
-                    scene.add(meshes.zome_obj)
-                    scene.add(meshes.zome_lines)
+                    scene.add(meshes.zome_obj);
+                    scene.add(meshes.zome_lines);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -1532,7 +1542,7 @@
                 },
                 params_backup: null,
 
-
+                is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
 
@@ -1604,6 +1614,8 @@
                             return this.params.theta_deg;
                     }
                 },
+
+
                 set theta(angle) {
                     switch (this.params.angle_unit) {
                         case "rad":
@@ -1758,6 +1770,8 @@
                     return vertices.length - 1;
                 },
                 make_zome() {
+                    this.is_computing = true;
+
                     // Init arrays
                     let vertices = [];      // 3D point vector
                     let env_spiral = [];
@@ -2154,6 +2168,8 @@
 
                     // Dispatch zome
                     this.$dispatch('zome-is-made');
+
+                    this.is_computing = false;
                 },
             };
         });
