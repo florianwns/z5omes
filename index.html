@@ -439,7 +439,6 @@
                                     <select class="form-select" aria-label="Kind of drawing" x-model="kind_of_drawing">
                                         <option selected value="mandala_figs">Mandala Origami</option>
                                         <option value="spiral_figs">Spiral Origami</option>
-                                        <option value="figs">Figures</option>
                                     </select>
                                 </div>
 
@@ -660,7 +659,7 @@
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
-    const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
+    const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
 
@@ -806,10 +805,10 @@
                 },
                 to_svg_points(piece, size) {
                     // Recompute pixel positions
-                    const [xMin, xMax, yMin, yMax] = get_boundaries(piece.planar_points);
+                    const [xMin, xMax, yMin, yMax] = get_boundaries(piece.points);
                     const pixel_ratio = size / Math.max(piece.height, piece.width);
                     const center = size / 2;
-                    return piece.planar_points.map(p => [
+                    return piece.points.map(p => [
                         (p[0] - xMin - piece.width / 2) * pixel_ratio + center,
                         (p[1] - yMin - piece.height / 2) * pixel_ratio + center,
                     ]);
@@ -818,7 +817,6 @@
                     // Clone structure
                     const env_spiral = _.cloneDeep(ZOME.env_spiral);
                     const base = _.cloneDeep(ZOME.base);
-
                     const num_crowns = env_spiral.length;
 
                     // Resize envelop figs
@@ -826,24 +824,27 @@
                     _.forEach(env_spiral, (crown, iR) => {
                         const fig = crown.obj;
 
-                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 figs
+                        // Planar fig
+                        let planar_fig = fig.planar();
+
+                        // then Compute σ, the Dihedral angle only for the Zome envelop with at least 2 figs
                         if (num_crowns > 1) {
                             if (iR == 0) {
                                 const next_fig = env_spiral[1].obj;
-                                fig.σ = dihedral_angle(next_fig.φ, fig.ω, fig.ω);
+                                planar_fig.σ = dihedral_angle(next_fig.φ, fig.ω, fig.ω);
                             } else {
                                 const prev_fig = env_spiral[iR - 1].obj;
                                 const α = angle(fig.A, fig.B, prev_fig.B);
                                 const δ = angle(fig.A, fig.B, fig.C);
                                 const λ = angle(prev_fig.B, fig.B, fig.C);
-                                fig.σ = dihedral_angle(λ, δ, α);
+                                planar_fig.σ = dihedral_angle(λ, δ, α);
                             }
                         }
-                        envelop_figs[iR] = fig;
+                        envelop_figs[iR] = planar_fig;
                     });
 
                     // Refresh proxy
-                    this.base = base;
+                    this.base = base.planar();
                     this.envelop_figs = envelop_figs;
                 },
             };
@@ -900,7 +901,7 @@
                     // Recompute pixel positions
                     const center = size / 2;
                     const pixel_ratio = size / Math.max(piece.height, piece.width);
-                    return piece.planar_points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
+                    return piece.points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 download_pdf() {
                     // Create empty PDF document
@@ -971,9 +972,6 @@
                         case 'mandala_figs':
                             this.draw_mandala_figs();
                             break;
-                        case 'figs':
-                            this.draw_figs();
-                            break;
                     }
 
                     // Compute boundaries for all pages
@@ -985,7 +983,7 @@
 
                         // Compute boundaries of all figs
                         for (const fig of page_figs) {
-                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(fig.planar_points);
+                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(fig.points);
 
                             // Save boundaries
                             if (xPMin < xMin) xMin = xPMin;
@@ -1033,7 +1031,7 @@
                         _.forEach(page, fig => {
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
-                            points = fig.planar_points.map(p => [
+                            points = fig.points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
                             ]);
@@ -1068,25 +1066,6 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                draw_figs() {
-                    const env_spiral = _.cloneDeep(ZOME.env_spiral);
-                    const base = _.cloneDeep(ZOME.base);
-
-                    // for each color and each fig add a page
-                    const range = _.range(0, ZOME.num);
-                    for (const crown of env_spiral) {
-                        for (const i of range) {
-                            const fig = _.cloneDeep(crown.obj);
-                            fig.color = crown.colors[i];
-                            pages.push([fig]);
-                        }
-                    }
-
-                    // Add Base at last page if base exists
-                    if (base !== null) {
-                        pages.push([base]);
-                    }
-                },
                 draw_mandala_figs() {
                     const env_spiral = _.cloneDeep(ZOME.env_spiral);
                     const spiral_planar_figs = _.cloneDeep(ZOME.spiral_planar_figs);
@@ -1098,7 +1077,7 @@
                         _.forEach(spiral_planar_figs, (spiral_fig, j) => {
                             const crown = env_spiral[j];
                             const fig = _.cloneDeep(spiral_fig);
-                            fig.planar_points = fig.planar_points.map(p => rotate_2d(p, -crown.angles[i], O));
+                            fig.points = fig.points.map(p => rotate_2d(p, -crown.angles[i], O));
                             fig.color = crown.colors[i];
                             mandala_figs.push(fig)
                         });
@@ -2145,10 +2124,10 @@
                     let O = [0, 0, 0], planar_points = [];
                     let rotated_A;
                     _.forEach(env_spiral, (crown, iR) => {
-                        let fig = _.cloneDeep(crown.obj);
+                        let fig = crown.obj.planar();
 
                         // Move to Origin and rotate to match with previous piece
-                        planar_points = fig.planar_points.map(p => add(p, O));
+                        planar_points = fig.points.map(p => add(p, O));
                         if (iR > 0) {
                             a = angle(A, O, planar_points[1]);
                             rotated_A = rotate_2d(planar_points[1], a, O);
@@ -2163,13 +2142,13 @@
                         A = planar_points[planar_points.length - 2];
 
                         // Save planar figs
-                        fig.planar_points = planar_points;
+                        fig.points = planar_points;
                         spiral_planar_figs[iR] = fig;
 
                         // Adapt points for 3D view
                         zomandala_spiral.push(
                             new CircularDistribution(
-                                new ConvexPolygon(
+                                new Convex3DPolygon(
                                     planar_points.map(p => [p[0], p[2], p[1]]),
                                     fig.color,
                                 ),
