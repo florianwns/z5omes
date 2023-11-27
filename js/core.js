@@ -111,7 +111,7 @@ function cross_product(vec1, vec2) {
 
 function project(vec1, vec2) {
     // Project vec2 on vec1
-    var square2 = squared_norm(vec2, vec2);
+    const square2 = squared_norm(vec2, vec2);
     return mul(vec2, dot_product(vec1, vec2) / square2);
 }
 
@@ -204,7 +204,7 @@ function intersect(p, v, q, u) {
     const dot = dot_product(a, a)
 
     // if v and u are parallel (v x u = 0), then no intersection, return NaN point
-    if (dot == 0) {
+    if (dot === 0) {
         return [NaN, NaN, NaN];
     }
 
@@ -300,7 +300,7 @@ function hsl2rgb(h, s, l) {
     const f = n =>
         l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
     return [f(0), f(8), f(4)];
-};
+}
 
 function rgb2hex(rgb) {
     // Convert RGB color to HSL color
@@ -443,7 +443,7 @@ class CircularDistribution {
 class TrapezoidalPrism {
     constructor(points) {
         const num_points = points.length;
-        if (num_points != 8) {
+        if (num_points !== 8) {
             console.error("TrapezoidalPrism must have 8 point");
             return;
         }
