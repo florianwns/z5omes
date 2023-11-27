@@ -111,7 +111,7 @@ function cross_product(vec1, vec2) {
 
 function project(vec1, vec2) {
     // Project vec2 on vec1
-    var square2 = squared_norm(vec2, vec2);
+    const square2 = squared_norm(vec2, vec2);
     return mul(vec2, dot_product(vec1, vec2) / square2);
 }
 
@@ -204,7 +204,7 @@ function intersect(p, v, q, u) {
     const dot = dot_product(a, a)
 
     // if v and u are parallel (v x u = 0), then no intersection, return NaN point
-    if (dot == 0) {
+    if (dot === 0) {
         return [NaN, NaN, NaN];
     }
 
@@ -300,7 +300,7 @@ function hsl2rgb(h, s, l) {
     const f = n =>
         l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
     return [f(0), f(8), f(4)];
-};
+}
 
 function rgb2hex(rgb) {
     // Convert RGB color to HSL color
@@ -443,7 +443,7 @@ class CircularDistribution {
 class TrapezoidalPrism {
     constructor(points) {
         const num_points = points.length;
-        if (num_points != 8) {
+        if (num_points !== 8) {
             console.error("TrapezoidalPrism must have 8 point");
             return;
         }
@@ -452,12 +452,12 @@ class TrapezoidalPrism {
 
         // Build the 6 sides of TrapezoidalPrism with Polygon
         this.polygons = [
-            new ConvexPolygon([A, B, D, C]), // Top side
-            new ConvexPolygon([E, F, H, G]), // Bottom side
-            new ConvexPolygon([A, B, F, E]), // Left side
-            new ConvexPolygon([C, D, H, G]), // Right side
-            new ConvexPolygon([A, C, G, E]), // Front side
-            new ConvexPolygon([B, D, H, F]), // Back side
+            new Convex3DPolygon([A, B, D, C]), // Top side
+            new Convex3DPolygon([E, F, H, G]), // Bottom side
+            new Convex3DPolygon([A, B, F, E]), // Left side
+            new Convex3DPolygon([C, D, H, G]), // Right side
+            new Convex3DPolygon([A, C, G, E]), // Front side
+            new Convex3DPolygon([B, D, H, F]), // Back side
         ]
 
         // Array of THREE.Vector3 for 3D visualization
@@ -473,7 +473,7 @@ class TrapezoidalPrism {
     }
 }
 
-class ConvexPolygon {
+class Convex3DPolygon {
     constructor(points, color = null) {
         // Consider that polygon is made by triangle,
         const num_points = points.length;
@@ -486,16 +486,10 @@ class ConvexPolygon {
         this.points = points;
         this.num_points = this.points.length;
         this.angles = new Array(this.num_points);           // Array of angles in radians
-        this.edge_distances = new Array(this.num_points);   // Edges distances
-        this.perimeter = 0;                                 // Decl
-        this.area = 0;                                      // Decl
 
         // 3D
         this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
         this.faces = new Array(this.num_faces);             // Array of THREE.Vector3 for 3D visualization
-
-        // 2D
-        this.planar_points = new Array(this.num_points);    // Array of planar points [x, y, z] for 2D visualization
 
         this.compute()
 
@@ -516,15 +510,6 @@ class ConvexPolygon {
     }
 
     compute() {
-        // Make a reference to planar 3D points to 2D, Take first point like origin
-        const [O, B, C] = [this.points[0], this.points[1], this.points[this.num_points - 1]];
-        const x_ref = norm(sub(C, O));
-        const y_ref = norm(sub(sub(B, O), mul(x_ref, dot_product(sub(B, O), x_ref))));
-        const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
-        let x_min = Number.MAX_VALUE, x_max = Number.MIN_VALUE;
-        let y_min = Number.MAX_VALUE, y_max = Number.MIN_VALUE;
-        let x, y, z, ab, bd, ob, od;
-
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
         let iF = 0;
         _.forEach(this.points, (A, i) => {
@@ -532,12 +517,92 @@ class ConvexPolygon {
             const B = this.points[(i + 1) % this.num_points];
             const D = this.points[(i + 2) % this.num_points];
 
+            // Compute angle in radians
+            this.angles[i] = angle(C, A, B);
+
+            // Compute triangles
+            iF = i * 3;
+            if (iF < this.num_faces) {
+                // Faces for 3D from △ O, B, D
+                this.faces[iF] = new THREE.Vector3(...this.O)
+                this.faces[iF + 1] = new THREE.Vector3(...B)
+                this.faces[iF + 2] = new THREE.Vector3(...D)
+            }
+        });
+    }
+
+    planar(){
+        // Make a reference to planar 3D points to 2D, Take first point like origin
+        const [O, B, C] = [this.O, this.points[1], this.points[this.num_points - 1]];
+        const x_ref = norm(sub(C, O));
+        const y_ref = norm(sub(sub(B, O), mul(x_ref, dot_product(sub(B, O), x_ref))));
+        const ref_angle = Math.PI / 2 - angle(C, O, B) / 2;
+
+        // Planar Polygon to Make 2D Representation, and compute parameters in one loop
+        const planar_points = new Array(this.num_points)
+        _.forEach(this.points, (A, i) => {
             // Apply the transformation for planar point
-            [x, y, z] = rotate_2d(
+            planar_points[i] = rotate_2d(
                 [dot_product(sub(A, O), x_ref), dot_product(sub(A, O), y_ref), 0],
                 ref_angle
-            )
-            this.planar_points[i] = [x, y, z];
+            );
+        });
+        return new Convex2DPolygon(
+            planar_points,
+            this.color,
+            this.slope,
+            this.diameter,
+        );
+    }
+}
+
+
+class Convex2DPolygon {
+    constructor(points, color = null, slope = null, diameter = null) {
+        // Consider that polygon is made by triangle,
+        const num_points = points.length;
+        if (num_points < 3) {
+            console.error("Not enough points to make a polygon");
+            return;
+        }
+
+        // Init variables
+        this.points = points;
+        this.color = color;
+        this.slope = slope;
+        this.diameter = diameter;
+
+        this.num_points = this.points.length;
+        this.angles = new Array(this.num_points);           // Array of angles in radians
+        this.edge_distances = new Array(this.num_points);   // Edges distances
+        this.perimeter = 0;                                 // Decl
+        this.area = 0;
+        this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces to calculate area
+
+        this.σ = null;                                      // The dihedral angle
+        this.compute()
+    }
+
+    get O() {
+        return this.points[0];
+    }
+
+    compute() {
+        // Make a reference to planar 3D points to 2D, Take first point like origin
+        const O = this.O;
+        let x_min = Number.MAX_VALUE, x_max = Number.MIN_VALUE;
+        let y_min = Number.MAX_VALUE, y_max = Number.MIN_VALUE;
+        let x, y, z, ab, bd, ob, od;
+
+        // Compute parameters in one loop
+        let iF = 0;
+        _.forEach(this.points, (A, i) => {
+            const C = this.points[(this.num_points + i - 1) % this.num_points];
+            const B = this.points[(i + 1) % this.num_points];
+            const D = this.points[(i + 2) % this.num_points];
+
+            // Apply the transformation for planar point
+            [x, y, z] = A
 
             // Save Boundaries
             if (x < x_min) x_min = x;
@@ -556,11 +621,6 @@ class ConvexPolygon {
             // Compute triangles
             iF = i * 3;
             if (iF < this.num_faces) {
-                // Faces for 3D from △ O, B, D
-                this.faces[iF] = new THREE.Vector3(...O)
-                this.faces[iF + 1] = new THREE.Vector3(...B)
-                this.faces[iF + 2] = new THREE.Vector3(...D)
-
                 // Heron formula to compute area of the triangle
                 ob = dist(O, B);
                 bd = dist(B, D);
@@ -576,8 +636,7 @@ class ConvexPolygon {
     }
 }
 
-
-class PolygonWithHat extends ConvexPolygon {
+class PolygonWithHat extends Convex3DPolygon {
     get A() {
         return this.points[0];
     }
@@ -644,7 +703,7 @@ class TruncatedKite extends Kite {
 }
 
 
-class ZomeBase extends ConvexPolygon {
+class ZomeBase extends Convex3DPolygon {
 }
 
 

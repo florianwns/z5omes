@@ -1,0 +1,25 @@
+
+8 - Définitions des Paramètres
+N - nombre d'ordre: nombre de symétrie de révolution autour de l'axe vertical
+K - nombre de niveaux: nombre d'étages du zome en partant du sommet
+Diamètre maximal: diamètre du plan équatorial du zome
+Hauteur d'un niveau: hauteur d'un étage - identique quel que soit l'étage
+Hauteur Totale  : hauteur du zome complet
+Arête : coté d'un losange - la même pour tous les losanges du zome
+Angle de Forme: angle entre l'axe vertical du zome et une arête du sommet
+Nombre de Forme: tangente de l'angle de forme
+
+
+9 - Signification des Résultats
+Résultats par niveaux
+K: numéro de l'étage en partant du sommet
+Diagonales: diagonales du losange de la couronne "K"
+La diagonale "Hor" (horizontale) est située dans un plan parralèle au sol. Ladiagonale "Vert" (verticale) est située dans un plan vertical (contenant l'axe du zome
+Ecart: distance entre 2 cotés parralèles d'un losange
+Diam : diamètre du cercle passant par les sommets du niveau
+Surf : surface d'un losange de la couronne
+Angle "Hor": angle du losange ayant la diagonale horizontale pour bissectrice
+Angle "Vert": angle du losange ayant la diagonale verticale pour bissectrice
+Angle "Pente": angle de la diagonale verticale du losange avec le sol
+Angle "Face Sup": angle dièdre entre 2 losanges ayant une arête commune - le losange considéré et celui de la couronne située au-dessus
+NOTA - au niveau 1, l'angle "Face Sup" est l'angle entre 2 losanges de la couronne 1 ayant une arête commune
