@@ -32,7 +32,7 @@
 
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 
-* Couleur par triangle qui sont les mêmes
+* Couleur par montants qui sont les mêmes
 
 * Affichage de message :
     * Téléchargement d'un fichier 3D ou PRINT
