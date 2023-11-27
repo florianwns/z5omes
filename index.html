@@ -844,7 +844,7 @@
                     });
 
                     // Refresh proxy
-                    this.base = base.planar();
+                    this.base = (base)? base.planar(): null;
                     this.envelop_figs = envelop_figs;
                 },
             };
