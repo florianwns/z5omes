@@ -20,16 +20,20 @@
 * rajout de la méthode jeam soum 
 * Ajouter les lignes pour chaque polygone (bug sur les mediane en beveled et aussi sur zomandala)
 * Grouper les montants: abandonnée car trop lent pour le rendu
+* Fix edge line segments
 
 ## A faire 
 
 * Change le nommage des crown pour les prims
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
+  
 * Raccourci clavier à afficher
-* Construire la base (Env et Montants séparement)
+
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
+
 * Couleur par triangle qui sont les mêmes
+
 * Affichage de message :
     * Téléchargement d'un fichier 3D ou PRINT
   
