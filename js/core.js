@@ -464,7 +464,6 @@ class TrapezoidalPrism {
         this.faces = [];
         _.forEach(this.polygons, (fig) => {
             this.faces.push(...fig.faces);
-
         });
         this.num_faces = this.faces.length
 
@@ -531,7 +530,7 @@ class Convex3DPolygon {
         });
     }
 
-    planar(){
+    planar() {
         // Make a reference to planar 3D points to 2D, Take first point like origin
         const [O, B, C] = [this.O, this.points[1], this.points[this.num_points - 1]];
         const x_ref = norm(sub(C, O));

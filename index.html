@@ -844,7 +844,7 @@
                     });
 
                     // Refresh proxy
-                    this.base = (base)? base.planar(): null;
+                    this.base = (base) ? base.planar() : null;
                     this.envelop_figs = envelop_figs;
                 },
             };
@@ -1761,9 +1761,6 @@
                     // Init arrays
                     let vertices = [];      // 3D point vector
                     let env_spiral = [];
-                    let skeleton_spiral = [];
-                    let zomandala_spiral = [];
-                    let spiral_planar_figs = [];
 
                     // Config Parameters
                     const N = this.params.num;
@@ -1924,27 +1921,13 @@
                         }
                     }
 
-                    //
-                    _.forEach(env_spiral, (crown, i) => {
-                        const fig = crown.obj;
-
-                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 figs
-                        if (i === 0) {
-                            const next_fig = env_spiral[1].obj;
-                            fig.dihedral_angle = dihedral_angle(next_fig.φ, fig.ω, fig.ω);
-                        } else {
-                            const prev_fig = env_spiral[i - 1].obj;
-                            const α = angle(fig.A, fig.B, prev_fig.B);
-                            const δ = angle(fig.A, fig.B, fig.C);
-                            const λ = angle(prev_fig.B, fig.B, fig.C);
-                            fig.dihedral_angle = dihedral_angle(λ, δ, α);
-                        }
-                    });
-
                     // Compute the vanishing point depends on parameters (?)
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.params.assembly_direction;
-                    let vanishing_lines = [];
+
+                    const spiral_num_points = _.reduce(env_spiral, (num, crown) => num += crown.obj.num_points, 0);
+                    const vanishing_lines = new Array(spiral_num_points);
+                    const skeleton_spiral = new Array(spiral_num_points);
 
                     // Freeze vanishing pt
                     const vanishing_pt = [
@@ -1956,13 +1939,20 @@
                     ];
 
                     // Build Timbers using the GoodKarma assembly method
-                    _.forEach(env_spiral, (crown, j) => {
+                    let spiral_point_index = 0; //
+                    _.forEach(env_spiral, (crown) => {
                         const fig = crown.obj;
 
-                        let ccw_vecs = [], cw_vecs = [], mid_pts = [], thickness_offset_pts = [], width_offset_pts = [],
-                            horizontal_proj_vecs = [], wall_planes = [], shifted_wall_planes = [],
-                            thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec,
-                            wall_plane, shifted_wall_plane;
+                        const ccw_vecs = new Array(fig.num_points),
+                            cw_vecs = new Array(fig.num_points),
+                            mid_pts = new Array(fig.num_points),
+                            thickness_offset_pts = new Array(fig.num_points),
+                            width_offset_pts = new Array(fig.num_points),
+                            horizontal_proj_vecs = new Array(fig.num_points),
+                            wall_planes = new Array(fig.num_points),
+                            shifted_wall_planes = new Array(fig.num_points);
+
+                        let thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                         // Calculate vectors and projected points to avoid multiple calculations
                         _.forEach(fig.points, (first_pt, i) => {
@@ -2006,14 +1996,14 @@
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                             // Push vectors
-                            ccw_vecs.push(first_2_sec_vec);
-                            cw_vecs.push(first_2_prev_vec);
-                            horizontal_proj_vecs.push(horizontal_proj_vec);
+                            ccw_vecs[i] = first_2_sec_vec;
+                            cw_vecs[i] = first_2_prev_vec;
+                            horizontal_proj_vecs[i] = horizontal_proj_vec;
 
                             // Push points
-                            mid_pts.push(mid_pt);
-                            thickness_offset_pts.push(thickness_offset_pt);
-                            width_offset_pts.push(width_offset_pt);
+                            mid_pts[i] = mid_pt;
+                            thickness_offset_pts[i] = thickness_offset_pt;
+                            width_offset_pts[i] = width_offset_pt;
 
                             //Push Planes
                             switch (ASSEMBLY_METHOD) {
@@ -2021,34 +2011,29 @@
                                 case 0:
                                 case 1:
                                     // Use vanishing pt for wall
-                                    wall_planes.push(
-                                        points_2_plane(
-                                            first_pt,
-                                            mid_pt,
-                                            vanishing_pt
-                                        ),
+                                    wall_planes[i] = points_2_plane(
+                                        first_pt,
+                                        mid_pt,
+                                        vanishing_pt
                                     );
+
                                     break;
                                 // Outward Xpansion
                                 case 2:
                                     // Use vertical proj rather vanishing pt
-                                    wall_planes.push(
-                                        points_2_plane(
-                                            first_pt,
-                                            mid_pt,
-                                            point_to(mid_pt, vertical_proj_vec, 100)
-                                        ),
+                                    wall_planes[i] = points_2_plane(
+                                        first_pt,
+                                        mid_pt,
+                                        point_to(mid_pt, vertical_proj_vec, 100)
                                     );
                                     break;
                             }
 
                             // Same base for shifted wall
-                            shifted_wall_planes.push(
-                                points_2_plane(
-                                    point_to(thickness_offset_pt, first_2_sec_vec, 100),
-                                    thickness_offset_pt,
-                                    width_offset_pt,
-                                )
+                            shifted_wall_planes[i] = points_2_plane(
+                                point_to(thickness_offset_pt, first_2_sec_vec, 100),
+                                thickness_offset_pt,
+                                width_offset_pt,
                             );
                         });
 
@@ -2107,28 +2092,29 @@
                             G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
                             H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
-
-                            // Add vanishing line OK
-                            vanishing_lines.push([vanishing_pt, first_pt])
-
                             // Build a TrapezoidalPrism
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H]);
-                            skeleton_spiral.push(new CircularDistribution(timber_prism, N))
+                            skeleton_spiral[spiral_point_index] = new CircularDistribution(timber_prism, N);
+
+                            // Add vanishing line OK
+                            vanishing_lines[spiral_point_index] = [vanishing_pt, first_pt];
+                            spiral_point_index += 1;
                         });
                     });
 
-                    // Build zomandala env
-                    spiral_planar_figs = new Array(env_spiral.length);
+                    // Build spiral_planar_figs and zomandala_spiral
+                    const zomandala_spiral = new Array(env_spiral.length);
+                    const spiral_planar_figs = new Array(env_spiral.length);
 
                     // Compute envelop planar figs
                     let O = [0, 0, 0], planar_points = [];
                     let rotated_A;
-                    _.forEach(env_spiral, (crown, iR) => {
+                    _.forEach(env_spiral, (crown, i) => {
                         let fig = crown.obj.planar();
 
                         // Move to Origin and rotate to match with previous piece
                         planar_points = fig.points.map(p => add(p, O));
-                        if (iR > 0) {
+                        if (i > 0) {
                             a = angle(A, O, planar_points[1]);
                             rotated_A = rotate_2d(planar_points[1], a, O);
 
@@ -2143,18 +2129,14 @@
 
                         // Save planar figs
                         fig.points = planar_points;
-                        spiral_planar_figs[iR] = fig;
+                        spiral_planar_figs[i] = fig;
 
                         // Adapt points for 3D view
-                        zomandala_spiral.push(
-                            new CircularDistribution(
-                                new Convex3DPolygon(
-                                    planar_points.map(p => [p[0], p[2], p[1]]),
-                                    fig.color,
-                                ),
-                                N,
-                            )
+                        const polygon = new Convex3DPolygon(
+                            planar_points.map(p => [p[0], p[2], p[1]]),
+                            fig.color,
                         );
+                        zomandala_spiral[i] = new CircularDistribution(polygon, N);
                     });
 
 
