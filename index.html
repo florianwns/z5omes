@@ -1177,6 +1177,7 @@
             const meshes = {
                 "axis": null,
                 "zome_obj": null,
+                "zome_edges": null,
                 "zome_vertices": null,
                 "vanishing_lines": null,
             }
@@ -1184,7 +1185,7 @@
             return {
                 // 3D Rendering Parameters
                 is_spinning: false,
-                speed: 0.01,
+                speed: 0.001,
                 type_of_3D_objects: "skeleton_spiral",
 
                 draw_axis: true,
@@ -1294,10 +1295,10 @@
                     }
                     meshes.zome_obj = new THREE.Group();
 
-                    if (meshes.zome_skeleton instanceof THREE.Group) {
-                        scene.remove(meshes.zome_skeleton)
+                    if (meshes.zome_lines instanceof THREE.Group) {
+                        scene.remove(meshes.zome_lines)
                     }
-                    meshes.zome_skeleton = new THREE.Group();
+                    meshes.zome_lines = new THREE.Group();
 
                     if (meshes.zome_vertices instanceof THREE.Group) {
                         scene.remove(meshes.zome_vertices)
@@ -1355,10 +1356,8 @@
                     scene.add(meshes.zome_vertices);
 
                     // Use same material for all faces
-                    const material = new THREE.MeshLambertMaterial({
-                        side: THREE.DoubleSide,
-                        vertexColors: true,
-                    });
+                    const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
+                    const edge_material = new THREE.LineBasicMaterial({color: 0x000000});
 
                     // Build 3D Skeleton Faces
                     const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -1393,9 +1392,13 @@
                                 for (let iR = 0; iR < num_crowns; iR++) {
                                     face_colors[iR] = _.times(num_faces[iR], _.constant(colors[iR][iN].rgb));
                                 }
-                                rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
 
+                                rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
                                 meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
+
+                                const edges_geometry = new THREE.EdgesGeometry(rotated_spiral_geometry);
+                                const spiral_lines = new THREE.LineSegments(edges_geometry, edge_material);
+                                meshes.zome_lines.add(spiral_lines);
                             }
                         }
                     }
@@ -1405,24 +1408,30 @@
                         // Build 3D Base Faces
                         const base = ZOME.base;
                         if (base !== null) {
-                            const geometry = new THREE.BufferGeometry();
-                            geometry.setFromPoints(base.faces)
+                            const base_geometry = new THREE.BufferGeometry();
+                            base_geometry.setFromPoints(base.faces)
 
                             const face_colors = [];
                             _.forEach(base.faces, () => {
                                 face_colors.push(...base.color.rgb);
                             });
 
-                            geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                            geometry.computeVertexNormals()
+                            base_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                            base_geometry.computeVertexNormals()
 
-                            meshes.zome_obj.add(new THREE.Mesh(geometry, material))
+                            meshes.zome_obj.add(new THREE.Mesh(base_geometry, material))
+
+                            const edges_geometry = new THREE.EdgesGeometry(base_geometry);
+                            const spiral_lines = new THREE.LineSegments(edges_geometry, edge_material);
+                            meshes.zome_lines.add(spiral_lines);
                         }
                     }
 
                     // Add the final obj mesh to the scene
                     meshes.zome_obj.rotation.y = zome_obj_rotation;
+                    meshes.zome_lines.rotation.y = zome_obj_rotation;
                     scene.add(meshes.zome_obj)
+                    scene.add(meshes.zome_lines)
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -1451,6 +1460,9 @@
                         if (meshes.zome_vertices instanceof THREE.Group) {
                             meshes.zome_vertices.rotation.y -= this.speed
                         }
+                        if (meshes.zome_lines instanceof THREE.Group) {
+                            meshes.zome_lines.rotation.y -= this.speed
+                        }
                         if (meshes.vanishing_lines instanceof THREE.Group) {
                             meshes.vanishing_lines.rotation.y -= this.speed
                         }
@@ -1472,7 +1484,7 @@
                     controls.update();
                 },
                 reset() {
-                    this.speed = 0.01;
+                    this.speed = 0.001;
                     controls.reset();
                     controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
                     controls.update();

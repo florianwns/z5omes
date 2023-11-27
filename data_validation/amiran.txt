@@ -1,0 +1,16 @@
+
+Hello! I saw your post, and also commented in the zome network group. This is another opportunity for me to say thank you! I am an amateur, not from the field. I recently learned how to build a geodesic dome. I was also exposed to a zome type structure, and I fell in love with this type of structure and made it my goal to learn how to build it, and hope to soon build such a structure. But I'm still trying to figure out how it works. I did not find much information in English on the Internet. I was also exposed to your calculator, used it and was happy to see today that you updated it. But there are still things that are not clear to me and I would be happy if you could help me or direct me to another source of knowledge. What I don't understand are the angles. I found a plan online, entered the same data into your calculator and got exactly the same lengths, except for the angles.
+(But maybe I didn't understand well).
+For example, the first rhombus, all the lengths are equal in the plan and in your calculator,
+but the angles are different:
+
+35.1, 35.2, 36, 38.2, for one type of angles,
+and 1.1, 14.8, 12.3, 25.8, for the second type of angles.
+
+Your calculator shows these angles: 35.1, 144.9, 40.22, 151.39.
+
+
+Can you explain to me what I'm missing?
+How come all the lengths are equal but the angles still don't match?
+I'm sure it's something pretty small and silly but since I'm new to this,
+it's not clear to me. Hope I didn't bother you. Thanks!
