@@ -40,11 +40,14 @@ function encode_url_params(params) {
 }
 
 function small_hash(params) {
-    const param_values = _.map(params,value => {
-        switch (typeof value){
-            case 'number': return to_decimal(value);    // Trunc number
-            case 'boolean': return + value;                          // Convert to int
-            default: return value;
+    const param_values = _.map(params, value => {
+        switch (typeof value) {
+            case 'number':
+                return to_decimal(value);    // Trunc number
+            case 'boolean':
+                return +value;                          // Convert to int
+            default:
+                return value;
         }
     });
 
@@ -201,15 +204,6 @@ function triangle_area_from_points(A, B, C) {
     const s = (ab + bc + ca) / 2;
     const area = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
     return area;
-}
-
-function dihedral_angle_between_planes(plane1, plane2) {
-    // Calcul du produit scalaire des normale
-    const dot = dot_product(plane1, plane2);
-
-    // Calculation of dihedral angle in radians
-    const theta = Math.acos(dot / (len(plane1) * len(plane2)));
-    return theta
 }
 
 
@@ -422,15 +416,19 @@ function unique_arr(arr) {
 }
 
 
-function angles2color(theta = 0, beta = 0) {
-    const hue = Math.round(((4 + beta) % TAU) / TAU * 360);
-    const rgb = hsl2rgb(hue, 80, Math.min(65 + Math.abs(rad2deg(theta) / 90) * 15, 80));
+function angles2color(hue_angle = 0, saturation_angle = 0) {
+    // Magic colors, pass radian angles
+    const hue = Math.round(((4 + hue_angle) % TAU) / TAU * 360);
+    const lightness = Math.min(65 + Math.abs(rad2deg(saturation_angle) / 90) * 15, 80);
+    const saturation = 80;
+    const rgb = hsl2rgb(hue, saturation, lightness);
     return new Color(rgb);
 }
 
-function num2color(num = 0) {
-    const beta = deg2rad(num % 360);
-    return angles2color(0, beta);
+function index2color(index = 0, arr_length = 1, saturation_angle = 0) {
+    // Magic colors, with index and array length
+    const hue_angle = (index % arr_length) * TAU / arr_length;
+    return angles2color(hue_angle, saturation_angle);
 }
 
 function color_map(value, start = '#FFFFFF', end = '#000000') {
@@ -480,27 +478,6 @@ class Color {
     }
 }
 
-class CircularDistribution {
-    // Also named "crown" in code
-
-    constructor(obj, num) {
-        // Define an crown of objects (prism, triangle, kite, etc...) with N instances around the crown.
-        this.obj = obj
-
-        // Compute angles and colors
-        this.angles = new Array(num);
-        this.colors = new Array(num);
-
-        // Color depends on figure slope
-        const slope = this.obj.slope;
-        const incr_rad = TAU / num;
-        for (let i = 0; i < num; i++) {
-            const a = i * incr_rad;
-            this.angles[i] = a;
-            this.colors[i] = angles2color(slope, a);
-        }
-    }
-}
 
 class TrapezoidalPrism {
     constructor(points, color = null) {
@@ -509,6 +486,7 @@ class TrapezoidalPrism {
             console.error("TrapezoidalPrism must have 8 point");
             return;
         }
+        this.color = color;
 
         // Unpack points
         const [A, B, C, D, E, F, G, H] = points;
@@ -534,8 +512,6 @@ class TrapezoidalPrism {
         });
         this.num_faces = this.faces.length
 
-        // Hack for color
-        this.slope = this.polygons[0].slope;
     }
 }
 
@@ -567,7 +543,7 @@ class Convex3DPolygon {
         this.compute()
 
         // Compute color which depends on slope
-        this.color = color || angles2color(this.slope);
+        this.color = color || angles2color(0, this.slope);
     }
 
     get O() {
@@ -659,8 +635,6 @@ class Convex2DPolygon {
         this.perimeter = 0;                                 // Decl
         this.area = 0;
         this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces to calculate area
-
-        this.σ = null;                                      // The dihedral angle
         this.compute()
     }
 
