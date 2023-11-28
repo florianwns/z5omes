@@ -437,8 +437,8 @@ function angles2color(beta = 0, theta = 0) {
 
 function index2color(index = 0, arr_length = 1) {
     // Magic colors for Z5omes, with index and array length
-    const hue = (index % arr_length) * TAU / arr_length;
-    return angles2color(hue);
+    const beta = (index % arr_length) * TAU / arr_length;
+    return angles2color(beta);
 }
 
 function color_map(value, start = '#FFFFFF', end = '#000000') {
