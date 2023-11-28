@@ -28,8 +28,8 @@
 * Sens Inward / Outward qui remplace la méthode .... Jean Soum ?
 
   
-* Supprimer les circular distribution et utiliser des constantes de LRU Cache
-
+* Supprimer les circular distribution 
+  
 * Utiliser le LRU Cache 
 ```
 const ANGLES2COLOR_CACHE = new LRU(10);
