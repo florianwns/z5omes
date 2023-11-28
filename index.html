@@ -262,8 +262,8 @@
                     </div>
                     <div class="input-group input-group-sm mb-3">
                         <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
-                        <input class="form-control form-range" min="0" :max="params.zome_height_in_mm" step="1"
-                               type="range" x-model.number="params.z_vanishing_point_in_mm"
+                        <input class="form-control form-range" :min="min_z_vanishing_point" :max="max_z_vanishing_point"
+                               step="1" type="range" x-model.number="params.z_vanishing_point_in_mm"
                                x-ref="z_vanishing_point_in_mm_slider">
                         <input class="form-control" step="1" type="number"
                                x-model.lazy.number="z_vanishing_point">
@@ -1584,8 +1584,15 @@
                     // Refresh data related to the height
                     // if you change the zome height
                     this.$watch("params.zome_height_in_mm", (value) => {
-                        this.clamp("z_vanishing_point_in_mm", this.z_centroid);
+                        this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
                     });
+
+                    _.forEach(["height_ratio", "zome_height_in_mm"], key => {
+                        this.$watch(`params.${key}`, (value) => {
+                            this.clamp("z_vanishing_point_in_mm", this.z_centroid);
+                        });
+                    });
+
 
                     // Use ClipboardJS to copy URL
                     const clipboard = new ClipboardJS("#copy-url-btn", {
@@ -1677,7 +1684,13 @@
                     return to_decimal(from_mm(this.params.z_vanishing_point_in_mm, this.params.length_unit), FLOAT_PRECISION);
                 },
                 get z_centroid() {
-                    return Math.max(0, this.params.zome_height_in_mm - (this.params.zome_height_in_mm / this.params.height_ratio / 2))
+                    return Math.max(0, this.params.zome_height_in_mm - this.params.zome_height_in_mm / this.params.height_ratio / 2);
+                },
+                get min_z_vanishing_point() {
+                    return (this.params.height_ratio > 0.75) ? this.params.zome_height_in_mm * 0.25 : 0;
+                },
+                get max_z_vanishing_point() {
+                    return this.params.zome_height_in_mm * 0.75;
                 },
                 get is_vanishing_centered() {
                     return to_decimal(this.params.z_vanishing_point_in_mm) === to_decimal(this.z_centroid);
