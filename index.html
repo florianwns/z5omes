@@ -926,6 +926,7 @@
 
                     const size = {width: A4_width * this.num_col, height: A4_height * this.num_col};
                     const num_sheet_per_svg = this.num_col * this.num_col;
+                    const filename = this.gen_filename("_planar_figs.pdf");
 
                     _.forEach(svg_elements_per_page, (elements, iP) => {
                         // Create the svg with elements
@@ -956,7 +957,7 @@
                     doc.end();
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
-                        download(this.gen_filename("_planar_figs.pdf"), url);
+                        download(filename, url);
                     });
 
                     // Tricks because svg is empty otherwise ;)
@@ -1783,7 +1784,7 @@
                         .replaceAll('-', '')
                         .replaceAll('T', '_')
                         .replaceAll(':', '')
-                        .slice(0, 14);
+                        .slice(0, 9);
                     return `Z5omes_${date_str}N${this.params.num}${small_hash(this.params)}${suffix}`
                 },
                 add_vertex(vertices, p) {
