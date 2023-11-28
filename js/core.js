@@ -174,6 +174,15 @@ function points_2_plane(p1, p2, p3) {
     return [norm_vec[0], norm_vec[1], norm_vec[2], d]
 }
 
+function triangle_area_from_points(A, B, C){
+    // Heron formula to compute area of the triangle
+    const ab = dist(A, B);
+    const bc = dist(B, C);
+    const ca = dist(C, A);
+    const s = (ab + bc + ca) / 2;
+    const area = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
+    return area;
+}
 
 function dihedral_angle_between_planes(plane1, plane2) {
     // Calcul du produit scalaire des normale
@@ -312,6 +321,35 @@ function rgb2hex(rgb) {
 // ========== Helpers ==========
 // -----------------------------
 
+class LRU {
+    constructor(max = 100) {
+        this.max = max;
+        this.cache = new Map();
+    }
+
+    get(key) {
+        let item = this.cache.get(key);
+        if (item !== undefined) {
+            // refresh key
+            this.cache.delete(key);
+            this.cache.set(key, item);
+        }
+        return item;
+    }
+
+    set(key, val) {
+        // refresh key
+        if (this.cache.has(key)) this.cache.delete(key);
+        // evict oldest
+        else if (this.cache.size === this.max) this.cache.delete(this.first());
+        this.cache.set(key, val);
+    }
+
+    first() {
+        return this.cache.keys().next().value;
+    }
+}
+
 function humanize_distance(d, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display distances
     if (isNaN(d)) {
@@ -365,10 +403,15 @@ function unique_arr(arr) {
 }
 
 
-function angle2color(theta = 0, beta = 0) {
+function angles2color(theta = 0, beta = 0) {
     const hue = Math.round(((4 + beta) % TAU) / TAU * 360);
     const rgb = hsl2rgb(hue, 80, Math.min(65 + Math.abs(rad2deg(theta) / 90) * 15, 80));
     return new Color(rgb);
+}
+
+function num2color(num = 0) {
+    const beta = deg2rad(num % 360);
+    return angles2color(0, beta);
 }
 
 function color_map(value, start = '#FFFFFF', end = '#000000') {
@@ -435,13 +478,13 @@ class CircularDistribution {
         for (let i = 0; i < num; i++) {
             const a = i * incr_rad;
             this.angles[i] = a;
-            this.colors[i] = angle2color(slope, a);
+            this.colors[i] = angles2color(slope, a);
         }
     }
 }
 
 class TrapezoidalPrism {
-    constructor(points) {
+    constructor(points, color = null) {
         const num_points = points.length;
         if (num_points !== 8) {
             console.error("TrapezoidalPrism must have 8 point");
@@ -464,9 +507,11 @@ class TrapezoidalPrism {
         // Arrays of THREE.Vector3 for 3D visualization
         this.faces = [];
         this.edge_points = []
+        this.area = 0;               // Get area to compare prims
         _.forEach(this.polygons, (fig) => {
             this.faces.push(...fig.faces);
-            this.edge_points.push(...fig.edge_points)
+            this.edge_points.push(...fig.edge_points);
+            this.area += fig.area;
         });
         this.num_faces = this.faces.length
 
@@ -487,7 +532,11 @@ class Convex3DPolygon {
         // Init variables
         this.points = points;
         this.num_points = this.points.length;
+
+        // Measurements
+        this.area = 0;
         this.angles = new Array(this.num_points);           // Array of angles in radians
+        this.edge_distances = new Array(this.num_points);   // Edges distances
 
         // 3D
         this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
@@ -499,7 +548,7 @@ class Convex3DPolygon {
         this.compute()
 
         // Compute color which depends on slope
-        this.color = color || angle2color(this.slope);
+        this.color = color || angles2color(this.slope);
     }
 
     get O() {
@@ -516,14 +565,15 @@ class Convex3DPolygon {
 
     compute() {
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-        let iF = 0;
+        let iF = 0, bd, ob, od;
         _.forEach(this.points, (A, i) => {
             const C = this.points[(this.num_points + i - 1) % this.num_points];
             const B = this.points[(i + 1) % this.num_points];
             const D = this.points[(i + 2) % this.num_points];
 
-            // Compute angle in radians
+            // Compute angle in radians and edge distance
             this.angles[i] = angle(C, A, B);
+            this.edge_distances[i] = dist(A, B);
 
             // Prepare ligne segments points
             this.edge_points[i * 2] = new THREE.Vector3(...A);
@@ -536,6 +586,9 @@ class Convex3DPolygon {
                 this.faces[iF] = new THREE.Vector3(...this.O)
                 this.faces[iF + 1] = new THREE.Vector3(...B)
                 this.faces[iF + 2] = new THREE.Vector3(...D)
+
+                // Compute area of the triangle
+                this.area += triangle_area_from_points(this.O, B, D);
             }
         });
     }
@@ -598,10 +651,9 @@ class Convex2DPolygon {
 
     compute() {
         // Make a reference to planar 3D points to 2D, Take first point like origin
-        const O = this.O;
         let x_min = Number.MAX_VALUE, x_max = Number.MIN_VALUE;
         let y_min = Number.MAX_VALUE, y_max = Number.MIN_VALUE;
-        let x, y, z, ab, bd, ob, od;
+        let x, y, z, ab;
 
         // Compute parameters in one loop
         let iF = 0;
@@ -630,12 +682,8 @@ class Convex2DPolygon {
             // Compute triangles
             iF = i * 3;
             if (iF < this.num_faces) {
-                // Heron formula to compute area of the triangle
-                ob = dist(O, B);
-                bd = dist(B, D);
-                od = dist(O, D);
-                const s = (ob + bd + od) / 2;
-                this.area += Math.sqrt(s * (s - ob) * (s - bd) * (s - od));
+                // Compute area of the triangle
+                this.area += triangle_area_from_points(this.O, B, D);
             }
         });
 
