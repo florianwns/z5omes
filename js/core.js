@@ -40,11 +40,14 @@ function encode_url_params(params) {
 }
 
 function small_hash(params) {
-    const param_values = _.map(params,value => {
-        switch (typeof value){
-            case 'number': return to_decimal(value);    // Trunc number
-            case 'boolean': return + value;                          // Convert to int
-            default: return value;
+    const param_values = _.map(params, value => {
+        switch (typeof value) {
+            case 'number':
+                return to_decimal(value);    // Trunc number
+            case 'boolean':
+                return +value;                          // Convert to int
+            default:
+                return value;
         }
     });
 
@@ -422,15 +425,20 @@ function unique_arr(arr) {
 }
 
 
-function angles2color(theta = 0, beta = 0) {
+function angles2color(beta = 0, theta = 0) {
+    // Magic colors for Z5omes, pass radian angles
+    // beta is for hue (color base) and theta for lightness
     const hue = Math.round(((4 + beta) % TAU) / TAU * 360);
-    const rgb = hsl2rgb(hue, 80, Math.min(65 + Math.abs(rad2deg(theta) / 90) * 15, 80));
+    const lightness = Math.min(65 + Math.abs(rad2deg(theta) / 90) * 15, 80);
+    const saturation = 80;
+    const rgb = hsl2rgb(hue, saturation, lightness);
     return new Color(rgb);
 }
 
-function num2color(num = 0) {
-    const beta = deg2rad(num % 360);
-    return angles2color(0, beta);
+function index2color(index = 0, arr_length = 1) {
+    // Magic colors for Z5omes, with index and array length
+    const hue = (index % arr_length) * TAU / arr_length;
+    return angles2color(hue);
 }
 
 function color_map(value, start = '#FFFFFF', end = '#000000') {
@@ -497,7 +505,7 @@ class CircularDistribution {
         for (let i = 0; i < num; i++) {
             const a = i * incr_rad;
             this.angles[i] = a;
-            this.colors[i] = angles2color(slope, a);
+            this.colors[i] = angles2color(a, slope);
         }
     }
 }
@@ -567,7 +575,7 @@ class Convex3DPolygon {
         this.compute()
 
         // Compute color which depends on slope
-        this.color = color || angles2color(this.slope);
+        this.color = color || angles2color(0, this.slope);
     }
 
     get O() {
