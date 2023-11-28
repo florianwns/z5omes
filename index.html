@@ -956,7 +956,7 @@
                     doc.end();
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
-                        download("planar_figs.pdf", url);
+                        download(this.gen_filename("_planar_figs.pdf"), url);
                     });
 
                     // Tricks because svg is empty otherwise ;)
@@ -965,7 +965,7 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    download("planar_figs.svg", window.URL.createObjectURL(blob));
+                    download(this.gen_filename("_planar_figs.svg"), window.URL.createObjectURL(blob));
                 },
                 process() {
                     if (!is_valid_zome(ZOME)) {
@@ -1265,7 +1265,7 @@
                         (res) => {
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});
-                            download(`zome_3D.gltf`, window.URL.createObjectURL(blob));
+                            download(this.gen_filename('.gltf'), window.URL.createObjectURL(blob));
                         },
                         (error) => console.error(error),
                         {binary: false},
@@ -1275,7 +1275,7 @@
                     const exporter = new cls();
                     const str = exporter.parse(scene);
                     const blob = new Blob([str], {type: 'text/plain'});
-                    download(`zome_3D.${ext}`, window.URL.createObjectURL(blob));
+                    download(this.gen_filename(`.${ext}`), window.URL.createObjectURL(blob));
                 },
                 clear() {
                     // Clean old meshes
@@ -1587,10 +1587,6 @@
                         this.clamp("z_vanishing_point_in_mm", this.z_centroid);
                     });
 
-                    this.$watch("params.zome_height_in_mm", (value) => {
-                        this.clamp("z_vanishing_point_in_mm", this.z_centroid);
-                    });
-
                     // Use ClipboardJS to copy URL
                     const clipboard = new ClipboardJS("#copy-url-btn", {
                         text: function (trigger) {
@@ -1609,7 +1605,6 @@
                 show_error(error = null) {
                     self.show_toast("An error has occurred", "triangle-exclamation", true);
                 },
-
                 get theta() {
                     switch (this.params.angle_unit) {
                         case "rad":
@@ -1621,8 +1616,6 @@
                             return this.params.theta_deg;
                     }
                 },
-
-
                 set theta(angle) {
                     switch (this.params.angle_unit) {
                         case "rad":
@@ -1771,6 +1764,14 @@
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
                     return to_decimal((WORLD_HEIGHT - y) / polar_height);
+                },
+                gen_filename(suffix) {
+                    const date_str = new Date().toISOString()
+                        .replaceAll('-', '')
+                        .replaceAll('T', '_')
+                        .replaceAll(':', '')
+                        .slice(0, 14);
+                    return `Z5omes_${date_str}N${this.params.num}${small_hash(this.params)}${suffix}`
                 },
                 add_vertex(vertices, p) {
                     vertices.push(p);

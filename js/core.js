@@ -35,8 +35,27 @@ function decode_url_param(key) {
 }
 
 
-function encode_url_param(value) {
-    return btoa(JSON.stringify(value));
+function encode_url_params(params) {
+    return btoa(JSON.stringify(params));
+}
+
+function small_hash(params) {
+    const param_values = _.map(params,value => {
+        switch (typeof value){
+            case 'number': return to_decimal(value);    // Trunc number
+            case 'boolean': return + value;                          // Convert to int
+            default: return value;
+        }
+    });
+
+    let param_str = `${param_values}`.replaceAll('[', '')
+        .replaceAll(']', '')
+        .replaceAll(',', '')
+        .replaceAll('', '')
+
+    param_str = _.reduce(`${param_str}`, (res, c) => res += c.charCodeAt(0), 0)
+    const hash = btoa(param_str).replaceAll('=', '');
+    return hash;
 }
 
 function sync_params_from_url(params) {
@@ -68,7 +87,7 @@ function sync_url_from_params(params) {
     if (!params) return;
 
     let url = new URL(window.location.href);
-    url.searchParams.set("q", encode_url_param(params));
+    url.searchParams.set("q", encode_url_params(params));
     history.pushState(null, document.title, url.toString());
 }
 
@@ -174,7 +193,7 @@ function points_2_plane(p1, p2, p3) {
     return [norm_vec[0], norm_vec[1], norm_vec[2], d]
 }
 
-function triangle_area_from_points(A, B, C){
+function triangle_area_from_points(A, B, C) {
     // Heron formula to compute area of the triangle
     const ab = dist(A, B);
     const bc = dist(B, C);
