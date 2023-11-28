@@ -1101,8 +1101,9 @@
                     }
 
                     // Add a last page if base exists
+                    console.log(base);
                     if (base !== null) {
-                        pages.push([base]);
+                        pages.push([base.planar()]);
                     }
                 },
                 draw_spiral_figs() {
@@ -1123,7 +1124,7 @@
 
                     // Add Base at last page if base exists
                     if (base !== null) {
-                        pages.push([base]);
+                        pages.push([base.planar()]);
                     }
                 },
                 next_page() {
@@ -2150,7 +2151,7 @@
                     const zomandala_spiral = new Array(env_spiral.length);
                     const spiral_planar_figs = new Array(env_spiral.length);
 
-                    // Compute envelop planar figs
+                        // Compute envelop planar figs
                     let O = [0, 0, 0], planar_points = [];
                     let rotated_A;
                     _.forEach(env_spiral, (crown, i) => {
@@ -2182,6 +2183,10 @@
                         );
                         zomandala_spiral[i] = new CircularDistribution(polygon, N);
                     });
+                    if(base){
+                        spiral_planar_figs
+                    }
+
 
 
                     // Save Zome and dispatch it
