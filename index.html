@@ -926,7 +926,6 @@
 
                     const size = {width: A4_width * this.num_col, height: A4_height * this.num_col};
                     const num_sheet_per_svg = this.num_col * this.num_col;
-                    const filename = this.gen_filename("_planar_figs.pdf");
 
                     _.forEach(svg_elements_per_page, (elements, iP) => {
                         // Create the svg with elements
@@ -955,6 +954,8 @@
 
                     // Save document
                     doc.end();
+
+                    const filename = this.gen_filename("_planar_figs.pdf");
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
                         download(filename, url);
@@ -966,7 +967,8 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    download(this.gen_filename("_planar_figs.svg"), window.URL.createObjectURL(blob));
+                    const filename = this.gen_filename("_planar_figs.svg");
+                    download(filename, window.URL.createObjectURL(blob));
                 },
                 process() {
                     if (!is_valid_zome(ZOME)) {
@@ -1099,8 +1101,9 @@
                     }
 
                     // Add a last page if base exists
+                    console.log(base);
                     if (base !== null) {
-                        pages.push([base]);
+                        pages.push([base.planar()]);
                     }
                 },
                 draw_spiral_figs() {
@@ -1121,7 +1124,7 @@
 
                     // Add Base at last page if base exists
                     if (base !== null) {
-                        pages.push([base]);
+                        pages.push([base.planar()]);
                     }
                 },
                 next_page() {
@@ -1266,7 +1269,10 @@
                         (res) => {
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});
-                            download(this.gen_filename('.gltf'), window.URL.createObjectURL(blob));
+
+                            const suffix = this.type_of_3D_objects.replace("spiral", "3D");
+                            const filename = this.gen_filename(`_${suffix}.gltf`);
+                            download(filename, window.URL.createObjectURL(blob));
                         },
                         (error) => console.error(error),
                         {binary: false},
@@ -1276,7 +1282,10 @@
                     const exporter = new cls();
                     const str = exporter.parse(scene);
                     const blob = new Blob([str], {type: 'text/plain'});
-                    download(this.gen_filename(`.${ext}`), window.URL.createObjectURL(blob));
+
+                    const suffix = this.type_of_3D_objects.replace("spiral", "3D");
+                    const filename = this.gen_filename(`_${suffix}.${ext}`);
+                    download(filename, window.URL.createObjectURL(blob));
                 },
                 clear() {
                     // Clean old meshes
@@ -2142,7 +2151,7 @@
                     const zomandala_spiral = new Array(env_spiral.length);
                     const spiral_planar_figs = new Array(env_spiral.length);
 
-                    // Compute envelop planar figs
+                        // Compute envelop planar figs
                     let O = [0, 0, 0], planar_points = [];
                     let rotated_A;
                     _.forEach(env_spiral, (crown, i) => {
@@ -2174,6 +2183,10 @@
                         );
                         zomandala_spiral[i] = new CircularDistribution(polygon, N);
                     });
+                    if(base){
+                        spiral_planar_figs
+                    }
+
 
 
                     // Save Zome and dispatch it
