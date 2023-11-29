@@ -2162,7 +2162,7 @@
                     // Compute rotated colors
                     let rotated_colors = {};
                     _.forEach(env_spiral, (fig) => {
-                        rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => angles2color(a, fig.slope));
+                        rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                     });
 
                     // Save Zome and dispatch it

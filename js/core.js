@@ -415,29 +415,6 @@ function unique_arr(arr) {
     return [...s];
 }
 
-
-function angles2color(hue_angle = 0, saturation_angle = 0) {
-    // Magic colors, pass radian angles
-    const hue = Math.round(((4 + hue_angle) % TAU) / TAU * 360);
-    const lightness = Math.min(65 + Math.abs(rad2deg(saturation_angle) / 90) * 15, 80);
-    const saturation = 80;
-    return new Color(hue, saturation, lightness);
-}
-
-function index2color(index = 0, arr_length = 1, saturation_angle = 0) {
-    // Magic colors, with index and array length
-    const hue_angle = (index % arr_length) * TAU / arr_length;
-    return angles2color(hue_angle, saturation_angle);
-}
-
-function color_map(value, start = '#FFFFFF', end = '#000000') {
-    const ratio = Math.max(0, Math.min(1, value));
-    const r = Math.ceil(parseInt(end.substring(1, 3), 16) * ratio + parseInt(start.substring(1, 3), 16) * (1 - ratio));
-    const g = Math.ceil(parseInt(end.substring(3, 5), 16) * ratio + parseInt(start.substring(3, 5), 16) * (1 - ratio));
-    const b = Math.ceil(parseInt(end.substring(5, 7), 16) * ratio + parseInt(start.substring(5, 7), 16) * (1 - ratio));
-    return rgb2hex(r, g, b);
-}
-
 function get_boundaries(points) {
     // Compute Boundaries
     let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
@@ -470,13 +447,27 @@ function download(filename, href) {
 // -----------------------------
 
 class Color {
-    constructor(hue, saturation, lightness = 80) {
+    constructor(hue, saturation, lightness) {
         // Class to manipulate color
-        this.hue= hue;
+        this.hue = hue;
         this.saturation = saturation;
         this.lightness = lightness;
         this.rgb = hsl2rgb(hue, saturation, lightness);
         this.hex = rgb2hex(this.rgb);
+    }
+
+    static from_angles(hue_angle = 0, saturation_angle = 0) {
+        // Magic colors, pass radian angles
+        const hue = Math.round(((4 + hue_angle) % TAU) / TAU * 360);
+        const lightness = Math.min(65 + Math.abs(rad2deg(saturation_angle) / 90) * 15, 80);
+        const saturation = 80;
+        return new Color(hue, saturation, lightness);
+    }
+
+    static from_index(index = 0, arr_length = 1, saturation_angle = 0) {
+        // Magic colors, with index and array length
+        const hue_angle = (index % arr_length) * TAU / arr_length;
+        return Color.from_angles(hue_angle, saturation_angle);
     }
 }
 
@@ -513,7 +504,6 @@ class TrapezoidalPrism {
             this.area += fig.area;
         });
         this.num_faces = this.faces.length
-
     }
 }
 
@@ -544,7 +534,7 @@ class Convex3DPolygon {
 
         this.compute()
 
-        this.color = color || angles2color(0, this.slope);
+        this.color = color || Color.from_angles(0, this.slope);
     }
 
     get O() {
