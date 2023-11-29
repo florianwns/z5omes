@@ -21,14 +21,13 @@
 * Ajouter les lignes pour chaque polygone (bug sur les mediane en beveled et aussi sur zomandala)
 * Grouper les montants: abandonnée car trop lent pour le rendu
 * Fix edge line segments
+* Supprimer les circular distribution
 
 ## A faire
 
 
 * Sens Inward / Outward qui remplace la méthode .... Jean Soum ?
 
-  
-* Supprimer les circular distribution 
   
 * Utiliser le LRU Cache 
 ```
