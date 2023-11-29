@@ -32,7 +32,7 @@
 * Utiliser le LRU Cache 
 ```
 const ANGLES2COLOR_CACHE = new LRU(10);
-[Math.PI, TAU].forEach(a => ANGLES2COLOR_CACHE.set(a, Color.from_angles(a)));
+[Math.PI, TAU].forEach(a => ANGLES2COLOR_CACHE.set(a, MagicColor.from_angles(a)));
 ANGLES2COLOR_CACHE.get(TAU);
 ```
   

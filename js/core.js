@@ -446,9 +446,9 @@ function download(filename, href) {
 // ========== Classes ==========
 // -----------------------------
 
-class Color {
+class MagicColor{
     constructor(hue, saturation, lightness) {
-        // Class to manipulate color
+        // Class to create magic color
         this.hue = hue;
         this.saturation = saturation;
         this.lightness = lightness;
@@ -456,18 +456,18 @@ class Color {
         this.hex = rgb2hex(this.rgb);
     }
 
-    static from_angles(hue_angle = 0, saturation_angle = 0) {
+    static from_angles(hue_angle = 0, ligthness_angle = 0) {
         // Magic colors, pass radian angles
         const hue = Math.round(((4 + hue_angle) % TAU) / TAU * 360);
-        const lightness = Math.min(65 + Math.abs(rad2deg(saturation_angle) / 90) * 15, 80);
+        const lightness = Math.min(65 + Math.abs(rad2deg(ligthness_angle) / 90) * 15, 80);
         const saturation = 80;
-        return new Color(hue, saturation, lightness);
+        return new MagicColor(hue, saturation, lightness);
     }
-
+    
     static from_index(index = 0, arr_length = 1, saturation_angle = 0) {
         // Magic colors, with index and array length
         const hue_angle = (index % arr_length) * TAU / arr_length;
-        return Color.from_angles(hue_angle, saturation_angle);
+        return MagicColor.from_angles(hue_angle, saturation_angle);
     }
 }
 
@@ -534,7 +534,7 @@ class Convex3DPolygon {
 
         this.compute()
 
-        this.color = color || Color.from_angles(0, this.slope);
+        this.color = color || MagicColor.from_angles(0, this.slope);
     }
 
     get O() {
