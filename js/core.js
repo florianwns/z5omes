@@ -478,7 +478,7 @@ class BaseGeometry {
         this.parameters = {};
 
         // Color
-        this.color = color || new Color(0, 0, 0);
+        this.color = color;
 
         // Hash : need to cal compute_hash from children
         this.hash = null;
@@ -573,7 +573,7 @@ class Convex3DPolygon extends BaseGeometry {
 
         this.compute()
 
-        this.color = Color.from_angles(0, this.slope);
+        this.color = this.color || Color.from_angles(0, this.slope);
 
         // Compute hash to compare polygons
         this.compute_hash();
@@ -787,11 +787,20 @@ class TruncatedKite extends Kite {
 
 
 class Zome {
-    constructor({
-                    num = null, rotation_angles= null, rotated_colors= null,
-                    vertices= null, envelop_3D= null, skeleton_3D= null, mandala_envelop_3D= null, planar_envelop_2D= null,
-                    base= null, vanishing_lines= null
-                }) {
+    constructor(
+        {
+            num = null,
+            rotation_angles = null,
+            rotated_colors = null,
+            vertices = null,
+            envelop_3D = null,
+            skeleton_3D = null,
+            mandala_envelop_3D = null,
+            planar_envelop_2D = null,
+            base = null,
+            vanishing_lines = null
+        }
+    ) {
         this.num = num || 0;
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];

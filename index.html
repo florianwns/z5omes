@@ -1219,8 +1219,7 @@
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});
 
-                            const suffix = this.type_of_3D_objects.replace("spiral", "3D");
-                            const filename = this.gen_filename(`_${suffix}.gltf`);
+                            const filename = this.gen_filename(`_${this.type_of_3D_objects}.gltf`);
                             download(filename, window.URL.createObjectURL(blob));
                         },
                         (error) => console.error(error),
@@ -1232,8 +1231,7 @@
                     const str = exporter.parse(scene);
                     const blob = new Blob([str], {type: 'text/plain'});
 
-                    const suffix = this.type_of_3D_objects.replace("spiral", "3D");
-                    const filename = this.gen_filename(`_${suffix}.${ext}`);
+                    const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
                     download(filename, window.URL.createObjectURL(blob));
                 },
                 clear() {
@@ -1270,34 +1268,36 @@
                     this.show_vanishing_lines_switch = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
                         && this.type_of_3D_objects == "skeleton_3D";
+
                     this.show_vertices_switch = DEBUG
                         && ZOME.vertices
                         && ZOME.vertices.length > 0;
 
                     // Display vanishing lines
-                    if (this.show_vanishing_lines_switch && this.draw_vanishing_lines) {
+                    {
                         const material = new THREE.LineBasicMaterial({color: 0x00FFFF});
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
                             const geometry = new THREE.BufferGeometry().setFromPoints(points);
                             meshes.vanishing_lines.add(new THREE.Line(geometry, material))
-                            this.set_visibility("vanishing_lines", this.draw_vanishing_lines);
                         });
                     }
+
                     meshes.vanishing_lines.rotation.y = zome_obj_rotation;
                     scene.add(meshes.vanishing_lines);
+                    this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
 
                     // Display zome vertices
-                    if (this.show_vertices_switch && this.draw_zome_vertices) {
+                    {
                         const geometry = new THREE.BufferGeometry();
                         geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
                         const material = new THREE.PointsMaterial({color: 0x888888, size: 20});
                         meshes.zome_vertices.add(new THREE.Points(geometry, material))
-                        this.set_visibility("zome_vertices", this.draw_zome_vertices);
                     }
                     meshes.zome_vertices.rotation.y = zome_obj_rotation;
                     scene.add(meshes.zome_vertices);
+                    this.set_visibility("zome_vertices", this.show_vertices_switch && this.draw_zome_vertices);
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
@@ -1968,14 +1968,19 @@
                                 case 1:
                                 case 2:
                                     const theta = fig.angles[i];
-
-                                    const hypotenuse = TIMBER_THICKNESS / Math.sin(theta)
-                                    const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta))
+                                    const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
+                                    const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta));
                                     const pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
 
                                     thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
                                     horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
-                                    vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
+
+                                    // Add Hack to avoid issues with bad cross_products on 90° angles
+                                    if (to_decimal(theta) == to_decimal(TAU_Q)) {
+                                        vertical_proj_vec = cross_product(mul(first_2_sec_vec, -1), first_2_prev_vec);
+                                    } else {
+                                        vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
+                                    }
 
                                     // Reverse direction for outward Expansion
                                     if (ASSEMBLY_METHOD == 2) {
