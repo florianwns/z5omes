@@ -377,9 +377,9 @@
                                         <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
-                                            <option selected value="skeleton_spiral">Zome skeleton</option>
-                                            <option value="env_spiral">Zome envelop</option>
-                                            <option value="mandala_spiral">Mandala</option>
+                                            <option selected value="skeleton_3D">Zome skeleton</option>
+                                            <option value="envelop_3D">Zome envelop</option>
+                                            <option value="mandala_envelop_3D">Mandala</option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -674,24 +674,7 @@
     const DEBUG = false;
 
     // Use a global variable to store ZOME data
-    let ZOME = {
-        vertices: [],
-        env_spiral: [],
-        skeleton_spiral: [],
-        mandala_spiral: [],
-        spiral_planar_figs: [],
-        base: null,
-        vanishing_lines: [],
-        num: 0,
-    };
-
-    function is_valid_zome(obj) {
-        const hasKey = (res, key) => res && obj.hasOwnProperty(key);
-        return !(!obj || ![
-            "vertices", "env_spiral", "skeleton_spiral", "mandala_spiral",
-            "base", "vanishing_lines", "spiral_planar_figs", "num"
-        ].reduce(hasKey, true));
-    };
+    let ZOME = new Zome({});
 
     // Enable tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -805,10 +788,6 @@
                     return rows;
                 },
                 process() {
-                    if (!is_valid_zome(ZOME)) {
-                        console.error("Zome is not valid", ZOME)
-                        return;
-                    }
                     this.__to_real_world();
                 },
                 to_svg_points(piece, size) {
@@ -823,12 +802,12 @@
                 },
                 to_real_world() {
                     // Clone structure
-                    const env_spiral = ZOME.env_spiral;
-                    const num_figs = env_spiral.length;
+                    const envelop_3D = ZOME.envelop_3D;
+                    const num_figs = envelop_3D.length;
 
                     // Resize envelop figs
                     const envelop_figs = new Array(num_figs);
-                    _.forEach(env_spiral, (fig, i) => {
+                    _.forEach(envelop_3D, (fig, i) => {
                         // Planar fig
                         let planar_fig = fig.planar();
                         envelop_figs[i] = planar_fig;
@@ -952,11 +931,6 @@
                     download(filename, window.URL.createObjectURL(blob));
                 },
                 process() {
-                    if (!is_valid_zome(ZOME)) {
-                        console.error("Object is not valid", ZOME)
-                        return;
-                    }
-
                     // Init variables
                     pages = [];
                     switch (this.kind_of_drawing) {
@@ -1061,12 +1035,12 @@
                     });
                 },
                 draw_mandala_figs() {
-                    const spiral_planar_figs = ZOME.spiral_planar_figs;
+                    const planar_envelop_2D = ZOME.planar_envelop_2D;
 
                     // For each color, rotate piece around the origin
                     const mandala_figs = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(spiral_planar_figs, (spiral_fig, j) => {
+                        _.forEach(planar_envelop_2D, (spiral_fig, j) => {
                             const fig = _.cloneDeep(spiral_fig);
                             fig.points = fig.points.map(p => rotate_2d(p, -ZOME.rotation_angles[i], O));
                             fig.color = ZOME.rotated_colors[fig.color.hex][i];
@@ -1084,12 +1058,12 @@
                     }
                 },
                 draw_spiral_figs() {
-                    const spiral_planar_figs = ZOME.spiral_planar_figs;
+                    const planar_envelop_2D = ZOME.planar_envelop_2D;
 
-                    // For each color, Add a page with env_spiral figs
+                    // For each color, Add a page with envelop_3D figs
                     for (let i = 0; i < ZOME.num; i++) {
                         const colored_spiral_figs = [];
-                        _.forEach(spiral_planar_figs, (spiral_fig, j) => {
+                        _.forEach(planar_envelop_2D, (spiral_fig, j) => {
                             const fig = _.cloneDeep(spiral_fig);
                             fig.color = ZOME.rotated_colors[fig.color.hex][i];
                             colored_spiral_figs.push(fig)
@@ -1154,7 +1128,7 @@
                 // 3D Rendering Parameters
                 is_spinning: false,
                 speed: 0.001,
-                type_of_3D_objects: "skeleton_spiral",
+                type_of_3D_objects: "skeleton_3D",
 
                 draw_axis: true,
                 draw_vanishing_lines: true,
@@ -1286,10 +1260,6 @@
                 },
 
                 process() {
-                    if (!is_valid_zome(ZOME)) {
-                        console.error("Zome is not valid", ZOME)
-                        return;
-                    }
                     const zome_obj_rotation = (meshes.zome_obj instanceof THREE.Group)
                         ? meshes.zome_obj.rotation.y
                         : 0;
@@ -1299,7 +1269,7 @@
                     // Display switch buttons
                     this.show_vanishing_lines_switch = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
-                        && this.type_of_3D_objects == "skeleton_spiral";
+                        && this.type_of_3D_objects == "skeleton_3D";
                     this.show_vertices_switch = DEBUG
                         && ZOME.vertices
                         && ZOME.vertices.length > 0;
@@ -1352,7 +1322,7 @@
                                 colors[i] = ZOME.rotated_colors[obj.color.hex];
                             });
 
-                            // Build geometry of first env_spiral
+                            // Build geometry of first envelop_3D
                             const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
                             spiral_geometry.computeVertexNormals()
                             const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
@@ -1383,7 +1353,7 @@
                     }
 
                     // Draw Zome Base only if draw envelop
-                    if (this.type_of_3D_objects == "env_spiral") {
+                    if (this.type_of_3D_objects == "envelop_3D") {
                         // Build 3D Base Faces
                         const base = ZOME.base;
                         if (base !== null) {
@@ -1778,7 +1748,7 @@
 
                     // Init arrays
                     let vertices = [];      // 3D point vector
-                    let env_spiral = [];
+                    let envelop_3D = [];
 
                     // Config Parameters
                     const N = this.params.num;
@@ -1857,7 +1827,7 @@
                                 // Add only the first piece, because only color after that
                                 if (i == 0) {
                                     fig = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
-                                    env_spiral.push(fig);
+                                    envelop_3D.push(fig);
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
@@ -1878,7 +1848,7 @@
                                 // Add Truncated Kite to figs
                                 if (i == 0) {
                                     fig = new TruncatedKite([A, B, E, F, C])
-                                    env_spiral.push(fig);
+                                    envelop_3D.push(fig);
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -1918,7 +1888,7 @@
                                 // Add triangle to figs
                                 if (iT == 0) {
                                     fig = new Triangle([A, B, C]);
-                                    env_spiral.push(fig);
+                                    envelop_3D.push(fig);
                                 }
                             }
 
@@ -1935,7 +1905,7 @@
                     // Finally add the base piece
                     let base = null;
                     if (base_vertices.length >= 3) {
-                        fig = new ZomeBase(base_vertices.map(iV => vertices[iV]))
+                        fig = new Convex3DPolygon(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
                         const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
@@ -1948,9 +1918,9 @@
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.params.assembly_direction;
 
-                    const spiral_num_points = _.reduce(env_spiral, (num, fig) => num += fig.num_points, 0);
+                    const spiral_num_points = _.reduce(envelop_3D, (num, fig) => num += fig.num_points, 0);
                     const vanishing_lines = new Array(spiral_num_points);
-                    const skeleton_spiral = new Array(spiral_num_points);
+                    const skeleton_3D = new Array(spiral_num_points);
 
                     // Freeze vanishing pt
                     const vanishing_pt = [
@@ -1963,7 +1933,7 @@
 
                     // Build Timbers using the GoodKarma assembly method
                     let spiral_point_index = 0; //
-                    _.forEach(env_spiral, (fig) => {
+                    _.forEach(envelop_3D, (fig) => {
                         const ccw_vecs = new Array(fig.num_points),
                             cw_vecs = new Array(fig.num_points),
                             mid_pts = new Array(fig.num_points),
@@ -2115,7 +2085,7 @@
 
                             // Build a TrapezoidalPrism
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], fig.color);
-                            skeleton_spiral[spiral_point_index] = timber_prism;
+                            skeleton_3D[spiral_point_index] = timber_prism;
 
                             // Add vanishing line OK
                             vanishing_lines[spiral_point_index] = [vanishing_pt, first_pt];
@@ -2123,14 +2093,14 @@
                         });
                     });
 
-                    // Build spiral_planar_figs and mandala_spiral
-                    const mandala_spiral = new Array(env_spiral.length);
-                    const spiral_planar_figs = new Array(env_spiral.length);
+                    // Build planar_envelop_2D and mandala_envelop_3D
+                    const mandala_envelop_3D = new Array(envelop_3D.length);
+                    const planar_envelop_2D = new Array(envelop_3D.length);
 
                     // Compute envelop planar figs
                     let O = [0, 0, 0], planar_points = [];
                     let rotated_A;
-                    _.forEach(env_spiral, (fig, i) => {
+                    _.forEach(envelop_3D, (fig, i) => {
                         let planar_fig = fig.planar();
 
                         // Move to Origin and rotate to match with previous piece
@@ -2150,10 +2120,10 @@
 
                         // Save planar figs
                         planar_fig.points = planar_points;
-                        spiral_planar_figs[i] = planar_fig;
+                        planar_envelop_2D[i] = planar_fig;
 
                         // Adapt points for 3D view
-                        mandala_spiral[i] = new Convex3DPolygon(
+                        mandala_envelop_3D[i] = new Convex3DPolygon(
                             planar_points.map(p => [p[0], p[2], p[1]]),
                             planar_fig.color,
                         );
@@ -2161,23 +2131,23 @@
 
                     // Compute rotated colors
                     let rotated_colors = {};
-                    _.forEach(env_spiral, (fig) => {
+                    _.forEach(envelop_3D, (fig) => {
                         rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                     });
 
                     // Save Zome and dispatch it
-                    ZOME = {
+                    ZOME = new Zome({
                         num: N,
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
                         vertices: vertices,
-                        env_spiral: env_spiral,
-                        skeleton_spiral: skeleton_spiral,
-                        mandala_spiral: mandala_spiral,
-                        spiral_planar_figs: spiral_planar_figs,
+                        envelop_3D: envelop_3D,
+                        skeleton_3D: skeleton_3D,
+                        mandala_envelop_3D: mandala_envelop_3D,
+                        planar_envelop_2D: planar_envelop_2D,
                         base: base,
                         vanishing_lines: vanishing_lines,
-                    }
+                    });
 
                     // Dispatch zome
                     this.$dispatch('zome-is-made');

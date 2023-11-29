@@ -5,8 +5,6 @@
 // * "fig" is a polygon/figure
 // * "faces" are the division of a figure into triangles for 3D representation
 // * "vertices", "point" or "vector" are just 3D point array [x, y, z]
-// * "crown" is a circular distribution to avoid multiple creation of objects
-// * "spiral" is a spiral of circular distribution, like a zome without the base
 // * "base" is the last figure which close the zome
 // * "vector" is a direction
 // * "segment" is an array of two points
@@ -489,7 +487,7 @@ class BaseGeometry {
     compute_hash() {
         // Sort parameters to compare symmetric geometry
         this.parameters = {
-            area:  to_decimal(this.area, FLOAT_2_STR_PRECISION),
+            area: to_decimal(this.area, FLOAT_2_STR_PRECISION),
             angles: _.sortBy(
                 _.map(this.angles, (a) => to_decimal(a, FLOAT_2_STR_PRECISION))
             ),
@@ -575,7 +573,7 @@ class Convex3DPolygon extends BaseGeometry {
 
         this.compute()
 
-        this.color = this.color || Color.from_angles(0, this.slope);
+        this.color = Color.from_angles(0, this.slope);
 
         // Compute hash to compare polygons
         this.compute_hash();
@@ -788,7 +786,22 @@ class TruncatedKite extends Kite {
 }
 
 
-class ZomeBase extends Convex3DPolygon {
+class Zome {
+    constructor({
+                    num = null, rotation_angles= null, rotated_colors= null,
+                    vertices= null, envelop_3D= null, skeleton_3D= null, mandala_envelop_3D= null, planar_envelop_2D= null,
+                    base= null, vanishing_lines= null
+                }) {
+        this.num = num || 0;
+        this.rotation_angles = rotation_angles || [];
+        this.rotated_colors = rotated_colors || [];
+        this.vertices = vertices || [];
+        this.envelop_3D = envelop_3D || [];
+        this.skeleton_3D = skeleton_3D || [];
+        this.mandala_envelop_3D = mandala_envelop_3D || [];
+        this.planar_envelop_2D = planar_envelop_2D || [];
+        this.base = base || null;
+        this.vanishing_lines = vanishing_lines || [];
+    }
 }
-
 
