@@ -1396,10 +1396,10 @@
                     return new THREE.Vector3(0, WORLD_HEIGHT * 0.5, WORLD_HEIGHT * 1.5);
                 },
                 get down() {
-                    return new THREE.Vector3(0, -WORLD_HEIGHT * 1.20, 0);
+                    return new THREE.Vector3(0, -WORLD_HEIGHT * 2, 0);
                 },
                 get up() {
-                    return new THREE.Vector3(0, WORLD_HEIGHT * 1.50, 0);
+                    return new THREE.Vector3(0, WORLD_HEIGHT * 2, 0);
                 },
                 get home() {
                     const axis = new THREE.Vector3(0, 1, 0);
@@ -1456,9 +1456,21 @@
                         case " ":
                             this.is_spinning = !this.is_spinning;
                             break;
+                        case "e":
+                        case "E":
+                            this.type_of_3D_objects = "envelop_3D";
+                            break;
                         case "h":
                         case "H":
                             this.reset();
+                            break;
+                        case "m":
+                        case "M":
+                            this.type_of_3D_objects = "mandala_envelop_3D";
+                            break;
+                        case "s":
+                        case "S":
+                            this.type_of_3D_objects = "skeleton_3D";
                             break;
                         case "Down":
                         case "ArrowDown":
