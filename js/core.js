@@ -27,7 +27,7 @@ const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", 
 // ========== URL Params ==========
 // --------------------------------
 
-function decode_url_param(key) {
+function decode_url_params(key) {
     const url = new URLSearchParams(window.location.search);
     const query_param = url.get(key)
     const decoded_params = (query_param) ? JSON.parse(atob(url.get("q"))) : {};
@@ -35,7 +35,7 @@ function decode_url_param(key) {
 }
 
 
-function encode_url_params(params) {
+function encode_params(params) {
     return btoa(JSON.stringify(params));
 }
 
@@ -62,7 +62,7 @@ function small_hash(params) {
 }
 
 function sync_params_from_url(params) {
-    const decoded_params = decode_url_param("q")
+    const decoded_params = decode_url_params("q")
 
     // Merge params with decoded params
     if (decoded_params) {
@@ -79,7 +79,7 @@ function sync_params_from_url(params) {
 function sync_url_from_param(key, value) {
     if (!key) return;
 
-    const decoded_params = decode_url_param("q")
+    const decoded_params = decode_url_params("q")
     decoded_params[key] = value;
 
     sync_url_from_params(decoded_params)
@@ -90,7 +90,7 @@ function sync_url_from_params(params) {
     if (!params) return;
 
     let url = new URL(window.location.href);
-    url.searchParams.set("q", encode_url_params(params));
+    url.searchParams.set("q", encode_params(params));
     history.pushState(null, document.title, url.toString());
 }
 
@@ -446,7 +446,7 @@ function download(filename, href) {
 // ========== Classes ==========
 // -----------------------------
 
-class MagicColor{
+class Color {
     constructor(hue, saturation, lightness) {
         // Class to create magic color
         this.hue = hue;
@@ -461,25 +461,58 @@ class MagicColor{
         const hue = Math.round(((4 + hue_angle) % TAU) / TAU * 360);
         const lightness = Math.min(65 + Math.abs(rad2deg(ligthness_angle) / 90) * 15, 80);
         const saturation = 80;
-        return new MagicColor(hue, saturation, lightness);
+        return new Color(hue, saturation, lightness);
     }
-    
+
     static from_index(index = 0, arr_length = 1, saturation_angle = 0) {
         // Magic colors, with index and array length
         const hue_angle = (index % arr_length) * TAU / arr_length;
-        return MagicColor.from_angles(hue_angle, saturation_angle);
+        return Color.from_angles(hue_angle, saturation_angle);
     }
 }
 
+class BaseGeometry {
+    constructor(color = null) {
+        // Parameters to compare geometry
+        this.area = 0;
+        this.angles = [];
+        this.edge_distances = [];
+        this.parameters = {};
 
-class TrapezoidalPrism {
+        // Color
+        this.color = color || new Color(0, 0, 0);
+
+        // Hash : need to cal compute_hash from children
+        this.hash = null;
+    }
+
+    compute_hash() {
+        // Sort parameters to compare symmetric geometry
+        this.parameters = {
+            area:  to_decimal(this.area, FLOAT_2_STR_PRECISION),
+            angles: _.sortBy(
+                _.map(this.angles, (a) => to_decimal(a, FLOAT_2_STR_PRECISION))
+            ),
+            edge_distances: _.sortBy(
+                _.map(this.edge_distances, (d) => to_decimal(d, FLOAT_2_STR_PRECISION))
+            ),
+        };
+
+        // Sort parameters to compare geometries
+        this.hash = encode_params(this.parameters);
+    }
+}
+
+class TrapezoidalPrism extends BaseGeometry {
     constructor(points, color = null) {
         const num_points = points.length;
         if (num_points !== 8) {
             console.error("TrapezoidalPrism must have 8 point");
             return;
         }
-        this.color = color;
+
+        // Call parent constructor
+        super(color);
 
         // Unpack points
         const [A, B, C, D, E, F, G, H] = points;
@@ -497,17 +530,22 @@ class TrapezoidalPrism {
         // Arrays of THREE.Vector3 for 3D visualization
         this.faces = [];
         this.edge_points = []
-        this.area = 0;               // Get area to compare prims
+
         _.forEach(this.polygons, (fig) => {
             this.faces.push(...fig.faces);
             this.edge_points.push(...fig.edge_points);
             this.area += fig.area;
+            this.angles.push(...fig.angles);
+            this.edge_distances.push(...fig.edge_distances);
         });
         this.num_faces = this.faces.length
+
+        // Compute hash to compare prims
+        this.compute_hash();
     }
 }
 
-class Convex3DPolygon {
+class Convex3DPolygon extends BaseGeometry {
     constructor(points, color = null) {
         // Consider that polygon is made by triangle,
         const num_points = points.length;
@@ -516,14 +554,17 @@ class Convex3DPolygon {
             return;
         }
 
+        // Call parent constructor
+        super(color);
+
         // Init variables
         this.points = points;
         this.num_points = this.points.length;
 
         // Measurements
         this.area = 0;
-        this.angles = new Array(this.num_points);           // Array of angles in radians
-        this.edge_distances = new Array(this.num_points);   // Edges distances
+        this.angles = new Array(this.num_points);               // Array of angles in radians
+        this.edge_distances = new Array(this.num_points);       // Edges distances
 
         // 3D
         this.num_faces = 3 * (this.num_points - 2);         // Compute number of faces of a polygon for 3D visualization
@@ -534,7 +575,10 @@ class Convex3DPolygon {
 
         this.compute()
 
-        this.color = color || MagicColor.from_angles(0, this.slope);
+        this.color = this.color || Color.from_angles(0, this.slope);
+
+        // Compute hash to compare polygons
+        this.compute_hash();
     }
 
     get O() {
