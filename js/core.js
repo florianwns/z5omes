@@ -20,7 +20,6 @@ const FLOAT_2_STR_PRECISION = 2;
 
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
-
 // --------------------------------
 // ========== URL Params ==========
 // --------------------------------
@@ -462,12 +461,15 @@ class Color {
         return new Color(hue, saturation, lightness);
     }
 
-    static from_index(index = 0, arr_length = 1, lightness_angle = 0) {
+    static from_index(index, arr_length, lightness_angle = 0) {
         // Magic colors, with index and array length
         const hue_angle = (index % arr_length) * TAU / arr_length;
         return Color.from_angles(hue_angle, lightness_angle);
     }
 }
+
+const COLOR_BASE = Color.from_angles(0, 0);
+
 
 class BaseGeometry {
     constructor(color = null) {
@@ -478,7 +480,7 @@ class BaseGeometry {
         this.parameters = {};
 
         // Color
-        this.color = color;
+        this.color = color || COLOR_BASE;
 
         // Hash : need to cal compute_hash from children
         this.hash = null;
@@ -572,8 +574,6 @@ class Convex3DPolygon extends BaseGeometry {
         this.edge_points = new Array(this.num_points * 2);
 
         this.compute()
-
-        this.color = this.color || Color.from_angles(0, this.slope);
 
         // Compute hash to compare polygons
         this.compute_hash();

@@ -174,10 +174,18 @@
             <hr>
 
             <div class="d-flex align-items-center mb-3">
-                <h5 class="text-secondary my-1 me-auto">
+                <h5 class="text-secondary my-1 me-3">
                     <i class="fa-solid fa-ruler-triangle me-1"></i>
-                    Skeleton Sizing
+                    Skeleton
                 </h5>
+
+                <!-- Paint Button -->
+                <button @click="params.paint_similar_pieces = !params.paint_similar_pieces"
+                        class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
+                        title="Paint similar pieces (paintbrush) / colored spirals (paint roller) ">
+                    <i class="fa-solid" :class="(params.paint_similar_pieces)? `fa-paintbrush` : `fa-paint-roller`"></i>
+                </button>
+
 
                 <select class="form-select form-select-sm unit-select"
                         aria-label="Length unit" x-model="params.length_unit">
@@ -1499,6 +1507,7 @@
 
                     // Commons parameters
                     help_is_displayed: false,
+                    paint_similar_pieces: false,
                 },
                 params_backup: null,
 
@@ -2098,6 +2107,46 @@
                         });
                     });
 
+                    // 🎨 Build rotated colors
+                    let rotated_colors = {};
+                    const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
+                    const grouped_skeleton_prisms = _.groupBy(skeleton_3D, (fig) => fig.hash);
+                    const grouped_env_polygons = _.groupBy(envelop_3D, (fig) => fig.hash);
+
+                    if (PAINT_SIMILAR_PIECES) {
+                        // Compute colors by hash
+                        const color_by_hash = {};
+
+                        const grouped_figures = _.merge(grouped_skeleton_prisms, grouped_env_polygons);
+                        const num_groups = Object.keys(grouped_figures).length;
+                        let group_index = 0;
+                        _.forIn(grouped_figures, (group, key) => {
+                            const color = Color.from_index(group_index, num_groups);
+                            color_by_hash[key] = color;
+                            rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
+                            group_index++;
+                        });
+
+                        _.forEach(envelop_3D, (fig) => {
+                            fig.color = color_by_hash[fig.hash]
+                        });
+
+                        _.forEach(skeleton_3D, (fig) => {
+                            fig.color = color_by_hash[fig.hash]
+                        });
+                    } else {
+                        // Paint colored spirals
+                        _.forEach(envelop_3D, (fig) => {
+                            fig.color = Color.from_angles(a, fig.slope)
+                            rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
+                        });
+
+                        _.forEach(skeleton_3D, (fig) => {
+                            fig.color = Color.from_angles(a, fig.slope)
+                            rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
+                        });
+                    }
+
                     // Build planar_envelop_2D and mandala_envelop_3D
                     const mandala_envelop_3D = new Array(envelop_3D.length);
                     const planar_envelop_2D = new Array(envelop_3D.length);
@@ -2132,12 +2181,6 @@
                             planar_points.map(p => [p[0], p[2], p[1]]),
                             planar_fig.color,
                         );
-                    });
-
-                    // Compute rotated colors
-                    let rotated_colors = {};
-                    _.forEach(envelop_3D, (fig) => {
-                        rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                     });
 
                     // Save Zome and dispatch it
