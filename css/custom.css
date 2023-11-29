@@ -182,3 +182,7 @@
 .toast{
     width: auto !important;
 }
+
+.rotate-45{
+    transform: rotate(45deg);
+}
