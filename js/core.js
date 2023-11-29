@@ -421,8 +421,7 @@ function angles2color(hue_angle = 0, saturation_angle = 0) {
     const hue = Math.round(((4 + hue_angle) % TAU) / TAU * 360);
     const lightness = Math.min(65 + Math.abs(rad2deg(saturation_angle) / 90) * 15, 80);
     const saturation = 80;
-    const rgb = hsl2rgb(hue, saturation, lightness);
-    return new Color(rgb);
+    return new Color(hue, saturation, lightness);
 }
 
 function index2color(index = 0, arr_length = 1, saturation_angle = 0) {
@@ -471,10 +470,13 @@ function download(filename, href) {
 // -----------------------------
 
 class Color {
-    constructor(rgb) {
-        // Consider that polygon is made by triangle,
-        this.rgb = rgb;
-        this.hex = rgb2hex(rgb);
+    constructor(hue, saturation, lightness = 80) {
+        // Class to manipulate color
+        this.hue= hue;
+        this.saturation = saturation;
+        this.lightness = lightness;
+        this.rgb = hsl2rgb(hue, saturation, lightness);
+        this.hex = rgb2hex(this.rgb);
     }
 }
 
@@ -542,7 +544,6 @@ class Convex3DPolygon {
 
         this.compute()
 
-        // Compute color which depends on slope
         this.color = color || angles2color(0, this.slope);
     }
 
