@@ -32,15 +32,18 @@
 * Utiliser le LRU Cache 
 ```
 const ANGLES2COLOR_CACHE = new LRU(10);
-[Math.PI, TAU].forEach(a => ANGLES2COLOR_CACHE.set(a, angles2color(a)));
+[Math.PI, TAU].forEach(a => ANGLES2COLOR_CACHE.set(a, Color.from_angles(a)));
 ANGLES2COLOR_CACHE.get(TAU);
 ```
   
 * Grouper les montants (en fonction de leur aire / simple)
 
 ```js
-const grouped_skeleton_prisms = _.groupBy(skeleton_spiral, (crown) => to_decimal(crown.obj.area, FLOAT_2_STR_PRECISION));
+const grouped_skeleton_prisms = _.groupBy(skeleton_3D, (fig) => fig.hash);
 console.log(grouped_skeleton_prisms);
+
+const grouped_env_polygons = _.groupBy(envelop_3D, (fig) => fig.hash);
+console.log(grouped_env_polygons);
 ```
   
 * Attribuer les couleurs en fonction du hash/area : num2color
@@ -48,7 +51,7 @@ console.log(grouped_skeleton_prisms);
 * Option des couleurs : Slope/Rotation Angle or Group by Area
 
   // Group polygons by hash
-  const grouped_env_polygons = _.groupBy(env_spiral, (crown) => to_decimal(crown.obj.area, FLOAT_2_STR_PRECISION));
+  const grouped_env_polygons = _.groupBy(envelop_3D, (crown) => to_decimal(crown.obj.area, FLOAT_2_STR_PRECISION));
   console.log(grouped_env_polygons);
 
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
