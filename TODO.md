@@ -31,6 +31,8 @@
 
 ## A faire
 
+* essayer de réparer la méthode beveled ou d'en créer une autre
+  
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
   * Commencer à dessiner la premier polygone (vue de dessus)
   * La hauteur du dessin est fixe
