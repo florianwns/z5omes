@@ -175,8 +175,8 @@
 
             <div class="d-flex align-items-center mb-3">
                 <h5 class="text-secondary my-1 me-3">
-                    <i class="fa-solid fa-ruler-triangle me-1"></i>
-                    Skeleton
+                    <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                    Framework
                 </h5>
 
                 <!-- Paint Button -->
@@ -185,7 +185,6 @@
                         title="Paint similar pieces (paintbrush) / colored spirals (paint roller) ">
                     <i class="fa-solid" :class="(params.paint_similar_pieces)? `fa-paintbrush` : `fa-paint-roller`"></i>
                 </button>
-
 
                 <select class="form-select form-select-sm unit-select"
                         aria-label="Length unit" x-model="params.length_unit">
@@ -346,7 +345,7 @@
                     </nav>
                     <div class="tab-content h-100 mt-3">
                         <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
-                             tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
+                             tabindex="0" x-data="renderer_3D" @resize.window="__auto_size"
                              @zome-is-made.window="process">
                             <div class="d-flex justify-content-center">
                                 <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
@@ -385,14 +384,115 @@
                                         <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
-                                            <option selected value="skeleton_3D">Zome skeleton</option>
-                                            <option value="envelop_3D">Zome envelop</option>
-                                            <option value="mandala_envelop_3D">Mandala</option>
+                                            <option selected value="skeleton_3D">3D Skeleton</option>
+                                            <option value="envelop_3D">3D Envelop</option>
+                                            <option value="mandala_envelop_3D">3D Mandala</option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
-                                    <div x-ref="canvas" style="height:500px; cursor: move;"
-                                         class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
+                                    <div x-ref="canvas_3D_container" class="position-relative">
+                                        <div x-ref="canvas_3D" style="min-height:500px; cursor: move;"
+                                             :style="(is_fullscreen)? `height:100%;` : `height:500px;`"
+                                             class="shadow bg-dark rounded mb-2 overflow-hidden">
+                                        </div>
+                                        <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-2">
+                                            <!-- Keyboard shortcuts -->
+                                            <button class="btn btn-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#shortcuts-modal">
+                                                <i class="fa-solid fa-keyboard"></i>
+                                            </button>
+
+                                            <!-- Fullscreen Toggle btn -->
+                                            <button class="btn btn-primary"
+                                                    x-show="can_use_screenfull"
+                                                    @click="toggle_fullscreen"
+                                                    data-bs-toggle="tooltip" title="Fullscreen">
+                                                <i class="fa fa-expand"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Keyboard shortcuts Modal -->
+                                        <div class="modal fade" id="shortcuts-modal" tabindex="-1"
+                                             aria-labelledby="shortcuts-modal-title" aria-hidden="true">
+                                            <div class="modal-dialog modal-sm mt-2 me-2">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="text-secondary my-1 me-3" id="shortcuts-modal-title">
+                                                            <i class="fa-solid fa-keyboard me-1"></i>
+                                                            Keyboard shorcuts
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <ul class="keyboard-shorcut-list small text-muted">
+                                                            <!-- Object selection -->
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('S')">S
+                                                                </button>
+                                                                <span>Select <b>3D Skeleton</b> object</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('E')">E
+                                                                </button>
+                                                                <span>Select <b>3D Envelop</b> object</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('M')">M
+                                                                </button>
+                                                                <span>Select <b>3D Mandala</b> object</span>
+                                                            </li>
+
+                                                            <!-- Camera view -->
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('H')">H
+                                                                </button>
+                                                                <span>Reset camera view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Left')">←
+                                                                </button>
+                                                                <span>Left side view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Up')">↑
+                                                                </button>
+                                                                <span>Top view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Right')">→
+                                                                </button>
+                                                                <span>Right side view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Down')">↓
+                                                                </button>
+                                                                <span>Bottom view</span>
+                                                            </li>
+
+                                                            <!-- Object rotation -->
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key key-space me-2"
+                                                                        @click="keydown(' ')"></button>
+                                                                <span>Spin on/off</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('*')">*
+                                                                </button>
+                                                                <span>Increase rotation speed</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('/')">/
+                                                                </button>
+                                                                <span>Decrease rotation speed</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="d-flex flex-wrap justify-content-evenly">
                                         <!-- Draw Vanishing Lines -->
@@ -455,8 +555,8 @@
                                     <div class="mb-2">
                                         <select class="form-select" aria-label="Kind of drawing"
                                                 x-model="kind_of_drawing">
-                                            <option selected value="mandala_figs">Mandala Origami</option>
-                                            <option value="spiral_figs">Spiral Origami</option>
+                                            <option selected value="mandala_figs">Origami Mandala</option>
+                                            <option value="spiral_figs">Origami Spirals</option>
                                         </select>
                                     </div>
 
@@ -669,6 +769,9 @@
 <!-- Clipboard JS -->
 <script src="js/clipboard.min.js"></script>
 
+<!-- Screenfull -->
+<script src="js/screenfull.min.js"></script>
+
 <!-- Core and geometry functions -->
 <script src="js/core.js?v=1.0.4"></script>
 
@@ -864,7 +967,7 @@
                         })
                     );
 
-                    this.$el.addEventListener("keydown", e => this.keydown(e), false);
+                    this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
                     // Add swipe
                     const hammer = new Hammer(this.A4_sheet.parentNode);
@@ -1090,8 +1193,8 @@
                 previous_page() {
                     this.page_index = (svg_elements_per_page.length + this.page_index - 1) % svg_elements_per_page.length;
                 },
-                keydown(e) {
-                    switch (e.key) {
+                keydown(key) {
+                    switch (key) {
                         case "Up":
                         case "ArrowUp":
                         case "Left":
@@ -1105,9 +1208,9 @@
                             this.next_page();
                             break;
                         default:
-                            return;
+                            return false;
                     }
-                    e.preventDefault();
+                    return true;
                 },
                 draw() {
                     this.A4_sheet.innerHTML = '';
@@ -1145,9 +1248,14 @@
                 show_vanishing_lines_switch: false,
                 show_vertices_switch: false,
 
+                is_fullscreen: false,
+                __auto_size: null,
+
                 init() {
+                    this.__auto_size = _.debounce(this.auto_size, 1);
+
                     // Add listeners
-                    this.$el.addEventListener("keydown", e => this.keydown(e), false);
+                    this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
                     ["axis", "vanishing_lines", "zome_vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
@@ -1159,8 +1267,17 @@
                         this.process();
                     });
 
+
+                    // Screenfull lister
+                    if (this.can_use_screenfull) {
+                        screenfull.on('change', () => {
+                            this.is_fullscreen = screenfull.isFullscreen;
+                            this.__auto_size();
+                        });
+                    }
+
                     // Set Canvas Parameters
-                    canvas = this.$refs.canvas;
+                    canvas = this.$refs.canvas_3D;
                     const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
 
                     // Renderer
@@ -1208,6 +1325,11 @@
                         camera.aspect = width / height;
                         camera.updateProjectionMatrix();
                         renderer.setSize(width, height);
+                    }
+                },
+                toggle_fullscreen() {
+                    if (this.can_use_screenfull) {
+                        screenfull.toggle(this.$refs.canvas_3D_container);
                     }
                 },
                 download_ply() {
@@ -1397,10 +1519,10 @@
                     return new THREE.Vector3(0, WORLD_HEIGHT * 0.5, WORLD_HEIGHT * 1.5);
                 },
                 get down() {
-                    return new THREE.Vector3(0, -WORLD_HEIGHT * 1.20, 0);
+                    return new THREE.Vector3(0, -WORLD_HEIGHT * 2, 0);
                 },
                 get up() {
-                    return new THREE.Vector3(0, WORLD_HEIGHT * 1.50, 0);
+                    return new THREE.Vector3(0, WORLD_HEIGHT * 2, 0);
                 },
                 get home() {
                     const axis = new THREE.Vector3(0, 1, 0);
@@ -1446,8 +1568,8 @@
                     controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
                     controls.update();
                 },
-                keydown(e) {
-                    switch (e.key) {
+                keydown(key) {
+                    switch (key) {
                         case "*":
                             this.speed += 0.001;
                             break;
@@ -1457,9 +1579,21 @@
                         case " ":
                             this.is_spinning = !this.is_spinning;
                             break;
+                        case "e":
+                        case "E":
+                            this.type_of_3D_objects = "envelop_3D";
+                            break;
                         case "h":
                         case "H":
                             this.reset();
+                            break;
+                        case "m":
+                        case "M":
+                            this.type_of_3D_objects = "mandala_envelop_3D";
+                            break;
+                        case "s":
+                        case "S":
+                            this.type_of_3D_objects = "skeleton_3D";
                             break;
                         case "Down":
                         case "ArrowDown":
@@ -1478,9 +1612,9 @@
                             this.move(this.right);
                             break;
                         default:
-                            return;
+                            return false;
                     }
-                    e.preventDefault();
+                    return true
                 },
             };
         });
@@ -1681,7 +1815,9 @@
                 get first_crown_height() {
                     return this.first_edge * Math.cos(deg2rad(this.params.theta_deg));
                 },
-
+                get can_use_screenfull() {
+                    return screenfull && screenfull.isEnabled && !IS_MOBILE;
+                },
                 reset_params() {
                     this.params = _.cloneDeep(this.params_backup);
                     this.show_toast("Settings have been restored !", "rotate")

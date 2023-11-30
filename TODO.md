@@ -22,42 +22,25 @@
 * Grouper les montants: abandonnée car trop lent pour le rendu
 * Fix edge line segments
 * Supprimer les circular distribution
+* Grouper les montants (en fonction de leur aire / simple)
+* Attribuer les couleurs en fonction du hash/area : Color.from_index
+* Option des couleurs : Slope/Rotation Angle or Group by Area
+* Rajouter le mode plein écran pour la 3D
+* Raccourci clavier à afficher
+
 
 ## A faire
 
-
-* Sens Inward / Outward qui remplace la méthode .... Jean Soum ?
-
-  
-* Utiliser le LRU Cache 
+* Utiliser le LRU Cache ?? je sais trop si c'est nécessaire.... 
 ```
 const ANGLES2COLOR_CACHE = new LRU(10);
 [Math.PI, TAU].forEach(a => ANGLES2COLOR_CACHE.set(a, Color.from_angles(a)));
 ANGLES2COLOR_CACHE.get(TAU);
 ```
-  
-* Grouper les montants (en fonction de leur aire / simple)
-
-```js
-const grouped_skeleton_prisms = _.groupBy(skeleton_3D, (fig) => fig.hash);
-console.log(grouped_skeleton_prisms);
-
-const grouped_env_polygons = _.groupBy(envelop_3D, (fig) => fig.hash);
-console.log(grouped_env_polygons);
-```
-  
-* Attribuer les couleurs en fonction du hash/area : num2color
-  
-* Option des couleurs : Slope/Rotation Angle or Group by Area
-
-  // Group polygons by hash
-  const grouped_env_polygons = _.groupBy(envelop_3D, (crown) => to_decimal(crown.obj.area, FLOAT_2_STR_PRECISION));
-  console.log(grouped_env_polygons);
 
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
-* Et enfin dessiner les côtes (mode acidome) de chaque montants
   
-* Raccourci clavier à afficher
+* Et enfin dessiner les côtes (mode acidome) de chaque montants
 
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 
