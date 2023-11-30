@@ -25,13 +25,13 @@
 * Grouper les montants (en fonction de leur aire / simple)
 * Attribuer les couleurs en fonction du hash/area : Color.from_index
 * Option des couleurs : Slope/Rotation Angle or Group by Area
+* Rajouter le mode plein écran pour la 3D
+* Raccourci clavier à afficher
 
 
 ## A faire
 
-* Rajouter le mode plein écran pour la 3D
-
-* Utiliser le LRU Cache 
+* Utiliser le LRU Cache ?? je sais trop si c'est nécessaire.... 
 ```
 const ANGLES2COLOR_CACHE = new LRU(10);
 [Math.PI, TAU].forEach(a => ANGLES2COLOR_CACHE.set(a, Color.from_angles(a)));
@@ -41,8 +41,6 @@ ANGLES2COLOR_CACHE.get(TAU);
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
   
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
-  
-* Raccourci clavier à afficher
 
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 
