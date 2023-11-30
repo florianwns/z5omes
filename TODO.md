@@ -38,6 +38,7 @@
   * l'angle de coupe arrière est dessinée en pointillés
   * Ajouter les indexs des montants/faces sur la 3D
 
+
 * Utiliser le LRU Cache ?? je sais trop si c'est nécessaire.... 
 ```
 const ANGLES2COLOR_CACHE = new LRU(10);
@@ -46,6 +47,8 @@ ANGLES2COLOR_CACHE.get(TAU);
 ```
 
 * Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
+
+* Rajouter une option pour surelever le zome.
   
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 
