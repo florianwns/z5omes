@@ -345,7 +345,7 @@
                     </nav>
                     <div class="tab-content h-100 mt-3">
                         <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
-                             tabindex="0" x-data="renderer_3D" @resize.window="auto_size"
+                             tabindex="0" x-data="renderer_3D" @resize.window="__auto_size"
                              @zome-is-made.window="process">
                             <div class="d-flex justify-content-center">
                                 <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
@@ -390,49 +390,29 @@
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
-                                    <div x-ref="canvas" style="height:500px; cursor: move;"
-                                         class="shadow bg-dark rounded mb-2 overflow-hidden"></div>
+                                    <div x-ref="canvas_3D_container" class="position-relative">
+                                        <div x-ref="canvas_3D" style="min-height:500px; cursor: move;"
+                                             :style="(is_fullscreen)? `height:100%;` : `height:500px;`"
+                                             class="shadow bg-dark rounded mb-2 overflow-hidden">
+                                        </div>
+                                        <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-2">
+                                            <!-- Keyboard shortcuts -->
+                                            <button class="btn btn-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#shortcuts-modal">
+                                                <i class="fa-solid fa-keyboard"></i>
+                                            </button>
 
-                                    <div class="d-flex flex-wrap justify-content-evenly">
-                                        <!-- Draw Vanishing Lines -->
-                                        <div class="form-check form-switch me-2 mb-3"
-                                             x-show="show_vanishing_lines_switch">
-                                            <label class="form-check-label" for="draw-vanishing-lines">Vanishing
-                                                Lines</label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-vanishing-lines" x-model="draw_vanishing_lines">
+                                            <!-- Fullscreen Toggle btn -->
+                                            <button class="btn btn-primary"
+                                                    x-show="can_use_screenfull"
+                                                    @click="toggle_fullscreen"
+                                                    data-bs-toggle="tooltip" title="Fullscreen">
+                                                <i class="fa fa-expand"></i>
+                                            </button>
                                         </div>
 
-                                        <!-- Draw Axis -->
-                                        <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-axis-switch">Axis</label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-axis-switch" x-model="draw_axis">
-                                        </div>
-
-                                        <!-- Draw Zome Vertices -->
-                                        <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
-                                            <label class="form-check-label"
-                                                   for="draw-zome-vertices-switch">Vertices</label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
-                                        </div>
-
-                                        <!-- Spin -->
-                                        <div class="form-check form-switch mb-3">
-                                            <label class="form-check-label" for="spin-switch">Spin</label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="spin-switch" x-model="is_spinning">
-                                        </div>
-
-                                        <!-- Keyboard shortcuts -->
-                                        <span class="text-primary btn btn-sm fs-4 p-0 mb-3"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#shortcuts-modal">
-                                            <i class="fa-solid fa-keyboard"></i>
-                                        </span>
-
-                                        <!-- Modal -->
+                                        <!-- Keyboard shortcuts Modal -->
                                         <div class="modal fade" id="shortcuts-modal" tabindex="-1"
                                              aria-labelledby="shortcuts-modal-title" aria-hidden="true">
                                             <div class="modal-dialog modal-sm mt-2 me-2">
@@ -511,6 +491,39 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex flex-wrap justify-content-evenly">
+                                        <!-- Draw Vanishing Lines -->
+                                        <div class="form-check form-switch me-2 mb-3"
+                                             x-show="show_vanishing_lines_switch">
+                                            <label class="form-check-label" for="draw-vanishing-lines">Vanishing
+                                                Lines</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-vanishing-lines" x-model="draw_vanishing_lines">
+                                        </div>
+
+                                        <!-- Draw Axis -->
+                                        <div class="form-check form-switch me-2 mb-3">
+                                            <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-axis-switch" x-model="draw_axis">
+                                        </div>
+
+                                        <!-- Draw Zome Vertices -->
+                                        <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
+                                            <label class="form-check-label"
+                                                   for="draw-zome-vertices-switch">Vertices</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
+                                        </div>
+
+                                        <!-- Spin -->
+                                        <div class="form-check form-switch mb-3">
+                                            <label class="form-check-label" for="spin-switch">Spin</label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="spin-switch" x-model="is_spinning">
                                         </div>
                                     </div>
                                 </div>
@@ -755,6 +768,9 @@
 
 <!-- Clipboard JS -->
 <script src="js/clipboard.min.js"></script>
+
+<!-- Screenfull -->
+<script src="js/screenfull.min.js"></script>
 
 <!-- Core and geometry functions -->
 <script src="js/core.js?v=1.0.4"></script>
@@ -1232,7 +1248,12 @@
                 show_vanishing_lines_switch: false,
                 show_vertices_switch: false,
 
+                is_fullscreen: false,
+                __auto_size: null,
+
                 init() {
+                    this.__auto_size = _.debounce(this.auto_size, 1);
+
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
@@ -1246,8 +1267,17 @@
                         this.process();
                     });
 
+
+                    // Screenfull lister
+                    if (this.can_use_screenfull) {
+                        screenfull.on('change', () => {
+                            this.is_fullscreen = screenfull.isFullscreen;
+                            this.__auto_size();
+                        });
+                    }
+
                     // Set Canvas Parameters
-                    canvas = this.$refs.canvas;
+                    canvas = this.$refs.canvas_3D;
                     const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
 
                     // Renderer
@@ -1295,6 +1325,12 @@
                         camera.aspect = width / height;
                         camera.updateProjectionMatrix();
                         renderer.setSize(width, height);
+                    }
+                    console.log(width, height)
+                },
+                toggle_fullscreen() {
+                    if (this.can_use_screenfull) {
+                        screenfull.toggle(this.$refs.canvas_3D_container);
                     }
                 },
                 download_ply() {
@@ -1780,7 +1816,9 @@
                 get first_crown_height() {
                     return this.first_edge * Math.cos(deg2rad(this.params.theta_deg));
                 },
-
+                get can_use_screenfull() {
+                    return screenfull && screenfull.isEnabled && !IS_MOBILE;
+                },
                 reset_params() {
                     this.params = _.cloneDeep(this.params_backup);
                     this.show_toast("Settings have been restored !", "rotate")
