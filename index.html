@@ -384,9 +384,9 @@
                                         <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
-                                            <option selected value="skeleton_3D">Zome skeleton</option>
-                                            <option value="envelop_3D">Zome envelop</option>
-                                            <option value="mandala_envelop_3D">Mandala</option>
+                                            <option selected value="skeleton_3D">3D Skeleton</option>
+                                            <option value="envelop_3D">3D Envelop</option>
+                                            <option value="mandala_envelop_3D">3D Mandala</option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -424,6 +424,94 @@
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                    id="spin-switch" x-model="is_spinning">
                                         </div>
+
+                                        <!-- Keyboard shortcuts -->
+                                        <span class="text-primary btn btn-sm fs-4 p-0 mb-3"
+                                              data-bs-toggle="modal"
+                                              data-bs-target="#shortcuts-modal">
+                                            <i class="fa-solid fa-keyboard"></i>
+                                        </span>
+
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="shortcuts-modal" tabindex="-1"
+                                             aria-labelledby="shortcuts-modal-title" aria-hidden="true">
+                                            <div class="modal-dialog modal-sm mt-2 me-2">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="text-secondary my-1 me-3" id="shortcuts-modal-title">
+                                                            <i class="fa-solid fa-keyboard me-1"></i>
+                                                            Keyboard shorcuts
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <ul class="keyboard-shorcut-list small text-muted">
+                                                            <!-- Object selection -->
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('S')">S
+                                                                </button>
+                                                                <span>Select <b>3D Skeleton</b> object</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('E')">E
+                                                                </button>
+                                                                <span>Select <b>3D Envelop</b> object</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('M')">M
+                                                                </button>
+                                                                <span>Select <b>3D Mandala</b> object</span>
+                                                            </li>
+
+                                                            <!-- Camera view -->
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('H')">H
+                                                                </button>
+                                                                <span>Reset camera view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Left')">←
+                                                                </button>
+                                                                <span>Left side view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Up')">↑
+                                                                </button>
+                                                                <span>Top view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Right')">→
+                                                                </button>
+                                                                <span>Right side view</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Down')">↓
+                                                                </button>
+                                                                <span>Bottom view</span>
+                                                            </li>
+
+                                                            <!-- Object rotation -->
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key key-space me-2"
+                                                                        @click="keydown(' ')"></button>
+                                                                <span>Spin on/off</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('*')">*
+                                                                </button>
+                                                                <span>Increase rotation speed</span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('/')">/
+                                                                </button>
+                                                                <span>Decrease rotation speed</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -454,8 +542,8 @@
                                     <div class="mb-2">
                                         <select class="form-select" aria-label="Kind of drawing"
                                                 x-model="kind_of_drawing">
-                                            <option selected value="mandala_figs">Mandala Origami</option>
-                                            <option value="spiral_figs">Spiral Origami</option>
+                                            <option selected value="mandala_figs">Origami Mandala</option>
+                                            <option value="spiral_figs">Origami Spirals</option>
                                         </select>
                                     </div>
 
@@ -863,7 +951,7 @@
                         })
                     );
 
-                    this.$el.addEventListener("keydown", e => this.keydown(e), false);
+                    this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
                     // Add swipe
                     const hammer = new Hammer(this.A4_sheet.parentNode);
@@ -1089,8 +1177,8 @@
                 previous_page() {
                     this.page_index = (svg_elements_per_page.length + this.page_index - 1) % svg_elements_per_page.length;
                 },
-                keydown(e) {
-                    switch (e.key) {
+                keydown(key) {
+                    switch (key) {
                         case "Up":
                         case "ArrowUp":
                         case "Left":
@@ -1104,9 +1192,9 @@
                             this.next_page();
                             break;
                         default:
-                            return;
+                            return false;
                     }
-                    e.preventDefault();
+                    return true;
                 },
                 draw() {
                     this.A4_sheet.innerHTML = '';
@@ -1146,7 +1234,7 @@
 
                 init() {
                     // Add listeners
-                    this.$el.addEventListener("keydown", e => this.keydown(e), false);
+                    this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
                     ["axis", "vanishing_lines", "zome_vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
@@ -1445,8 +1533,8 @@
                     controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
                     controls.update();
                 },
-                keydown(e) {
-                    switch (e.key) {
+                keydown(key) {
+                    switch (key) {
                         case "*":
                             this.speed += 0.001;
                             break;
@@ -1489,9 +1577,9 @@
                             this.move(this.right);
                             break;
                         default:
-                            return;
+                            return false;
                     }
-                    e.preventDefault();
+                    return true
                 },
             };
         });
