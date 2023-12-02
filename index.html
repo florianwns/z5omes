@@ -2090,30 +2090,31 @@
                     ];
 
 
-                    // Compute dihedral angle for wall plane
+                    // Compute dihedral angle for all points
                     let spi = 0;
-                    let dihedral_angle_v2;
-                    _.forEach(envelop_3D, (fig, i) => {
+                    _.forEach(envelop_3D, (fig, j) => {
+                        const num_points = fig.points.length;
+                        const plane_above = (j > 0)
+                            ? envelop_3D[j - 1].plane
+                            : rotate_around_vertical_axis(fig.plane, -INCR_RAD);
+
+                        const plane_below = (j < envelop_3D.length - 1)
+                            ? envelop_3D[j + 1].plane
+                            : rotate_around_vertical_axis(fig.plane, -INCR_RAD);
+
+                        const dihedral_angle_with_plane_above = dihedral_angle_between_planes(fig.plane, plane_above);
+                        const dihedral_angle_with_plane_below = dihedral_angle_between_planes(fig.plane, plane_below);
+
                         _.forEach(fig.points, (first_pt, i) => {
-
+                            if (i == 0 || i == num_points - 1) {
+                                dihedral_angles[spi] = dihedral_angle_with_plane_above;
+                            } else if (num_points >= 4 && (i == 1 || i == num_points - 2)) {
+                                dihedral_angles[spi] = dihedral_angle_with_plane_below;
+                            } else {
+                                dihedral_angles[spi] = TAU_Q; /// 90° ???
+                            }
+                            spi += 1;
                         });
-
-                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 figs
-                        if (i === 0) {
-                            const next_fig = envelop_3D[1];
-                            fig.dihedral_angle = dihedral_angle(next_fig.φ, fig.ω, fig.ω);
-
-                            dihedral_angle_v2 = dihedral_angle_between_planes(
-                                fig.plane,
-                                rotate_around_vertical_axis(fig.plane, -INCR_RAD)
-                            );
-
-                            console.log(i, rad2deg(fig.dihedral_angle), rad2deg(dihedral_angle_v2))
-                        } else {
-                            const prev_fig = envelop_3D[i - 1];
-                            dihedral_angle_v2 = dihedral_angle_between_planes(fig.plane, prev_fig.plane)
-                            console.log(i, rad2deg(fig.dihedral_angle), rad2deg(dihedral_angle_v2))
-                        }
                     });
 
 
