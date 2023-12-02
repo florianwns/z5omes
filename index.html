@@ -2071,8 +2071,8 @@
                         cw_vecs = new Array(spiral_num_points),
                         mid_pts = new Array(spiral_num_points),
                         thickness_offset_pts = new Array(spiral_num_points),
-                        rotated_thickness_offset_pts = [],
                         width_offset_pts = new Array(spiral_num_points),
+                        mid_width_width_offset_pts = new Array(spiral_num_points),
                         horizontal_proj_vecs = new Array(spiral_num_points),
                         wall_planes = new Array(spiral_num_points),
                         shifted_wall_planes = new Array(spiral_num_points),
@@ -2120,12 +2120,12 @@
 
                     // Build Timbers using the GoodKarma assembly method
                     spi = 0; //
-                    let thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
+                    let thickness_offset_pt, width_offset_pt, mid_width_width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
                     let first_index = 0;
                     vertices = []
 
 
-                    _.forEach(envelop_3D, (fig) => {
+                    _.forEach(envelop_3D, (fig, j) => {
                         first_index = spi;
 
                         // Calculate vectors and projected points to avoid multiple calculations
@@ -2169,10 +2169,11 @@
                                         // Add Hack to avoid issues with bad cross_products on 90° angles
                                         vertical_proj_vec = cross_product(mul(first_2_sec_vec, -1), first_2_prev_vec);
                                     } else if (theta > TAU_Q) {
-                                        // Change direction if theta superior than 90°
-                                        vertical_proj_vec = cross_product(mul(horizontal_proj_vec, -1), first_2_prev_vec);
+                                        // Change direction if theta is greater than 90°,
+                                        // Because pivot point is after mid_pt, so the direction is opposite
+                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(first_2_prev_vec, -1));
                                     } else {
-                                        // The normal way
+                                        // The normal way if theta is smaller than 90 °
                                         vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
                                     }
 
@@ -2203,10 +2204,19 @@
                                     wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
                                     break;
                                 case 1: // Beveled Length
+                                    const theta = dihedral_angles[spi] / 2;
+                                    const [hypotenuse, adjacent_side] = triangle_rectangle_sides(theta, TIMBER_WIDTH)
+                                    const pivot_pt = point_to(mid_pt, horizontal_proj_vec, adjacent_side);
+                                    const mid_width_width_offset_pt = point_to(pivot_pt, vertical_proj_vec, TIMBER_WIDTH);
 
-                                    rotated_thickness_offset_pts.push(thickness_offset_pt)
-                                    rotated_thickness_offset_pts.push(rotate_around_vertical_axis(thickness_offset_pt, INCR_RAD))
-                                    rotated_thickness_offset_pts.push(rotate_around_vertical_axis(thickness_offset_pt, -INCR_RAD))
+                                    console.log(j, i, "dihedral_angles", rad2deg(theta), rad2deg(dihedral_angles[spi]))
+
+                                    mid_width_width_offset_pts[spi] = mid_width_width_offset_pt;
+                                    wall_planes[spi] = points_2_plane(first_pt, mid_pt, mid_width_width_offset_pt);
+
+                                    console.log("spi ", spi, "mid_width_offset_pt", mid_width_width_offset_pt);
+                                    console.log("dist width_offset_pt/mid_pt_with_vertical_proj ", dist(width_offset_pt, mid_width_width_offset_pt));
+                                    console.log("dist thickness_offset_pt/pivot_pt2 ", dist(thickness_offset_pt, pivot_pt));
 
                                 case 2: // Outward Xpansion
                                     // Use vertical proj rather vanishing pt
@@ -2314,9 +2324,14 @@
                             // Compute planes to find intersection points
                             horizontal_proj_vec = horizontal_proj_vecs[spi];
                             const along_plane = wall_planes[spi]
-                            const mid_pt_with_vertical_proj = plan_intersection(
-                                width_offset_pt, horizontal_proj_vec, along_plane
-                            )
+                            const mid_pt_with_vertical_proj = mid_width_width_offset_pts[spi];
+                            // const mid_pt_with_vertical_proj = plan_intersection(
+                            //     width_offset_pt, horizontal_proj_vec, along_plane
+                            // )
+
+                            console.log("spi ", spi, "mid_pt_with_vertical_proj", mid_pt_with_vertical_proj);
+                            console.log("dist width_offset_pt/mid_pt_with_vertical_proj ", dist(width_offset_pt, mid_pt_with_vertical_proj));
+                            this.add_vertex(vertices, mid_pt_with_vertical_proj)
 
                             // A, B, C, D is the top part (trapezoid) of the timber
                             A = plan_intersection(mid_pt, sec_2_first_vec, planes[0]);
