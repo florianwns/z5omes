@@ -215,6 +215,13 @@ function triangle_area_from_points(A, B, C) {
     return area;
 }
 
+function triangle_rectangle_sides(theta, opposite_side){
+    const hypotenuse = opposite_side / Math.sin(theta);
+    const adjacent_side = opposite_side / Math.tan(theta);
+
+    return [hypotenuse, adjacent_side]
+}
+
 function rotate_around_vertical_axis(point, theta) {
     // in this project, y is the vertical axis
     const [x, y, z] = point;
