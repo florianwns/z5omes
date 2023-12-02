@@ -215,6 +215,28 @@ function triangle_area_from_points(A, B, C) {
     return area;
 }
 
+function rotate_around_vertical_axis(point, theta) {
+    // in this project, y is the vertical axis
+    const [x, y, z] = point;
+    const cos_theta = Math.cos(theta);
+    const sin_theta = Math.sin(theta);
+
+    // Matrice de rotation autour de l'axe des Y
+    const rotation_matrix = [
+        cos_theta, 0, sin_theta,
+        0, 1, 0,
+        -sin_theta, 0, cos_theta
+    ];
+
+    // Application de la matrice de rotation au point
+    const rotated_point = [
+        rotation_matrix[0] * x + rotation_matrix[1] * y + rotation_matrix[2] * z,
+        rotation_matrix[3] * x + rotation_matrix[4] * y + rotation_matrix[5] * z,
+        rotation_matrix[6] * x + rotation_matrix[7] * y + rotation_matrix[8] * z
+    ];
+
+    return rotated_point;
+}
 
 function plan_intersection(p1, vec1, plane1) {
     const [a, b, c, d] = plane1;
@@ -275,6 +297,13 @@ function dihedral_angle(a, b, c) {
     return Math.acos(
         (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
     )
+}
+
+
+function dihedral_angle_between_planes(plane1, plane2) {
+    const dot = dot_product(plane1, plane2);
+    const theta = Math.PI - Math.acos(dot / (len(plane1) * len(plane2)));
+    return theta;
 }
 
 
@@ -531,12 +560,12 @@ class TrapezoidalPrism extends BaseGeometry {
 
         // Build the 6 sides of TrapezoidalPrism with Polygon
         this.polygons = [
-            new Convex3DPolygon([A, B, D, C]), // Top side
-            new Convex3DPolygon([E, F, H, G]), // Bottom side
-            new Convex3DPolygon([A, B, F, E]), // Left side
-            new Convex3DPolygon([C, D, H, G]), // Right side
-            new Convex3DPolygon([A, C, G, E]), // Front side
-            new Convex3DPolygon([B, D, H, F]), // Back side
+            new CoplanarConvex3DPolygon([A, B, D, C]), // Top side
+            new CoplanarConvex3DPolygon([E, F, H, G]), // Bottom side
+            new CoplanarConvex3DPolygon([A, B, F, E]), // Left side
+            new CoplanarConvex3DPolygon([C, D, H, G]), // Right side
+            new CoplanarConvex3DPolygon([A, C, G, E]), // Front side
+            new CoplanarConvex3DPolygon([B, D, H, F]), // Back side
         ]
 
         // Arrays of THREE.Vector3 for 3D visualization
@@ -557,9 +586,15 @@ class TrapezoidalPrism extends BaseGeometry {
     }
 }
 
-class Convex3DPolygon extends BaseGeometry {
+class CoplanarConvex3DPolygon extends BaseGeometry {
+    // Consider A convex polygon          A
+    // points = [A, B, E, F, C]         B ◇ C
+    //                                   E F
+    //
+    // points are distributed counterclockwise
+
     constructor(points, color = null) {
-        // Consider that polygon is made by triangle,
+        // Consider a coplanar polygon made by triangle
         const num_points = points.length;
         if (num_points < 3) {
             console.error("Not enough points to make a polygon");
@@ -573,7 +608,12 @@ class Convex3DPolygon extends BaseGeometry {
         this.points = points;
         this.num_points = this.points.length;
 
+        // Because we consider this polygon coplanar, we make a plane with 3 points
+        console.log()
+        this.plane = points_2_plane(this.points[0], this.points[1], this.points[this.num_points - 1]);
+
         // Measurements
+        this.diameter = 2 * dist(this.points[1], [0, this.points[1][1], 0]);
         this.area = 0;
         this.angles = new Array(this.num_points);               // Array of angles in radians
         this.edge_distances = new Array(this.num_points);       // Edges distances
@@ -591,16 +631,19 @@ class Convex3DPolygon extends BaseGeometry {
         this.compute_hash();
     }
 
-    get O() {
-        return this.points[0];
-    }
 
     get slope() {
-        return 0;
+        // Compute the slope of the hat
+        const I = midpoint(this.points[1], this.points[this.num_points - 1]);
+        let a = angle(this.O, I, [0, I[1], 0]);
+        if (a > TAU_Q) {
+            a = Math.PI - a;
+        }
+        return a
     }
 
-    get diameter() {
-        return 2 * dist(this.O, [0, this.O[1], 0]);
+    get O() {
+        return this.points[0];
     }
 
     compute() {
@@ -729,72 +772,6 @@ class Convex2DPolygon {
         this.width = Math.abs(x_max - x_min);
         this.height = Math.abs(y_max - y_min);
     }
-}
-
-class PolygonWithHat extends Convex3DPolygon {
-    get A() {
-        return this.points[0];
-    }
-
-    get B() {
-        return this.points[1];
-    }
-
-    get C() {
-        return this.points[this.num_points - 1];
-    }
-
-    get hat() {
-        // The triangle at the top of polygon
-        return [this.A, this.B, this.C];
-    }
-
-    get φ() {
-        // The vertical ↓ angle
-        return angle(this.C, this.A, this.B);
-    }
-
-    get ω() {
-        // The horizontal → angle
-        return angle(this.A, this.B, this.points[2]);
-    }
-
-    get diameter() {
-        return 2 * dist(this.B, [0, this.B[1], 0]);
-    }
-
-    get slope() {
-        // Compute the slope of the hat
-        const I = midpoint(this.points[1], this.points[this.num_points - 1]);
-        let a = angle(this.O, I, [0, I[1], 0]);
-        if (a > TAU_Q) {
-            a = Math.PI - a
-        }
-        return a
-    }
-}
-
-
-class Triangle extends PolygonWithHat {
-}
-
-class Kite extends PolygonWithHat {
-    //  Consider Kite like this       A
-    //  points = [A, B, D, C]       B ◇ C
-    //                                D
-
-    // A, B, C Form the top_triangle
-    // B, D, C Form the Base
-}
-
-class Rhombus extends Kite {
-}
-
-
-class TruncatedKite extends Kite {
-    //  Consider this Trapezium            A
-    //  points = [A, B, E, F, C]         B ◇ C
-    //                                    E F
 }
 
 

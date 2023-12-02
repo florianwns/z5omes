@@ -782,7 +782,7 @@
 <script type="text/javascript">
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
-    const DEBUG = false;
+    const DEBUG = true;
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
@@ -1405,7 +1405,7 @@
 
                     // Display vanishing lines
                     {
-                        const material = new THREE.LineBasicMaterial({color: 0x00FFFF});
+                        const material = new THREE.LineBasicMaterial({color: 0xFF0000});
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
                             const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -1971,7 +1971,7 @@
 
                                 // Add only the first piece, because only color after that
                                 if (i == 0) {
-                                    fig = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
+                                    fig = new CoplanarConvex3DPolygon([A, B, D, C]);
                                     envelop_3D.push(fig);
                                 }
 
@@ -1992,7 +1992,7 @@
 
                                 // Add Truncated Kite to figs
                                 if (i == 0) {
-                                    fig = new TruncatedKite([A, B, E, F, C])
+                                    fig = new CoplanarConvex3DPolygon([A, B, E, F, C])
                                     envelop_3D.push(fig);
                                 }
 
@@ -2032,7 +2032,7 @@
                             if (far_enough) {
                                 // Add triangle to figs
                                 if (iT == 0) {
-                                    fig = new Triangle([A, B, C]);
+                                    fig = new CoplanarConvex3DPolygon([A, B, C]);
                                     envelop_3D.push(fig);
                                 }
                             }
@@ -2050,7 +2050,7 @@
                     // Finally add the base piece
                     let base = null;
                     if (base_vertices.length >= 3) {
-                        fig = new Convex3DPolygon(base_vertices.map(iV => vertices[iV]))
+                        fig = new CoplanarConvex3DPolygon(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
                         const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
@@ -2064,8 +2064,21 @@
                     const ASSEMBLY_DIRECTION = this.params.assembly_direction;
 
                     const spiral_num_points = _.reduce(envelop_3D, (num, fig) => num += fig.num_points, 0);
-                    const vanishing_lines = new Array(spiral_num_points);
                     const skeleton_3D = new Array(spiral_num_points);
+                    let vanishing_lines = []; // new Array(spiral_num_points);
+
+                    const ccw_vecs = new Array(spiral_num_points),
+                        cw_vecs = new Array(spiral_num_points),
+                        mid_pts = new Array(spiral_num_points),
+                        thickness_offset_pts = new Array(spiral_num_points),
+                        rotated_thickness_offset_pts = [],
+                        width_offset_pts = new Array(spiral_num_points),
+                        horizontal_proj_vecs = new Array(spiral_num_points),
+                        wall_planes = new Array(spiral_num_points),
+                        shifted_wall_planes = new Array(spiral_num_points),
+                        previous_indexes = new Array(spiral_num_points),
+                        next_indexes = new Array(spiral_num_points),
+                        dihedral_angles = new Array(spiral_num_points);
 
                     // Freeze vanishing pt
                     const vanishing_pt = [
@@ -2076,24 +2089,54 @@
                         0
                     ];
 
-                    // Build Timbers using the GoodKarma assembly method
-                    let spiral_point_index = 0; //
-                    _.forEach(envelop_3D, (fig) => {
-                        const ccw_vecs = new Array(fig.num_points),
-                            cw_vecs = new Array(fig.num_points),
-                            mid_pts = new Array(fig.num_points),
-                            thickness_offset_pts = new Array(fig.num_points),
-                            width_offset_pts = new Array(fig.num_points),
-                            horizontal_proj_vecs = new Array(fig.num_points),
-                            wall_planes = new Array(fig.num_points),
-                            shifted_wall_planes = new Array(fig.num_points);
 
-                        let thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
+                    // Compute dihedral angle for wall plane
+                    let spi = 0;
+                    let dihedral_angle_v2;
+                    _.forEach(envelop_3D, (fig, i) => {
+                        _.forEach(fig.points, (first_pt, i) => {
+
+                        });
+
+                        // Compute σ, the Dihedral angle only for the Zome envelop with at least 2 figs
+                        if (i === 0) {
+                            const next_fig = envelop_3D[1];
+                            fig.dihedral_angle = dihedral_angle(next_fig.φ, fig.ω, fig.ω);
+
+                            dihedral_angle_v2 = dihedral_angle_between_planes(
+                                fig.plane,
+                                rotate_around_vertical_axis(fig.plane, -INCR_RAD)
+                            );
+
+                            console.log(i, rad2deg(fig.dihedral_angle), rad2deg(dihedral_angle_v2))
+                        } else {
+                            const prev_fig = envelop_3D[i - 1];
+                            dihedral_angle_v2 = dihedral_angle_between_planes(fig.plane, prev_fig.plane)
+                            console.log(i, rad2deg(fig.dihedral_angle), rad2deg(dihedral_angle_v2))
+                        }
+                    });
+
+
+                    // Build Timbers using the GoodKarma assembly method
+                    spi = 0; //
+                    let thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
+                    let first_index = 0;
+                    vertices = []
+
+
+                    _.forEach(envelop_3D, (fig) => {
+                        first_index = spi;
 
                         // Calculate vectors and projected points to avoid multiple calculations
                         _.forEach(fig.points, (first_pt, i) => {
-                            const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
-                            const sec_pt = fig.points[(i + 1) % fig.num_points];
+                            const next_index = (i + 1) % fig.num_points;
+                            const previous_index = (fig.num_points + i - 1) % fig.num_points;
+
+                            previous_indexes[spi] = first_index + previous_index;
+                            next_indexes[spi] = first_index + next_index;
+
+                            const prev_pt = fig.points[previous_index];
+                            const sec_pt = fig.points[next_index];
 
                             const first_2_sec_vec = sub(sec_pt, first_pt);
                             const first_2_prev_vec = sub(prev_pt, first_pt);
@@ -2114,12 +2157,18 @@
                                 case 2:
                                     const theta = fig.angles[i];
                                     const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                                    const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta));
-                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
+                                    const adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
+                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, (theta < TAU_Q) ? -adjacent_side : adjacent_side);
 
                                     thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
-                                    horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
 
+                                    horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
+                                    this.add_vertex(vertices, pivot_pt);
+                                    this.add_vertex(vertices, thickness_offset_pt);
+                                    this.add_vertex(vertices, mid_pt);
+
+
+                                    console.log(rad2deg(angle(first_pt, mid_pt, thickness_offset_pt)))
                                     // Add Hack to avoid issues with bad cross_products on 90° angles
                                     if (to_decimal(theta) == to_decimal(TAU_Q)) {
                                         vertical_proj_vec = cross_product(mul(first_2_sec_vec, -1), first_2_prev_vec);
@@ -2137,32 +2186,30 @@
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                             // Push vectors
-                            ccw_vecs[i] = first_2_sec_vec;
-                            cw_vecs[i] = first_2_prev_vec;
-                            horizontal_proj_vecs[i] = horizontal_proj_vec;
+                            ccw_vecs[spi] = first_2_sec_vec;
+                            cw_vecs[spi] = first_2_prev_vec;
+                            horizontal_proj_vecs[spi] = horizontal_proj_vec;
 
                             // Push points
-                            mid_pts[i] = mid_pt;
-                            thickness_offset_pts[i] = thickness_offset_pt;
-                            width_offset_pts[i] = width_offset_pt;
+                            mid_pts[spi] = mid_pt;
+                            thickness_offset_pts[spi] = thickness_offset_pt;
+                            width_offset_pts[spi] = width_offset_pt;
 
                             //Push Planes
                             switch (ASSEMBLY_METHOD) {
-                                // GoodKarma && Beveled Length
-                                case 0:
-                                case 1:
+                                case 0: // GoodKarma
                                     // Use vanishing pt for wall
-                                    wall_planes[i] = points_2_plane(
-                                        first_pt,
-                                        mid_pt,
-                                        vanishing_pt
-                                    );
-
+                                    wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
                                     break;
-                                // Outward Xpansion
-                                case 2:
+                                case 1: // Beveled Length
+
+                                    rotated_thickness_offset_pts.push(thickness_offset_pt)
+                                    rotated_thickness_offset_pts.push(rotate_around_vertical_axis(thickness_offset_pt, INCR_RAD))
+                                    rotated_thickness_offset_pts.push(rotate_around_vertical_axis(thickness_offset_pt, -INCR_RAD))
+
+                                case 2: // Outward Xpansion
                                     // Use vertical proj rather vanishing pt
-                                    wall_planes[i] = points_2_plane(
+                                    wall_planes[spi] = points_2_plane(
                                         first_pt,
                                         mid_pt,
                                         point_to(mid_pt, vertical_proj_vec, 100)
@@ -2171,25 +2218,74 @@
                             }
 
                             // Same base for shifted wall
-                            shifted_wall_planes[i] = points_2_plane(
+                            shifted_wall_planes[spi] = points_2_plane(
                                 point_to(thickness_offset_pt, first_2_sec_vec, 100),
                                 thickness_offset_pt,
                                 width_offset_pt,
                             );
-                        });
 
+                            spi += 1;
+                        });
+                    });
+
+                    if (ASSEMBLY_METHOD == 1) { // Only for Beveled Length
+                        spi = 0
+                        _.forEach(envelop_3D, (fig, j) => {
+
+                            // Calculate vectors and projected points to avoid multiple calculations
+                            _.forEach(fig.points, (first_pt, i) => {
+                                if (j > 1 && j < envelop_3D.length - 1) {
+                                    const mid_pt = mid_pts[spi];
+                                    const thickness_offset_pt = thickness_offset_pts[spi];
+
+                                    // Get vectors
+                                    const pt_to_compare = point_to(mid_pt, sub(mid_pt, thickness_offset_pt), TIMBER_THICKNESS);
+                                    const closest_pts = _.sortBy(
+                                        rotated_thickness_offset_pts.map((pt) => {
+                                            return {
+                                                'point': pt,
+                                                'distance': dist(pt_to_compare, pt),
+                                                'same': pt == thickness_offset_pt
+                                            };
+                                        }),
+                                        ['same', 'distance']
+                                    );
+                                    const closest_pt = closest_pts[0].point;
+                                    const dihedral_pt = midpoint(closest_pt, thickness_offset_pt)
+
+                                    // this.add_vertex(vertices, mid_pt)
+                                    // this.add_vertex(vertices, closest_pt)
+                                    // this.add_vertex(vertices, dihedral_pt)
+
+                                    vanishing_lines.push([closest_pt, mid_pt]);
+
+                                    wall_planes[spi] = points_2_plane(
+                                        first_pt,
+                                        mid_pt,
+                                        dihedral_pt
+                                    );
+                                }
+
+                                spi += 1;
+                            });
+                        });
+                    }
+
+                    // reset point index counter
+                    spi = 0
+                    _.forEach(envelop_3D, (fig) => {
                         // Build the prism
-                        _.forEach(fig.points, (first_pt, i) => {
-                            const prev_index = (fig.num_points + i - 1) % fig.num_points;    // previous index
-                            const next_index = (i + 1) % fig.num_points;                     // next index
+                        _.forEach(fig.points, (first_pt) => {
+                            const prev_index = previous_indexes[spi];    // previous index
+                            const next_index = next_indexes[spi];        // next index
 
                             // Get polygon points, first is the current point and last is n-1 point
-                            thickness_offset_pt = thickness_offset_pts[i];
-                            width_offset_pt = width_offset_pts[i];
+                            thickness_offset_pt = thickness_offset_pts[spi];
+                            width_offset_pt = width_offset_pts[spi];
 
                             // Get vectors
-                            const mid_pt = mid_pts[i];
-                            const first_2_sec_vec = ccw_vecs[i];
+                            const mid_pt = mid_pts[spi];
+                            const first_2_sec_vec = ccw_vecs[spi];
                             const sec_2_first_vec = cw_vecs[next_index];
 
                             // Compute Planes to make point intersections
@@ -2215,8 +2311,8 @@
                             }
 
                             // Compute planes to find intersection points
-                            horizontal_proj_vec = horizontal_proj_vecs[i];
-                            const along_plane = wall_planes[i]
+                            horizontal_proj_vec = horizontal_proj_vecs[spi];
+                            const along_plane = wall_planes[spi]
                             const mid_pt_with_vertical_proj = plan_intersection(
                                 width_offset_pt, horizontal_proj_vec, along_plane
                             )
@@ -2235,11 +2331,12 @@
 
                             // Build a TrapezoidalPrism
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], fig.color);
-                            skeleton_3D[spiral_point_index] = timber_prism;
+                            skeleton_3D[spi] = timber_prism;
 
                             // Add vanishing line OK
-                            vanishing_lines[spiral_point_index] = [vanishing_pt, first_pt];
-                            spiral_point_index += 1;
+                            // vanishing_lines.push([vanishing_pt, first_pt]);
+
+                            spi += 1;
                         });
                     });
 
@@ -2313,7 +2410,7 @@
                         planar_envelop_2D[i] = planar_fig;
 
                         // Adapt points for 3D view
-                        mandala_envelop_3D[i] = new Convex3DPolygon(
+                        mandala_envelop_3D[i] = new CoplanarConvex3DPolygon(
                             planar_points.map(p => [p[0], p[2], p[1]]),
                             planar_fig.color,
                         );
