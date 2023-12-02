@@ -2116,7 +2116,7 @@
                             spi += 1;
                         });
                     });
-
+                    // console.log(dihedral_angles)
 
                     // Build Timbers using the GoodKarma assembly method
                     spi = 0; //
@@ -2157,23 +2157,22 @@
                                 case 1:
                                 case 2:
                                     const theta = fig.angles[i];
-                                    const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                                    const adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
-                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, (theta < TAU_Q) ? -adjacent_side : adjacent_side);
+                                    const [hypotenuse, adjacent_side] = triangle_rectangle_sides(theta, TIMBER_THICKNESS)
+                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
 
                                     thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
 
+                                    // Go to the wall
                                     horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
-                                    this.add_vertex(vertices, pivot_pt);
-                                    this.add_vertex(vertices, thickness_offset_pt);
-                                    this.add_vertex(vertices, mid_pt);
 
-
-                                    console.log(rad2deg(angle(first_pt, mid_pt, thickness_offset_pt)))
-                                    // Add Hack to avoid issues with bad cross_products on 90° angles
                                     if (to_decimal(theta) == to_decimal(TAU_Q)) {
+                                        // Add Hack to avoid issues with bad cross_products on 90° angles
                                         vertical_proj_vec = cross_product(mul(first_2_sec_vec, -1), first_2_prev_vec);
+                                    } else if (theta > TAU_Q) {
+                                        // Change direction if theta superior than 90°
+                                        vertical_proj_vec = cross_product(mul(horizontal_proj_vec, -1), first_2_prev_vec);
                                     } else {
+                                        // The normal way
                                         vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
                                     }
 
@@ -2185,6 +2184,7 @@
                             }
 
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
+                            console.log("m o w", rad2deg(angle(mid_pt, thickness_offset_pt, width_offset_pt)))
 
                             // Push vectors
                             ccw_vecs[spi] = first_2_sec_vec;
@@ -2229,48 +2229,48 @@
                         });
                     });
 
-                    if (ASSEMBLY_METHOD == 1) { // Only for Beveled Length
-                        spi = 0
-                        _.forEach(envelop_3D, (fig, j) => {
-
-                            // Calculate vectors and projected points to avoid multiple calculations
-                            _.forEach(fig.points, (first_pt, i) => {
-                                if (j > 1 && j < envelop_3D.length - 1) {
-                                    const mid_pt = mid_pts[spi];
-                                    const thickness_offset_pt = thickness_offset_pts[spi];
-
-                                    // Get vectors
-                                    const pt_to_compare = point_to(mid_pt, sub(mid_pt, thickness_offset_pt), TIMBER_THICKNESS);
-                                    const closest_pts = _.sortBy(
-                                        rotated_thickness_offset_pts.map((pt) => {
-                                            return {
-                                                'point': pt,
-                                                'distance': dist(pt_to_compare, pt),
-                                                'same': pt == thickness_offset_pt
-                                            };
-                                        }),
-                                        ['same', 'distance']
-                                    );
-                                    const closest_pt = closest_pts[0].point;
-                                    const dihedral_pt = midpoint(closest_pt, thickness_offset_pt)
-
-                                    // this.add_vertex(vertices, mid_pt)
-                                    // this.add_vertex(vertices, closest_pt)
-                                    // this.add_vertex(vertices, dihedral_pt)
-
-                                    vanishing_lines.push([closest_pt, mid_pt]);
-
-                                    wall_planes[spi] = points_2_plane(
-                                        first_pt,
-                                        mid_pt,
-                                        dihedral_pt
-                                    );
-                                }
-
-                                spi += 1;
-                            });
-                        });
-                    }
+                    // if (ASSEMBLY_METHOD == 1) { // Only for Beveled Length
+                    //     spi = 0
+                    //     _.forEach(envelop_3D, (fig, j) => {
+                    //
+                    //         // Calculate vectors and projected points to avoid multiple calculations
+                    //         _.forEach(fig.points, (first_pt, i) => {
+                    //             if (j > 1 && j < envelop_3D.length - 1) {
+                    //                 const mid_pt = mid_pts[spi];
+                    //                 const thickness_offset_pt = thickness_offset_pts[spi];
+                    //
+                    //                 // Get vectors
+                    //                 const pt_to_compare = point_to(mid_pt, sub(mid_pt, thickness_offset_pt), TIMBER_THICKNESS);
+                    //                 const closest_pts = _.sortBy(
+                    //                     rotated_thickness_offset_pts.map((pt) => {
+                    //                         return {
+                    //                             'point': pt,
+                    //                             'distance': dist(pt_to_compare, pt),
+                    //                             'same': pt == thickness_offset_pt
+                    //                         };
+                    //                     }),
+                    //                     ['same', 'distance']
+                    //                 );
+                    //                 const closest_pt = closest_pts[0].point;
+                    //                 const dihedral_pt = midpoint(closest_pt, thickness_offset_pt)
+                    //
+                    //                 // this.add_vertex(vertices, mid_pt)
+                    //                 // this.add_vertex(vertices, closest_pt)
+                    //                 // this.add_vertex(vertices, dihedral_pt)
+                    //
+                    //                 vanishing_lines.push([closest_pt, mid_pt]);
+                    //
+                    //                 wall_planes[spi] = points_2_plane(
+                    //                     first_pt,
+                    //                     mid_pt,
+                    //                     dihedral_pt
+                    //                 );
+                    //             }
+                    //
+                    //             spi += 1;
+                    //         });
+                    //     });
+                    // }
 
                     // reset point index counter
                     spi = 0
