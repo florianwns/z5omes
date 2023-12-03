@@ -236,15 +236,23 @@
                 <div x-show="params.help_is_displayed">
                     <b>AM</b> : from left to right :
                     <ul>
+                        <li>Xpansion direction (button)</li>
                         <li>Assembly method (select)</li>
                         <li>Assembly direction (button)</li>
-                        <li>Xpansion direction (button)</li>
                     </ul>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">
                     AM
                 </span>
+                    <button class="btn btn-primary" type="button"
+                            :class="(params.assembly_method == 2)? `disabled`: ``"
+                            data-bs-toggle="tooltip"
+                            title="Xpansion direction : ↑ outwards or ↓ inwards"
+                            @click="params.xpansion_direction = -params.xpansion_direction">
+                        <i class="fa-solid fa-fw"
+                           :class="(params.xpansion_direction < 0 || params.assembly_method == 2)? `fa-arrow-up-from-line` : `fa-arrow-down-from-line`"></i>
+                    </button>
                     <select class="form-select" aria-label="Assembly method"
                             x-model.number="params.assembly_method">
                         <option selected value=0>GoodKarma</option>
@@ -258,15 +266,6 @@
                         <i class="fa-solid fa-fw"
                            :class="ASSEMBLY_DIRECTION_ICONS[params.assembly_direction]"
                         ></i>
-                    </button>
-
-                    <button class="btn btn-primary" type="button"
-                            :class="(params.assembly_method == 2)? `disabled`: ``"
-                            data-bs-toggle="tooltip"
-                            title="Xpansion direction : ↑ outwards or ↓ inwards"
-                            @click="params.xpansion_direction = -params.xpansion_direction">
-                        <i class="fa-solid"
-                           :class="(params.xpansion_direction < 0 || params.assembly_method == 2)? `fa-arrow-up-from-line` : `fa-arrow-down-from-line`"></i>
                     </button>
                 </div>
 
@@ -2281,8 +2280,8 @@
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], fig.color);
                             skeleton_3D[spi] = timber_prism;
 
-                            // Add vanishing line OK
-                            // vanishing_lines.push([vanishing_pt, first_pt]);
+                            // Add vanishing line
+                            vanishing_lines.push([vanishing_pt, first_pt]);
 
                             spi += 1;
                         });
