@@ -2120,7 +2120,8 @@
 
                     // Build Timbers using the GoodKarma assembly method
                     spi = 0; //
-                    let thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
+                    let theta, hypotenuse, adjacent_side, opposite_side, pivot_pt,
+                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
                     let first_index = 0;
                     vertices = []
 
@@ -2143,48 +2144,57 @@
                             const first_2_prev_vec = sub(prev_pt, first_pt);
 
                             const mid_pt = midpoint(first_pt, sec_pt);
+                            const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
+
+                            theta = fig.angles[i];
+                            hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
+                            adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
+                            pivot_pt = point_to(mid_pt, first_2_sec_vec, (theta < TAU_Q) ? -adjacent_side : adjacent_side);
+
+                            const thickness_slope_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
+                            const slope_vec = sub(thickness_slope_offset_pt, mid_pt)
 
                             switch (ASSEMBLY_METHOD) {
-                                // GoodKarma
-                                case 0:
-                                    const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
-
+                                case 0: // GoodKarma
                                     horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
+                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
                                     break;
-                                // Beveled Length && Outward Xpansion
-                                case 1:
-                                case 2:
-                                    const theta = fig.angles[i];
-                                    const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                                    const adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
-                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, (theta < TAU_Q) ? -adjacent_side : adjacent_side);
+                                case 1: // Beveled Length
+                                    const gk_horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
+                                    const gk_thickness_offset_pt = point_to(mid_pt, gk_horizontal_proj_vec, TIMBER_THICKNESS);
+                                    const gk_vertical_proj_vec = cross_product(gk_horizontal_proj_vec, first_2_sec_vec);
 
-                                    thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
+                                    theta = angle(thickness_slope_offset_pt, mid_pt, gk_thickness_offset_pt);
+                                    opposite_side = TIMBER_THICKNESS * Math.tan(theta);
+                                    hypotenuse = TIMBER_THICKNESS / Math.cos(theta);
+                                    thickness_offset_pt = point_to(mid_pt, slope_vec, hypotenuse)
+                                    vertical_proj_vec = gk_vertical_proj_vec;
+                                    horizontal_proj_vec = slope_vec;
+                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH - opposite_side);
 
-                                    horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
-                                    this.add_vertex(vertices, pivot_pt);
-                                    this.add_vertex(vertices, thickness_offset_pt);
-                                    this.add_vertex(vertices, mid_pt);
+                                    console.log("gk_thickness_offset_pt", gk_thickness_offset_pt)
+                                    console.log("thickness_offset_pt", thickness_offset_pt)
+                                    console.log("width_offset_pt", width_offset_pt)
+                                    this.add_vertex(vertices, gk_thickness_offset_pt)
+                                    this.add_vertex(vertices, thickness_offset_pt)
+                                    this.add_vertex(vertices, width_offset_pt)
 
+                                    break;
 
-                                    console.log(rad2deg(angle(first_pt, mid_pt, thickness_offset_pt)))
+                                case 2: // Outward Xpansion
+                                    thickness_offset_pt = thickness_slope_offset_pt;
+                                    horizontal_proj_vec = slope_vec;
+
                                     // Add Hack to avoid issues with bad cross_products on 90° angles
-                                    if (to_decimal(theta) == to_decimal(TAU_Q)) {
-                                        vertical_proj_vec = cross_product(mul(first_2_sec_vec, -1), first_2_prev_vec);
-                                    } else {
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
-                                    }
+                                    vertical_proj_vec = (to_decimal(theta) == to_decimal(TAU_Q))
+                                        ? cross_product(first_2_sec_vec, first_2_prev_vec)
+                                        : mul(cross_product(horizontal_proj_vec, first_2_prev_vec), -1);
 
-                                    // Reverse direction for outward Expansion
-                                    if (ASSEMBLY_METHOD == 2) {
-                                        vertical_proj_vec = mul(vertical_proj_vec, -1);
-                                    }
+                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
                                     break;
                             }
-
-                            width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                             // Push vectors
                             ccw_vecs[spi] = first_2_sec_vec;
@@ -2199,15 +2209,10 @@
                             //Push Planes
                             switch (ASSEMBLY_METHOD) {
                                 case 0: // GoodKarma
+                                case 1: // Beveled Length
                                     // Use vanishing pt for wall
                                     wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
                                     break;
-                                case 1: // Beveled Length
-
-                                    rotated_thickness_offset_pts.push(thickness_offset_pt)
-                                    rotated_thickness_offset_pts.push(rotate_around_vertical_axis(thickness_offset_pt, INCR_RAD))
-                                    rotated_thickness_offset_pts.push(rotate_around_vertical_axis(thickness_offset_pt, -INCR_RAD))
-
                                 case 2: // Outward Xpansion
                                     // Use vertical proj rather vanishing pt
                                     wall_planes[spi] = points_2_plane(
@@ -2228,49 +2233,6 @@
                             spi += 1;
                         });
                     });
-
-                    if (ASSEMBLY_METHOD == 1) { // Only for Beveled Length
-                        spi = 0
-                        _.forEach(envelop_3D, (fig, j) => {
-
-                            // Calculate vectors and projected points to avoid multiple calculations
-                            _.forEach(fig.points, (first_pt, i) => {
-                                if (j > 1 && j < envelop_3D.length - 1) {
-                                    const mid_pt = mid_pts[spi];
-                                    const thickness_offset_pt = thickness_offset_pts[spi];
-
-                                    // Get vectors
-                                    const pt_to_compare = point_to(mid_pt, sub(mid_pt, thickness_offset_pt), TIMBER_THICKNESS);
-                                    const closest_pts = _.sortBy(
-                                        rotated_thickness_offset_pts.map((pt) => {
-                                            return {
-                                                'point': pt,
-                                                'distance': dist(pt_to_compare, pt),
-                                                'same': pt == thickness_offset_pt
-                                            };
-                                        }),
-                                        ['same', 'distance']
-                                    );
-                                    const closest_pt = closest_pts[0].point;
-                                    const dihedral_pt = midpoint(closest_pt, thickness_offset_pt)
-
-                                    // this.add_vertex(vertices, mid_pt)
-                                    // this.add_vertex(vertices, closest_pt)
-                                    // this.add_vertex(vertices, dihedral_pt)
-
-                                    vanishing_lines.push([closest_pt, mid_pt]);
-
-                                    wall_planes[spi] = points_2_plane(
-                                        first_pt,
-                                        mid_pt,
-                                        dihedral_pt
-                                    );
-                                }
-
-                                spi += 1;
-                            });
-                        });
-                    }
 
                     // reset point index counter
                     spi = 0
