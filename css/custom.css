@@ -74,8 +74,8 @@
 
 .aligned-form .input-group .form-range,
 .aligned-form .input-group .form-range {
-    min-width: 32%;
-    max-width: 32%;
+    min-width: 42%;
+    max-width: 42%;
 }
 
 
@@ -115,9 +115,13 @@
     transition: margin-left .1s ease-in-out
 }
 
+.offcanvas{
+    max-width : 380px !important;
+}
+
 @media (min-width: 1280px) {
     .offcanvas.show + .auto-shift {
-        margin-right: 400px !important;
+        margin-right: 380px !important;
     }
 }
 

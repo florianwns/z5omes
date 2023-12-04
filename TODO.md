@@ -27,9 +27,21 @@
 * Option des couleurs : Slope/Rotation Angle or Group by Area
 * Rajouter le mode plein écran pour la 3D
 * Raccourci clavier à afficher
+* Réparer la méthode beveled 
+* Rajouter les montants de renforts horizontal/vertical
+* Couleur par montants qui sont les mêmes
 
 
 ## A faire
+
+  
+* Et enfin dessiner les côtes (mode acidome) de chaque montants
+  * Commencer à dessiner la premier polygone (vue de dessus)
+  * La hauteur du dessin est fixe
+  * Sa largeur est donc relative.... on peut la tronquer avec des pointillés
+  * l'angle de coupe arrière est dessinée en pointillés
+  * Ajouter les indexs des montants/faces sur la 3D
+
 
 * Utiliser le LRU Cache ?? je sais trop si c'est nécessaire.... 
 ```
@@ -38,14 +50,8 @@ const ANGLES2COLOR_CACHE = new LRU(10);
 ANGLES2COLOR_CACHE.get(TAU);
 ```
 
-* Rajouter les montants de renforts horizontal/vertical (1, 2, 3)
-  
-* Et enfin dessiner les côtes (mode acidome) de chaque montants
+* Rajouter une option pour surelever le zome. avec des murs
 
+* Ajouter une  devanture 
+  
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
-
-* Couleur par montants qui sont les mêmes
-
-* Affichage de message :
-    * Téléchargement d'un fichier 3D ou PRINT
-  
