@@ -234,23 +234,31 @@
 
                 <!-- Assembly method -->
                 <div x-show="params.help_is_displayed">
-                    <b>AM</b> : Assembly method (slider) and direction (button)
+                    <b>AM</b> : from left to right :
+                    <ul>
+                        <li>Xpansion direction (button)</li>
+                        <li>Assembly method (select)</li>
+                        <li>Assembly direction (button)</li>
+                    </ul>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Assembly method">
                     AM
-                    <i class="fa-thin"
-                       :class="(params.assembly_method < 2)? `fa-arrow-down-from-line` : `fa-arrow-up-from-line`"></i>
                 </span>
-                    <input class="form-control form-range" min="0" max="2" step="1" type="range"
-                           x-model.number="params.assembly_method" x-ref="assembly_method_slider">
+                    <button class="btn btn-primary" type="button"
+                            :class="(params.assembly_method == 2)? `disabled`: ``"
+                            data-bs-toggle="tooltip"
+                            title="Xpansion direction : ↑ outwards or ↓ inwards"
+                            @click="params.xpansion_direction = -params.xpansion_direction">
+                        <i class="fa-solid fa-fw"
+                           :class="(params.xpansion_direction < 0 || params.assembly_method == 2)? `fa-arrow-up-from-line` : `fa-arrow-down-from-line`"></i>
+                    </button>
                     <select class="form-select" aria-label="Assembly method"
-                            x-model.lazy.number="params.assembly_method">
+                            x-model.number="params.assembly_method">
                         <option selected value=0>GoodKarma</option>
-                        <option value=1>Beveled Length</option>
+                        <option value=1>Beveled GoodKarma</option>
                         <option value=2>Outward Xpansion</option>
                     </select>
-
                     <button class="btn btn-primary" type="button"
                             data-bs-toggle="tooltip"
                             title="Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)"
@@ -261,9 +269,8 @@
                     </button>
                 </div>
 
-
                 <!-- Vanishing point -->
-                <div x-show="params.assembly_method == 0">
+                <div x-show="params.assembly_method < 2">
                     <div x-show="params.help_is_displayed">
                         <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
                     </div>
@@ -782,7 +789,7 @@
 <script type="text/javascript">
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
-    const DEBUG = false;
+    const DEBUG = true;
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
@@ -1405,7 +1412,7 @@
 
                     // Display vanishing lines
                     {
-                        const material = new THREE.LineBasicMaterial({color: 0x00FFFF});
+                        const material = new THREE.LineBasicMaterial({color: 0x00ffff});
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
                             const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -1638,6 +1645,7 @@
                     z_vanishing_point_in_mm: 0,
                     assembly_method: 0,
                     assembly_direction: 0,
+                    xpansion_direction: 1,
 
                     // Commons parameters
                     help_is_displayed: false,
@@ -1667,7 +1675,6 @@
                     _.forEach(Object.keys(this.params), key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
-                            sync_url_from_param(key, value);
                             this.__make_zome();
                         })
                     });
@@ -1971,7 +1978,7 @@
 
                                 // Add only the first piece, because only color after that
                                 if (i == 0) {
-                                    fig = (IS_RHOMBUS) ? new Rhombus([A, B, D, C]) : new Kite([A, B, D, C]);
+                                    fig = new CoplanarConvex3DPolygon([A, B, D, C]);
                                     envelop_3D.push(fig);
                                 }
 
@@ -1992,7 +1999,7 @@
 
                                 // Add Truncated Kite to figs
                                 if (i == 0) {
-                                    fig = new TruncatedKite([A, B, E, F, C])
+                                    fig = new CoplanarConvex3DPolygon([A, B, E, F, C])
                                     envelop_3D.push(fig);
                                 }
 
@@ -2032,7 +2039,7 @@
                             if (far_enough) {
                                 // Add triangle to figs
                                 if (iT == 0) {
-                                    fig = new Triangle([A, B, C]);
+                                    fig = new CoplanarConvex3DPolygon([A, B, C]);
                                     envelop_3D.push(fig);
                                 }
                             }
@@ -2050,7 +2057,7 @@
                     // Finally add the base piece
                     let base = null;
                     if (base_vertices.length >= 3) {
-                        fig = new Convex3DPolygon(base_vertices.map(iV => vertices[iV]))
+                        fig = new CoplanarConvex3DPolygon(base_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a base
                         const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
@@ -2062,107 +2069,161 @@
                     // Compute the vanishing point depends on parameters (?)
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.params.assembly_direction;
+                    const XPANSION_DIRECTION = this.params.xpansion_direction;
 
                     const spiral_num_points = _.reduce(envelop_3D, (num, fig) => num += fig.num_points, 0);
-                    const vanishing_lines = new Array(spiral_num_points);
                     const skeleton_3D = new Array(spiral_num_points);
+                    let vanishing_lines = []; // new Array(spiral_num_points);
+
+                    const ccw_vecs = new Array(spiral_num_points),
+                        cw_vecs = new Array(spiral_num_points),
+                        mid_pts = new Array(spiral_num_points),
+                        thickness_offset_pts = new Array(spiral_num_points),
+                        width_offset_pts = new Array(spiral_num_points),
+                        horizontal_proj_vecs = new Array(spiral_num_points),
+                        wall_planes = new Array(spiral_num_points),
+                        shifted_wall_planes = new Array(spiral_num_points),
+                        previous_indexes = new Array(spiral_num_points),
+                        next_indexes = new Array(spiral_num_points),
+                        dihedral_angles = new Array(spiral_num_points);
 
                     // Freeze vanishing pt
-                    const vanishing_pt = [
-                        0,
-                        (ASSEMBLY_METHOD === 0)
-                            ? this.params.z_vanishing_point_in_mm
-                            : this.z_centroid,
-                        0
-                    ];
+                    const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
+
+
+                    // Compute dihedral angle for all points
+                    let spi = 0;
+                    _.forEach(envelop_3D, (fig, j) => {
+                        const num_points = fig.points.length;
+                        const plane_above = (j > 0)
+                            ? envelop_3D[j - 1].plane
+                            : rotate_around_vertical_axis(fig.plane, -INCR_RAD);
+
+                        const plane_below = (j < envelop_3D.length - 1)
+                            ? envelop_3D[j + 1].plane
+                            : rotate_around_vertical_axis(fig.plane, -INCR_RAD);
+
+                        const dihedral_angle_with_plane_above = dihedral_angle_between_planes(fig.plane, plane_above);
+                        const dihedral_angle_with_plane_below = dihedral_angle_between_planes(fig.plane, plane_below);
+
+                        _.forEach(fig.points, (first_pt, i) => {
+                            if (i == 0 || i == num_points - 1) {
+                                dihedral_angles[spi] = dihedral_angle_with_plane_above;
+                            } else if (num_points >= 4 && (i == 1 || i == num_points - 2)) {
+                                dihedral_angles[spi] = dihedral_angle_with_plane_below;
+                            } else {
+                                dihedral_angles[spi] = TAU_Q; /// 90° ???
+                            }
+                            spi += 1;
+                        });
+                    });
 
                     // Build Timbers using the GoodKarma assembly method
-                    let spiral_point_index = 0; //
-                    _.forEach(envelop_3D, (fig) => {
-                        const ccw_vecs = new Array(fig.num_points),
-                            cw_vecs = new Array(fig.num_points),
-                            mid_pts = new Array(fig.num_points),
-                            thickness_offset_pts = new Array(fig.num_points),
-                            width_offset_pts = new Array(fig.num_points),
-                            horizontal_proj_vecs = new Array(fig.num_points),
-                            wall_planes = new Array(fig.num_points),
-                            shifted_wall_planes = new Array(fig.num_points);
+                    let theta, hypotenuse, adjacent_side, opposite_side, pivot_pt,
+                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec, real_timber_width;
 
-                        let thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
+                    spi = 0; // spiral point index
+                    let first_index = 0;
+                    _.forEach(envelop_3D, (fig, j) => {
+                        first_index = spi;
 
                         // Calculate vectors and projected points to avoid multiple calculations
+                        real_timber_width = null;
                         _.forEach(fig.points, (first_pt, i) => {
-                            const prev_pt = fig.points[(fig.num_points + i - 1) % fig.num_points];
-                            const sec_pt = fig.points[(i + 1) % fig.num_points];
+                            const next_index = (i + 1) % fig.num_points;
+                            const previous_index = (fig.num_points + i - 1) % fig.num_points;
+
+                            previous_indexes[spi] = first_index + previous_index;
+                            next_indexes[spi] = first_index + next_index;
+
+                            const prev_pt = fig.points[previous_index];
+                            const sec_pt = fig.points[next_index];
 
                             const first_2_sec_vec = sub(sec_pt, first_pt);
                             const first_2_prev_vec = sub(prev_pt, first_pt);
 
                             const mid_pt = midpoint(first_pt, sec_pt);
+                            const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
+
+
+
 
                             switch (ASSEMBLY_METHOD) {
-                                // GoodKarma
-                                case 0:
-                                    const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
-
+                                case 0: // GoodKarma
                                     horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
+
+                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
+                                    real_timber_width = TIMBER_WIDTH;
+
+                                    // Multiply vertical proj by xpansion direction
+                                    vertical_proj_vec = mul(vertical_proj_vec, XPANSION_DIRECTION);
                                     break;
-                                // Beveled Length && Outward Xpansion
-                                case 1:
-                                case 2:
-                                    const theta = fig.angles[i];
-                                    const hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                                    const adjacent_side = Math.abs(TIMBER_THICKNESS / Math.tan(theta));
-                                    const pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
+
+                                case 1: // Beveled GoodKarma
+                                case 2: // Outward Xpansion
+                                    theta = fig.angles[i];
+                                    hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
+                                    adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
+                                    pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
 
                                     thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
                                     horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
 
-                                    // Add Hack to avoid issues with bad cross_products on 90° angles
                                     if (to_decimal(theta) == to_decimal(TAU_Q)) {
-                                        vertical_proj_vec = cross_product(mul(first_2_sec_vec, -1), first_2_prev_vec);
-                                    } else {
+                                        // Add Hack to avoid issues with bad cross_products on 90° angles
+                                        vertical_proj_vec = cross_product(first_2_sec_vec, first_2_prev_vec);
+                                    } else if (theta > TAU_Q) {
+                                        // Change direction if theta is greater than 90°,
+                                        // Because pivot point is after mid_pt, so the direction is opposite
                                         vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
+                                    } else {
+                                        // The normal way if theta is smaller than 90 °
+                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(first_2_prev_vec, -1));
                                     }
+                                    real_timber_width = TIMBER_WIDTH;
 
-                                    // Reverse direction for outward Expansion
-                                    if (ASSEMBLY_METHOD == 2) {
-                                        vertical_proj_vec = mul(vertical_proj_vec, -1);
+                                    if(ASSEMBLY_METHOD == 1){
+                                        vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
+
+                                        wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
+                                        width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, real_timber_width);
+
+                                        const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[spi])
+                                        const opposite_thickness = dist(opposite_mid_pt, width_offset_pt);
+
+                                        // If opposite width is superior than TIMBER_THICKNESS
+                                        if(opposite_thickness > TIMBER_THICKNESS){
+                                            // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
+                                            const thickness_delta = opposite_thickness - TIMBER_THICKNESS;
+                                            thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS - thickness_delta)
+                                        }
                                     }
-                                    break;
                             }
 
-                            width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
+                            width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, real_timber_width);
 
                             // Push vectors
-                            ccw_vecs[i] = first_2_sec_vec;
-                            cw_vecs[i] = first_2_prev_vec;
-                            horizontal_proj_vecs[i] = horizontal_proj_vec;
+                            ccw_vecs[spi] = first_2_sec_vec;
+                            cw_vecs[spi] = first_2_prev_vec;
+                            horizontal_proj_vecs[spi] = horizontal_proj_vec;
 
                             // Push points
-                            mid_pts[i] = mid_pt;
-                            thickness_offset_pts[i] = thickness_offset_pt;
-                            width_offset_pts[i] = width_offset_pt;
+                            mid_pts[spi] = mid_pt;
+                            thickness_offset_pts[spi] = thickness_offset_pt;
+                            width_offset_pts[spi] = width_offset_pt;
 
                             //Push Planes
                             switch (ASSEMBLY_METHOD) {
-                                // GoodKarma && Beveled Length
-                                case 0:
-                                case 1:
+                                case 0: // GoodKarma
+                                case 1: // Beveled GoodKarma
                                     // Use vanishing pt for wall
-                                    wall_planes[i] = points_2_plane(
-                                        first_pt,
-                                        mid_pt,
-                                        vanishing_pt
-                                    );
-
+                                    wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
                                     break;
-                                // Outward Xpansion
-                                case 2:
+                                case 2: // Outward Xpansion
                                     // Use vertical proj rather vanishing pt
-                                    wall_planes[i] = points_2_plane(
+                                    wall_planes[spi] = points_2_plane(
                                         first_pt,
                                         mid_pt,
                                         point_to(mid_pt, vertical_proj_vec, 100)
@@ -2171,25 +2232,31 @@
                             }
 
                             // Same base for shifted wall
-                            shifted_wall_planes[i] = points_2_plane(
+                            shifted_wall_planes[spi] = points_2_plane(
                                 point_to(thickness_offset_pt, first_2_sec_vec, 100),
                                 thickness_offset_pt,
                                 width_offset_pt,
                             );
-                        });
 
+                            spi += 1;
+                        });
+                    });
+
+                    // reset point index counter
+                    spi = 0
+                    _.forEach(envelop_3D, (fig) => {
                         // Build the prism
-                        _.forEach(fig.points, (first_pt, i) => {
-                            const prev_index = (fig.num_points + i - 1) % fig.num_points;    // previous index
-                            const next_index = (i + 1) % fig.num_points;                     // next index
+                        _.forEach(fig.points, (first_pt) => {
+                            const prev_index = previous_indexes[spi];    // previous index
+                            const next_index = next_indexes[spi];        // next index
 
                             // Get polygon points, first is the current point and last is n-1 point
-                            thickness_offset_pt = thickness_offset_pts[i];
-                            width_offset_pt = width_offset_pts[i];
+                            thickness_offset_pt = thickness_offset_pts[spi];
+                            width_offset_pt = width_offset_pts[spi];
 
                             // Get vectors
-                            const mid_pt = mid_pts[i];
-                            const first_2_sec_vec = ccw_vecs[i];
+                            const mid_pt = mid_pts[spi];
+                            const first_2_sec_vec = ccw_vecs[spi];
                             const sec_2_first_vec = cw_vecs[next_index];
 
                             // Compute Planes to make point intersections
@@ -2215,8 +2282,8 @@
                             }
 
                             // Compute planes to find intersection points
-                            horizontal_proj_vec = horizontal_proj_vecs[i];
-                            const along_plane = wall_planes[i]
+                            horizontal_proj_vec = horizontal_proj_vecs[spi];
+                            const along_plane = wall_planes[spi]
                             const mid_pt_with_vertical_proj = plan_intersection(
                                 width_offset_pt, horizontal_proj_vec, along_plane
                             )
@@ -2235,11 +2302,12 @@
 
                             // Build a TrapezoidalPrism
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], fig.color);
-                            skeleton_3D[spiral_point_index] = timber_prism;
+                            skeleton_3D[spi] = timber_prism;
 
-                            // Add vanishing line OK
-                            vanishing_lines[spiral_point_index] = [vanishing_pt, first_pt];
-                            spiral_point_index += 1;
+                            // Add vanishing line
+                            vanishing_lines.push([vanishing_pt, first_pt]);
+
+                            spi += 1;
                         });
                     });
 
@@ -2313,7 +2381,7 @@
                         planar_envelop_2D[i] = planar_fig;
 
                         // Adapt points for 3D view
-                        mandala_envelop_3D[i] = new Convex3DPolygon(
+                        mandala_envelop_3D[i] = new CoplanarConvex3DPolygon(
                             planar_points.map(p => [p[0], p[2], p[1]]),
                             planar_fig.color,
                         );
@@ -2336,6 +2404,7 @@
                     // Dispatch zome
                     this.$dispatch('zome-is-made');
 
+                    sync_url_from_params(this.params);
                     this.is_computing = false;
                 },
             };
