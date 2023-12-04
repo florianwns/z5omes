@@ -789,7 +789,7 @@
 <script type="text/javascript">
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
-    const DEBUG = false;
+    const DEBUG = true;
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
@@ -2085,21 +2085,51 @@
                         wall_planes = new Array(spiral_num_points),
                         shifted_wall_planes = new Array(spiral_num_points),
                         previous_indexes = new Array(spiral_num_points),
-                        next_indexes = new Array(spiral_num_points);
+                        next_indexes = new Array(spiral_num_points),
+                        dihedral_angles = new Array(spiral_num_points);
 
                     // Freeze vanishing pt
                     const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
+
+
+                    // Compute dihedral angle for all points
+                    let spi = 0;
+                    _.forEach(envelop_3D, (fig, j) => {
+                        const num_points = fig.points.length;
+                        const plane_above = (j > 0)
+                            ? envelop_3D[j - 1].plane
+                            : rotate_around_vertical_axis(fig.plane, -INCR_RAD);
+
+                        const plane_below = (j < envelop_3D.length - 1)
+                            ? envelop_3D[j + 1].plane
+                            : rotate_around_vertical_axis(fig.plane, -INCR_RAD);
+
+                        const dihedral_angle_with_plane_above = dihedral_angle_between_planes(fig.plane, plane_above);
+                        const dihedral_angle_with_plane_below = dihedral_angle_between_planes(fig.plane, plane_below);
+
+                        _.forEach(fig.points, (first_pt, i) => {
+                            if (i == 0 || i == num_points - 1) {
+                                dihedral_angles[spi] = dihedral_angle_with_plane_above;
+                            } else if (num_points >= 4 && (i == 1 || i == num_points - 2)) {
+                                dihedral_angles[spi] = dihedral_angle_with_plane_below;
+                            } else {
+                                dihedral_angles[spi] = TAU_Q; /// 90° ???
+                            }
+                            spi += 1;
+                        });
+                    });
 
                     // Build Timbers using the GoodKarma assembly method
                     let theta, hypotenuse, adjacent_side, opposite_side, pivot_pt,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec, real_timber_width;
 
-                    let spi = 0; // spiral point index
+                    spi = 0; // spiral point index
                     let first_index = 0;
-                    _.forEach(envelop_3D, (fig) => {
+                    _.forEach(envelop_3D, (fig, j) => {
                         first_index = spi;
 
                         // Calculate vectors and projected points to avoid multiple calculations
+                        real_timber_width = null;
                         _.forEach(fig.points, (first_pt, i) => {
                             const next_index = (i + 1) % fig.num_points;
                             const previous_index = (fig.num_points + i - 1) % fig.num_points;
@@ -2116,13 +2146,8 @@
                             const mid_pt = midpoint(first_pt, sec_pt);
                             const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
 
-                            theta = fig.angles[i];
-                            hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                            adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
-                            pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
 
-                            const thickness_slope_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
-                            const slope_vec = sub(thickness_slope_offset_pt, mid_pt)
+
 
                             switch (ASSEMBLY_METHOD) {
                                 case 0: // GoodKarma
@@ -2137,30 +2162,15 @@
                                     vertical_proj_vec = mul(vertical_proj_vec, XPANSION_DIRECTION);
                                     break;
 
-                                case 1: // Beveled GoodKarma
-                                    // Find GoodKarma thickness_offset pt
-                                    const gk_horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
-                                    const gk_thickness_offset_pt = point_to(mid_pt, gk_horizontal_proj_vec, TIMBER_THICKNESS);
-                                    const gk_vertical_proj_vec = cross_product(gk_horizontal_proj_vec, first_2_sec_vec);
-
-                                    // Compute triangle for bevel adjustment
-                                    theta = angle(thickness_slope_offset_pt, mid_pt, gk_thickness_offset_pt);
-                                    hypotenuse = TIMBER_THICKNESS / Math.cos(theta);
-                                    thickness_offset_pt = point_to(mid_pt, slope_vec, hypotenuse)
-                                    vertical_proj_vec = gk_vertical_proj_vec;
-                                    horizontal_proj_vec = slope_vec;
-
-                                    // Subtract opposite_side to have the real timber width
-                                    opposite_side = TIMBER_THICKNESS * Math.tan(theta);
-                                    real_timber_width = TIMBER_WIDTH - opposite_side;
-
-                                    // Multiply vertical proj by xpansion direction
-                                    vertical_proj_vec = mul(vertical_proj_vec, XPANSION_DIRECTION);
-                                    break;
-
+                                case 1:
                                 case 2: // Outward Xpansion
-                                    thickness_offset_pt = thickness_slope_offset_pt;
-                                    horizontal_proj_vec = slope_vec;
+                                    theta = fig.angles[i];
+                                    hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
+                                    adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
+                                    pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
+
+                                    thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
+                                    horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
 
                                     if (to_decimal(theta) == to_decimal(TAU_Q)) {
                                         // Add Hack to avoid issues with bad cross_products on 90° angles
@@ -2173,8 +2183,25 @@
                                         // The normal way if theta is smaller than 90 °
                                         vertical_proj_vec = cross_product(horizontal_proj_vec, mul(first_2_prev_vec, -1));
                                     }
-
                                     real_timber_width = TIMBER_WIDTH;
+
+                                case 1: // Beveled GoodKarma
+                                    vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
+
+                                    wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
+                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, real_timber_width);
+
+                                    const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[spi])
+                                    const opposite_thickness = dist(opposite_mid_pt, width_offset_pt);
+
+                                    // If opposite width is superior than TIMBER_THICKNESS
+                                    if(opposite_thickness > TIMBER_THICKNESS){
+                                        // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
+                                        const thickness_delta = opposite_thickness - TIMBER_THICKNESS;
+                                        thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS - thickness_delta)
+                                    }
+
+
                                     break;
                             }
 
