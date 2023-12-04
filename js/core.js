@@ -85,7 +85,7 @@ function sync_params_from_url(params) {
     return params;
 }
 
-function sync_url_from_param(key, value) {
+function __sync_url_from_param(key, value) {
     if (!key) return;
 
     const decoded_params = decode_url_params("q")
@@ -94,14 +94,19 @@ function sync_url_from_param(key, value) {
     sync_url_from_params(decoded_params)
 }
 
+const sync_url_from_param = _.debounce(__sync_url_from_param, 10);
 
-function sync_url_from_params(params) {
+
+function __sync_url_from_params(params) {
     if (!params) return;
 
     let url = new URL(window.location.href);
     url.searchParams.set("q", encode_params(params));
     history.pushState(null, document.title, url.toString());
 }
+
+const sync_url_from_params = _.debounce(__sync_url_from_params, 10);
+
 
 // -----------------------------------
 // ========== 3D Operations ==========

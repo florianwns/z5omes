@@ -1675,7 +1675,6 @@
                     _.forEach(Object.keys(this.params), key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
-                            sync_url_from_param(key, value);
                             this.__make_zome();
                         })
                     });
@@ -2162,7 +2161,7 @@
                                     vertical_proj_vec = mul(vertical_proj_vec, XPANSION_DIRECTION);
                                     break;
 
-                                case 1:
+                                case 1: // Beveled GoodKarma
                                 case 2: // Outward Xpansion
                                     theta = fig.angles[i];
                                     hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
@@ -2185,24 +2184,22 @@
                                     }
                                     real_timber_width = TIMBER_WIDTH;
 
-                                case 1: // Beveled GoodKarma
-                                    vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
+                                    if(ASSEMBLY_METHOD == 1){
+                                        vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
 
-                                    wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
-                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, real_timber_width);
+                                        wall_planes[spi] = points_2_plane(first_pt, mid_pt, vanishing_pt);
+                                        width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, real_timber_width);
 
-                                    const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[spi])
-                                    const opposite_thickness = dist(opposite_mid_pt, width_offset_pt);
+                                        const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[spi])
+                                        const opposite_thickness = dist(opposite_mid_pt, width_offset_pt);
 
-                                    // If opposite width is superior than TIMBER_THICKNESS
-                                    if(opposite_thickness > TIMBER_THICKNESS){
-                                        // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
-                                        const thickness_delta = opposite_thickness - TIMBER_THICKNESS;
-                                        thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS - thickness_delta)
+                                        // If opposite width is superior than TIMBER_THICKNESS
+                                        if(opposite_thickness > TIMBER_THICKNESS){
+                                            // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
+                                            const thickness_delta = opposite_thickness - TIMBER_THICKNESS;
+                                            thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS - thickness_delta)
+                                        }
                                     }
-
-
-                                    break;
                             }
 
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, real_timber_width);
@@ -2407,6 +2404,7 @@
                     // Dispatch zome
                     this.$dispatch('zome-is-made');
 
+                    sync_url_from_params(this.params);
                     this.is_computing = false;
                 },
             };
