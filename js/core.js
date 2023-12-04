@@ -220,36 +220,6 @@ function triangle_area_from_points(A, B, C) {
     return area;
 }
 
-function triangle_rectangle_sides(theta, opposite_side){
-    const hypotenuse = opposite_side / Math.sin(theta);
-    const adjacent_side = opposite_side / Math.tan(theta);
-
-    return [hypotenuse, adjacent_side]
-}
-
-function rotate_around_vertical_axis(point, theta) {
-    // in this project, y is the vertical axis
-    const [x, y, z] = point;
-    const cos_theta = Math.cos(theta);
-    const sin_theta = Math.sin(theta);
-
-    // Matrice de rotation autour de l'axe des Y
-    const rotation_matrix = [
-        cos_theta, 0, sin_theta,
-        0, 1, 0,
-        -sin_theta, 0, cos_theta
-    ];
-
-    // Application de la matrice de rotation au point
-    const rotated_point = [
-        rotation_matrix[0] * x + rotation_matrix[1] * y + rotation_matrix[2] * z,
-        rotation_matrix[3] * x + rotation_matrix[4] * y + rotation_matrix[5] * z,
-        rotation_matrix[6] * x + rotation_matrix[7] * y + rotation_matrix[8] * z
-    ];
-
-    return rotated_point;
-}
-
 function plan_intersection(p1, vec1, plane1) {
     const [a, b, c, d] = plane1;
 
@@ -302,22 +272,6 @@ function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     let y = delta[0] * sin_theta + delta[1] * cos_theta + origin[1];
     return [x, y, 0]
 }
-
-function dihedral_angle(a, b, c) {
-    // Compute the dihedral angle from 3 angles
-    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
-    return Math.acos(
-        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
-    )
-}
-
-
-function dihedral_angle_between_planes(plane1, plane2) {
-    const dot = dot_product(plane1, plane2);
-    const theta = Math.PI - Math.acos(dot / (len(plane1) * len(plane2)));
-    return theta;
-}
-
 
 // ---------------------------------
 // ========== Conversions ==========
@@ -613,6 +567,7 @@ class CoplanarConvex3DPolygon extends BaseGeometry {
             return;
         }
 
+
         // Call parent constructor
         super(color);
 
@@ -687,6 +642,7 @@ class CoplanarConvex3DPolygon extends BaseGeometry {
             }
         });
     }
+
 
     planar() {
         // Make a reference to planar 3D points to 2D, Take first point like origin
