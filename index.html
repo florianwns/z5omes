@@ -19,6 +19,7 @@
     <!-- Stylesheets -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
+    <link href="css/flag-icons.css" rel="stylesheet">
     <link href="css/custom.css?v=1.0.6" rel="stylesheet">
 </head>
 
@@ -33,18 +34,7 @@
          id="offcanvasSettings" aria-labelledby="settingsLabel">
 
         <div class="offcanvas-body">
-            <div class="d-flex align-items-center mb-3">
-                <h5 class="text-secondary my-1 me-3">
-                    <i class="fa-solid fa-rhombus me-1"></i>
-                    Shape
-                </h5>
-
-                <!-- Randomize Button -->
-                <button @click="randomize" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
-                        title="Randomize settings">
-                    <i class="fa-solid fa-dice"></i>
-                </button>
-
+            <div class="d-flex align-items-center mt-2 mb-3">
                 <!-- Reset Params Button -->
                 <button @click="reset_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
                         title="Reset settings">
@@ -63,6 +53,24 @@
                     <i class="fa-solid fa-link"></i>
                 </button>
 
+                <!-- Language Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-primary btn-sm p-1 dropdown-toggle"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="fi" :class="`fi-${params.language}`"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <template x-for="(obj, lng) in I18N_LANGUAGES" :key="lng">
+                            <li>
+                                <button class="dropdown-item" @click="set_language(lng)">
+                                    <span class="fi" :class="`fi-${lng}`"></span>
+                                    <span x-text="obj.name"></span>
+                                </button>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
                 <!-- Show Help -->
                 <button class="btn btn-sm p-1"
                         @click="params.help_is_displayed = !params.help_is_displayed"
@@ -79,12 +87,29 @@
                 </button>
             </div>
 
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="text-secondary my-1 me-3">
+                    <i class="fa-solid fa-rhombus me-1"></i>
+                    Shape
+                </h5>
+
+                <!-- Randomize Button -->
+                <button @click="randomize" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
+                        title="Randomize settings">
+                    <i class="fa-solid fa-dice"></i>
+                </button>
+            </div>
+
             <div class="text-muted small aligned-form">
                 <div x-show="params.help_is_displayed">
-                    <p>The shape of a <a href="https://en.wikipedia.org/wiki/Zome">zome</a> is determined by :</p>
+                    <p>
+                        The shape of a
+                        <a href="https://en.wikipedia.org/wiki/Zome">zome</a>
+                        is determined by :
+                    </p>
 
                     <!-- Num of Order -->
-                    <b>N</b> : Number of edges starting from the top of zome
+                    <b>N</b> : <span x-text="__t('help__number_order')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Num of order">N</span>
@@ -336,7 +361,7 @@
                         <i class="fa-brands fa-linkedin"></i>
                     </a>
 
-                    <button class="btn btn-primary" type="button"
+                    <button class="btn btn-primary btn-sm p-2 px-3" type="button"
                             data-bs-toggle="offcanvas"
                             data-bs-target="#offcanvasSettings" aria-controls="offcanvasSettings">
                         <i class="fa-solid fa-sliders"></i>
@@ -793,6 +818,9 @@
 <!-- Screenfull -->
 <script src="js/screenfull.min.js"></script>
 
+<!-- i18n -->
+<script src="i18n/i18n.js"></script>
+
 <!-- Core and geometry functions -->
 <script src="js/core.js?v=1.0.6"></script>
 
@@ -804,6 +832,7 @@
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
+    const I18_DEFAULT_LANGUAGE = "fr";
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
@@ -816,24 +845,6 @@
             trigger: "hover",
         })
     )
-
-
-    // Init i18n
-    i18next.init({
-        lng: 'en', // if you're using a language detector, do not define the lng option
-        debug: true,
-        resources: {
-            en: {
-                translation: {
-                    "key": "hello world"
-                }
-            }
-        }
-    });
-
-    const __ = i18next.t;
-
-
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
@@ -1659,8 +1670,11 @@
 
         Alpine.data('settings', () => {
             return {
-                // Group zome parameters
+                // Group parameters
                 params: {
+                    // Language parameters
+                    language: I18_DEFAULT_LANGUAGE,
+
                     // Shape Parameters
                     num: 10,                            // number of figs (kites or diamonds)
                     theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
@@ -1688,6 +1702,7 @@
                 is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
+                i18n_dictionary: {},
 
                 // Debouncers
                 __make_zome: null,
@@ -1695,21 +1710,24 @@
                 async init() {
                     this.__make_zome = _.debounce(this.make_zome, 1);
 
+                    // Language update listener
+                    this.$watch("params.language", (value) => {
+                        this.set_language(value);
+                    });
+
                     // Init params
                     this.params.z_vanishing_point_in_mm = this.z_centroid;
                     this.params = sync_params_from_url(this.params);
                     this.save_params(false);
-
-                    // First time push param in url
-                    sync_url_from_params(this.params);
 
                     // Add shape parameter listeners
                     _.forEach(Object.keys(this.params), key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
-                        })
+                        });
                     });
+
 
                     // Refresh the height_ratio if you change the zome params.num
                     this.$watch("params.num", (value) => {
@@ -1743,6 +1761,41 @@
                     clipboard.on('error', function (e) {
                         self.show_error();
                     });
+
+                    this.$watch("params.language", (value) => {
+                        console.log("lng", value)
+                    });
+                },
+                set_language(lng) {
+                    // verify that the language exists
+                    const new_lng = (I18N_LANGUAGES.hasOwnProperty(this.params.language) && I18N_LANGUAGES[this.params.language].hasOwnProperty("dictionary"))
+                        ? lng
+                        : I18_DEFAULT_LANGUAGE;
+
+                    this.i18n_dictionary = I18N_LANGUAGES[new_lng].dictionary;
+                    this.params.language = new_lng;
+                    sync_url_from_param("language", new_lng);
+                },
+                __t(key) {
+                    // Translation function
+                    if (this.i18n_dictionary.hasOwnProperty(key)) {
+                        return this.i18n_dictionary[key];
+                    } else if (this.i18n_default_dictionary.hasOwnProperty(key)) {
+                        return this.i18n_default_dictionary[key];
+                    }
+
+                    // Return the key if not found in language and default language dictionaries
+                    return key;
+                },
+                get i18n_default_dictionary() {
+                    if (!(I18N_LANGUAGES.hasOwnProperty(I18_DEFAULT_LANGUAGE)
+                        && I18N_LANGUAGES[I18_DEFAULT_LANGUAGE].hasOwnProperty("dictionary")
+                    )) {
+                        console.error(`This language '${I18_DEFAULT_LANGUAGE}' is not available`)
+                        return;
+                    }
+
+                    return I18N_LANGUAGES[I18_DEFAULT_LANGUAGE].dictionary;
                 },
                 show_error(error = null) {
                     self.show_toast("An error has occurred", "triangle-exclamation", true);
@@ -2430,6 +2483,7 @@
                     this.$dispatch('zome-is-made');
 
                     sync_url_from_params(this.params);
+
                     this.is_computing = false;
                 },
             };

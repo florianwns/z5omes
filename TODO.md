@@ -34,6 +34,11 @@
 
 ## A faire
 
+* Rajouter les limites de renforts.
+  
+* Rajouter une semelle pour mettre de niveau à la base.
+  
+* Rajouter un paramètre d'aire.
   
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
   * Commencer à dessiner la premier polygone (vue de dessus)
