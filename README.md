@@ -12,7 +12,7 @@ To make your own Zome, check the app [here](https://florianwns.github.io/z5omes/
 ## The Project
 
 This project was designed to be free and will never be charged for. 
-However, you have the right to [offer me a coffee](https://www.buymeacoffee.com/z5omes) ☕ if you want to help me in my approach.
+However, you have the right to [offer me a coffee](https://www.paypal.com/paypalme/z5omes) ☕ if you want to help me in my approach.
 
 🙏 I would first like to thank [Tim Hutton](https://github.com/timhutton/) from whom I took inspiration 
 for the trigonometry calculations ◁ and who allowed me to launch this project. 🚀
