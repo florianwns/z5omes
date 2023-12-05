@@ -90,7 +90,7 @@
             <div class="d-flex align-items-center mb-3">
                 <h5 class="text-secondary my-1 me-3">
                     <i class="fa-solid fa-rhombus me-1"></i>
-                    Shape
+                    <span x-text="i18n('shape')" class="up-first"></span>
                 </h5>
 
                 <!-- Randomize Button -->
@@ -102,14 +102,11 @@
 
             <div class="text-muted small aligned-form">
                 <div x-show="params.help_is_displayed">
-                    <p>
-                        The shape of a
-                        <a href="https://en.wikipedia.org/wiki/Zome">zome</a>
-                        is determined by :
-                    </p>
+                    <p class="mb-1" x-text="i18n('help_shape')"></p>
 
                     <!-- Num of Order -->
-                    <b>N</b> : <span x-text="__t('help__number_order')"></span>
+                    <b>N</b> :
+                    <span x-text="i18n('help_n_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Num of order">N</span>
@@ -120,8 +117,9 @@
                 </div>
 
                 <!-- Num of rhombus from the top -->
-                <div x-show="params.help_is_displayed"><b>M</b> : Number of <a
-                        href="https://en.wikipedia.org/wiki/Rhombus">rhombus</a> from top to bottom
+                <div x-show="params.help_is_displayed">
+                    <b>M</b> :
+                    <span x-text="i18n('help_m_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Num of rhombus from the top">M</span>
@@ -133,8 +131,9 @@
 
                 <!--  Shape angle of Zome -->
                 <div x-show="params.help_is_displayed">
-                    <b>Θ | F</b> : Shape angle(Θ) | number(F) which allows to calculate the first crown of zome. F =
-                    tan(Θ)<br>
+                    <b>Θ | F</b> :
+                    <span x-text="i18n('help_f_param')"></span>
+                    <br>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <button class="btn btn-primary text-start" type="button"
@@ -156,7 +155,8 @@
 
                 <!-- Height Ratio of Zome -->
                 <div x-show="params.help_is_displayed">
-                    <b>HR</b> : The height ratio (Set HR to 1 for an entire zome)
+                    <b>HR</b> :
+                    <span x-text="i18n('help_hr_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Height ratio">
@@ -176,8 +176,8 @@
 
                 <!-- Kite Ratio of Zome -->
                 <div x-show="params.help_is_displayed">
-                    <b>KR</b> : The kite ratio is the proportion between the length of the edges of the upper triangle
-                    and that of the lower triangle of the rhombus
+                    <b>KR</b> :
+                    <span x-text="i18n('help_kr_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                 <span class="input-group-text" data-bs-toggle="tooltip" title="Kite ratio">
@@ -201,7 +201,7 @@
             <div class="d-flex align-items-center mb-3">
                 <h5 class="text-secondary my-1 me-3">
                     <i class="fa-solid fa-frame rotate-45 me-1"></i>
-                    Framework
+                    <span x-text="i18n('framework')" class="up-first"></span>
                 </h5>
 
                 <!-- Paint Button -->
@@ -222,7 +222,8 @@
             <div class="text-muted small aligned-form">
                 <!-- Height of Zome -->
                 <div x-show="params.help_is_displayed">
-                    <b>ZH</b> : Zome height
+                    <b>ZH</b> :
+                    <span x-text="i18n('help_zh_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Zome height">ZH</span>
@@ -234,7 +235,8 @@
 
                 <!-- Timber width -->
                 <div x-show="params.help_is_displayed">
-                    <b>TW</b> : Timber width
+                    <b>TW</b> :
+                    <span x-text="i18n('help_tw_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Timber width">TW</span>
@@ -246,7 +248,8 @@
 
                 <!-- Timber thickness -->
                 <div x-show="params.help_is_displayed">
-                    <b>TT</b> : Timber thickness
+                    <b>TT</b> :
+                    <span x-text="i18n('help_tt_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Timber thickness">TT</span>
@@ -259,7 +262,8 @@
 
                 <!-- Strengthening of timbers -->
                 <div x-show="params.help_is_displayed">
-                    <b>ST</b> : Strengthening of timbers : none, horizontal or vertical
+                    <b>ST</b> :
+                    <span x-text="i18n('help_st_param')"></span>
                 </div>
                 <div class="input-group input-group-sm mb-3">
                     <span class="input-group-text" data-bs-toggle="tooltip" title="Strengthening of timbers">ST</span>
@@ -273,11 +277,12 @@
 
                 <!-- Assembly method -->
                 <div x-show="params.help_is_displayed">
-                    <b>AM</b> : from left to right :
+                    <b>AM</b> :
+                    <span x-text="i18n('help_am_param')"></span>
                     <ul>
-                        <li>Xpansion direction (button)</li>
-                        <li>Assembly method (select)</li>
-                        <li>Assembly direction (button)</li>
+                        <li x-text="i18n('help_am_param_1')"></li>
+                        <li x-text="i18n('help_am_param_2')"></li>
+                        <li x-text="i18n('help_am_param_3')"></li>
                     </ul>
                 </div>
                 <div class="input-group input-group-sm mb-3">
@@ -311,7 +316,8 @@
                 <!-- Vanishing point -->
                 <div x-show="params.assembly_method < 2">
                     <div x-show="params.help_is_displayed">
-                        <b>VP</b> : The Vanishing point is used to build GoodKarma geometry
+                        <b>VP</b> :
+                        <span x-text="i18n('help_vp_param')"></span>
                     </div>
                     <div class="input-group input-group-sm mb-3">
                         <span class="input-group-text" data-bs-toggle="tooltip" title="Vanishing point">VP</span>
@@ -832,7 +838,7 @@
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
-    const I18_DEFAULT_LANGUAGE = "fr";
+    const I18_DEFAULT_LANGUAGE = "en";
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
@@ -1776,7 +1782,7 @@
                     this.params.language = new_lng;
                     sync_url_from_param("language", new_lng);
                 },
-                __t(key) {
+                i18n(key) {
                     // Translation function
                     if (this.i18n_dictionary.hasOwnProperty(key)) {
                         return this.i18n_dictionary[key];
