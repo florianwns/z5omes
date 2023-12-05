@@ -53,7 +53,7 @@ const I18N_LANGUAGES = {
             help_n_param: "Le nombre de losanges tournant autour de l'axe vertical",
             help_m_param: "Le nombre de losanges de haut en bas",
             help_f_param: "Angle de forme(Θ) | Nombre(F) qui permet de calculer la première couronne du zome. F = tan(Θ)",
-            help_hr_param: "Le ratio de la hauteur est La part visible du zome (Réglez HR sur 1 pour un zome entier)",
+            help_hr_param: "Le ratio de la hauteur est la proportion visible du zome (Réglez HR sur 1 pour un zome entier)",
             help_kr_param: "Le ratio du cerf-volant est la proportion entre les bords supérieurs et inférieurs d'un losange",
 
             help_zh_param: "Hauteur de la part visible du zome",
