@@ -41,8 +41,18 @@ If you have any requests/questions, see any bugs,
 
 ![Screenshot of Z5omes.](/img/screenshot.png)
 
+## 🌎 Translations
 
-## Powered by : 
+I prefered use an homemade version of i18n, to make the app faster and lighter.
+
+So if you want add a new language to Z5omes, 
+you can modify the [i18n.js](i18n/i18n.js) file.
+
+Please, fork the project, commit your changes and pull a new request.
+
+🙏
+
+## ⚡ Powered by : 
 
 Most of the calculations were written in the code.
 However, for visualization as well as for the functional side within javascript, 
@@ -51,7 +61,7 @@ I relied on several libraries.
 > * [Lodash](https://lodash.com/) : The awesome JS toolbox. 🧰
 > * [ThreeJS](https://threejs.org/) : For 3D vizualisation.
 > * [AlpineJS](https://alpinejs.dev/) : A very good minimal framework for composing behavior directly in HTML.
-
+> * [Flag-Icons](https://github.com/lipis/flag-icons) : For flag languages
 
 ## Thanks To :
 
@@ -61,3 +71,4 @@ So, I would like to say a big thank you 🙏
 > * [Tim Hutton](https://github.com/timhutton/) whose github project inspired me for trigonometry and zome envelop calculation.
 > * [Dims Zomes](http://www.rusticdomes.com/software.html) who allowed me to check my data.
 > * [La tanière à mémé](https://www.domegeodesique-yourte.com/) for sharing knowledge particularly on the GoodKarma understanding.
+> * Every donors and members of the 'Zomes' community
