@@ -433,25 +433,25 @@
                                     <div class="ps-2 exports-container" style="top:0px;">
                                         <div class="vstack">
                                         <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                              data-bs-toggle="tooltip" title="Export to STL format"
+                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_STL')"
                                               @click="download_stl()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">STL</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" title="Export to PLY format"
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_PLY')"
                                                   @click="download_ply()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">PLY</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" title="Export to GLTF format"
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_GLTF')"
                                                   @click="download_gltf()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">GLTF</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" title="Export to OBJ format"
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_OBJ')"
                                                   @click="download_obj()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">OBJ</span>
@@ -464,9 +464,9 @@
                                         <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
-                                            <option selected value="skeleton_3D">3D Skeleton</option>
-                                            <option value="envelop_3D">3D Envelop</option>
-                                            <option value="mandala_envelop_3D">3D Mandala</option>
+                                            <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
+                                            <option value="envelop_3D" x-text="i18n('envelop_3D')"></option>
+                                            <option value="mandala_3D" x-text="i18n('mandala_3D')"></option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -487,7 +487,7 @@
                                             <button class="btn btn-primary"
                                                     x-show="can_use_screenfull"
                                                     @click="toggle_fullscreen"
-                                                    data-bs-toggle="tooltip" title="Fullscreen">
+                                                    data-bs-toggle="tooltip" :title="i18n('fullscreen')">
                                                 <i class="fa fa-expand"></i>
                                             </button>
                                         </div>
@@ -500,7 +500,7 @@
                                                     <div class="modal-header">
                                                         <h5 class="text-secondary my-1 me-3" id="shortcuts-modal-title">
                                                             <i class="fa-solid fa-keyboard me-1"></i>
-                                                            Keyboard shorcuts
+                                                            <span x-text="i18n('keyboard_shortcuts')"></span>
                                                         </h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                                 aria-label="Close"></button>
@@ -511,61 +511,61 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('S')">S
                                                                 </button>
-                                                                <span>Select <b>3D Skeleton</b> object</span>
+                                                                <span x-text="i18n('key_S_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('E')">E
                                                                 </button>
-                                                                <span>Select <b>3D Envelop</b> object</span>
+                                                                <span x-text="i18n('key_E_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('M')">M
                                                                 </button>
-                                                                <span>Select <b>3D Mandala</b> object</span>
+                                                                <span x-text="i18n('key_M_3D_view')"></span>
                                                             </li>
 
                                                             <!-- Camera view -->
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('H')">H
                                                                 </button>
-                                                                <span>Reset camera view</span>
+                                                                <span x-text="i18n('key_H_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('Left')">←
                                                                 </button>
-                                                                <span>Left side view</span>
+                                                                <span x-text="i18n('key_left_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('Up')">↑
                                                                 </button>
-                                                                <span>Top view</span>
+                                                                <span x-text="i18n('key_up_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('Right')">→
                                                                 </button>
-                                                                <span>Right side view</span>
+                                                                <span x-text="i18n('key_right_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('Down')">↓
                                                                 </button>
-                                                                <span>Bottom view</span>
+                                                                <span x-text="i18n('key_down_3D_view')"></span>
                                                             </li>
 
                                                             <!-- Object rotation -->
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key key-space me-2"
                                                                         @click="keydown(' ')"></button>
-                                                                <span>Spin on/off</span>
+                                                                <span x-text="i18n('key_space_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('*')">*
                                                                 </button>
-                                                                <span>Increase rotation speed</span>
+                                                                <span x-text="i18n('key_mul_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('/')">/
                                                                 </button>
-                                                                <span>Decrease rotation speed</span>
+                                                                <span x-text="i18n('key_div_3D_view')"></span>
                                                             </li>
                                                         </ul>
                                                     </div>
@@ -578,30 +578,32 @@
                                         <!-- Draw Vanishing Lines -->
                                         <div class="form-check form-switch me-2 mb-3"
                                              x-show="show_vanishing_lines_switch">
-                                            <label class="form-check-label" for="draw-vanishing-lines">Vanishing
-                                                Lines</label>
+                                            <label class="form-check-label" for="draw-vanishing-lines"
+                                                   x-text="i18n('vanishing_lines')"></label>
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                    id="draw-vanishing-lines" x-model="draw_vanishing_lines">
                                         </div>
 
                                         <!-- Draw Axis -->
                                         <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-axis-switch">Axis</label>
+                                            <label class="form-check-label" for="draw-axis-switch"
+                                                   x-text="i18n('axis')"></label>
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                    id="draw-axis-switch" x-model="draw_axis">
                                         </div>
 
                                         <!-- Draw Zome Vertices -->
                                         <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
-                                            <label class="form-check-label"
-                                                   for="draw-zome-vertices-switch">Vertices</label>
+                                            <label class="form-check-label" for="draw-zome-vertices-switch"
+                                                   x-text="i18n('vertices')"></label>
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                    id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
                                         </div>
 
                                         <!-- Spin -->
                                         <div class="form-check form-switch mb-3">
-                                            <label class="form-check-label" for="spin-switch">Spin</label>
+                                            <label class="form-check-label" for="spin-switch"
+                                                   x-text="i18n('spin')"></label>
                                             <input class="form-check-input" type="checkbox" role="switch"
                                                    id="spin-switch" x-model="is_spinning">
                                         </div>
@@ -1663,7 +1665,7 @@
                             break;
                         case "m":
                         case "M":
-                            this.type_of_3D_objects = "mandala_envelop_3D";
+                            this.type_of_3D_objects = "mandala_3D";
                             break;
                         case "s":
                         case "S":
@@ -2466,8 +2468,8 @@
                         });
                     }
 
-                    // Build planar_envelop_2D and mandala_envelop_3D
-                    const mandala_envelop_3D = new Array(envelop_3D.length);
+                    // Build planar_envelop_2D and mandala_3D
+                    const mandala_3D = new Array(envelop_3D.length);
                     const planar_envelop_2D = new Array(envelop_3D.length);
 
                     // Compute envelop planar figs
@@ -2496,7 +2498,7 @@
                         planar_envelop_2D[i] = planar_fig;
 
                         // Adapt points for 3D view
-                        mandala_envelop_3D[i] = new CoplanarConvex3DPolygon(
+                        mandala_3D[i] = new CoplanarConvex3DPolygon(
                             planar_points.map(p => [p[0], p[2], p[1]]),
                             planar_fig.color,
                         );
@@ -2510,7 +2512,7 @@
                         vertices: vertices,
                         envelop_3D: envelop_3D,
                         skeleton_3D: skeleton_3D,
-                        mandala_envelop_3D: mandala_envelop_3D,
+                        mandala_3D: mandala_3D,
                         planar_envelop_2D: planar_envelop_2D,
                         base: base,
                         vanishing_lines: vanishing_lines,

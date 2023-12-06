@@ -2,16 +2,20 @@ const I18N_LANGUAGES = {
     en: {
         name: "English",
         dictionary: {
-            hello_world: "hello world",
-
-            // Common lexical
+            // Common Lexical / Words
             zome: "zome",
-            rhombuses: "rhombuses",
-            rhombus: "rhombus",
-            shape: "shape",
-            framework: "framework",
-            origami: "origami",
+            shape: "Shape",
+            framework: "Framework",
+            origami: "Origami",
             view_3D: "3D view",
+            vanishing_lines: "Vanishing lines",
+            axis: "Axis",
+            spin: "Spin",
+            vertices: "Vertices",
+            fullscreen: "Fullscreen",
+            skeleton_3D : '3D Skeleton',
+            envelop_3D : '3D Envelop',
+            mandala_3D : '3D Mandala',
 
             // Tooltips
             tooltip_display_help: "Display help",
@@ -23,6 +27,10 @@ const I18N_LANGUAGES = {
             tooltip_link_buymeacoffee: "Buy me a coffee ☕ if you love Z5omes 🙏",
             tooltip_link_github: "Go to Github 🐈 if you have any questions",
             tooltip_link_linkedin: "Visit my profile on Linkedin",
+            tooltip_export_2_STL: "Export to STL format",
+            tooltip_export_2_PLY: "Export to PLY format",
+            tooltip_export_2_GLTF: "Export to GLTF format",
+            tooltip_export_2_OBJ: "Export to OBJ format",
 
             // Help
             help_shape: "The shape of a zome is determined by :",
@@ -44,22 +52,39 @@ const I18N_LANGUAGES = {
             help_am_param_3: "Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)",
             help_vp_param: "The Vanishing point is used to build geometries called 'GoodKarma'",
             help_zc_param: "Place the vanishing point at the centroid of the entire zome",
-        },
 
+            // Keyboard shortcuts
+            key_S_3D_view: "Select '3D Skeleton' object",
+            key_E_3D_view: "Select '3D Envelop' object",
+            key_M_3D_view: "Select '3D Mandala' object",
+            key_H_3D_view: "Reset camera view",
+            key_left_3D_view: "Left side view",
+            key_up_3D_view: "Top view",
+            key_right_3D_view: "Right side view",
+            key_down_3D_view: "Bottom view",
+            key_space_3D_view: "Spin on/off",
+            key_mul_3D_view: "Increase rotation speed",
+            key_div_3D_view: "Decrease rotation speed",
+        },
     },
     fr: {
         name: "Français",
         dictionary: {
-            hello_world: "bonjour",
-
-            // Common lexical
+            // Common lexical / Words
             zome: "zome",
-            rhombuses: "losanges",
-            rhombus: "losange",
-            shape: "forme",
-            framework: "charpente",
-            origami: "origami",
-            view_3D: "vue 3D",
+            shape: "Forme",
+            framework: "Charpente",
+            origami: "Origami",
+            view_3D: "Vue 3D",
+            vanishing_lines: "Lignes de fuite",
+            axis: "Axes",
+            spin: "Rotation",
+            vertices: "Sommets",
+            fullscreen: "Plein écran",
+            keyboard_shortcuts: "Raccourcis clavier",
+            skeleton_3D : 'Squelette 3D',
+            envelop_3D : 'Enveloppe 3D',
+            mandala_3D : 'Mandala 3D',
 
             // Tooltips
             tooltip_display_help: "Afficher l'aide",
@@ -71,6 +96,10 @@ const I18N_LANGUAGES = {
             tooltip_link_buymeacoffee: "Achetez moi un café ☕ si vous aimez Z5omes 🙏",
             tooltip_link_github: "Allez sur Github 🐈 si vous avez des questions",
             tooltip_link_linkedin: "Visitez mon profil Linkedin",
+            tooltip_export_2_STL: "Exporter au format STL",
+            tooltip_export_2_PLY: "Exporter au format PLY",
+            tooltip_export_2_GLTF: "Exporter au format GLTF",
+            tooltip_export_2_OBJ: "Exporter au format OBJ",
 
             // Help
             help_shape: "La forme d'un zome est déterminée par :",
@@ -92,6 +121,20 @@ const I18N_LANGUAGES = {
             help_am_param_3: "Direction de l'assemblage : Sens horaire, anti-horaire ou axe de symétrie (SemiCone)",
             help_vp_param: "Le point de fuite est utilisé pour construire les géométries nommées GoodKarma",
             help_zc_param: "Mettre le point de fuite au centre de gravité du zome entier",
+
+
+            // Keyboard shortcuts
+            key_S_3D_view: "Sélectionner l'objet 'Squelette 3D'",
+            key_E_3D_view: "Sélectionner l'objet 'Enveloppe 3D'",
+            key_M_3D_view: "Sélectionner l'objet 'Mandala 3D'",
+            key_H_3D_view: "Restaurer la vue caméra",
+            key_left_3D_view: "Vue de gauche",
+            key_up_3D_view: "Vue de dessus",
+            key_right_3D_view: "Vue de droite",
+            key_down_3D_view: "Vue de dessous",
+            key_space_3D_view: "Rotation on/off",
+            key_mul_3D_view: "Augmenter la vitesse de rotation",
+            key_div_3D_view: "Réduire la vitesse de rotation",
         },
     },
 

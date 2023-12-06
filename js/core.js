@@ -740,7 +740,7 @@ class Zome {
             vertices = null,
             envelop_3D = null,
             skeleton_3D = null,
-            mandala_envelop_3D = null,
+            mandala_3D = null,
             planar_envelop_2D = null,
             base = null,
             vanishing_lines = null
@@ -752,7 +752,7 @@ class Zome {
         this.vertices = vertices || [];
         this.envelop_3D = envelop_3D || [];
         this.skeleton_3D = skeleton_3D || [];
-        this.mandala_envelop_3D = mandala_envelop_3D || [];
+        this.mandala_3D = mandala_3D || [];
         this.planar_envelop_2D = planar_envelop_2D || [];
         this.base = base || null;
         this.vanishing_lines = vanishing_lines || [];
