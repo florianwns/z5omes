@@ -12,7 +12,7 @@
 }
 
 .fi:before {
-    content: " ";
+    content: "\00a0";
 }
 
 .fi.fis {
