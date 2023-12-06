@@ -31,12 +31,12 @@
 * Rajouter les montants de renforts horizontal/vertical
 * Couleur par montants qui sont les mêmes
 * Faire fonctionner les tooltips avec le système de traduction
+* ZooOoomes devient le lien de l'appli
 
 
 ## Reste à faire
 
 * Finir de traduire l'appli en français
-* ZooOoomes devient le lien de l'appli
   
 * Rajouter les limites de renforts avec un slider double :
   * https://tailwindcomponents.com/component/multi-range-slider
