@@ -93,7 +93,7 @@ function __sync_url_from_params(params) {
     history.pushState(null, document.title, url.toString());
 }
 
-const sync_url_from_params = _.debounce(__sync_url_from_params, 10);
+const sync_url_from_params = _.debounce(__sync_url_from_params, 50);
 
 
 // -----------------------------------
