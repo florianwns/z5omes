@@ -30,11 +30,13 @@
 * Réparer la méthode beveled 
 * Rajouter les montants de renforts horizontal/vertical
 * Couleur par montants qui sont les mêmes
+* Faire fonctionner les tooltips avec le système de traduction
 
 
 ## Reste à faire
 
-* Faire fonctionner les tooltips avec le système de traduction 
+* Finir de traduire l'appli en français
+* ZooOoomes devient le lien de l'appli
   
 * Rajouter les limites de renforts avec un slider double :
   * https://tailwindcomponents.com/component/multi-range-slider

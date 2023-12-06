@@ -85,18 +85,6 @@ function sync_params_from_url(params) {
     return params;
 }
 
-function __sync_url_from_param(key, value) {
-    if (!key) return;
-
-    const decoded_params = decode_url_params("q")
-    decoded_params[key] = value;
-
-    sync_url_from_params(decoded_params)
-}
-
-const sync_url_from_param = _.debounce(__sync_url_from_param, 10);
-
-
 function __sync_url_from_params(params) {
     if (!params) return;
 

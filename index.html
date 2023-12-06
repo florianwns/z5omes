@@ -36,20 +36,20 @@
         <div class="offcanvas-body">
             <div class="d-flex align-items-center mt-2 mb-3">
                 <!-- Reset Params Button -->
-                <button @click="reset_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
-                        title="Reset settings">
+                <button @click="reset_params" class="btn btn-primary btn-sm p-2 me-2"
+                        data-bs-toggle="tooltip" :title="i18n('tooltip_reset_settings')">
                     <i class="fa-solid fa-rotate"></i>
                 </button>
 
                 <!-- Save Params Button -->
-                <button @click="save_params" class="btn btn-primary btn-sm p-2 me-2" data-bs-toggle="tooltip"
-                        title="Save settings">
+                <button @click="save_params" class="btn btn-primary btn-sm p-2 me-2"
+                        data-bs-toggle="tooltip"  :title="i18n('tooltip_save_settings')">
                     <i class="fa-solid fa-floppy-disk"></i>
                 </button>
 
                 <!-- Copy Link -->
-                <button id="copy-url-btn" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
-                        title="Copy link">
+                <button id="copy-url-btn" class="btn btn-primary btn-sm p-2 me-auto"
+                        data-bs-toggle="tooltip"  :title="i18n('tooltip_copy_link')">
                     <i class="fa-solid fa-link"></i>
                 </button>
 
@@ -62,7 +62,7 @@
                     <ul class="dropdown-menu">
                         <template x-for="(obj, lng) in I18N_LANGUAGES" :key="lng">
                             <li>
-                                <button class="dropdown-item" @click="set_language(lng)">
+                                <button class="dropdown-item" @click="params.language = lng">
                                     <span class="fi" :class="`fi-${lng}`"></span>
                                     <span x-text="obj.name"></span>
                                 </button>
@@ -75,14 +75,14 @@
                 <button class="btn btn-sm p-1"
                         @click="params.help_is_displayed = !params.help_is_displayed"
                         :class="params.help_is_displayed ? 'text-primary' : 'text-secondary'"
-                        data-bs-toggle="tooltip" title="Display help">
+                        data-bs-toggle="tooltip" :title="i18n('tooltip_display_help')">
                     <i class="fa-solid fa-question-circle fa-fw"></i>
                 </button>
 
                 <!-- Close Button -->
                 <button type="button" class="btn btn-sm p-1"
                         data-bs-dismiss="offcanvas"
-                        data-bs-toggle="tooltip" title="Close">
+                        data-bs-toggle="tooltip" :title="i18n('tooltip_close')">
                     <i class="fa-solid fa-close fa-fw"></i>
                 </button>
             </div>
@@ -94,8 +94,8 @@
                 </h5>
 
                 <!-- Randomize Button -->
-                <button @click="randomize" class="btn btn-primary btn-sm p-2 me-auto" data-bs-toggle="tooltip"
-                        title="Randomize settings">
+                <button @click="randomize_shape" class="btn btn-primary btn-sm p-2 me-auto"
+                        data-bs-toggle="tooltip" :title="i18n('tooltip_randomize_shape')">
                     <i class="fa-solid fa-dice"></i>
                 </button>
             </div>
@@ -842,15 +842,6 @@
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
-
-    // Enable tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(
-        tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
-            placement: "bottom",
-            trigger: "hover",
-        })
-    )
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
@@ -1679,7 +1670,7 @@
                 // Group parameters
                 params: {
                     // Language parameters
-                    language: I18_DEFAULT_LANGUAGE,
+                    language: null,
 
                     // Shape Parameters
                     num: 10,                            // number of figs (kites or diamonds)
@@ -1721,9 +1712,12 @@
                         this.set_language(value);
                     });
 
-                    // Init params
+                    // Dynamic default params
                     this.params.z_vanishing_point_in_mm = this.z_centroid;
+
+                    // Init params
                     this.params = sync_params_from_url(this.params);
+                    if(!this.params.language) this.params.language = I18_DEFAULT_LANGUAGE;
                     this.save_params(false);
 
                     // Add shape parameter listeners
@@ -1767,10 +1761,6 @@
                     clipboard.on('error', function (e) {
                         self.show_error();
                     });
-
-                    this.$watch("params.language", (value) => {
-                        console.log("lng", value)
-                    });
                 },
                 set_language(lng) {
                     // verify that the language exists
@@ -1778,9 +1768,20 @@
                         ? lng
                         : I18_DEFAULT_LANGUAGE;
 
+                    // Get dictionary to apply new language
                     this.i18n_dictionary = I18N_LANGUAGES[new_lng].dictionary;
-                    this.params.language = new_lng;
-                    sync_url_from_param("language", new_lng);
+
+                    // Update tooltips
+                    const tooltip_trigger_elements = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                    const tooltips = [...tooltip_trigger_elements].map((el) => {
+                        return new bootstrap.Tooltip(el, {
+                            placement: "bottom",
+                            trigger: "hover",
+                        });
+                    });
+
+                    // Save params to url
+                    sync_url_from_params(this.params)
                 },
                 i18n(key) {
                     // Translation function
@@ -1954,7 +1955,7 @@
                             return to_decimal(value);
                     }
                 },
-                randomize() {
+                randomize_shape() {
                     _.forEach(["num", "theta_deg", "num_rhombus"], (key) => {
                             const slider = this.get_slider(key);
                             this.params[key] = _.random(slider.min, slider.max)

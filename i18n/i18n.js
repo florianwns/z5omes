@@ -3,7 +3,6 @@ const I18N_LANGUAGES = {
         name: "English",
         dictionary: {
             hello_world: "hello world",
-            display_help: "display help",
 
             // Common lexical
             zome: "zome",
@@ -11,6 +10,14 @@ const I18N_LANGUAGES = {
             rhombus: "rhombus",
             shape: "shape",
             framework: "framework",
+
+            // Tooltips
+            tooltip_display_help: "Display help",
+            tooltip_close: "Close",
+            tooltip_randomize_shape: "Generate random shape",
+            tooltip_reset_settings: "Reset settings",
+            tooltip_save_settings: "Save settings",
+            tooltip_copy_link: "Copy link",
 
             // Help
             help_shape: "The shape of a zome is determined by :",
@@ -39,7 +46,6 @@ const I18N_LANGUAGES = {
         name: "Français",
         dictionary: {
             hello_world: "bonjour",
-            display_help: "afficher l'aide",
 
             // Common lexical
             zome: "zome",
@@ -47,6 +53,14 @@ const I18N_LANGUAGES = {
             rhombus: "losange",
             shape: "forme",
             framework: "charpente",
+
+            // Tooltips
+            tooltip_display_help: "Afficher l'aide",
+            tooltip_close: "Fermer",
+            tooltip_randomize_shape: "Générer une forme aléatoire",
+            tooltip_reset_settings: "Restaurer les paramètres",
+            tooltip_save_settings: "Sauvegarder les paramètres",
+            tooltip_copy_link: "Copier le lien",
 
             // Help
             help_shape: "La forme d'un zome est déterminée par :",
