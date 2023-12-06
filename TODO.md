@@ -1,4 +1,4 @@
-## Evos
+## Evolutions
 
 * Rajouter les réglages de dimensionnement (DONE)
 * Export modèle à l'échelle (DONE)
@@ -32,13 +32,22 @@
 * Couleur par montants qui sont les mêmes
 
 
-## A faire
+## Reste à faire
 
-* Rajouter les limites de renforts.
+* Faire fonctionner les tooltips avec le système de traduction 
+  
+* Rajouter les limites de renforts avec un slider double :
+  * https://tailwindcomponents.com/component/multi-range-slider
+  * faire la même avec les classes bootstrap ??
   
 * Rajouter une semelle pour mettre de niveau à la base.
   
-* Rajouter un paramètre d'aire.
+* Rajouter un paramètre d'aire qui switche la hauteur
+
+* HR devient un boutton de switch avec M pour éviter de perturber les gens
+
+* L'aide switche avec le click bouton si plusieurs params
+
   
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
   * Commencer à dessiner la premier polygone (vue de dessus)

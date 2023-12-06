@@ -55,9 +55,9 @@
 
                 <!-- Language Dropdown -->
                 <div class="dropdown">
-                    <button class="btn btn-primary btn-sm p-1 dropdown-toggle"
+                    <button class="btn btn-primary btn-sm dropdown-toggle"
                             type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="fi" :class="`fi-${params.language}`"></span>
+                        <span class="fi fa-fw" :class="`fi-${params.language}`"></span>
                     </button>
                     <ul class="dropdown-menu">
                         <template x-for="(obj, lng) in I18N_LANGUAGES" :key="lng">
