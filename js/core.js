@@ -39,7 +39,7 @@ const IS_MOBILE = check_is_mobile();
 function decode_url_params(key) {
     const url = new URLSearchParams(window.location.search);
     const query_param = url.get(key)
-    const decoded_params = (query_param) ? JSON.parse(atob(url.get("q"))) : {};
+    const decoded_params = (query_param) ? JSON.parse(atob(query_param)) : {};
     return decoded_params;
 }
 
@@ -70,8 +70,8 @@ function small_hash(params) {
     return hash;
 }
 
-function sync_params_from_url(params) {
-    const decoded_params = decode_url_params("q")
+function sync_params_from_url(params, key="q") {
+    const decoded_params = decode_url_params(key)
 
     // Merge params with decoded params
     if (decoded_params) {
@@ -85,11 +85,11 @@ function sync_params_from_url(params) {
     return params;
 }
 
-function __sync_url_from_params(params) {
+function __sync_url_from_params(params, key="q") {
     if (!params) return;
 
     let url = new URL(window.location.href);
-    url.searchParams.set("q", encode_params(params));
+    url.searchParams.set(key, encode_params(params));
     history.pushState(null, document.title, url.toString());
 }
 

@@ -62,7 +62,7 @@
                     <ul class="dropdown-menu">
                         <template x-for="(obj, lng) in I18N_LANGUAGES" :key="lng">
                             <li>
-                                <button class="dropdown-item" @click="set_language(lng)">
+                                <button class="dropdown-item" @click="params.language = lng">
                                     <span class="fi" :class="`fi-${lng}`"></span>
                                     <span x-text="obj.name"></span>
                                 </button>
@@ -444,19 +444,22 @@
                                             <span class="fa-icon-file-type">STL</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'PLY')"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'PLY')"
                                                   @click="download_ply()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">PLY</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'GLTF')"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'GLTF')"
                                                   @click="download_gltf()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">GLTF</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'OBJ')"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'OBJ')"
                                                   @click="download_obj()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">OBJ</span>
@@ -631,7 +634,8 @@
                                             <span class="fa-icon-file-type">SVG</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'PDF')"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'PDF')"
                                                   @click="download_pdf()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">PDF</span>
@@ -1745,16 +1749,16 @@
                     // Dynamic default params
                     this.params.z_vanishing_point_in_mm = this.zome_centroid;
 
-                    // Init params
-                    this.params = sync_params_from_url(this.params);
-                    if (!this.params.language) this.params.language = I18_DEFAULT_LANGUAGE;
-                    this.save_params(false);
-
-
-                    // Update  tooltip
+                    // Update translated texts
                     this.$watch(`i18n_dictionary`, (value) => {
+                        // remove old tooltips
+                        const old_tooltips = document.getElementsByClassName('tooltip');
+                        if (old_tooltips) {
+                            _.map(old_tooltips, (e) => e.remove());
+                        }
+
                         const tooltip_trigger_elements = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-                        const tooltips = [...tooltip_trigger_elements].map((el) => {
+                        const new_tooltips = [...tooltip_trigger_elements].map((el) => {
                             return new bootstrap.Tooltip(el, {
                                 placement: "bottom",
                                 trigger: "hover",
@@ -1762,10 +1766,21 @@
                         });
                     });
 
-                    this.set_language(this.params.language);
-                    ''
+                    // Change language listener
+                    this.$watch(`params.language`, (value) => {
+                        this.set_language(this.params.language);
+                    });
+
+                    // Init params
+                    this.params = sync_params_from_url(this.params);
+                    if (!this.params.language) {
+                        this.params.language = I18_DEFAULT_LANGUAGE;
+                    }
+                    this.save_params(false);
+
                     // Add shape parameter listeners
-                    _.forEach(Object.keys(this.params), key => {
+                    const zome_param_keys = Object.keys(this.params).filter(el => el !== 'language');
+                    _.forEach(zome_param_keys, key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
                             this.__make_zome();
@@ -1814,7 +1829,6 @@
 
                     // Get dictionary to apply new language
                     this.i18n_dictionary = I18N_LANGUAGES[new_lng].dictionary;
-                    this.params.language = new_lng;
 
                     // Save params to url
                     sync_url_from_params(this.params)
