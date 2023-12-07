@@ -32,6 +32,8 @@ const I18N_LANGUAGES = {
             tooltip_export_2_PLY: "Export to PLY format",
             tooltip_export_2_GLTF: "Export to GLTF format",
             tooltip_export_2_OBJ: "Export to OBJ format",
+            tooltip_export_2_PDF: "Export to PDF format",
+            tooltip_export_2_SVG: "Export to SVG format",
 
             // Help
             help_shape: "The shape of a zome is determined by :",
@@ -102,6 +104,8 @@ const I18N_LANGUAGES = {
             tooltip_export_2_PLY: "Exporter au format PLY",
             tooltip_export_2_GLTF: "Exporter au format GLTF",
             tooltip_export_2_OBJ: "Exporter au format OBJ",
+            tooltip_export_2_PDF: "Exporter au format SVG",
+            tooltip_export_2_SVG: "Exporter au format PDF",
 
             // Help
             help_shape: "La forme d'un zome est déterminée par :",
