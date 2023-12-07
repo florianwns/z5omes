@@ -33,6 +33,7 @@
 * ZooOoomes devient le lien de l'appli
 * Finir de traduire l'appli en français
 * Envelop => coverage
+* Corriger le padding du container en mode telephone
 
 
 ## Reste à faire
