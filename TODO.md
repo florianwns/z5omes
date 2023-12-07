@@ -39,8 +39,10 @@
 ## Reste à faire
 
 
-* Rajouter les matériaux pour calculer le poids total du zome
-
+* Rajouter les essences de bois pour calculer le poids total du zome
+  * https://www.warmaths.fr/SCIENCES/densiteCatalogue..htm
+  * https://www.cndb.org/site/wp-content/uploads/2019/01/Le_Guide_des_Essences_de_Bois_Yves_Benoit_FCBA_Eyrolles.pdf
+  
 * Grouper les montants lors de l'export
   
 * Intersection avec le modèle sketchup à regarder.
