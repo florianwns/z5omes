@@ -38,8 +38,8 @@
 ## Reste à faire
 
 
-* S'inpirer 
-  
+* Rajouter les matériaux pour calculer le poids total du zome
+
 * Grouper les montants lors de l'export
   
 * Intersection avec le modèle sketchup à regarder.
