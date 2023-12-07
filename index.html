@@ -861,8 +861,10 @@
 <!-- Screenfull -->
 <script src="js/screenfull.min.js"></script>
 
-<!-- i18n -->
-<script src="i18n/i18n.js?v=1.0.7b"></script>
+<!-- i18n Dictionaries -->
+<script src="i18n/en.js?v=1.0.7b"></script>
+<script src="i18n/fr.js?v=1.0.7b"></script>
+<script src="i18n/es.js?v=1.0.7b"></script>
 
 <!-- Core and geometry functions -->
 <script src="js/core.js?v=1.0.7b"></script>
@@ -875,7 +877,14 @@
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
+
+    // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
+    const I18N_LANGUAGES = {
+        en: I18N_EN,
+        es: I18N_ES,
+        fr: I18N_FR,
+    }
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
