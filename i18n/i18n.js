@@ -36,15 +36,20 @@ const I18N_LANGUAGES = {
             tooltip_draw_fig_centroid: "Draw figure centroid",
             tooltip_split_drawing: "Split the drawing into multiple A4 sheets for export to PDF",
 
+            // Options
+            opt_none: "none",
+            opt_horizontal: "Horizontal",
+            opt_vertical: "Vertical",
+
             // Help
             help_shape: "The shape of a zome is determined by :",
             help_n_param: "Number of rhombuses rotating around the vertical axis",
             help_m_param: "Number of rhombuses from top to bottom",
-            help_f_param: "Shape angle(Θ) | Number(F) which allows to calculate the first crown of zome. F = tan(Θ)",
-            help_hr_param: "The height ratio is the visible part of zome (Set HR to 1 for an entire zome)",
-            help_magnetize_param: "Magnetize to the nearest rhombus",
-            help_kr_param: "The kite ratio is the proportion between the upper and lower edges of a rhombus",
-            help_set_rhombus_param: "Set to rhombus",
+            help_f_param: "Shape angle(Θ) | Number(F) which allows to calculate the slope of zome. F = tan(Θ)",
+            help_hr_param: "Ratio of the visible height of the zome to its total height (Set HR to 1 for an entire zome)",
+            help_magnetize_param: "Magnetize to complete the zome with a whole rhombus",
+            help_kr_param: "Ratio of the length of the lower edges to that of the upper edges of a rhombus",
+            help_set_rhombus_param: "Set to rhombus (equilateral)",
             help_painting_param: "Paint spirals or similar pieces",
             help_zh_param: "Height of the visible part of the zome",
             help_tw_param: "Width of timbers",
@@ -54,7 +59,7 @@ const I18N_LANGUAGES = {
             help_am_param_1: "Xpansion direction : ↑ outwards or ↓ inwards",
             help_am_param_2: "Assembly method",
             help_am_param_3: "Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)",
-            help_vp_param: "The Vanishing point is used to build geometries called 'GoodKarma'",
+            help_vp_param: "Height of vanishing point (used to build 'GoodKarma' methods)",
             help_zc_param: "Place the vanishing point at the centroid of the entire zome",
 
             // Keyboard shortcuts
@@ -116,6 +121,11 @@ const I18N_LANGUAGES = {
             spirals: 'Spirales',
             zome_made_with: "Ce zome a été fabriqué avec",
 
+            // Options
+            opt_none: "Aucun",
+            opt_horizontal: "Horizontal",
+            opt_vertical: "Vertical",
+
             // Tooltips
             tooltip_display_help: "Afficher l'aide",
             tooltip_close: "Fermer",
@@ -136,11 +146,11 @@ const I18N_LANGUAGES = {
             help_shape: "La forme d'un zome est déterminée par :",
             help_n_param: "Le nombre de losanges tournant autour de l'axe vertical",
             help_m_param: "Le nombre de losanges de haut en bas",
-            help_f_param: "Angle de forme(Θ) | Nombre(F) qui permet de calculer la première couronne du zome. F = tan(Θ)",
-            help_hr_param: "Le ratio de la hauteur est la proportion visible du zome (Réglez HR sur 1 pour un zome entier)",
-            help_magnetize_param: "Aimanter au losange le plus proche",
-            help_kr_param: "Le ratio du cerf-volant est la proportion entre les bords supérieurs et inférieurs d'un losange",
-            help_set_rhombus_param: "Règle sur losange",
+            help_f_param: "Angle de forme(Θ) | Nombre(F) qui permet de calculer la pente du zome. F = tan(Θ)",
+            help_hr_param: "Rapport de la hauteur visible du zome sur sa hauteur totale (Réglez HR sur 1 pour un zome entier)",
+            help_magnetize_param: "Aimanter pour terminer le zome avec un losange entier",
+            help_kr_param: "Rapport de la longueur des bords inférieurs sur celle des bords supérieurs d'un losange",
+            help_set_rhombus_param: "Règler sur losange (équilatéral)",
             help_painting_param: "Peindre les spirales ou les pièces similaires",
             help_zh_param: "Hauteur de la part visible du zome",
             help_tw_param: "Largeur des chevrons",
@@ -150,7 +160,7 @@ const I18N_LANGUAGES = {
             help_am_param_1: "Direction de l'expansion : ↑ vers l'extérieur ou ↓ l'intérieur",
             help_am_param_2: "Méthode d'assemblage",
             help_am_param_3: "Direction de l'assemblage : Sens horaire, anti-horaire ou axe de symétrie (SemiCone)",
-            help_vp_param: "Le point de fuite est utilisé pour construire les géométries nommées GoodKarma",
+            help_vp_param: "Hauteur du point de fuite (utilisé pour construire les méthodes 'GoodKarma')",
             help_zc_param: "Mettre le point de fuite au centre de gravité du zome entier",
 
 

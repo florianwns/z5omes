@@ -291,9 +291,9 @@
                     </span>
                     <select class="form-select" aria-label="Assembly method"
                             x-model.number="params.strengthening_of_timbers">
-                        <option selected value=0>None</option>
-                        <option value=1>Horizontal</option>
-                        <option value=2>Vertical</option>
+                        <option selected value=0 x-text="i18n('opt_none')"></option>
+                        <option value=1 x-text="i18n('opt_horizontal')"></option>
+                        <option value=2 x-text="i18n('opt_vertical')"></option>
                     </select>
                 </div>
 
@@ -360,7 +360,6 @@
                         </button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
