@@ -5,7 +5,6 @@
 // * "fig" is a polygon/figure
 // * "faces" are the division of a figure into triangles for 3D representation
 // * "vertices", "point" or "vector" are just 3D point array [x, y, z]
-// * "base" is the last figure which close the zome
 // * "vector" is a direction
 // * "segment" is an array of two points
 
@@ -742,7 +741,7 @@ class Zome {
             skeleton_3D = null,
             mandala_3D = null,
             planar_cover_2D = null,
-            base = null,
+            floor = null,
             vanishing_lines = null
         }
     ) {
@@ -754,7 +753,7 @@ class Zome {
         this.skeleton_3D = skeleton_3D || [];
         this.mandala_3D = mandala_3D || [];
         this.planar_cover_2D = planar_cover_2D || [];
-        this.base = base || null;
+        this.floor = floor || null;
         this.vanishing_lines = vanishing_lines || [];
     }
 }

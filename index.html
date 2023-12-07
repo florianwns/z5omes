@@ -763,19 +763,19 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
+                    <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_floor">
                         <ul class="list-group small">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('base_perimeter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
+                                <span x-text="i18n('floor_perimeter')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_perimeter"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('base_diameter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
+                                <span x-text="i18n('floor_diameter')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_diameter"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('base_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="base_area"></span>
+                                <span x-text="i18n('floor_area')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
                             </li>
                         </ul>
                     </div>
@@ -885,17 +885,17 @@
         Alpine.data('measurements', () => {
             return {
                 cover_figs: [],
-                base: null,
+                floor: null,
 
                 __to_real_world: null,
                 async init() {
                     this.__to_real_world = _.debounce(this.to_real_world, 1);
                 },
                 get figs() {
-                    return this.has_base ? [...this.cover_figs, this.base] : this.cover_figs;
+                    return this.has_floor ? [...this.cover_figs, this.floor] : this.cover_figs;
                 },
-                get has_base() {
-                    return this.base !== null;
+                get has_floor() {
+                    return this.floor !== null;
                 },
                 get cover_widest_diameter() {
                     const value = _.reduce(this.cover_figs, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
@@ -908,16 +908,16 @@
                 get cover_num_figs() {
                     return ZOME.num * this.cover_figs.length;
                 },
-                get base_diameter() {
-                    const value = this.base ? this.base.diameter : 0;
+                get floor_diameter() {
+                    const value = this.floor ? this.floor.diameter : 0;
                     return humanize_distance(value);
                 },
-                get base_area() {
-                    const value = this.base ? this.base.area : 0
+                get floor_area() {
+                    const value = this.floor ? this.floor.area : 0
                     return humanize_area(value);
                 },
-                get base_perimeter() {
-                    const value = this.base ? this.base.perimeter : 0
+                get floor_perimeter() {
+                    const value = this.floor ? this.floor.perimeter : 0
                     return humanize_distance(value);
                 },
                 format(key, value) {
@@ -944,9 +944,9 @@
                     obj += `# ${this.i18n('cover_num_figures')} : ${this.cover_num_figs}\n`;
                     obj += `# ${this.i18n('cover_widest_diameter')} : ${this.cover_widest_diameter}\n`;
                     obj += `# ${this.i18n('cover_area')} : ${this.cover_area}\n`;
-                    obj += `# ${this.i18n('base_perimeter')} : ${this.base_perimeter}\n`;
-                    obj += `# ${this.i18n('base_diameter')} : ${this.base_diameter}\n`;
-                    obj += `# ${this.i18n('base_area')} : ${this.base_area}\n`;
+                    obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
+                    obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
+                    obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
                     obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
@@ -1010,7 +1010,7 @@
                     });
 
                     // Refresh proxy
-                    this.base = (ZOME.base) ? ZOME.base.planar() : null;
+                    this.floor = (ZOME.floor) ? ZOME.floor.planar() : null;
                     this.cover_figs = cover_figs;
                 },
             };
@@ -1248,9 +1248,9 @@
                         pages.push(mandala_figs);
                     }
 
-                    // Add a last page if base exists
-                    if (ZOME.base !== null) {
-                        pages.push([ZOME.base.planar()]);
+                    // Add a last page if floor exists
+                    if (ZOME.floor !== null) {
+                        pages.push([ZOME.floor.planar()]);
                     }
                 },
                 draw_spiral_figs() {
@@ -1267,9 +1267,9 @@
                         pages.push(colored_spiral_figs);
                     }
 
-                    // Add Base at last page if base exists
-                    if (ZOME.base !== null) {
-                        pages.push([ZOME.base.planar()]);
+                    // Add Floor at last page if floor exists
+                    if (ZOME.floor !== null) {
+                        pages.push([ZOME.floor.planar()]);
                     }
                 },
                 next_page() {
@@ -1567,25 +1567,25 @@
                         }
                     }
 
-                    // Draw Zome Base only if draw cover
+                    // Draw Zome Floor only if draw cover
                     if (this.type_of_3D_objects == "cover_3D") {
-                        // Build 3D Base Faces
-                        const base = ZOME.base;
-                        if (base !== null) {
-                            const base_geometry = new THREE.BufferGeometry();
-                            base_geometry.setFromPoints(base.faces)
+                        // Build 3D Floor Faces
+                        const floor = ZOME.floor;
+                        if (floor !== null) {
+                            const floor_geometry = new THREE.BufferGeometry();
+                            floor_geometry.setFromPoints(floor.faces)
 
                             const face_colors = [];
-                            _.forEach(base.faces, () => {
-                                face_colors.push(...base.color.rgb);
+                            _.forEach(floor.faces, () => {
+                                face_colors.push(...floor.color.rgb);
                             });
 
-                            base_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                            base_geometry.computeVertexNormals()
+                            floor_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                            floor_geometry.computeVertexNormals()
 
-                            meshes.zome_obj.add(new THREE.Mesh(base_geometry, material))
+                            meshes.zome_obj.add(new THREE.Mesh(floor_geometry, material))
 
-                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(base.edge_points)
+                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
                             const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
                             meshes.zome_lines.add(spiral_lines);
                         }
@@ -2176,7 +2176,7 @@
                     }
 
                     // Close The Zome
-                    let base_vertices = [];
+                    let floor_vertices = [];
                     const num_triangles = triangles.length;
                     if (num_triangles > 0) {
                         let iT = 0;
@@ -2201,25 +2201,25 @@
                                 }
                             }
 
-                            // Push base vertices only if zome is partial
+                            // Push floor vertices only if zome is partial
                             if (IS_PARTIAL) {
-                                base_vertices.push(iB);
+                                floor_vertices.push(iB);
                                 if (last_is_truncated && far_enough) {
-                                    base_vertices.push(iC);
+                                    floor_vertices.push(iC);
                                 }
                             }
                         }
                     }
 
-                    // Finally add the base piece
-                    let base = null;
-                    if (base_vertices.length >= 3) {
-                        fig = new CoplanarConvex3DPolygon(base_vertices.map(iV => vertices[iV]))
+                    // Finally add the floor piece
+                    let floor = null;
+                    if (floor_vertices.length >= 3) {
+                        fig = new CoplanarConvex3DPolygon(floor_vertices.map(iV => vertices[iV]))
 
-                        // Deal with case where points are too close to make a base
+                        // Deal with case where points are too close to make a floor
                         const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
                         if (far_enough) {
-                            base = fig;
+                            floor = fig;
                         }
                     }
 
@@ -2383,7 +2383,7 @@
                                     break;
                             }
 
-                            // Same base for shifted wall
+                            // Same floor for shifted wall
                             shifted_wall_planes[i] = points_2_plane(
                                 point_to(thickness_offset_pt, first_2_sec_vec, 100),
                                 thickness_offset_pt,
@@ -2542,7 +2542,7 @@
                         skeleton_3D: skeleton_3D,
                         mandala_3D: mandala_3D,
                         planar_cover_2D: planar_cover_2D,
-                        base: base,
+                        floor: floor,
                         vanishing_lines: vanishing_lines,
                     });
 

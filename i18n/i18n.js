@@ -83,9 +83,9 @@ const I18N_LANGUAGES = {
             cover_num_figures: "Cover num figures",
             cover_widest_diameter: "Cover widest diameter",
             cover_area: "Cover Area",
-            base_perimeter: "Base Perimeter",
-            base_diameter: "Base diameter",
-            base_area: "Base Area",
+            floor_perimeter: "Floor perimeter",
+            floor_diameter: "Floor diameter",
+            floor_area: "Floor area",
 
             // Toast message
             toast_settings_restored: "Settings have been restored !",
@@ -176,14 +176,14 @@ const I18N_LANGUAGES = {
             edges: "Longueur des arêtes",
             angles: "Angles",
             slope_angle: "Angle d'inclinaison",
-            area: "Aire",
+            area: "Surface",
             diameter: "Diamètre",
             cover_num_figures: "Nb de figures de la couverture",
             cover_widest_diameter: "Diamètre max de la couverture",
-            cover_area: "Aire de la couverture",
-            base_perimeter: "Perimètre de la base",
-            base_diameter: "Diamètre de la base",
-            base_area: "Aire de la base",
+            cover_area: "Surface de la couverture",
+            floor_perimeter: "Perimètre du sol",
+            floor_diameter: "Diamètre du sol",
+            floor_area: "Surface au sol",
 
             // Toast message
             toast_settings_restored: "Les paramètres ont été restaurés !",

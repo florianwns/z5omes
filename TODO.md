@@ -19,10 +19,9 @@
 * Mandala : export en 3D : .obj
 * rajout de la méthode jeam soum 
 * Ajouter les lignes pour chaque polygone (bug sur les mediane en beveled et aussi sur zomandala)
-* Grouper les montants: abandonnée car trop lent pour le rendu
 * Fix edge line segments
 * Supprimer les circular distribution
-* Grouper les montants (en fonction de leur aire / simple)
+* Grouper les montants (en fonction de leur aire / simple) pour les colorier
 * Attribuer les couleurs en fonction du hash/area : Color.from_index
 * Option des couleurs : Slope/Rotation Angle or Group by Area
 * Rajouter le mode plein écran pour la 3D
@@ -33,15 +32,27 @@
 * Faire fonctionner les tooltips avec le système de traduction
 * ZooOoomes devient le lien de l'appli
 * Finir de traduire l'appli en français
-
+* Envelop => coverage
 
 
 ## Reste à faire
 
-* S'inspirer des nommages de l'application acidome 
-  * envelop => coverage
-  * base => platform / floor
 
+* S'inpirer 
+  
+* Grouper les montants lors de l'export
+  
+* Intersection avec le modèle sketchup à regarder.
+
+* Différencier les couvertures intérieur et extérieur. 
+
+* Habillage intérieur : Plafond == couverture intérieur
+  
+* Couveture extérieure et intérieur
+  * Prendre chaque A ou E point des prismes
+  
+* S'inspirer des nommages de l'application acidome 
+  * base => platform / floor
   
 * Rajouter les limites de renforts avec un slider double :
   * https://tailwindcomponents.com/component/multi-range-slider
@@ -54,7 +65,6 @@
 * HR devient un boutton de switch avec M pour éviter de perturber les gens
 
 * L'aide switche avec le click bouton si plusieurs params
-
   
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
   * Commencer à dessiner la premier polygone (vue de dessus)
@@ -62,7 +72,6 @@
   * Sa largeur est donc relative.... on peut la tronquer avec des pointillés
   * l'angle de coupe arrière est dessinée en pointillés
   * Ajouter les indexs des montants/faces sur la 3D
-
 
 * Utiliser le LRU Cache ?? je sais trop si c'est nécessaire.... 
 ```
@@ -77,6 +86,6 @@ ANGLES2COLOR_CACHE.get(TAU);
 
 * Rajouter une option pour surelever le zome. avec des murs
 
-* Ajouter une  devanture 
+* Ajouter une devanture 
   
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable
