@@ -1,4 +1,4 @@
-## Evos
+## Evolutions
 
 * Rajouter les réglages de dimensionnement (DONE)
 * Export modèle à l'échelle (DONE)
@@ -19,10 +19,9 @@
 * Mandala : export en 3D : .obj
 * rajout de la méthode jeam soum 
 * Ajouter les lignes pour chaque polygone (bug sur les mediane en beveled et aussi sur zomandala)
-* Grouper les montants: abandonnée car trop lent pour le rendu
 * Fix edge line segments
 * Supprimer les circular distribution
-* Grouper les montants (en fonction de leur aire / simple)
+* Grouper les montants (en fonction de leur aire / simple) pour les colorier
 * Attribuer les couleurs en fonction du hash/area : Color.from_index
 * Option des couleurs : Slope/Rotation Angle or Group by Area
 * Rajouter le mode plein écran pour la 3D
@@ -30,10 +29,42 @@
 * Réparer la méthode beveled 
 * Rajouter les montants de renforts horizontal/vertical
 * Couleur par montants qui sont les mêmes
+* Faire fonctionner les tooltips avec le système de traduction
+* ZooOoomes devient le lien de l'appli
+* Finir de traduire l'appli en français
+* Envelop => coverage
 
 
-## A faire
+## Reste à faire
 
+
+* S'inpirer 
+  
+* Grouper les montants lors de l'export
+  
+* Intersection avec le modèle sketchup à regarder.
+
+* Différencier les couvertures intérieur et extérieur. 
+
+* Habillage intérieur : Plafond == couverture intérieur
+  
+* Couveture extérieure et intérieur
+  * Prendre chaque A ou E point des prismes
+  
+* S'inspirer des nommages de l'application acidome 
+  * base => platform / floor
+  
+* Rajouter les limites de renforts avec un slider double :
+  * https://tailwindcomponents.com/component/multi-range-slider
+  * faire la même avec les classes bootstrap ??
+  
+* Rajouter une semelle pour mettre de niveau à la base.
+  
+* Rajouter un paramètre d'aire qui switche la hauteur
+
+* HR devient un boutton de switch avec M pour éviter de perturber les gens
+
+* L'aide switche avec le click bouton si plusieurs params
   
 * Et enfin dessiner les côtes (mode acidome) de chaque montants
   * Commencer à dessiner la premier polygone (vue de dessus)
@@ -42,7 +73,6 @@
   * l'angle de coupe arrière est dessinée en pointillés
   * Ajouter les indexs des montants/faces sur la 3D
 
-
 * Utiliser le LRU Cache ?? je sais trop si c'est nécessaire.... 
 ```
 const ANGLES2COLOR_CACHE = new LRU(10);
@@ -50,8 +80,12 @@ const ANGLES2COLOR_CACHE = new LRU(10);
 ANGLES2COLOR_CACHE.get(TAU);
 ```
 
+* Ajouter une page wikipedia avec des vidéos pour l'apprentissage de la construction zome
+
+* Et une page community pour les gens qui n'auraient pas facebook
+
 * Rajouter une option pour surelever le zome. avec des murs
 
-* Ajouter une  devanture 
+* Ajouter une devanture 
   
 * Wizzdome HR => WR width ratio::: plus compliqué mais faisable

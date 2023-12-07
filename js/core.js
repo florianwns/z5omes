@@ -5,7 +5,6 @@
 // * "fig" is a polygon/figure
 // * "faces" are the division of a figure into triangles for 3D representation
 // * "vertices", "point" or "vector" are just 3D point array [x, y, z]
-// * "base" is the last figure which close the zome
 // * "vector" is a direction
 // * "segment" is an array of two points
 
@@ -39,7 +38,7 @@ const IS_MOBILE = check_is_mobile();
 function decode_url_params(key) {
     const url = new URLSearchParams(window.location.search);
     const query_param = url.get(key)
-    const decoded_params = (query_param) ? JSON.parse(atob(url.get("q"))) : {};
+    const decoded_params = (query_param) ? JSON.parse(atob(query_param)) : {};
     return decoded_params;
 }
 
@@ -70,8 +69,8 @@ function small_hash(params) {
     return hash;
 }
 
-function sync_params_from_url(params) {
-    const decoded_params = decode_url_params("q")
+function sync_params_from_url(params, key="q") {
+    const decoded_params = decode_url_params(key)
 
     // Merge params with decoded params
     if (decoded_params) {
@@ -85,27 +84,15 @@ function sync_params_from_url(params) {
     return params;
 }
 
-function __sync_url_from_param(key, value) {
-    if (!key) return;
-
-    const decoded_params = decode_url_params("q")
-    decoded_params[key] = value;
-
-    sync_url_from_params(decoded_params)
-}
-
-const sync_url_from_param = _.debounce(__sync_url_from_param, 10);
-
-
-function __sync_url_from_params(params) {
+function __sync_url_from_params(params, key="q") {
     if (!params) return;
 
     let url = new URL(window.location.href);
-    url.searchParams.set("q", encode_params(params));
-    history.pushState(null, document.title, url.toString());
+    url.searchParams.set(key, encode_params(params));
+    history.replaceState(null, document.title, url.toString());
 }
 
-const sync_url_from_params = _.debounce(__sync_url_from_params, 10);
+const sync_url_from_params = _.debounce(__sync_url_from_params, 1000);
 
 
 // -----------------------------------
@@ -750,11 +737,11 @@ class Zome {
             rotation_angles = null,
             rotated_colors = null,
             vertices = null,
-            envelop_3D = null,
+            cover_3D = null,
             skeleton_3D = null,
-            mandala_envelop_3D = null,
-            planar_envelop_2D = null,
-            base = null,
+            mandala_3D = null,
+            planar_cover_2D = null,
+            floor = null,
             vanishing_lines = null
         }
     ) {
@@ -762,11 +749,11 @@ class Zome {
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
         this.vertices = vertices || [];
-        this.envelop_3D = envelop_3D || [];
+        this.cover_3D = cover_3D || [];
         this.skeleton_3D = skeleton_3D || [];
-        this.mandala_envelop_3D = mandala_envelop_3D || [];
-        this.planar_envelop_2D = planar_envelop_2D || [];
-        this.base = base || null;
+        this.mandala_3D = mandala_3D || [];
+        this.planar_cover_2D = planar_cover_2D || [];
+        this.floor = floor || null;
         this.vanishing_lines = vanishing_lines || [];
     }
 }

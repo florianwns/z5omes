@@ -115,8 +115,8 @@
     transition: margin-left .1s ease-in-out
 }
 
-.offcanvas{
-    max-width : 380px !important;
+.offcanvas {
+    max-width: 380px !important;
 }
 
 @media (min-width: 1280px) {
@@ -229,4 +229,13 @@ ul.keyboard-shorcut-list .key:hover {
     background: -o-linear-gradient(top, #f2f2f2 0%, #efefef 100%);
     background: -ms-linear-gradient(top, #f2f2f2 0%, #efefef 100%);
     background: linear-gradient(to bottom, #f2f2f2 0%, #efefef 100%);
+}
+
+
+.up-first {
+    display: inline-block;
+}
+
+.up-first:first-letter {
+    text-transform: uppercase;
 }
