@@ -38,6 +38,11 @@
 
 
 * Finir de traduire l'appli en français
+
+* S'inspirer des nommages de l'application acidome 
+  * envelop => coverage
+  * base => platform / floor
+
   
 * Rajouter les limites de renforts avec un slider double :
   * https://tailwindcomponents.com/component/multi-range-slider

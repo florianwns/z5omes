@@ -113,7 +113,7 @@
                           data-bs-toggle="tooltip" :title="i18n('help_n_param')">
                         N
                     </span>
-                    <input class="form-control form-range" max="21" min="3" step="1" type="range"
+                    <input class="form-control form-range" max="24" min="3" step="1" type="range"
                            x-model.number="params.num" x-ref="num_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="params.num">
@@ -129,7 +129,7 @@
                           data-bs-toggle="tooltip" :title="i18n('help_m_param')">
                         M
                     </span>
-                    <input class="form-control form-range" min="1" max="20" :max="params.num - 1" step="1" type="range"
+                    <input class="form-control form-range" min="1" :max="params.num - 1" step="1" type="range"
                            x-model.number="num_rhombus" x-ref="num_rhombus_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="num_rhombus">
@@ -438,25 +438,25 @@
                                     <div class="ps-2 exports-container" style="top:0px;">
                                         <div class="vstack">
                                         <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_STL')"
+                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'STL')"
                                               @click="download_stl()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">STL</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_PLY')"
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'PLY')"
                                                   @click="download_ply()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">PLY</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_GLTF')"
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'GLTF')"
                                                   @click="download_gltf()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">GLTF</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_OBJ')"
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'OBJ')"
                                                   @click="download_obj()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">OBJ</span>
@@ -625,13 +625,13 @@
                                     <div class="ps-2 exports-container" style="top:48px;">
                                         <div class="vstack">
                                         <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_SVG')"
+                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'SVG')"
                                               @click="download_svg()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">SVG</span>
                                         </span>
                                             <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_PDF')"
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'PDF')"
                                                   @click="download_pdf()">
                                             <i class="fa-solid fa-file"></i>
                                             <span class="fa-icon-file-type">PDF</span>
@@ -642,8 +642,8 @@
                                     <div class="mb-2">
                                         <select class="form-select" aria-label="Kind of drawing"
                                                 x-model="kind_of_drawing">
-                                            <option selected value="mandala_figs">Origami Mandala</option>
-                                            <option value="spiral_figs">Origami Spirals</option>
+                                            <option selected value="mandala_figs" x-text="i18n('mandala')"></option>
+                                            <option value="spiral_figs" x-text="i18n('spirals')"></option>
                                         </select>
                                     </div>
 
@@ -668,8 +668,7 @@
                                     <div class="input-group input-group-sm mt-2">
                                         <!-- Draw color -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip"
-                                                title="Draw figure color"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_fig_color')"
                                                 :class="draw_color ? '' : 'btn-secondary'"
                                                 @click="draw_color = !draw_color">
                                             <i class="fa-regular fa-droplet fa-fw"></i>
@@ -677,8 +676,7 @@
 
                                         <!-- Draw centroid -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip"
-                                                title="Draw figure centroid"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_fig_centroid')"
                                                 :class="draw_centroid ? '' : 'btn-secondary'"
                                                 @click="draw_centroid = !draw_centroid">
                                             <i class="fa-regular fa-circle-dot fa-fw"></i>
@@ -695,7 +693,7 @@
                                         <!-- Num Col of Grid -->
                                         <button class="btn btn-primary" type="button"
                                                 data-bs-toggle="tooltip"
-                                                title="Split the drawing into multiple A4 sheets for export to PDF"
+                                                :title="i18n('tooltip_split_drawing')"
                                                 @click="num_col = (num_col * 2 > 8) ? 1 : num_col * 2">
                                             <i class="fa-regular fa-grid-2-plus fa-fw"></i>
                                         </button>
@@ -722,12 +720,12 @@
                 <div class="d-flex align-items-center">
                     <h5 class="text-secondary mt-4 mb-4 me-auto">
                         <i class="fa-solid fa-ruler-triangle me-1"></i>
-                        Envelop Measurements
+                        <span x-text="i18n('measurements')"></span>
                     </h5>
                     <!-- CSV Button -->
                     <div>
                     <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                          title="Export to TSV format"
+                          :title="i18n('tooltip_export_2_format', 'TSV')"
                           @click="download_tsv()">
                         <i class="fa-solid fa-file"></i>
                         <span class="fa-icon-file-type">TSV</span>
@@ -736,6 +734,7 @@
                     <div>
                     <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
                           title="Export to CSV format"
+                          :title="i18n('tooltip_export_2_format', 'CSV')"
                           @click="download_csv()">
                         <i class="fa-solid fa-file"></i>
                         <span class="fa-icon-file-type">CSV</span>
@@ -747,15 +746,15 @@
                     <div class="col-md-6 col-xl-5 mt-2">
                         <ul class="list-group small">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Envelop Num Figures
+                                <span x-text="i18n('envelop_num_figures')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="envelop_num_figs"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Envelop Widest Ø
+                                <span x-text="i18n('envelop_widest_diameter')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Envelop Area
+                                <span x-text="i18n('envelop_area')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
                             </li>
                         </ul>
@@ -763,15 +762,15 @@
                     <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_base">
                         <ul class="list-group small">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Base Perimeter
+                                <span x-text="i18n('base_perimeter')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="base_perimeter"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Base Ø
+                                <span x-text="i18n('base_diameter')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="base_diameter"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Base Area
+                                <span x-text="i18n('base_area')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="base_area"></span>
                             </li>
                         </ul>
@@ -810,15 +809,15 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="toast-container position-fixed bottom-0 start-0 p-3">
-            <div id="live_toast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body" id="toast_msg" class="me-auto">
-                    </div>
-                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Close"></button>
+    <div class="toast-container position-fixed bottom-0 start-0 p-3">
+        <div id="live_toast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toast_msg" class="me-auto">
                 </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
             </div>
         </div>
     </div>
@@ -935,14 +934,15 @@
 
                     // Add comments
                     let obj = hr;
-                    obj += "# This zome was made with https://florianwns.github.io/z5omes/\n";
+                    obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
+                    obj += `# https://florianwns.github.io/z5omes/\n`;
                     obj += hr;
-                    obj += `# Envelop Num Figures : ${this.envelop_num_figs}\n`;
-                    obj += `# Envelop Widest Ø : ${this.envelop_widest_diameter}\n`;
-                    obj += `# Envelop Area : ${this.envelop_area}\n`;
-                    obj += `# Base Perimeter : ${this.base_perimeter}\n`;
-                    obj += `# Base Ø : ${this.base_diameter}\n`;
-                    obj += `# Base Area : ${this.base_area}\n`;
+                    obj += `# ${this.i18n('envelop_num_figures')} : ${this.envelop_num_figs}\n`;
+                    obj += `# ${this.i18n('envelop_widest_diameter')} : ${this.envelop_widest_diameter}\n`;
+                    obj += `# ${this.i18n('envelop_area')} : ${this.envelop_area}\n`;
+                    obj += `# ${this.i18n('base_perimeter')} : ${this.base_perimeter}\n`;
+                    obj += `# ${this.i18n('base_diameter')} : ${this.base_diameter}\n`;
+                    obj += `# ${this.i18n('base_area')} : ${this.base_area}\n`;
                     obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
@@ -953,14 +953,14 @@
                 },
                 get table_column_names() {
                     return [
-                        "Id",
-                        "Width",
-                        "Height",
-                        "Edges",    // CCW Edges
-                        "Angles",   // CCW Angles
-                        "Slope angle",
-                        "Area",
-                        "Ø",
+                        this.i18n('id'),
+                        this.i18n('width'),
+                        this.i18n('height'),
+                        this.i18n('edges'),    // CCW Edges
+                        this.i18n('angles'),   // CCW Angles
+                        this.i18n('slope_angle'),
+                        this.i18n('area'),
+                        this.i18n('diameter'),
                     ]
                 },
                 get table_rows() {
@@ -1763,7 +1763,7 @@
                     });
 
                     this.set_language(this.params.language);
-
+                    ''
                     // Add shape parameter listeners
                     _.forEach(Object.keys(this.params), key => {
                         this.$watch(`params.${key}`, (value) => {
@@ -1800,7 +1800,7 @@
 
                     const self = this;
                     clipboard.on('success', function (e) {
-                        self.show_toast("Link copied to clipboard !", "link");
+                        self.show_toast(this.i18n('toast_link_copied'), "link");
                     });
                     clipboard.on('error', function (e) {
                         self.show_error();
@@ -1819,16 +1819,25 @@
                     // Save params to url
                     sync_url_from_params(this.params)
                 },
-                i18n(key) {
-                    // Translation function
-                    if (this.i18n_dictionary.hasOwnProperty(key)) {
-                        return this.i18n_dictionary[key];
-                    } else if (this.i18n_default_dictionary.hasOwnProperty(key)) {
-                        return this.i18n_default_dictionary[key];
-                    }
+                i18n(key, value = null) {
+                    // Translation function using JSON dictionnaries
 
                     // Return the key if not found in language and default language dictionaries
-                    return key;
+                    let translated_txt = key;
+
+                    if (this.i18n_dictionary.hasOwnProperty(key)) {
+                        translated_txt = this.i18n_dictionary[key];
+                    } else if (this.i18n_default_dictionary.hasOwnProperty(key)) {
+                        translated_txt = this.i18n_default_dictionary[key];
+                    } else {
+                        console.warn(`Translation '${key}' not founded !`);
+                    }
+
+                    if (value) {
+                        translated_txt = translated_txt.replaceAll('$1', value);
+                    }
+
+                    return translated_txt;
                 },
                 get i18n_default_dictionary() {
                     if (!(I18N_LANGUAGES.hasOwnProperty(I18_DEFAULT_LANGUAGE)
@@ -1841,7 +1850,7 @@
                     return I18N_LANGUAGES[I18_DEFAULT_LANGUAGE].dictionary;
                 },
                 show_error(error = null) {
-                    self.show_toast("An error has occurred", "triangle-exclamation", true);
+                    self.show_toast(this.i18n('toast_error'), "triangle-exclamation", true);
                 },
                 get theta() {
                     switch (this.params.angle_unit) {
@@ -1956,12 +1965,12 @@
                 },
                 reset_params() {
                     this.params = _.cloneDeep(this.params_backup);
-                    this.show_toast("Settings have been restored !", "rotate")
+                    this.show_toast(this.i18n('toast_settings_restored'), "rotate")
                 },
                 save_params(toast = true) {
                     this.params_backup = _.cloneDeep(this.params);
                     if (toast) {
-                        this.show_toast("Settings have been saved !", "floppy-disk")
+                        this.show_toast(this.i18n('toast_settings_save'), "floppy-disk")
                     }
                 },
                 show_toast(txt, icon = null, error = false) {

@@ -13,9 +13,12 @@ const I18N_LANGUAGES = {
             spin: "Spin",
             vertices: "Vertices",
             fullscreen: "Fullscreen",
-            skeleton_3D : '3D Skeleton',
-            envelop_3D : '3D Envelop',
-            mandala_3D : '3D Mandala',
+            skeleton_3D: '3D Skeleton',
+            envelop_3D: '3D Envelop',
+            mandala_3D: '3D Mandala',
+            mandala: 'Mandala',
+            spirals: 'Spirals',
+            zome_made_with: "This zome was made with",
 
             // Tooltips
             tooltip_display_help: "Display help",
@@ -28,12 +31,10 @@ const I18N_LANGUAGES = {
             tooltip_link_facebook: "Come and chat with 📢 with the 'Zome Network Building' community",
             tooltip_link_github: "Go to Github 🐈 if you have any questions",
             tooltip_link_linkedin: "Visit my profile on Linkedin",
-            tooltip_export_2_STL: "Export to STL format",
-            tooltip_export_2_PLY: "Export to PLY format",
-            tooltip_export_2_GLTF: "Export to GLTF format",
-            tooltip_export_2_OBJ: "Export to OBJ format",
-            tooltip_export_2_PDF: "Export to PDF format",
-            tooltip_export_2_SVG: "Export to SVG format",
+            tooltip_export_2_format: "Exporter au format $1",
+            tooltip_draw_fig_color: "Draw figure color",
+            tooltip_draw_fig_centroid: "Draw figure centroid",
+            tooltip_split_drawing: "Split the drawing into multiple A4 sheets for export to PDF",
 
             // Help
             help_shape: "The shape of a zome is determined by :",
@@ -68,6 +69,29 @@ const I18N_LANGUAGES = {
             key_space_3D_view: "Spin on/off",
             key_mul_3D_view: "Increase rotation speed",
             key_div_3D_view: "Decrease rotation speed",
+
+            // Measurements table
+            measurements: "Measurements",
+            id: "Id",
+            width: "Width",
+            height: "Height",
+            edges: "Edges",
+            angles: "Angles",
+            slope_angle: "Slope angle",
+            area: "Area",
+            diameter: "Diameter",
+            envelop_num_figures: "Envelop num figures",
+            envelop_widest_diameter: "Envelop widest diameter",
+            envelop_area: "Envelop Area",
+            base_perimeter: "Base Perimeter",
+            base_diameter: "Base diameter",
+            base_area: "Base Area",
+
+            // Toast message
+            toast_settings_restored: "Settings have been restored !",
+            toast_settings_save: "Settings have been saved !",
+            toast_link_copied: "Link copied to clipboard !",
+            toast_error: "An error has occurred",
         },
     },
     fr: {
@@ -85,9 +109,12 @@ const I18N_LANGUAGES = {
             vertices: "Sommets",
             fullscreen: "Plein écran",
             keyboard_shortcuts: "Raccourcis clavier",
-            skeleton_3D : 'Squelette 3D',
-            envelop_3D : 'Enveloppe 3D',
-            mandala_3D : 'Mandala 3D',
+            skeleton_3D: 'Squelette 3D',
+            envelop_3D: 'Enveloppe 3D',
+            mandala_3D: 'Mandala 3D',
+            mandala: 'Mandala',
+            spirals: 'Spirales',
+            zome_made_with: "Ce zome a été fabriqué avec",
 
             // Tooltips
             tooltip_display_help: "Afficher l'aide",
@@ -100,12 +127,10 @@ const I18N_LANGUAGES = {
             tooltip_link_facebook: "Venez discuter 📢 avec la communauté 'Zome Network Building'",
             tooltip_link_github: "Allez sur Github 🐈 si vous avez des questions",
             tooltip_link_linkedin: "Visitez mon profil Linkedin",
-            tooltip_export_2_STL: "Exporter au format STL",
-            tooltip_export_2_PLY: "Exporter au format PLY",
-            tooltip_export_2_GLTF: "Exporter au format GLTF",
-            tooltip_export_2_OBJ: "Exporter au format OBJ",
-            tooltip_export_2_PDF: "Exporter au format SVG",
-            tooltip_export_2_SVG: "Exporter au format PDF",
+            tooltip_export_2_format: "Exporter au format $1",
+            tooltip_draw_fig_color: "Dessiner les couleurs",
+            tooltip_draw_fig_centroid: "Dessiner le centre de gravité",
+            tooltip_split_drawing: "Divisez le dessin en plusieurs feuilles A4 pour l'exporter au format PDF",
 
             // Help
             help_shape: "La forme d'un zome est déterminée par :",
@@ -118,9 +143,9 @@ const I18N_LANGUAGES = {
             help_set_rhombus_param: "Règle sur losange",
             help_painting_param: "Peindre les spirales ou les pièces similaires",
             help_zh_param: "Hauteur de la part visible du zome",
-            help_tw_param: "Largeur des montants",
-            help_tt_param: "Profondeur des montants",
-            help_st_param: "Renforcement des montants",
+            help_tw_param: "Largeur des chevrons",
+            help_tt_param: "Profondeur des chevrons",
+            help_st_param: "Renforcement des chevrons",
             help_am_param: "De gauche à droite :",
             help_am_param_1: "Direction de l'expansion : ↑ vers l'extérieur ou ↓ l'intérieur",
             help_am_param_2: "Méthode d'assemblage",
@@ -141,8 +166,30 @@ const I18N_LANGUAGES = {
             key_space_3D_view: "Rotation on/off",
             key_mul_3D_view: "Augmenter la vitesse de rotation",
             key_div_3D_view: "Réduire la vitesse de rotation",
+
+
+            // Measurements table
+            measurements: "Mesures",
+            id: "Id",
+            width: "Largeur",
+            height: "Hauteur",
+            edges: "Longueur des arêtes",
+            angles: "Angles",
+            slope_angle: "Angle d'inclinaison",
+            area: "Aire",
+            diameter: "Diamètre",
+            envelop_num_figures: "Nb de figures de l'enveloppe",
+            envelop_widest_diameter: "Diamètre max de l'enveloppe",
+            envelop_area: "Aire de l'enveloppe",
+            base_perimeter: "Perimètre de la base",
+            base_diameter: "Diamètre de la base",
+            base_area: "Aire de la base",
+
+            // Toast message
+            toast_settings_restored: "Les paramètres ont été restaurés !",
+            toast_settings_save: "Les paramètres ont été enregistrés !",
+            toast_link_copied: "Le lien a été copié dans le presse-papier !",
+            toast_error: "Une erreur est survenue",
         },
     },
-
-
 }
