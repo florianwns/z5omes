@@ -36,6 +36,7 @@
 
 ## Reste à faire
 
+
 * Finir de traduire l'appli en français
   
 * Rajouter les limites de renforts avec un slider double :
@@ -65,6 +66,10 @@ const ANGLES2COLOR_CACHE = new LRU(10);
 [Math.PI, TAU].forEach(a => ANGLES2COLOR_CACHE.set(a, Color.from_angles(a)));
 ANGLES2COLOR_CACHE.get(TAU);
 ```
+
+* Ajouter une page wikipedia avec des vidéos pour l'apprentissage de la construction zome
+
+* Et une page community pour les gens qui n'auraient pas facebook
 
 * Rajouter une option pour surelever le zome. avec des murs
 
