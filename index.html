@@ -473,7 +473,7 @@
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
-                                            <option value="envelop_3D" x-text="i18n('envelop_3D')"></option>
+                                            <option value="cover_3D" x-text="i18n('cover_3D')"></option>
                                             <option value="mandala_3D" x-text="i18n('mandala_3D')"></option>
                                         </select>
                                     </div>
@@ -750,16 +750,16 @@
                     <div class="col-md-6 col-xl-5 mt-2">
                         <ul class="list-group small">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('envelop_num_figures')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="envelop_num_figs"></span>
+                                <span x-text="i18n('cover_num_figures')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="cover_num_figs"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('envelop_widest_diameter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="envelop_widest_diameter"></span>
+                                <span x-text="i18n('cover_widest_diameter')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="cover_widest_diameter"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('envelop_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="envelop_area"></span>
+                                <span x-text="i18n('cover_area')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="cover_area"></span>
                             </li>
                         </ul>
                     </div>
@@ -884,7 +884,7 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('measurements', () => {
             return {
-                envelop_figs: [],
+                cover_figs: [],
                 base: null,
 
                 __to_real_world: null,
@@ -892,21 +892,21 @@
                     this.__to_real_world = _.debounce(this.to_real_world, 1);
                 },
                 get figs() {
-                    return this.has_base ? [...this.envelop_figs, this.base] : this.envelop_figs;
+                    return this.has_base ? [...this.cover_figs, this.base] : this.cover_figs;
                 },
                 get has_base() {
                     return this.base !== null;
                 },
-                get envelop_widest_diameter() {
-                    const value = _.reduce(this.envelop_figs, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                get cover_widest_diameter() {
+                    const value = _.reduce(this.cover_figs, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
-                get envelop_area() {
-                    const value = _.reduce(this.envelop_figs, (res, p) => res + p.area * ZOME.num, 0);
+                get cover_area() {
+                    const value = _.reduce(this.cover_figs, (res, p) => res + p.area * ZOME.num, 0);
                     return humanize_area(value);
                 },
-                get envelop_num_figs() {
-                    return ZOME.num * this.envelop_figs.length;
+                get cover_num_figs() {
+                    return ZOME.num * this.cover_figs.length;
                 },
                 get base_diameter() {
                     const value = this.base ? this.base.diameter : 0;
@@ -941,9 +941,9 @@
                     obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
                     obj += `# https://florianwns.github.io/z5omes/\n`;
                     obj += hr;
-                    obj += `# ${this.i18n('envelop_num_figures')} : ${this.envelop_num_figs}\n`;
-                    obj += `# ${this.i18n('envelop_widest_diameter')} : ${this.envelop_widest_diameter}\n`;
-                    obj += `# ${this.i18n('envelop_area')} : ${this.envelop_area}\n`;
+                    obj += `# ${this.i18n('cover_num_figures')} : ${this.cover_num_figs}\n`;
+                    obj += `# ${this.i18n('cover_widest_diameter')} : ${this.cover_widest_diameter}\n`;
+                    obj += `# ${this.i18n('cover_area')} : ${this.cover_area}\n`;
                     obj += `# ${this.i18n('base_perimeter')} : ${this.base_perimeter}\n`;
                     obj += `# ${this.i18n('base_diameter')} : ${this.base_diameter}\n`;
                     obj += `# ${this.i18n('base_area')} : ${this.base_area}\n`;
@@ -998,20 +998,20 @@
                 },
                 to_real_world() {
                     // Clone structure
-                    const envelop_3D = ZOME.envelop_3D;
-                    const num_figs = envelop_3D.length;
+                    const cover_3D = ZOME.cover_3D;
+                    const num_figs = cover_3D.length;
 
-                    // Resize envelop figs
-                    const envelop_figs = new Array(num_figs);
-                    _.forEach(envelop_3D, (fig, i) => {
+                    // Resize cover figs
+                    const cover_figs = new Array(num_figs);
+                    _.forEach(cover_3D, (fig, i) => {
                         // Planar fig
                         let planar_fig = fig.planar();
-                        envelop_figs[i] = planar_fig;
+                        cover_figs[i] = planar_fig;
                     });
 
                     // Refresh proxy
                     this.base = (ZOME.base) ? ZOME.base.planar() : null;
-                    this.envelop_figs = envelop_figs;
+                    this.cover_figs = cover_figs;
                 },
             };
         });
@@ -1231,12 +1231,12 @@
                     });
                 },
                 draw_mandala_figs() {
-                    const planar_envelop_2D = ZOME.planar_envelop_2D;
+                    const planar_cover_2D = ZOME.planar_cover_2D;
 
                     // For each color, rotate piece around the origin
                     const mandala_figs = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(planar_envelop_2D, (spiral_fig, j) => {
+                        _.forEach(planar_cover_2D, (spiral_fig, j) => {
                             const fig = _.cloneDeep(spiral_fig);
                             fig.points = fig.points.map(p => rotate_2d(p, -ZOME.rotation_angles[i], O));
                             fig.color = ZOME.rotated_colors[fig.color.hex][i];
@@ -1254,12 +1254,12 @@
                     }
                 },
                 draw_spiral_figs() {
-                    const planar_envelop_2D = ZOME.planar_envelop_2D;
+                    const planar_cover_2D = ZOME.planar_cover_2D;
 
-                    // For each color, Add a page with envelop_3D figs
+                    // For each color, Add a page with cover_3D figs
                     for (let i = 0; i < ZOME.num; i++) {
                         const colored_spiral_figs = [];
-                        _.forEach(planar_envelop_2D, (spiral_fig, j) => {
+                        _.forEach(planar_cover_2D, (spiral_fig, j) => {
                             const fig = _.cloneDeep(spiral_fig);
                             fig.color = ZOME.rotated_colors[fig.color.hex][i];
                             colored_spiral_figs.push(fig)
@@ -1537,7 +1537,7 @@
                                 colors[i] = ZOME.rotated_colors[obj.color.hex];
                             });
 
-                            // Build geometry of first envelop_3D
+                            // Build geometry of first cover_3D
                             const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
                             spiral_geometry.computeVertexNormals()
                             const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
@@ -1567,8 +1567,8 @@
                         }
                     }
 
-                    // Draw Zome Base only if draw envelop
-                    if (this.type_of_3D_objects == "envelop_3D") {
+                    // Draw Zome Base only if draw cover
+                    if (this.type_of_3D_objects == "cover_3D") {
                         // Build 3D Base Faces
                         const base = ZOME.base;
                         if (base !== null) {
@@ -1666,7 +1666,7 @@
                             break;
                         case "e":
                         case "E":
-                            this.type_of_3D_objects = "envelop_3D";
+                            this.type_of_3D_objects = "cover_3D";
                             break;
                         case "h":
                         case "H":
@@ -2052,7 +2052,7 @@
 
                     // Init arrays
                     let vertices = [];      // 3D point vector
-                    let envelop_3D = [];
+                    let cover_3D = [];
 
                     // Config Parameters
                     const N = this.params.num;
@@ -2136,7 +2136,7 @@
                                 // Add only the first piece
                                 if (i == 0) {
                                     fig = new CoplanarConvex3DPolygon([A, B, D, C]);
-                                    envelop_3D.push(fig);
+                                    cover_3D.push(fig);
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
@@ -2157,7 +2157,7 @@
                                 // Add Truncated Kite to figs
                                 if (i == 0) {
                                     fig = new CoplanarConvex3DPolygon([A, B, E, F, C])
-                                    envelop_3D.push(fig);
+                                    cover_3D.push(fig);
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -2197,7 +2197,7 @@
                                 // Add triangle to figs
                                 if (iT == 0) {
                                     fig = new CoplanarConvex3DPolygon([A, B, C]);
-                                    envelop_3D.push(fig);
+                                    cover_3D.push(fig);
                                 }
                             }
 
@@ -2233,15 +2233,15 @@
                     let theta, hypotenuse, adjacent_side, pivot_pt,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
-                    // Divide envelop figs into two parts
+                    // Divide cover figs into two parts
                     const framework_figs = [];
                     const divide_polygons_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
 
-                    _.forEach(envelop_3D, (fig, j) => {
+                    _.forEach(cover_3D, (fig, j) => {
                         const use_same_fig = !divide_polygons_into_two_parts
                             || j == 0
-                            || j == envelop_3D.length - 1
+                            || j == cover_3D.length - 1
                             || fig.num_points == 3;
 
                         if (use_same_fig) {
@@ -2460,13 +2460,13 @@
                     let rotated_colors = {};
                     const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
                     const grouped_skeleton_prisms = _.groupBy(skeleton_3D, (fig) => fig.hash);
-                    const grouped_env_polygons = _.groupBy(envelop_3D, (fig) => fig.hash);
+                    const grouped_cover_polygons = _.groupBy(cover_3D, (fig) => fig.hash);
 
                     if (PAINT_SIMILAR_PIECES) {
                         // Compute colors by hash
                         const color_by_hash = {};
 
-                        const grouped_figures = _.merge(grouped_skeleton_prisms, grouped_env_polygons);
+                        const grouped_figures = _.merge(grouped_skeleton_prisms, grouped_cover_polygons);
                         const num_groups = Object.keys(grouped_figures).length;
                         let group_index = 0;
                         _.forIn(grouped_figures, (group, key) => {
@@ -2476,7 +2476,7 @@
                             group_index++;
                         });
 
-                        _.forEach(envelop_3D, (fig) => {
+                        _.forEach(cover_3D, (fig) => {
                             fig.color = color_by_hash[fig.hash]
                         });
 
@@ -2485,7 +2485,7 @@
                         });
                     } else {
                         // Paint colored spirals
-                        _.forEach(envelop_3D, (fig) => {
+                        _.forEach(cover_3D, (fig) => {
                             fig.color = Color.from_angles(a, fig.slope)
                             rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                         });
@@ -2496,14 +2496,14 @@
                         });
                     }
 
-                    // Build planar_envelop_2D and mandala_3D
-                    const mandala_3D = new Array(envelop_3D.length);
-                    const planar_envelop_2D = new Array(envelop_3D.length);
+                    // Build planar_cover_2D and mandala_3D
+                    const mandala_3D = new Array(cover_3D.length);
+                    const planar_cover_2D = new Array(cover_3D.length);
 
-                    // Compute envelop planar figs
+                    // Compute cover planar figs
                     let O = [0, 0, 0], planar_points = [];
                     let rotated_A;
-                    _.forEach(envelop_3D, (fig, i) => {
+                    _.forEach(cover_3D, (fig, i) => {
                         let planar_fig = fig.planar();
 
                         // Move to Origin and rotate to match with previous piece
@@ -2523,7 +2523,7 @@
 
                         // Save planar figs
                         planar_fig.points = planar_points;
-                        planar_envelop_2D[i] = planar_fig;
+                        planar_cover_2D[i] = planar_fig;
 
                         // Adapt points for 3D view
                         mandala_3D[i] = new CoplanarConvex3DPolygon(
@@ -2538,10 +2538,10 @@
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
                         vertices: vertices,
-                        envelop_3D: envelop_3D,
+                        cover_3D: cover_3D,
                         skeleton_3D: skeleton_3D,
                         mandala_3D: mandala_3D,
-                        planar_envelop_2D: planar_envelop_2D,
+                        planar_cover_2D: planar_cover_2D,
                         base: base,
                         vanishing_lines: vanishing_lines,
                     });

@@ -738,10 +738,10 @@ class Zome {
             rotation_angles = null,
             rotated_colors = null,
             vertices = null,
-            envelop_3D = null,
+            cover_3D = null,
             skeleton_3D = null,
             mandala_3D = null,
-            planar_envelop_2D = null,
+            planar_cover_2D = null,
             base = null,
             vanishing_lines = null
         }
@@ -750,10 +750,10 @@ class Zome {
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
         this.vertices = vertices || [];
-        this.envelop_3D = envelop_3D || [];
+        this.cover_3D = cover_3D || [];
         this.skeleton_3D = skeleton_3D || [];
         this.mandala_3D = mandala_3D || [];
-        this.planar_envelop_2D = planar_envelop_2D || [];
+        this.planar_cover_2D = planar_cover_2D || [];
         this.base = base || null;
         this.vanishing_lines = vanishing_lines || [];
     }
