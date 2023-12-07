@@ -90,10 +90,10 @@ function __sync_url_from_params(params, key="q") {
 
     let url = new URL(window.location.href);
     url.searchParams.set(key, encode_params(params));
-    history.pushState(null, document.title, url.toString());
+    history.replaceState(null, document.title, url.toString());
 }
 
-const sync_url_from_params = _.debounce(__sync_url_from_params, 50);
+const sync_url_from_params = _.debounce(__sync_url_from_params, 1000);
 
 
 // -----------------------------------
