@@ -32,12 +32,11 @@
 * Couleur par montants qui sont les mêmes
 * Faire fonctionner les tooltips avec le système de traduction
 * ZooOoomes devient le lien de l'appli
+* Finir de traduire l'appli en français
+
 
 
 ## Reste à faire
-
-
-* Finir de traduire l'appli en français
 
 * S'inspirer des nommages de l'application acidome 
   * envelop => coverage
