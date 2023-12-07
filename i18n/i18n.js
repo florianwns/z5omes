@@ -2,7 +2,7 @@ const I18N_LANGUAGES = {
     en: {
         name: "English",
         dictionary: {
-            // Common Lexical / Words
+            // Common Vocabulary / Words
             zome: "zome",
             shape: "Shape",
             framework: "Framework",
@@ -102,7 +102,7 @@ const I18N_LANGUAGES = {
     fr: {
         name: "Français",
         dictionary: {
-            // Common lexical / Words
+            // Common Vocabulary / Words
             zome: "zome",
             shape: "Forme",
             framework: "Charpente",
