@@ -37,6 +37,37 @@
 
 ## Reste à faire
 
+* Préindexer les polygons/figures avec un label
+* Donner à chaque montant le label de la figure dont il provient
+* Construire/ Indexer les montants du bas vers le haut.
+  ```js
+    const timber_profile = {
+      num : 4,
+  
+      // for profile 1
+      label: 'P1', 
+  
+      // Figure from which the timber comes
+      figures: ['F1', 'F2', 'F3'], 
+    }
+  ```
+
+  * En partant de la courounne la base.
+  * Si le hash du prism a déjà été affiché,
+    on compte le nombre de fois où la pièce est présente et on continue
+    on continue sur la pièce suivante.
+  
+  
+
+* Les dessins de profils sont toujours fais de la même façon :
+  * La largeur est fixe (équivalent à la longueur du montant)
+  * La face de devant est dessiné au trait plein
+  * Celle de derrière en pointillés.
+  *  
+  
+
+
+
 
 * Rajouter les matériaux pour calculer le poids total du zome
 
