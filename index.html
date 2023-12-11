@@ -2145,7 +2145,7 @@
 
                                 // Add only the first piece
                                 if (i == 0) {
-                                    fig = new CoplanarConvex3DPolygon([A, B, D, C]);
+                                    fig = new Polygon3D([A, B, D, C]);
                                     cover_3D.push(fig);
                                 }
 
@@ -2166,7 +2166,7 @@
 
                                 // Add Truncated Kite to figs
                                 if (i == 0) {
-                                    fig = new CoplanarConvex3DPolygon([A, B, E, F, C])
+                                    fig = new Polygon3D([A, B, E, F, C])
                                     cover_3D.push(fig);
                                 }
 
@@ -2206,7 +2206,7 @@
                             if (far_enough) {
                                 // Add triangle to figs
                                 if (iT == 0) {
-                                    fig = new CoplanarConvex3DPolygon([A, B, C]);
+                                    fig = new Polygon3D([A, B, C]);
                                     cover_3D.push(fig);
                                 }
                             }
@@ -2224,7 +2224,7 @@
                     // Finally add the floor piece
                     let floor = null;
                     if (floor_vertices.length >= 3) {
-                        fig = new CoplanarConvex3DPolygon(floor_vertices.map(iV => vertices[iV]))
+                        fig = new Polygon3D(floor_vertices.map(iV => vertices[iV]))
 
                         // Deal with case where points are too close to make a floor
                         const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
@@ -2259,24 +2259,24 @@
                         } else if (divide_horizontally) {
                             switch (fig.num_points) {
                                 case 4:
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[3]]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[1], fig.points[2], fig.points[3]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[3]]));
+                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3]]));
                                     break;
                                 case 5:
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[4]]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[1], fig.points[2], fig.points[3], fig.points[4]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[4]]));
+                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3], fig.points[4]]));
                                     break;
                             }
                         } else {
                             switch (fig.num_points) {
                                 case 4:
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[2]]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[2], fig.points[3], fig.points[0]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2]]));
+                                    framework_figs.push(new Polygon3D([fig.points[2], fig.points[3], fig.points[0]]));
                                     break;
                                 case 5:
                                     const mid_pt = midpoint(fig.points[2], fig.points[3]);
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[2], mid_pt]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([mid_pt, fig.points[3], fig.points[4], fig.points[0]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2], mid_pt]));
+                                    framework_figs.push(new Polygon3D([mid_pt, fig.points[3], fig.points[4], fig.points[0]]));
                                     break;
                             }
                         }
@@ -2458,7 +2458,7 @@
                             H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
                             // Build a TrapezoidalPrism
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], fig.color);
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", fig.color);
                             skeleton_3D.push(timber_prism);
 
                             // Add vanishing line
@@ -2536,8 +2536,9 @@
                         planar_cover_2D[i] = planar_fig;
 
                         // Adapt points for 3D view
-                        mandala_3D[i] = new CoplanarConvex3DPolygon(
+                        mandala_3D[i] = new Polygon3D(
                             planar_points.map(p => [p[0], p[2], p[1]]),
+                            planar_fig.label,
                             planar_fig.color,
                         );
                     });
