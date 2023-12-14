@@ -722,7 +722,7 @@
             </div>
 
             <div class="col-12 break-before" x-data="measurements_v2" @zome-is-made.window="process">
-                <div class="bg-white rounded border position-relative" x-ref="planar_timbers_container">
+                <div class="bg-white rounded border position-relative" x-ref="timber_profile_container">
                 </div>
             </div>
 
@@ -903,13 +903,9 @@
 
         Alpine.data('measurements_v2', () => {
             return {
-
-                skeleton_figs: [],
-
-                planar_timbers_container: null,
+                timber_profile_container: null,
                 async init() {
-                    console.log("init measurements v2");
-                    this.planar_timbers_container = this.$refs.planar_timbers_container;
+                    this.timber_profile_container = this.$refs.timber_profile_container;
                 },
 
                 to_svg_points(piece, size) {
@@ -927,25 +923,26 @@
 
                 process() {
                     // Group prims by hash
-                    const grouped_skeleton_prisms = _.groupBy(ZOME.skeleton_3D, (fig) => fig.hash);
+                    const hash_grouped_skeleton_3D = ZOME.hash_grouped_skeleton_3D;
 
-                    // Group cover polygons by hash
-                    const grouped_cover_polygons = _.groupBy(ZOME.cover_3D, (fig) => fig.hash);
-
-                    const skeleton_figs = []
-
-
-                    this.planar_timbers_container.innerHTML = "";
-                    _.forIn(grouped_skeleton_prisms, (group) => {
+                    // Clear content
+                    this.timber_profile_container.innerHTML = "";
+                    _.forIn(hash_grouped_skeleton_3D, (group) => {
                         // Take the first element of group
                         const prism = group[0];
 
                         // Unpack polygons
                         const [top, bottom, left, right, front, back] = prism.polygons;
 
+                        console.log("==================");
+                        console.log("Label", prism.label);
+                        console.log("top.angles", top.angles.map((a) => rad2deg(a)));
+                        console.log("bottom.angles", bottom.angles.map((a) => rad2deg(a)));
 
                         let planar_fig = top.planar();
                         const svg_points = this.to_svg_points(planar_fig, 100)
+
+
                         const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(svg_points);
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
@@ -962,7 +959,7 @@
 
                         svg.appendChild(polygon);
 
-                        this.planar_timbers_container.appendChild(svg);
+                        this.timber_profile_container.appendChild(svg);
 
                         // const [xMin, xMax, yMin, yMax] = get_boundaries(polygon.points);
                         // const pixel_ratio = size / Math.max(polygon.height, polygon.width);
@@ -973,8 +970,6 @@
                         // ]);
 
                     });
-
-                    this.skeleton_figs = skeleton_figs;
                 },
             };
         });
@@ -1821,7 +1816,7 @@
                     zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
                     timber_width_in_mm: 60,                             // Timber width in mm
                     timber_thickness_in_mm: 40,                         // Timber thickness in mm
-                    z_vanishing_point_in_mm: 0,
+                    z_vanishing_point_in_mm: null,
                     assembly_method: 0,
                     assembly_direction: 0,
                     xpansion_direction: 1,
@@ -1871,6 +1866,7 @@
 
                     // Init params
                     this.params = sync_params_from_url(this.params);
+
                     if (!this.params.language) {
                         this.params.language = I18_DEFAULT_LANGUAGE;
                     }
@@ -2559,46 +2555,49 @@
                     let rotated_colors = {};
                     const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
 
-                    const skeleton_hashes = Object.keys(_.groupBy(skeleton_3D, (fig) => fig.hash));
-                    const cover_hashes = Object.keys(_.groupBy(cover_3D, (fig) => fig.hash));
+                    const hash_grouped_skeleton_3D = _.groupBy(skeleton_3D, (fig) => fig.hash)
+                    const skeleton_3D_hashes = Object.keys(hash_grouped_skeleton_3D);
+
+                    const hash_grouped_cover_3D = _.groupBy(cover_3D, (fig) => fig.hash)
+                    const cover_3D_hashes = Object.keys(hash_grouped_cover_3D);
 
                     // Apply color and labels
                     if (PAINT_SIMILAR_PIECES) {
                         // Compute cover colors
                         let color_by_hash = {};
-                        _.forIn(cover_hashes, (hash, i) => {
-                            const color = Color.from_index(i, cover_hashes.length);
+                        _.forIn(cover_3D_hashes, (hash, i) => {
+                            const color = Color.from_index(i, cover_3D_hashes.length);
                             color_by_hash[hash] = color;
                             rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
                         });
 
                         _.forEach(cover_3D, (fig) => {
-                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
+                            fig.label = `F${cover_3D_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = color_by_hash[fig.hash]
                         });
 
                         // Compute skeleton color
                         color_by_hash = {};
-                        _.forIn(skeleton_hashes, (hash, i) => {
-                            const color = Color.from_index(i, skeleton_hashes.length);
+                        _.forIn(skeleton_3D_hashes, (hash, i) => {
+                            const color = Color.from_index(i, skeleton_3D_hashes.length);
                             color_by_hash[hash] = color;
                             rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
                         });
 
                         _.forEach(skeleton_3D, (fig) => {
-                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
+                            fig.label = `T${skeleton_3D_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = color_by_hash[fig.hash]
                         });
                     } else {
                         // Paint colored spirals
                         _.forEach(cover_3D, (fig) => {
-                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
+                            fig.label = `F${cover_3D_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = Color.from_angles(a, fig.slope)
                             rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                         });
 
                         _.forEach(skeleton_3D, (fig) => {
-                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
+                            fig.label = `T${skeleton_3D_hashes.findIndex((hash) => hash == fig.hash)}`
                             rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                         });
                     }
@@ -2646,8 +2645,17 @@
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
                         vertices: vertices,
+
+                        // Cover 3D
                         cover_3D: cover_3D,
+                        hash_grouped_cover_3D: hash_grouped_cover_3D,
+                        cover_3D_hashes: cover_3D_hashes,
+
+                        // Skeleton 3D
                         skeleton_3D: skeleton_3D,
+                        hash_grouped_skeleton_3D: hash_grouped_skeleton_3D,
+                        skeleton_3D_hashes: skeleton_3D_hashes,
+
                         mandala_3D: mandala_3D,
                         planar_cover_2D: planar_cover_2D,
                         floor: floor,
