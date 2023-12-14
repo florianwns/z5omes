@@ -368,7 +368,8 @@
         <div class="container-xl row m-auto">
             <div class="col mb-3 mt-3">
                 <div class="d-flex align-items-center">
-                    <a href="https://florianwns.github.io/z5omes/" class="text-decoration-none me-auto d-flex align-items-center">
+                    <a href="https://florianwns.github.io/z5omes/"
+                       class="text-decoration-none me-auto d-flex align-items-center">
                         <img src="img/logo_zome.svg" width="46" title="Z5omes" class="me-2">
                         <h2 id="#title" class="text-primary mb-0 ">
                             <span class="d-none d-md-inline-block">
@@ -719,6 +720,12 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-12 break-before" x-data="measurements_v2" @zome-is-made.window="process">
+                <div class="bg-white rounded border position-relative" x-ref="planar_timbers_container">
+                </div>
+            </div>
+
             <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
                 <hr>
 
@@ -892,6 +899,87 @@
     let ZOME = new Zome({});
 
     document.addEventListener('alpine:init', () => {
+
+
+        Alpine.data('measurements_v2', () => {
+            return {
+
+                skeleton_figs: [],
+
+                planar_timbers_container: null,
+                async init() {
+                    console.log("init measurements v2");
+                    this.planar_timbers_container = this.$refs.planar_timbers_container;
+                },
+
+                to_svg_points(piece, size) {
+                    // Recompute pixel positions
+                    const theta = angle([0, 100, 0], piece.points[0], piece.points[1])
+                    let points = piece.points.map((p) => rotate_2d(p, theta - TAU_Q))
+                    const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(points);
+                    const pixel_ratio = size / Math.max(width, height);
+                    return points.map(p => [
+                        (p[0] - xMin) * pixel_ratio,
+                        (p[1] - yMin) * pixel_ratio,
+                    ]);
+
+                },
+
+                process() {
+                    // Group prims by hash
+                    const grouped_skeleton_prisms = _.groupBy(ZOME.skeleton_3D, (fig) => fig.hash);
+
+                    // Group cover polygons by hash
+                    const grouped_cover_polygons = _.groupBy(ZOME.cover_3D, (fig) => fig.hash);
+
+                    const skeleton_figs = []
+
+
+                    this.planar_timbers_container.innerHTML = "";
+                    _.forIn(grouped_skeleton_prisms, (group) => {
+                        // Take the first element of group
+                        const prism = group[0];
+
+                        // Unpack polygons
+                        const [top, bottom, left, right, front, back] = prism.polygons;
+
+
+                        let planar_fig = top.planar();
+                        const svg_points = this.to_svg_points(planar_fig, 100)
+                        const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(svg_points);
+                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+                        svg.setAttribute('class', "m-2");
+
+
+                        const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                        polygon.setAttribute('points', `${svg_points}`);
+                        polygon.setAttribute('stroke', 'black');
+                        polygon.setAttribute('stroke-width', '0.1px');
+                        polygon.setAttribute('fill', prism.color.hex);
+
+
+                        svg.appendChild(polygon);
+
+                        this.planar_timbers_container.appendChild(svg);
+
+                        // const [xMin, xMax, yMin, yMax] = get_boundaries(polygon.points);
+                        // const pixel_ratio = size / Math.max(polygon.height, polygon.width);
+                        // const center = size / 2;
+                        // return polygon.points.map(p => [
+                        //     (p[0] - xMin - polygon.width / 2) * pixel_ratio + center,
+                        //     (p[1] - yMin - polygon.height / 2) * pixel_ratio + center,
+                        // ]);
+
+                    });
+
+                    this.skeleton_figs = skeleton_figs;
+                },
+            };
+        });
+
+
         Alpine.data('measurements', () => {
             return {
                 cover_figs: [],
@@ -2221,10 +2309,11 @@
                         }
                     }
 
+
                     // Finally add the floor piece
                     let floor = null;
                     if (floor_vertices.length >= 3) {
-                        fig = new Polygon3D(floor_vertices.map(iV => vertices[iV]))
+                        fig = new Polygon3D(floor_vertices.map(iV => vertices[iV]), "F")
 
                         // Deal with case where points are too close to make a floor
                         const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
@@ -2232,16 +2321,6 @@
                             floor = fig;
                         }
                     }
-
-
-                    const skeleton_3D = [], vanishing_lines = [];
-
-                    // Compute vanishing pt
-                    const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
-
-                    // Build Timbers using the GoodKarma assembly method
-                    let theta, hypotenuse, adjacent_side, pivot_pt,
-                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     // Divide cover figs into two parts
                     const framework_figs = [];
@@ -2281,6 +2360,17 @@
                             }
                         }
                     });
+
+
+                    // Build Timbers using the assembly method
+                    const skeleton_3D = [], vanishing_lines = [];
+
+                    // Compute vanishing pt
+                    const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
+
+                    // Build Timbers using the assembly method
+                    let theta, hypotenuse, adjacent_side, pivot_pt,
+                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     _.forEach(framework_figs, (fig) => {
                         const num_points = fig.num_points;
@@ -2399,7 +2489,6 @@
                                 thickness_offset_pt,
                                 width_offset_pt,
                             );
-
                         });
 
                         // Build the prism
@@ -2469,39 +2558,47 @@
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
                     const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
-                    const grouped_skeleton_prisms = _.groupBy(skeleton_3D, (fig) => fig.hash);
-                    const grouped_cover_polygons = _.groupBy(cover_3D, (fig) => fig.hash);
 
+                    const skeleton_hashes = Object.keys(_.groupBy(skeleton_3D, (fig) => fig.hash));
+                    const cover_hashes = Object.keys(_.groupBy(cover_3D, (fig) => fig.hash));
+
+                    // Apply color and labels
                     if (PAINT_SIMILAR_PIECES) {
-                        // Compute colors by hash
-                        const color_by_hash = {};
-
-                        const grouped_figures = _.merge(grouped_skeleton_prisms, grouped_cover_polygons);
-                        const num_groups = Object.keys(grouped_figures).length;
-                        let group_index = 0;
-                        _.forIn(grouped_figures, (group, key) => {
-                            const color = Color.from_index(group_index, num_groups);
-                            color_by_hash[key] = color;
+                        // Compute cover colors
+                        let color_by_hash = {};
+                        _.forIn(cover_hashes, (hash, i) => {
+                            const color = Color.from_index(i, cover_hashes.length);
+                            color_by_hash[hash] = color;
                             rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
-                            group_index++;
                         });
 
                         _.forEach(cover_3D, (fig) => {
+                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = color_by_hash[fig.hash]
                         });
 
+                        // Compute skeleton color
+                        color_by_hash = {};
+                        _.forIn(skeleton_hashes, (hash, i) => {
+                            const color = Color.from_index(i, skeleton_hashes.length);
+                            color_by_hash[hash] = color;
+                            rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
+                        });
+
                         _.forEach(skeleton_3D, (fig) => {
+                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = color_by_hash[fig.hash]
                         });
                     } else {
                         // Paint colored spirals
                         _.forEach(cover_3D, (fig) => {
+                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = Color.from_angles(a, fig.slope)
                             rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                         });
 
                         _.forEach(skeleton_3D, (fig) => {
-                            fig.color = Color.from_angles(a, fig.slope)
+                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
                             rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                         });
                     }

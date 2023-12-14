@@ -450,15 +450,15 @@ class Color {
     static from_angles(hue_angle = 0, lightness_angle = 0) {
         // Magic colors, pass radian angles
         const hue = Math.round(((4 + hue_angle) % TAU) / TAU * 360);
-        const lightness = Math.min(65 + Math.abs(rad2deg(lightness_angle) / 90) * 15, 80);
+        const lightness = Math.min(80, Math.max(60, 60 + Math.abs(lightness_angle / TAU_Q) * 20));
         const saturation = 80;
         return new Color(hue, saturation, lightness);
     }
 
-    static from_index(index, arr_length, lightness_angle = 0) {
+    static from_index(index, arr_length) {
         // Magic colors, with index and array length
         const hue_angle = (index % arr_length) * TAU / arr_length;
-        return Color.from_angles(hue_angle, lightness_angle);
+        return Color.from_angles(hue_angle, TAU_Q / 2);
     }
 }
 
