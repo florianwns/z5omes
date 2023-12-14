@@ -77,7 +77,8 @@ function sync_params_from_url(params, key = "q") {
         _.forEach(params, (value, key) => {
             // Check if decoded_params has the property
             if (decoded_params.hasOwnProperty(key)) {
-                params[key] = decoded_params[key] || value;
+                const new_value = decoded_params[key];
+                params[key] = (new_value === undefined || new_value === null) ? value : new_value;
             }
         });
     }
@@ -486,7 +487,7 @@ class BaseGeometry {
         this.edge_distances = [];       // Edges distances
     }
 
-    compute_parameters(){
+    compute_parameters() {
         // Compute angle, edge distances, perimeter and area
         _.forEach(this.points, (current_point, i) => {
             const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
@@ -713,7 +714,11 @@ class Zome {
             rotated_colors = null,
             vertices = null,
             cover_3D = null,
+            hash_grouped_cover_3D = null,
+            cover_3D_hashes = null,
             skeleton_3D = null,
+            hash_grouped_skeleton_3D = null,
+            skeleton_3D_hashes = null,
             mandala_3D = null,
             planar_cover_2D = null,
             floor = null,
@@ -725,7 +730,11 @@ class Zome {
         this.rotated_colors = rotated_colors || [];
         this.vertices = vertices || [];
         this.cover_3D = cover_3D || [];
+        this.hash_grouped_cover_3D = hash_grouped_cover_3D || [];
+        this.cover_3D_hashes = cover_3D_hashes || [];
         this.skeleton_3D = skeleton_3D || [];
+        this.hash_grouped_skeleton_3D = hash_grouped_skeleton_3D || [];
+        this.skeleton_3D_hashes = skeleton_3D_hashes || [];
         this.mandala_3D = mandala_3D || [];
         this.planar_cover_2D = planar_cover_2D || [];
         this.floor = floor || null;
