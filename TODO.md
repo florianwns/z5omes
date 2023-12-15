@@ -34,13 +34,9 @@
 * [x] Finir de traduire l'appli en français
 * [x] Envelop => coverage
 * [x] Corriger le padding du container en mode telephone
-
 * [x] Préindexer les polygons/figures avec un label
 
-- [ ] 
-
 * [ ] Donner à chaque montant le label de la figure dont il provient
-
 * [ ] Construire/ Indexer les montants du bas vers le haut.
   
   ```js
