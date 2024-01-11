@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.7b" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.7c" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -368,13 +368,16 @@
         <div class="container-xl row m-auto">
             <div class="col mb-3 mt-3">
                 <div class="d-flex align-items-center">
-                    <h2 id="#title" class="text-primary me-auto mb-0">
-                        <a href="https://florianwns.github.io/z5omes/" class="text-decoration-none">
-                            <img src="img/logo_zome.svg" width="48" alt="Zome Logo">
-                            Z<span class="fs-4">o</span>oOo<span
-                                class="fs-4">o</span>mes
-                        </a>
-                    </h2>
+                    <a href="https://florianwns.github.io/z5omes/"
+                       class="text-decoration-none me-auto d-flex align-items-center">
+                        <img src="img/logo_zome.svg" width="46" title="Z5omes" class="me-2">
+                        <h2 id="#title" class="text-primary mb-0 ">
+                            <span class="d-none d-md-inline-block">
+                                Z<span class="fs-4">o</span>oOo<span class="fs-4">o</span>mes
+                            </span>
+                            <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
+                        </h2>
+                    </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
                        class="text-primary btn btn-sm fs-4 p-2"
@@ -717,6 +720,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
                 <hr>
 
@@ -861,11 +865,14 @@
 <!-- Screenfull -->
 <script src="js/screenfull.min.js"></script>
 
-<!-- i18n -->
-<script src="i18n/i18n.js?v=1.0.7b"></script>
+<!-- i18n Dictionaries -->
+<script src="i18n/en.js?v=1.0.7c"></script>
+<script src="i18n/fr.js?v=1.0.7c"></script>
+<script src="i18n/es.js?v=1.0.7c"></script>
+<script src="i18n/pl.js?v=1.0.7c"></script>
 
 <!-- Core and geometry functions -->
-<script src="js/core.js?v=1.0.7b"></script>
+<script src="js/core.js?v=1.0.7c"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -875,7 +882,15 @@
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
+
+    // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
+    const I18N_LANGUAGES = {
+        en: I18N_EN,
+        es: I18N_ES,
+        fr: I18N_FR,
+        pl: I18N_PL,
+    }
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
@@ -2134,7 +2149,7 @@
 
                                 // Add only the first piece
                                 if (i == 0) {
-                                    fig = new CoplanarConvex3DPolygon([A, B, D, C]);
+                                    fig = new Polygon3D([A, B, D, C]);
                                     cover_3D.push(fig);
                                 }
 
@@ -2155,7 +2170,7 @@
 
                                 // Add Truncated Kite to figs
                                 if (i == 0) {
-                                    fig = new CoplanarConvex3DPolygon([A, B, E, F, C])
+                                    fig = new Polygon3D([A, B, E, F, C])
                                     cover_3D.push(fig);
                                 }
 
@@ -2195,7 +2210,7 @@
                             if (far_enough) {
                                 // Add triangle to figs
                                 if (iT == 0) {
-                                    fig = new CoplanarConvex3DPolygon([A, B, C]);
+                                    fig = new Polygon3D([A, B, C]);
                                     cover_3D.push(fig);
                                 }
                             }
@@ -2210,10 +2225,11 @@
                         }
                     }
 
+
                     // Finally add the floor piece
                     let floor = null;
                     if (floor_vertices.length >= 3) {
-                        fig = new CoplanarConvex3DPolygon(floor_vertices.map(iV => vertices[iV]))
+                        fig = new Polygon3D(floor_vertices.map(iV => vertices[iV]), "F")
 
                         // Deal with case where points are too close to make a floor
                         const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
@@ -2221,16 +2237,6 @@
                             floor = fig;
                         }
                     }
-
-
-                    const skeleton_3D = [], vanishing_lines = [];
-
-                    // Compute vanishing pt
-                    const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
-
-                    // Build Timbers using the GoodKarma assembly method
-                    let theta, hypotenuse, adjacent_side, pivot_pt,
-                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     // Divide cover figs into two parts
                     const framework_figs = [];
@@ -2248,28 +2254,39 @@
                         } else if (divide_horizontally) {
                             switch (fig.num_points) {
                                 case 4:
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[3]]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[1], fig.points[2], fig.points[3]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[3]]));
+                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3]]));
                                     break;
                                 case 5:
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[4]]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[1], fig.points[2], fig.points[3], fig.points[4]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[4]]));
+                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3], fig.points[4]]));
                                     break;
                             }
                         } else {
                             switch (fig.num_points) {
                                 case 4:
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[2]]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[2], fig.points[3], fig.points[0]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2]]));
+                                    framework_figs.push(new Polygon3D([fig.points[2], fig.points[3], fig.points[0]]));
                                     break;
                                 case 5:
                                     const mid_pt = midpoint(fig.points[2], fig.points[3]);
-                                    framework_figs.push(new CoplanarConvex3DPolygon([fig.points[0], fig.points[1], fig.points[2], mid_pt]));
-                                    framework_figs.push(new CoplanarConvex3DPolygon([mid_pt, fig.points[3], fig.points[4], fig.points[0]]));
+                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2], mid_pt]));
+                                    framework_figs.push(new Polygon3D([mid_pt, fig.points[3], fig.points[4], fig.points[0]]));
                                     break;
                             }
                         }
                     });
+
+
+                    // Build Timbers using the assembly method
+                    const skeleton_3D = [], vanishing_lines = [];
+
+                    // Compute vanishing pt
+                    const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
+
+                    // Build Timbers using the assembly method
+                    let theta, hypotenuse, adjacent_side, pivot_pt,
+                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     _.forEach(framework_figs, (fig) => {
                         const num_points = fig.num_points;
@@ -2388,7 +2405,6 @@
                                 thickness_offset_pt,
                                 width_offset_pt,
                             );
-
                         });
 
                         // Build the prism
@@ -2447,7 +2463,7 @@
                             H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
                             // Build a TrapezoidalPrism
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], fig.color);
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", fig.color);
                             skeleton_3D.push(timber_prism);
 
                             // Add vanishing line
@@ -2458,39 +2474,47 @@
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
                     const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
-                    const grouped_skeleton_prisms = _.groupBy(skeleton_3D, (fig) => fig.hash);
-                    const grouped_cover_polygons = _.groupBy(cover_3D, (fig) => fig.hash);
 
+                    const skeleton_hashes = Object.keys(_.groupBy(skeleton_3D, (fig) => fig.hash));
+                    const cover_hashes = Object.keys(_.groupBy(cover_3D, (fig) => fig.hash));
+
+                    // Apply color and labels
                     if (PAINT_SIMILAR_PIECES) {
-                        // Compute colors by hash
-                        const color_by_hash = {};
-
-                        const grouped_figures = _.merge(grouped_skeleton_prisms, grouped_cover_polygons);
-                        const num_groups = Object.keys(grouped_figures).length;
-                        let group_index = 0;
-                        _.forIn(grouped_figures, (group, key) => {
-                            const color = Color.from_index(group_index, num_groups);
-                            color_by_hash[key] = color;
+                        // Compute cover colors
+                        let color_by_hash = {};
+                        _.forIn(cover_hashes, (hash, i) => {
+                            const color = Color.from_index(i, cover_hashes.length);
+                            color_by_hash[hash] = color;
                             rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
-                            group_index++;
                         });
 
                         _.forEach(cover_3D, (fig) => {
+                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = color_by_hash[fig.hash]
                         });
 
+                        // Compute skeleton color
+                        color_by_hash = {};
+                        _.forIn(skeleton_hashes, (hash, i) => {
+                            const color = Color.from_index(i, skeleton_hashes.length);
+                            color_by_hash[hash] = color;
+                            rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
+                        });
+
                         _.forEach(skeleton_3D, (fig) => {
+                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = color_by_hash[fig.hash]
                         });
                     } else {
                         // Paint colored spirals
                         _.forEach(cover_3D, (fig) => {
+                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
                             fig.color = Color.from_angles(a, fig.slope)
                             rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                         });
 
                         _.forEach(skeleton_3D, (fig) => {
-                            fig.color = Color.from_angles(a, fig.slope)
+                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
                             rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
                         });
                     }
@@ -2525,8 +2549,9 @@
                         planar_cover_2D[i] = planar_fig;
 
                         // Adapt points for 3D view
-                        mandala_3D[i] = new CoplanarConvex3DPolygon(
+                        mandala_3D[i] = new Polygon3D(
                             planar_points.map(p => [p[0], p[2], p[1]]),
+                            planar_fig.label,
                             planar_fig.color,
                         );
                     });

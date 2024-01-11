@@ -33,13 +33,43 @@
 * ZooOoomes devient le lien de l'appli
 * Finir de traduire l'appli en français
 * Envelop => coverage
+* Corriger le padding du container en mode telephone
 
 
 ## Reste à faire
 
+* Préindexer les polygons/figures avec un label
+* Donner à chaque montant le label de la figure dont il provient
+  
+* Construire/ Indexer les montants du bas vers le haut.
+  ```js
+    const timber_profile = {
+      num : 4,
+  
+      // for profile 1
+      label: 'P1', 
+  
+      // Figure from which the timber comes
+      figures: ['F1', 'F2', 'F3'], 
+    }
+  ```
 
-* Rajouter les matériaux pour calculer le poids total du zome
-
+  * En partant de la courounne la base.
+  * Si le hash du prism a déjà été affiché,
+    on compte le nombre de fois où la pièce est présente et on continue
+    on continue sur la pièce suivante.
+  
+    
+* Les dessins de profils sont toujours fais de la même façon :
+  * La largeur est fixe (équivalent à la longueur du montant)
+  * La face de devant est dessiné au trait plein
+  * Celle de derrière en pointillés.
+    
+  
+* Rajouter les essences de bois pour calculer le poids total du zome
+  * https://www.warmaths.fr/SCIENCES/densiteCatalogue..htm
+  * https://www.cndb.org/site/wp-content/uploads/2019/01/Le_Guide_des_Essences_de_Bois_Yves_Benoit_FCBA_Eyrolles.pdf
+  
 * Grouper les montants lors de l'export
   
 * Intersection avec le modèle sketchup à regarder.
