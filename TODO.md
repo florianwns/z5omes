@@ -1,41 +1,8 @@
 # TODO-LIST
 
-* [x] Rajouter les réglages de dimensionnement (DONE)
-* [x] Export modèle à l'échelle (DONE)
-* [x] Clean de la lib geom.js => core.js
-* [x] Dessiner les montants en  goodkarma (intersection des plans)
-* [x] Ajouter le mode horaire/anti_horaire pour le goodkarma
-* [x] Ajoût des autres méthodes de contructions (Semicone)
-* [x] Validation de nos modèles
-* [x] Ajoût du "BizeledLength" 
-* [x] Contraindre les limites de timber width/thickness
-* [x] Url parametrée
-* [x] Sauver et revenir à l'état d'origine pour éviter le rafraichissement de la page.
-* [x] Lien de partage de l'URL qui copie colle dans le presse papier.
-* [x] Affichage de message (toast: https://getbootstrap.com/docs/5.2/components/toasts/) pour
-  * Copier/Coller
-  * Save settings
-  * reset settings
-* [x] Mandala : export en 3D : .obj
-* [x] rajout de la méthode jeam soum 
-* [x] Ajouter les lignes pour chaque polygone (bug sur les mediane en beveled et aussi sur zomandala)
-* [x] Fix edge line segments
-* [x] Supprimer les circular distribution
-* [x] Grouper les montants (en fonction de leur aire / simple) pour les colorier
-* [x] Attribuer les couleurs en fonction du hash/area : Color.from_index
-* [x] Option des couleurs : Slope/Rotation Angle or Group by Area
-* [x] Rajouter le mode plein écran pour la 3D
-* [x] Raccourci clavier à afficher
-* [x] Réparer la méthode beveled 
-* [x] Rajouter les montants de renforts horizontal/vertical
-* [x] Couleur par montants qui sont les mêmes
-* [x] Faire fonctionner les tooltips avec le système de traduction
-* [x] ZooOoomes devient le lien de l'appli
-* [x] Finir de traduire l'appli en français
-* [x] Envelop => coverage
-* [x] Corriger le padding du container en mode telephone
-* [x] Préindexer les polygons/figures avec un label
-
+* [ ] faire la différence entre outer_cover_3D/inner_cover_3D et vertices
+* [ ] changer l'aide de ZH "visible part  of zome" ???  
+* [ ] Coller la base du zome au sol => vanishing pt is 0 for last part
 * [ ] Donner à chaque montant le label de la figure dont il provient
 * [ ] Construire/ Indexer les montants du bas vers le haut.
   
@@ -118,6 +85,6 @@
 
 * [ ] Rajouter une option pour surelever le zome. avec des murs
 
-* [ ] Ajouter une devanture 
+* [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
 
 * [ ] Wizzdome HR => WR width ratio::: plus compliqué mais faisable
