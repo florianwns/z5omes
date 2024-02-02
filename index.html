@@ -874,6 +874,7 @@
 <script src="i18n/en.js?v=1.0.7b"></script>
 <script src="i18n/fr.js?v=1.0.7b"></script>
 <script src="i18n/es.js?v=1.0.7b"></script>
+<script src="i18n/pl.js?v=1.0.7b"></script>
 
 <!-- Core and geometry functions -->
 <script src="js/core.js?v=1.0.7b"></script>
@@ -893,6 +894,7 @@
         en: I18N_EN,
         es: I18N_ES,
         fr: I18N_FR,
+        pl: I18N_PL,
     }
 
     // Use a global variable to store ZOME data
@@ -910,7 +912,7 @@
 
                 to_svg_points(piece, size) {
                     // Recompute pixel positions
-                    const theta = angle([0, 100, 0], piece.points[0], piece.points[1])
+                    const theta = angle([0, 100, 0], piecranche.points[0], piece.points[1])
                     let points = piece.points.map((p) => rotate_2d(p, theta - TAU_Q))
                     const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(points);
                     const pixel_ratio = size / Math.max(width, height);
