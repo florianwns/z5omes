@@ -590,8 +590,8 @@ class TrapezoidalPrism extends LabeledGeometry {
 
 class Polygon3D extends LabeledGeometry {
     // Consider A convex polygon          A
-    // points = [A, B, E, F, C]         B ◇ C
-    //                                   E F
+    // points = [A, B, C, D, E]         B ◇ E
+    //                                   C D
     //
     // points are distributed counterclockwise
 
@@ -627,7 +627,7 @@ class Polygon3D extends LabeledGeometry {
 
             // Compute face triangle
             if (face_index < this.num_faces) {
-                // Faces for 3D from △ O, B, D
+                // Faces for 3D
                 this.faces[face_index] = new THREE.Vector3(...this.origin)
                 this.faces[face_index + 1] = new THREE.Vector3(...second_point)
                 this.faces[face_index + 2] = new THREE.Vector3(...third_point)
