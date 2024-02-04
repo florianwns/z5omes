@@ -934,12 +934,10 @@
                         const prism = group[0];
 
                         // Unpack polygons
-                        const [top, bottom, left, right, front, back] = prism.polygons;
+                        const top = prism.top;
 
                         console.log("==================");
                         console.log("Label", prism.label);
-                        console.log("top.angles", top.angles.map((a) => rad2deg(a)));
-                        console.log("bottom.angles", bottom.angles.map((a) => rad2deg(a)));
 
                         let planar_fig = top.planar();
                         const svg_points = this.to_svg_points(planar_fig, 100)

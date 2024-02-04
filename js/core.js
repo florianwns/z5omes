@@ -558,21 +558,20 @@ class TrapezoidalPrism extends LabeledGeometry {
         const [A, B, C, D, E, F, G, H] = points;
 
         // Build the 6 sides of TrapezoidalPrism with Polygon
-        this.polygons = [
-            new Polygon3D([A, B, D, C]), // Top side
-            new Polygon3D([E, F, H, G]), // Bottom side
-            new Polygon3D([A, B, F, E]), // Left side
-            new Polygon3D([C, D, H, G]), // Right side
-            new Polygon3D([A, C, G, E]), // Front side
-            new Polygon3D([B, D, H, F]), // Back side
-        ]
+        this.top = new Polygon3D([A, C, D, B]);     // Top side
+        this.bottom = new Polygon3D([E, G, H, F]);  // Bottom side
+        this.left = new Polygon3D([A, E, G, C]);    // Left side
+        this.right = new Polygon3D([B, F, H, D]);   // Right side
+        this.front = new Polygon3D([C, G, H, D]);   // Front side
+        this.back = new Polygon3D([A, E, F, B]);    // Back side
 
         // Arrays of THREE.Vector3 for 3D visualization
         this.faces = [];
         this.edge_points = []
         this.area = 0;
 
-        _.forEach(this.polygons, (fig) => {
+        const polygons = [this.top, this.bottom, this.left, this.right, this.front, this.back];
+        _.forEach(polygons, (fig) => {
             this.faces.push(...fig.faces);
             this.edge_points.push(...fig.edge_points);
 
