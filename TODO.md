@@ -1,5 +1,6 @@
 # TODO-LIST
 
+* [ ] Améliorer la fonction planar pour aligner verticalement ou horizontalement la figure
 * [ ] faire la différence entre outer_cover_3D/inner_cover_3D et vertices
 * [ ] changer l'aide de ZH "visible part  of zome" ???  
 * [ ] Coller la base du zome au sol => vanishing pt is 0 for last part

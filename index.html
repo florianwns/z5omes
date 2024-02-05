@@ -871,9 +871,10 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/en.js?v=1.0.7b"></script>
-<script src="i18n/fr.js?v=1.0.7b"></script>
 <script src="i18n/es.js?v=1.0.7b"></script>
+<script src="i18n/en.js?v=1.0.7b"></script>
+<script src="i18n/it.js?v=1.0.7b"></script>
+<script src="i18n/fr.js?v=1.0.7b"></script>
 <script src="i18n/pl.js?v=1.0.7b"></script>
 
 <!-- Core and geometry functions -->
@@ -891,8 +892,9 @@
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
     const I18N_LANGUAGES = {
-        en: I18N_EN,
         es: I18N_ES,
+        en: I18N_EN,
+        it: I18N_IT,
         fr: I18N_FR,
         pl: I18N_PL,
     }
@@ -912,7 +914,7 @@
 
                 to_svg_points(piece, size) {
                     // Recompute pixel positions
-                    const theta = angle([0, 100, 0], piece.points[0], piece.points[1])
+                    const theta = angle([0, size, 0], piece.points[0], piece.points[1])
                     let points = piece.points.map((p) => rotate_2d(p, theta - TAU_Q))
                     const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(points);
                     const pixel_ratio = size / Math.max(width, height);
@@ -933,21 +935,18 @@
                         // Take the first element of group
                         const prism = group[0];
 
-                        // Unpack polygons
-                        const top = prism.top;
+                        const top = prism.top
 
-                        console.log("==================");
-                        console.log("Label", prism.label);
+                        let planar_fig = prism.top.planar();
+                        const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(planar_fig.points);
+                        const svg_points = this.to_svg_points(planar_fig, width)
 
-                        let planar_fig = top.planar();
-                        const svg_points = this.to_svg_points(planar_fig, 100)
-
-                        const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(svg_points);
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
                         svg.setAttribute('class', "m-2");
-
+                        svg.setAttribute('width', `${width}`);
+                        svg.setAttribute('height', `${height}`);
 
                         const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                         polygon.setAttribute('points', `${svg_points}`);

@@ -649,12 +649,16 @@ class Polygon3D extends LabeledGeometry {
         return a
     }
 
-    planar() {
-        // Make a reference to planar 3D points to 2D, Take first point like origin
-        const [origin, second_point, last_point] = [this.origin, this.points[1], this.points[this.num_points - 1]];
-        const x_ref = norm(sub(last_point, origin));
-        const y_ref = norm(sub(sub(second_point, origin), mul(x_ref, dot_product(sub(second_point, origin), x_ref))));
-        const ref_angle = Math.PI / 2 - angle(last_point, origin, second_point) / 2;
+    planar(ref_index = 0) {
+        // Make a reference to planar 3D points to 2D, Take ref index point like origin
+        const i = ref_index + this.num_points;
+        const origin = this.points[i % this.num_points];
+        const next_point = this.points[(i + 1) % this.num_points];
+        const prev_point = this.points[(i - 1) % this.num_points];
+
+        const x_ref = norm(sub(prev_point, origin));
+        const y_ref = norm(sub(sub(next_point, origin), mul(x_ref, dot_product(sub(next_point, origin), x_ref))));
+        const ref_angle = Math.PI / 2 - angle(prev_point, origin, next_point) / 2;
 
         // Planar Polygon to Make 2D Representation, and compute parameters in one loop
         const planar_points = new Array(this.num_points);
