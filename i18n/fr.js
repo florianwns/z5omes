@@ -62,7 +62,6 @@ const I18N_FR = {
         help_vp_param: "Hauteur du point de fuite (utilisé pour construire les méthodes 'GoodKarma')",
         help_zc_param: "Mettre le point de fuite au centre de gravité du zome entier",
 
-
         // Keyboard shortcuts
         key_S_3D_view: "Sélectionner l'objet 'Squelette 3D'",
         key_E_3D_view: "Sélectionner l'objet 'Couverture 3D'",
@@ -75,7 +74,6 @@ const I18N_FR = {
         key_space_3D_view: "Rotation on/off",
         key_mul_3D_view: "Augmenter la vitesse de rotation",
         key_div_3D_view: "Réduire la vitesse de rotation",
-
 
         // Measurements table
         measurements: "Mesures",
