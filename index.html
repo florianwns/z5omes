@@ -804,7 +804,7 @@
                                         <td>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
                                                  :fill="row[0].color.hex">
-                                                <polygon :points="to_svg_points(row[0], 32)"/>
+                                                <polygon :points="row[0].to_svg_points(32)"/>
                                             </svg>
                                         </td>
                                         <template x-for="(value, j) in row[1]" :key="j">
@@ -912,18 +912,6 @@
                     this.timber_profile_container = this.$refs.timber_profile_container;
                 },
 
-                to_svg_points(piece, size) {
-                    // Recompute pixel positions
-                    const theta = angle([0, size, 0], piece.points[0], piece.points[1])
-                    let points = piece.points.map((p) => rotate_2d(p, theta - TAU_Q))
-                    const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(points);
-                    const pixel_ratio = size / Math.max(width, height);
-                    return points.map(p => [
-                        (p[0] - xMin) * pixel_ratio,
-                        (p[1] - yMin) * pixel_ratio,
-                    ]);
-
-                },
 
                 process() {
                     // Group prims by hash
@@ -931,15 +919,15 @@
 
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
+
                     _.forIn(hash_grouped_skeleton_3D, (group) => {
                         // Take the first element of group
                         const prism = group[0];
 
-                        const top = prism.top
-
                         let planar_fig = prism.top.planar();
-                        const [xMin, xMax, yMin, yMax, width, height] = get_boundaries(planar_fig.points);
-                        const svg_points = this.to_svg_points(planar_fig, width)
+                        const svg_points = planar_fig.to_svg_points(100)
+                        const width = planar_fig.width;
+                        const height = planar_fig.height;
 
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
@@ -958,15 +946,6 @@
                         svg.appendChild(polygon);
 
                         this.timber_profile_container.appendChild(svg);
-
-                        // const [xMin, xMax, yMin, yMax] = get_boundaries(polygon.points);
-                        // const pixel_ratio = size / Math.max(polygon.height, polygon.width);
-                        // const center = size / 2;
-                        // return polygon.points.map(p => [
-                        //     (p[0] - xMin - polygon.width / 2) * pixel_ratio + center,
-                        //     (p[1] - yMin - polygon.height / 2) * pixel_ratio + center,
-                        // ]);
-
                     });
                 },
             };
@@ -1077,16 +1056,7 @@
                 process() {
                     this.__to_real_world();
                 },
-                to_svg_points(piece, size) {
-                    // Recompute pixel positions
-                    const [xMin, xMax, yMin, yMax] = get_boundaries(piece.points);
-                    const pixel_ratio = size / Math.max(piece.height, piece.width);
-                    const center = size / 2;
-                    return piece.points.map(p => [
-                        (p[0] - xMin - piece.width / 2) * pixel_ratio + center,
-                        (p[1] - yMin - piece.height / 2) * pixel_ratio + center,
-                    ]);
-                },
+
                 to_real_world() {
                     // Clone structure
                     const cover_3D = ZOME.cover_3D;
@@ -1233,23 +1203,22 @@
                     page_bounds = new Array(pages.length);
                     _.forEach(pages, (page_figs, iP) => {
                         // Reset boundaries
-                        let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
-                            xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
+                        let x_max = Number.MIN_VALUE,
+                            y_max = Number.MIN_VALUE,
+                            x_min = Number.MAX_VALUE,
+                            y_min = Number.MAX_VALUE;
 
-                        // Compute boundaries of all figs
+                        // Get min max from all figs
                         for (const fig of page_figs) {
-                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(fig.points);
-
-                            // Save boundaries
-                            if (xPMin < xMin) xMin = xPMin;
-                            if (xPMax > xMax) xMax = xPMax;
-                            if (yPMin < yMin) yMin = yPMin;
-                            if (yPMax > yMax) yMax = yPMax;
+                            if (fig.x_min < x_min) x_min = fig.x_min;
+                            if (fig.x_max > x_max) x_max = fig.x_max;
+                            if (fig.y_min < y_min) y_min = fig.y_min;
+                            if (fig.y_max > y_max) y_max = fig.y_max;
                         }
 
-                        const width = Math.abs(xMax - xMin);
-                        const height = Math.abs(yMax - yMin);
-                        page_bounds[iP] = [xMin, yMin, width, height];
+                        const width = Math.abs(x_max - x_min);
+                        const height = Math.abs(y_max - y_min);
+                        page_bounds[iP] = [x_min, y_min, width, height];
                     });
 
                     // Add bulleted list
@@ -1327,11 +1296,14 @@
                     // For each color, rotate piece around the origin
                     const mandala_figs = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(planar_cover_2D, (spiral_fig, j) => {
-                            const fig = _.cloneDeep(spiral_fig);
-                            fig.points = fig.points.map(p => rotate_2d(p, -ZOME.rotation_angles[i], O));
-                            fig.color = ZOME.rotated_colors[fig.color.hex][i];
-                            mandala_figs.push(fig)
+                        _.forEach(planar_cover_2D, (fig) => {
+                            mandala_figs.push(
+                                new PlanarGeometry(
+                                    fig.points.map(p => rotate_2d(p, -ZOME.rotation_angles[i], O)),
+                                    fig.label,
+                                    ZOME.rotated_colors[fig.color.hex][i],
+                                )
+                            );
                         });
                     }
 
@@ -1350,10 +1322,14 @@
                     // For each color, Add a page with cover_3D figs
                     for (let i = 0; i < ZOME.num; i++) {
                         const colored_spiral_figs = [];
-                        _.forEach(planar_cover_2D, (spiral_fig, j) => {
-                            const fig = _.cloneDeep(spiral_fig);
-                            fig.color = ZOME.rotated_colors[fig.color.hex][i];
-                            colored_spiral_figs.push(fig)
+                        _.forEach(planar_cover_2D, (fig) => {
+                            colored_spiral_figs.push(
+                                new PlanarGeometry(
+                                    fig.points,
+                                    fig.label,
+                                    ZOME.rotated_colors[fig.color.hex][i],
+                                )
+                            );
                         });
                         pages.push(colored_spiral_figs);
                     }

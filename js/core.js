@@ -261,6 +261,58 @@ function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     return [x, y, 0]
 }
 
+function to_svg_points(fig, size) {
+    // Recompute pixel positions of a figure
+    const [xMin, xMax, yMin, yMax] = get_boundaries(fig.points);
+    const pixel_ratio = size / Math.max(fig.height, fig.width);
+    const center = size / 2;
+    return fig.points.map(p => [
+        (p[0] - xMin - fig.width / 2) * pixel_ratio + center,
+        (p[1] - yMin - fig.height / 2) * pixel_ratio + center,
+    ]);
+}
+
+
+function planar(points, horizontally = false) {
+    const num_points = points.length;
+    if (num_points < 3) {
+        console.error("Not enough points to make a geometry");
+        return;
+    }
+
+    // Make a reference to planar 3D points to 2D, Take first point like origin
+    const origin = points[0];
+    const next_point = points[1];
+    const prev_point = points[num_points - 1];
+
+    const origin_2_prev_vec = sub(prev_point, origin);
+    const origin_2_next_vec = sub(next_point, origin);
+
+    const x_ref = norm(origin_2_prev_vec);
+    const y_ref = norm(
+        sub(origin_2_next_vec, mul(x_ref, dot_product(origin_2_next_vec, x_ref)))
+    );
+
+    let ref_angle = TAU_Q - angle(prev_point, origin, next_point) / 2;
+    if (horizontally) {
+        ref_angle += TAU_Q;
+    }
+
+    // Planar Polygon to Make 2D Representation, and compute parameters in one loop
+    const planar_points = new Array(num_points);
+
+    _.forEach(points, (current_point, i) => {
+        // Apply the transformation for planar point
+        const origin_2_pt_vec = sub(current_point, origin);
+        planar_points[i] = rotate_2d(
+            [dot_product(origin_2_pt_vec, x_ref), dot_product(origin_2_pt_vec, y_ref), 0],
+            ref_angle
+        );
+    });
+
+    return planar_points;
+}
+
 // ---------------------------------
 // ========== Conversions ==========
 // ---------------------------------
@@ -409,20 +461,25 @@ function unique_arr(arr) {
 
 function get_boundaries(points) {
     // Compute Boundaries
-    let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
-        xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
+    let x_max = Number.MIN_VALUE,
+        y_max = Number.MIN_VALUE,
+        x_min = Number.MAX_VALUE,
+        y_min = Number.MAX_VALUE;
+
     for (let i = 0; i < points.length; i++) {
-        [x, y] = points[i];
+        const [x, y] = points[i];
 
         // Save Boundaries
-        if (x < xMin) xMin = x;
-        if (x > xMax) xMax = x;
-        if (y < yMin) yMin = y;
-        if (y > yMax) yMax = y;
+        if (x < x_min) x_min = x;
+        if (x > x_max) x_max = x;
+        if (y < y_min) y_min = y;
+        if (y > y_max) y_max = y;
     }
-    const width = Math.abs(xMax - xMin);
-    const height = Math.abs(yMax - yMin);
-    return [xMin, xMax, yMin, yMax, width, height];
+
+    // Compute width and height from 2D boundaries
+    const width = Math.abs(x_max - x_min);
+    const height = Math.abs(y_max - y_min);
+    return [x_min, x_max, y_min, y_max, width, height];
 }
 
 function download(filename, href) {
@@ -540,6 +597,11 @@ class LabeledGeometry extends BaseGeometry {
         // Sort parameters to compare geometries
         this.hash = encode_params(this.hash_parameters);
     }
+
+    planar(horizontally = false) {
+        const planar_points = planar(this.points, horizontally);
+        return new PlanarGeometry(planar_points, this.label, this.color);
+    }
 }
 
 
@@ -649,62 +711,42 @@ class Polygon3D extends LabeledGeometry {
         return a
     }
 
-    planar(ref_index = 0) {
-        // Make a reference to planar 3D points to 2D, Take ref index point like origin
-        const i = ref_index + this.num_points;
-        const origin = this.points[i % this.num_points];
-        const next_point = this.points[(i + 1) % this.num_points];
-        const prev_point = this.points[(i - 1) % this.num_points];
-
-        const x_ref = norm(sub(prev_point, origin));
-        const y_ref = norm(sub(sub(next_point, origin), mul(x_ref, dot_product(sub(next_point, origin), x_ref))));
-        const ref_angle = Math.PI / 2 - angle(prev_point, origin, next_point) / 2;
-
-        // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-        const planar_points = new Array(this.num_points);
-        _.forEach(this.points, (current_point, i) => {
-            // Apply the transformation for planar point
-            planar_points[i] = rotate_2d(
-                [dot_product(sub(current_point, origin), x_ref), dot_product(sub(current_point, origin), y_ref), 0],
-                ref_angle
-            );
-        });
-
-        return new Polygon2D(planar_points, this.label, this.color, this.slope, this.diameter);
+    planar(horizontally = false) {
+        const planar_points = planar(this.points, horizontally);
+        return new PlanarGeometry(planar_points, this.label, this.color, this.slope, this.diameter);
     }
 }
 
-
-class Polygon2D extends LabeledGeometry {
+class PlanarGeometry extends LabeledGeometry {
     constructor(points, label, color, slope, diameter) {
         // Consider that polygon is made by triangle,
         super(points, label, color);
         this.compute_parameters();
+        this.compute_boundaries();
 
-        // Save parameters
+        // Save parameters, TODO remove from this class
         this.slope = slope || 0;
         this.diameter = diameter || 0;
+    }
 
-        // Get boundaries
-        this.x_min = Number.MAX_VALUE;
-        this.x_max = Number.MIN_VALUE;
-        this.y_min = Number.MAX_VALUE;
-        this.y_max = Number.MIN_VALUE;
+    compute_boundaries(){
+        let [x_min, x_max, y_min, y_max, width, height] = get_boundaries(this.points);
+        this.x_min = x_min;
+        this.x_max = x_max
+        this.y_min = y_min;
+        this.y_max = y_max;
+        this.width = width;
+        this.height = height;
+    }
 
-        _.forEach(this.points, (point) => {
-            // Unpack point coordinates
-            const [x, y, z] = point
-
-            // Save Boundaries
-            if (x < this.x_min) this.x_min = x;
-            if (x > this.x_max) this.x_max = x;
-            if (y < this.y_min) this.y_min = y;
-            if (y > this.y_max) this.y_max = y;
-        });
-
-        // Compute width and height from 2D boundaries
-        this.width = Math.abs(this.x_max - this.x_min);
-        this.height = Math.abs(this.y_max - this.y_min);
+    to_svg_points(size) {
+        // Recompute pixel positions for svg display
+        const pixel_ratio = size / Math.max(this.height, this.width);
+        const center = size / 2;
+        return this.points.map(p => [
+            (p[0] - this.x_min - this.width / 2) * pixel_ratio + center,
+            (p[1] - this.y_min - this.height / 2) * pixel_ratio + center,
+        ]);
     }
 }
 
