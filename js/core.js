@@ -250,6 +250,52 @@ function angle(p1, p2, p3) {
     return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
+function angle_without_one_axis(p1, p2, p3, hidden_axis) {
+    // angle_without_one_axis cannot work because we loose the direction... please use angle_between vecs
+    switch (hidden_axis) {
+        case "x":
+        case "X":
+        case "roll":
+            return angle_between_vectors(
+                sub([0, p1[1], p1[2]], [0, p2[1], p2[2]]),
+                sub([0, p3[1], p3[2]], [0, p2[1], p2[2]])
+            );
+        case "y":
+        case "Y":
+        case "pitch":
+            return angle_between_vectors(
+                sub([p1[0], 0, p1[2]], [p2[0], 0, p2[2]]),
+                sub([p3[0], 0, p3[2]], [p2[0], 0, p2[2]])
+            );
+        case "z":
+        case "Z":
+        case "yaw":
+            return angle_between_vectors(
+                sub([p1[0], p1[1], 0], [p2[0], p2[1], 0]),
+                sub([p3[0], p3[1], 0], [p2[0], p2[1], 0])
+            );
+        default:
+            return 0;
+    }
+}
+
+function calculate_euler_angles(point1, point2) {
+    // Calcul du vecteur
+    const [dx, dy, dz] = sub(point2, point1);
+
+    // Calcul de l'angle de yaw (rotation autour de l'axe z)
+    const yaw = Math.atan2(dy, dx);
+
+    // Projection des vecteurs sur le plan xy
+    const dxProjected = Math.sqrt(dx * dx + dy * dy);
+    const pitch = Math.atan2(dz, dxProjected);
+
+    // Calcul de l'angle de roll (rotation autour de l'axe x)
+    const roll = Math.atan2(dy, dz);
+
+    return [pitch, roll, yaw];
+}
+
 function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
     const cos_theta = Math.cos(theta);
@@ -261,6 +307,21 @@ function rotate_2d(vec, theta, origin = [0, 0, 0]) {
     return [x, y, 0]
 }
 
+function dihedral_angle(a, b, c) {
+    // Compute the dihedral angle from 3 angles
+    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
+    return Math.acos(
+        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
+    )
+}
+
+function dihedral_angle_between_planes(plane1, plane2) {
+    const dot = dot_product(plane1, plane2);
+    const theta = Math.PI - Math.acos(dot / (len(plane1) * len(plane2)));
+    return theta;
+}
+
+
 function to_svg_points(fig, size) {
     // Recompute pixel positions of a figure
     const [xMin, xMax, yMin, yMax] = get_boundaries(fig.points);
@@ -271,7 +332,6 @@ function to_svg_points(fig, size) {
         (p[1] - yMin - fig.height / 2) * pixel_ratio + center,
     ]);
 }
-
 
 function planar(points, horizontally = false) {
     const num_points = points.length;
@@ -311,6 +371,65 @@ function planar(points, horizontally = false) {
     });
 
     return planar_points;
+}
+
+function matrix_from_points(a, b, c) {
+    const axis1 = new THREE.Vector3(...sub(a, b)).normalize()
+    const axis2 = new THREE.Vector3(...sub(c, b)).normalize()
+    const axis3 = new THREE.Vector3().crossVectors(axis1, axis2).normalize();
+    return new THREE.Matrix4().makeBasis(axis1, axis2, axis3);
+}
+
+function planar_v2(points, indexes = [0, -1, 1], horizontally = true, debug = false) {
+    // Use quaternion method to planar a face from 3 points
+    const num_points = points.length;
+
+    // Force indexes
+    if (indexes.length !== 3) {
+        console.error("There should only be 3 indexes to form the positioning triangle");
+        return;
+    }
+    const idx = indexes.map(index => (num_points + index) % num_points);
+
+    // Define start points
+    const origin = points[idx[0]];
+    const start_pt1 = points[idx[1]];
+    const start_pt2 = points[idx[2]];
+
+    // The angle/distances with the origin
+    const theta = angle(start_pt1, origin, start_pt2);
+    const dist_2_pt1 = dist(origin, start_pt1);
+    const dist_2_pt2 = dist(origin, start_pt2);
+
+    // Define end points
+    const zero = [0, 0, 0];
+    const end_pt1 = [dist_2_pt1, 0, 0];
+        // ? [dist_2_pt1, 0, 0]
+        // : [0, dist_2_pt1, 0];
+    const end_pt2 = rotate_2d([dist_2_pt2, 0, 0], theta);
+        // ? rotate_2d([dist_2_pt2, 0, 0], theta)
+        // : rotate_2d([0, dist_2_pt2, 0], theta);
+
+    // Compute quaternion from https://jsfiddle.net/v6bkg4wf/2/
+    const matrix1 = matrix_from_points(start_pt1, origin, start_pt2).invert();
+    const matrix2 = matrix_from_points(end_pt1, zero, end_pt2);
+    const Q = new THREE.Quaternion();
+    Q.setFromRotationMatrix(matrix2.multiply(matrix1));
+
+    // Apply quaternion and sub translation vec to planar the face
+    const points_at_origin = new Array(points.length);
+    const translation_vec = new THREE.Vector3(...new THREE.Vector3(...points[0]).applyQuaternion(Q));
+    _.forEach(points, (point, i) => {
+        points_at_origin[i] = new THREE.Vector3(...point).applyQuaternion(Q).sub(translation_vec).toArray();
+    });
+
+    if (debug) {
+        console.log("============")
+        console.log(idx)
+        console.log("points_at_origin", points_at_origin);
+    }
+
+    return points_at_origin;
 }
 
 // ---------------------------------
@@ -542,6 +661,10 @@ class BaseGeometry {
         this.perimeter = 0;
         this.angles = [];               // Array of angles in radians
         this.edge_distances = [];       // Edges distances
+
+
+        // Compute boundaries
+        this.compute_boundaries();
     }
 
     compute_parameters() {
@@ -562,6 +685,26 @@ class BaseGeometry {
             // Compute area of the triangle
             this.area += triangle_area_from_points(this.origin, next_point, next_next_point);
         });
+    }
+
+    compute_boundaries() {
+        let [x_min, x_max, y_min, y_max, width, height] = get_boundaries(this.points);
+        this.x_min = x_min;
+        this.x_max = x_max
+        this.y_min = y_min;
+        this.y_max = y_max;
+        this.width = width;
+        this.height = height;
+    }
+
+    to_svg_points(size) {
+        // Recompute pixel positions for svg display
+        const pixel_ratio = size / Math.max(this.height, this.width);
+        const center = size / 2;
+        return this.points.map(p => [
+            (p[0] - this.x_min - this.width / 2) * pixel_ratio + center,
+            (p[1] - this.y_min - this.height / 2) * pixel_ratio + center,
+        ]);
     }
 }
 
@@ -596,11 +739,6 @@ class LabeledGeometry extends BaseGeometry {
 
         // Sort parameters to compare geometries
         this.hash = encode_params(this.hash_parameters);
-    }
-
-    planar(horizontally = false) {
-        const planar_points = planar(this.points, horizontally);
-        return new PlanarGeometry(planar_points, this.label, this.color);
     }
 }
 
@@ -646,6 +784,13 @@ class TrapezoidalPrism extends LabeledGeometry {
 
         // Compute hash to compare prims
         this.compute_hash();
+    }
+
+    planar(horizontally = true) {
+        const planar_points = planar_v2(this.points, [0, 2, 1], horizontally);
+        const planar_polygon = new TrapezoidalPrism(planar_points, this.label, this.color);
+        planar_polygon.compute_boundaries();
+        return planar_polygon;
     }
 }
 
@@ -710,46 +855,22 @@ class Polygon3D extends LabeledGeometry {
         }
         return a
     }
+    //
+    // planar(horizontally = false) {
+    //     const planar_polygon = _.cloneDeep(this);
+    //     planar_polygon.points = planar_v2(this.points, [0, -1, 1], horizontally);
+    //     planar_polygon.compute_boundaries();
+    //     return planar_polygon;
+    // }
 
-    planar(horizontally = false) {
-        const planar_points = planar(this.points, horizontally);
-        return new PlanarGeometry(planar_points, this.label, this.color, this.slope, this.diameter);
+
+    planar(horizontally = true) {
+        const planar_points = planar_v2(this.points, [0, -1, 1], horizontally);
+        const planar_polygon = new Polygon3D(planar_points, this.label, this.color);
+        planar_polygon.compute_boundaries();
+        return planar_polygon;
     }
 }
-
-class PlanarGeometry extends LabeledGeometry {
-    constructor(points, label, color, slope, diameter) {
-        // Consider that polygon is made by triangle,
-        super(points, label, color);
-        this.compute_parameters();
-        this.compute_boundaries();
-
-        // Save parameters, TODO remove from this class
-        this.slope = slope || 0;
-        this.diameter = diameter || 0;
-    }
-
-    compute_boundaries(){
-        let [x_min, x_max, y_min, y_max, width, height] = get_boundaries(this.points);
-        this.x_min = x_min;
-        this.x_max = x_max
-        this.y_min = y_min;
-        this.y_max = y_max;
-        this.width = width;
-        this.height = height;
-    }
-
-    to_svg_points(size) {
-        // Recompute pixel positions for svg display
-        const pixel_ratio = size / Math.max(this.height, this.width);
-        const center = size / 2;
-        return this.points.map(p => [
-            (p[0] - this.x_min - this.width / 2) * pixel_ratio + center,
-            (p[1] - this.y_min - this.height / 2) * pixel_ratio + center,
-        ]);
-    }
-}
-
 
 class Zome {
     constructor(

@@ -924,7 +924,9 @@
                         // Take the first element of group
                         const prism = group[0];
 
-                        let planar_fig = prism.top.planar();
+                        let planar_prism = prism.planar();
+                        const planar_fig = planar_prism.top;
+                        console.log("PLANAR PRISM", planar_fig.points, planar_prism.color)
                         const svg_points = planar_fig.to_svg_points(100)
                         const width = planar_fig.width;
                         const height = planar_fig.height;
@@ -940,7 +942,7 @@
                         polygon.setAttribute('points', `${svg_points}`);
                         polygon.setAttribute('stroke', 'black');
                         polygon.setAttribute('stroke-width', '0.1px');
-                        polygon.setAttribute('fill', prism.color.hex);
+                        polygon.setAttribute('fill', planar_prism.color.hex);
 
 
                         svg.appendChild(polygon);
@@ -1124,12 +1126,6 @@
                     // Compute Grid size in percent for css drawing
                     return 100 / this.num_col;
                 },
-                to_svg_points(piece, size) {
-                    // Recompute pixel positions
-                    const center = size / 2;
-                    const pixel_ratio = size / Math.max(piece.height, piece.width);
-                    return piece.points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
-                },
                 download_pdf() {
                     // Create empty PDF document
                     const [A4_width, A4_height] = [595, 842];
@@ -1298,7 +1294,7 @@
                     for (let i = 0; i < ZOME.num; i++) {
                         _.forEach(planar_cover_2D, (fig) => {
                             mandala_figs.push(
-                                new PlanarGeometry(
+                                new Polygon3D(
                                     fig.points.map(p => rotate_2d(p, -ZOME.rotation_angles[i], O)),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
@@ -1324,7 +1320,7 @@
                         const colored_spiral_figs = [];
                         _.forEach(planar_cover_2D, (fig) => {
                             colored_spiral_figs.push(
-                                new PlanarGeometry(
+                                new Polygon3D(
                                     fig.points,
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
