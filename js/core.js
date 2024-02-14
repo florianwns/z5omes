@@ -333,46 +333,6 @@ function to_svg_points(fig, size) {
     ]);
 }
 
-function planar(points, horizontally = false) {
-    const num_points = points.length;
-    if (num_points < 3) {
-        console.error("Not enough points to make a geometry");
-        return;
-    }
-
-    // Make a reference to planar 3D points to 2D, Take first point like origin
-    const origin = points[0];
-    const next_point = points[1];
-    const prev_point = points[num_points - 1];
-
-    const origin_2_prev_vec = sub(prev_point, origin);
-    const origin_2_next_vec = sub(next_point, origin);
-
-    const x_ref = norm(origin_2_prev_vec);
-    const y_ref = norm(
-        sub(origin_2_next_vec, mul(x_ref, dot_product(origin_2_next_vec, x_ref)))
-    );
-
-    let ref_angle = TAU_Q - angle(prev_point, origin, next_point) / 2;
-    if (horizontally) {
-        ref_angle += TAU_Q;
-    }
-
-    // Planar Polygon to Make 2D Representation, and compute parameters in one loop
-    const planar_points = new Array(num_points);
-
-    _.forEach(points, (current_point, i) => {
-        // Apply the transformation for planar point
-        const origin_2_pt_vec = sub(current_point, origin);
-        planar_points[i] = rotate_2d(
-            [dot_product(origin_2_pt_vec, x_ref), dot_product(origin_2_pt_vec, y_ref), 0],
-            ref_angle
-        );
-    });
-
-    return planar_points;
-}
-
 function matrix_from_points(a, b, c) {
     const axis1 = new THREE.Vector3(...sub(a, b)).normalize()
     const axis2 = new THREE.Vector3(...sub(c, b)).normalize()
@@ -380,37 +340,25 @@ function matrix_from_points(a, b, c) {
     return new THREE.Matrix4().makeBasis(axis1, axis2, axis3);
 }
 
-function planar_v2(points, indexes = [0, -1, 1], horizontally = true, debug = false) {
-    // Use quaternion method to planar a face from 3 points
-    const num_points = points.length;
+function flat_points(points, origin, start_pt1, start_pt2, horizontally = true) {
+    // Use quaternion method to flat points
+    // start_pt1 is aligned on X axis if horizontally is true, y axis otherwise
 
-    // Force indexes
-    if (indexes.length !== 3) {
-        console.error("There should only be 3 indexes to form the positioning triangle");
-        return;
-    }
-    const idx = indexes.map(index => (num_points + index) % num_points);
-
-    // Define start points
-    const origin = points[idx[0]];
-    const start_pt1 = points[idx[1]];
-    const start_pt2 = points[idx[2]];
-
-    // The angle/distances with the origin
+    // Compute the angle/distances with the origin point
     const theta = angle(start_pt1, origin, start_pt2);
     const dist_2_pt1 = dist(origin, start_pt1);
     const dist_2_pt2 = dist(origin, start_pt2);
 
-    // Define end points
+    // Define end points depends on horizontally variable
     const zero = [0, 0, 0];
-    const end_pt1 = [dist_2_pt1, 0, 0];
-        // ? [dist_2_pt1, 0, 0]
-        // : [0, dist_2_pt1, 0];
-    const end_pt2 = rotate_2d([dist_2_pt2, 0, 0], theta);
-        // ? rotate_2d([dist_2_pt2, 0, 0], theta)
-        // : rotate_2d([0, dist_2_pt2, 0], theta);
+    const end_pt1 = (horizontally)
+        ? [dist_2_pt1, 0, 0]
+        : [0, dist_2_pt1, 0];
+    const end_pt2 = (horizontally)
+        ? rotate_2d([dist_2_pt2, 0, 0], theta)
+        : rotate_2d([0, dist_2_pt2, 0], theta);
 
-    // Compute quaternion from https://jsfiddle.net/v6bkg4wf/2/
+    // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
     const matrix1 = matrix_from_points(start_pt1, origin, start_pt2).invert();
     const matrix2 = matrix_from_points(end_pt1, zero, end_pt2);
     const Q = new THREE.Quaternion();
@@ -422,12 +370,6 @@ function planar_v2(points, indexes = [0, -1, 1], horizontally = true, debug = fa
     _.forEach(points, (point, i) => {
         points_at_origin[i] = new THREE.Vector3(...point).applyQuaternion(Q).sub(translation_vec).toArray();
     });
-
-    if (debug) {
-        console.log("============")
-        console.log(idx)
-        console.log("points_at_origin", points_at_origin);
-    }
 
     return points_at_origin;
 }
@@ -656,6 +598,8 @@ class BaseGeometry {
 
         // Take first point as Origin
         this.origin = this.points[0];
+        this.centroid = [0, 0, 0];
+
         // Geometry parameters
         this.area = 0;
         this.perimeter = 0;
@@ -668,8 +612,13 @@ class BaseGeometry {
     }
 
     compute_parameters() {
-        // Compute angle, edge distances, perimeter and area
+        // Compute angle, edge distances, perimeter and area, and centroid
+        let [x_sum, y_sum, z_sum] = [0, 0, 0];
         _.forEach(this.points, (current_point, i) => {
+            x_sum += current_point[0];
+            y_sum += current_point[1];
+            z_sum += current_point[2];
+
             const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
             const next_point = this.points[(i + 1) % this.num_points];
             const next_next_point = this.points[(i + 2) % this.num_points];
@@ -685,6 +634,8 @@ class BaseGeometry {
             // Compute area of the triangle
             this.area += triangle_area_from_points(this.origin, next_point, next_next_point);
         });
+
+        this.centroid = [x_sum / this.num_points, y_sum / this.num_points, z_sum / this.num_points];
     }
 
     compute_boundaries() {
@@ -697,7 +648,7 @@ class BaseGeometry {
         this.height = height;
     }
 
-    to_2D_points(){
+    to_2D_points() {
         return this.points.map(p => [
             p[0] - this.x_min,
             p[1] - this.y_min
@@ -795,8 +746,12 @@ class TrapezoidalPrism extends LabeledGeometry {
         this.compute_hash();
     }
 
-    planar(horizontally = true) {
-        const planar_points = planar_v2(this.points, [0, 2, 1], horizontally);
+    planar(face_name = "top") {
+        const origin = this.points[0];
+        const start_pt1 = this.points[2];
+        const start_pt2 = this.points[1];
+
+        const planar_points = flat_points(this.points, origin, start_pt1, start_pt2, true);
         const planar_polygon = new TrapezoidalPrism(planar_points, this.label, this.color);
         planar_polygon.compute_boundaries();
         return planar_polygon;
@@ -865,8 +820,13 @@ class Polygon3D extends LabeledGeometry {
         return a
     }
 
-    planar(horizontally = true) {
-        const planar_points = planar_v2(this.points, [0, -1, 1], horizontally);
+    planar() {
+        // Define parameters
+        const origin = this.points[0];
+        const start_pt1 = this.centroid;
+        const start_pt2 = this.points[1];
+
+        const planar_points = flat_points(this.points, origin, start_pt1, start_pt2, false);
         const planar_polygon = new Polygon3D(planar_points, this.label, this.color);
         planar_polygon.compute_boundaries();
         return planar_polygon;
