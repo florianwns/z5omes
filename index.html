@@ -804,7 +804,7 @@
                                         <td>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
                                                  :fill="row[0].color.hex">
-                                                <polygon :points="row[0].to_svg_points(32)"/>
+                                                <polygon :points="row[0].to_resized_2D_points(32)"/>
                                             </svg>
                                         </td>
                                         <template x-for="(value, j) in row[1]" :key="j">
@@ -926,8 +926,10 @@
 
                         let planar_prism = prism.planar();
                         const planar_fig = planar_prism.top;
+                        planar_fig.compute_boundaries();
+
                         console.log("PLANAR PRISM", planar_fig.points, planar_prism.color)
-                        const svg_points = planar_fig.to_svg_points(100)
+                        const svg_points = planar_fig.to_2D_points()
                         const width = planar_fig.width;
                         const height = planar_fig.height;
 
@@ -935,8 +937,6 @@
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
                         svg.setAttribute('class', "m-2");
-                        svg.setAttribute('width', `${width}`);
-                        svg.setAttribute('height', `${height}`);
 
                         const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                         polygon.setAttribute('points', `${svg_points}`);
@@ -1069,7 +1069,10 @@
                     _.forEach(cover_3D, (fig, i) => {
                         // Planar fig
                         let planar_fig = fig.planar();
+                        // TODO : Get the all slope
+
                         cover_figs[i] = planar_fig;
+
                     });
 
                     // Refresh proxy

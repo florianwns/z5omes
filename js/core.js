@@ -697,7 +697,14 @@ class BaseGeometry {
         this.height = height;
     }
 
-    to_svg_points(size) {
+    to_2D_points(){
+        return this.points.map(p => [
+            p[0] - this.x_min,
+            p[1] - this.y_min
+        ]);
+    }
+
+    to_resized_2D_points(size = null) {
         // Recompute pixel positions for svg display
         const pixel_ratio = size / Math.max(this.height, this.width);
         const center = size / 2;
@@ -706,6 +713,8 @@ class BaseGeometry {
             (p[1] - this.y_min - this.height / 2) * pixel_ratio + center,
         ]);
     }
+
+
 }
 
 
@@ -855,14 +864,6 @@ class Polygon3D extends LabeledGeometry {
         }
         return a
     }
-    //
-    // planar(horizontally = false) {
-    //     const planar_polygon = _.cloneDeep(this);
-    //     planar_polygon.points = planar_v2(this.points, [0, -1, 1], horizontally);
-    //     planar_polygon.compute_boundaries();
-    //     return planar_polygon;
-    // }
-
 
     planar(horizontally = true) {
         const planar_points = planar_v2(this.points, [0, -1, 1], horizontally);
