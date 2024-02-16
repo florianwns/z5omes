@@ -20,11 +20,6 @@ const I18N_FR = {
         spirals: 'Spirales',
         zome_made_with: "Ce zome a été fabriqué avec",
 
-        // Options
-        opt_none: "Aucun",
-        opt_horizontal: "Horizontal",
-        opt_vertical: "Vertical",
-
         // Tooltips
         tooltip_display_help: "Afficher l'aide",
         tooltip_close: "Fermer",
@@ -40,6 +35,11 @@ const I18N_FR = {
         tooltip_draw_fig_color: "Dessiner les couleurs",
         tooltip_draw_fig_centroid: "Dessiner le centre de gravité",
         tooltip_split_drawing: "Divisez le dessin en plusieurs feuilles A4 pour l'exporter au format PDF",
+
+        // Options
+        opt_none: "Aucun",
+        opt_horizontal: "Horizontal",
+        opt_vertical: "Vertical",
 
         // Help
         help_shape: "La forme d'un zome est déterminée par :",
