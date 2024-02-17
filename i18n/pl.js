@@ -8,7 +8,7 @@ const I18N_PL = {
         origami: "origami",
         view_3D: "widok 3D",
         vanishing_lines: "linie zbiegu",
-        axis: "osie",
+        axes: "osie",
         spin: "rotacja",
         vertices: "wierzchołki",
         fullscreen: "tryb pełnoekranowy",

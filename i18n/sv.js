@@ -8,7 +8,7 @@ const I18N_SV = {
         origami: "Origami",
         view_3D: "3D bild",
         vanishing_lines: "Vanishing lines",
-        axis: "Axel",
+        axes: "Axlar",
         spin: "Snurra",
         vertices: "Vertex",
         fullscreen: "Helskärm",

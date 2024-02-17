@@ -8,7 +8,7 @@ const I18N_EN = {
         origami: "Origami",
         view_3D: "3D view",
         vanishing_lines: "Vanishing lines",
-        axis: "Axis",
+        axes: "Axes",
         spin: "Spin",
         vertices: "Vertices",
         fullscreen: "Fullscreen",

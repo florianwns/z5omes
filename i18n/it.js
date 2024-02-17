@@ -8,7 +8,7 @@ const I18N_IT = {
         origami: "Origami",
         view_3D: "Vista 3D",
         vanishing_lines: "Linee di fuga",
-        axis: "Assi",
+        axes: "Assi",
         spin: "Rotazione",
         vertices: "Vertici",
         fullscreen: "Schermo intero",
