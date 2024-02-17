@@ -933,28 +933,77 @@
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
 
-                    _.forIn(hash_grouped_skeleton_3D, (group) => {
+                    // Define the 6 sides
+                    const sides = ["top", "left", "front"];
+
+                    // Reset boundaries
+                    let x_max = Number.MIN_VALUE,
+                        y_max = Number.MIN_VALUE,
+                        x_min = Number.MAX_VALUE,
+                        y_min = Number.MAX_VALUE,
+                        max_height = Number.MIN_VALUE,
+                        max_width = Number.MIN_VALUE;
+
+                    let all_labeled_figs = {};
+                    _.forIn(hash_grouped_skeleton_3D, group => {
                         // Take the first element of group
                         const prism = group[0];
+                        all_labeled_figs[prism.label] = new Array(sides.length);
 
-                        const fig = prism.flatten("top");
-                        const svg_points = fig.fit_points()
-                        const width = fig.width;
-                        const height = fig.height;
+                        // Get min max from all fig sides
+                        _.forEach(sides, (side, i) => {
+                            const fig = prism.flatten(side);
 
-                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
-                        // svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-                        svg.setAttribute('class', "m-2");
+                            if (fig.x_min < x_min) x_min = fig.x_min;
+                            if (fig.x_max > x_max) x_max = fig.x_max;
+                            if (fig.y_min < y_min) y_min = fig.y_min;
+                            if (fig.y_max > y_max) y_max = fig.y_max;
 
-                        const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                        polygon.setAttribute('points', `${svg_points}`);
-                        polygon.setAttribute('stroke', 'black');
-                        polygon.setAttribute('stroke-width', '0.1px');
-                        polygon.setAttribute('fill', prism.color.hex);
+                            if (fig.width > max_width) max_width = fig.width;
+                            if (fig.height > max_height) max_height = fig.height;
 
-                        svg.appendChild(polygon);
-                        this.timber_profile_container.appendChild(svg);
+                            all_labeled_figs[prism.label][i] = fig;
+                        });
+                    });
+
+                    console.log(all_labeled_figs);
+                    console.log(max_height, max_width);
+
+
+                    _.forIn(hash_grouped_skeleton_3D, group => {
+                        // Take the first element of group
+                        const prism = group[0];
+                        const side_figs = all_labeled_figs[prism.label];
+
+                        // Draw all fig sides
+                        _.forEach(side_figs, (fig, i) => {
+
+                            console.log(fig)
+                            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                            svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                            svg.setAttribute('viewBox', `0 0 ${max_width} ${max_height}`);
+                            svg.setAttribute('class', "m-2");
+
+                            const fig_points = fig.fit_points()
+
+                            const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            polygon_front.setAttribute('points', `${fig_points.slice(0, 4)}`);
+                            polygon_front.setAttribute('stroke', 'black');
+                            polygon_front.setAttribute('stroke-width', '0.1px');
+                            polygon_front.setAttribute('fill', prism.color.hex);
+                            polygon_front.setAttribute('fill-opacity', "0.7");
+
+                            const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            polygon_behind.setAttribute('points', `${fig_points.slice(4, 8)}`);
+                            polygon_behind.setAttribute('stroke', 'black');
+                            polygon_behind.setAttribute('stroke-width', '0.1px');
+                            polygon_behind.setAttribute('fill', "#FF0000");
+
+
+                            svg.appendChild(polygon_behind);
+                            svg.appendChild(polygon_front);
+                            this.timber_profile_container.appendChild(svg);
+                        });
                     });
                 },
             };
@@ -1223,11 +1272,11 @@
                 },
                 build_elements_per_page() {
                     // Compute the same pixel ratio for all pages
-                    const maxWidth = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
-                    const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
+                    const max_width = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
+                    const max_height = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
                     const border = 6;
                     const pixel_ratio = Math.min(
-                        (210 - 2 * border) / maxWidth, (297 - 6 * border) / maxHeight
+                        (210 - 2 * border) / max_width, (297 - 6 * border) / max_height
                     ) * this.zoom;
                     const center = [210 / 2, 297 / 2];
 
@@ -1379,7 +1428,7 @@
                 type_of_3D_objects: "skeleton_3D",
 
                 draw_axes: true,
-                draw_labels: true,
+                draw_vanishing_lines: true,
                 draw_zome_vertices: false,
 
                 show_vanishing_lines_switch: false,

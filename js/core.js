@@ -635,7 +635,6 @@ class Base3DGeometry extends LabeledObject {
         this.points = points;
         this.num_points = this.points.length;
 
-
         // Take first point as Origin
         this.origin = this.points[0];
         this.centroid = get_centroid(points);
@@ -819,10 +818,10 @@ class TrapezoidalPrism extends Base3DGeometry {
         }
     }
 
-    filter_points_by_side(side_name, points) {
+    filter_points_by_side(side, points) {
         // Filter the 6 sides points of TrapezoidalPrism for Polygon construction
         const [A, B, C, D, E, F, G, H] = points || this.points;
-        switch (side_name) {
+        switch (side) {
             case "top":
                 return [A, C, D, B];     // Top side
             case "bottom":
@@ -834,19 +833,34 @@ class TrapezoidalPrism extends Base3DGeometry {
             case "front":
                 return [C, G, H, D];     // Front side
             case "back":
-            default:
                 return [A, E, F, B];     // Back side
         }
     }
 
-    flatten(side_name) {
-        const side_polygon = this.get_side(side_name);
-        const polygon_points = side_polygon.points;
-        const [a, b, _, d] = polygon_points;
-        const planar_points = flatten_3D_points(this.points, a, b, d, true);
+    flatten(side = "top") {
+        let flattened_points, opposite_side;
+        const [A, B, C, D, E, F, G, H] = this.points;
 
-        const side_points = this.filter_points_by_side(side_name, planar_points);
-        return new Polygon2D(side_points, this.label, this.color);
+        switch (side) {
+            case "top":
+                flattened_points = flatten_3D_points(this.points, B, D, A, true);
+                opposite_side = "bottom";
+                break;
+            case "left":
+                flattened_points = flatten_3D_points(this.points, A, C, E, true);
+                opposite_side = "right";
+                break;
+            case "front":
+                flattened_points = flatten_3D_points(this.points, D, H, C, false);
+                opposite_side = "back";
+                break;
+        }
+
+        return new Polygon2D([
+                ...this.filter_points_by_side(side, flattened_points),
+                ...this.filter_points_by_side(opposite_side, flattened_points)
+            ], this.label, this.color
+        );
     }
 }
 
