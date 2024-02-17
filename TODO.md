@@ -92,3 +92,8 @@
 * [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
 
 * [ ] Wizzdome HR => WR width ratio::: plus compliqué mais faisable
+
+* [ ] Attention aux exports, verifier que les axes ou vanishing lines ne soient pas exportés
+
+* [ ] Sur le renforcement des tasseaux, 
+  pouvoir avec un multiselect choisir les niveaux auquel les ajouter.

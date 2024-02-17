@@ -115,7 +115,7 @@ function mul(p1, k) {
     return [p1[0] * k, p1[1] * k, p1[2] * k];
 }
 
-function swap_yz_axis(p1) {
+function swap_yz_axes(p1) {
     // Swap the y axis with the z axis
     return [p1[0], p1[2], p1[1]];
 }
@@ -360,7 +360,7 @@ function flatten_3D_points(points, origin, start_pt1, start_pt2, horizontally = 
 
     // Apply quaternion and sub translation vec to planar the face
     const flattened_points = new Array(points.length);
-    const translation_vec = new THREE.Vector3(...new THREE.Vector3(...points[0]).applyQuaternion(Q));
+    const translation_vec = new THREE.Vector3(...points[0]).applyQuaternion(Q);
     _.forEach(points, (point, i) => {
         flattened_points[i] = new THREE.Vector3(...point)
             .applyQuaternion(Q).sub(translation_vec)

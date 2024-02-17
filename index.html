@@ -594,12 +594,28 @@
                                                    id="draw-vanishing-lines" x-model="draw_vanishing_lines">
                                         </div>
 
-                                        <!-- Draw Axis -->
+                                        <!-- Draw Axes -->
                                         <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-axis-switch"
-                                                   x-text="i18n('axis')"></label>
+                                            <label class="form-check-label" for="draw-axes-switch"
+                                                   x-text="i18n('axes')"></label>
                                             <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-axis-switch" x-model="draw_axis">
+                                                   id="draw-axes-switch" x-model="draw_axes">
+                                        </div>
+
+                                        <!-- Draw Labels -->
+                                        <div class="form-check form-switch me-2 mb-3">
+                                            <label class="form-check-label" for="draw-labels-switch"
+                                                   x-text="i18n('labels')"></label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-labels-switch" x-model="draw_labels">
+                                        </div>
+
+                                        <!-- Draw Measurements -->
+                                        <div class="form-check form-switch me-2 mb-3">
+                                            <label class="form-check-label" for="draw-measurements-switch"
+                                                   x-text="i18n('measurements')"></label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-measurements-switch" x-model="draw_measurements">
                                         </div>
 
                                         <!-- Draw Zome Vertices -->
@@ -721,12 +737,7 @@
                 </div>
             </div>
 
-            <div class="col-12 break-before" x-data="measurements_v2" @zome-is-made.window="process">
-                <div class="bg-white rounded border position-relative" x-ref="timber_profile_container">
-                </div>
-            </div>
-
-            <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
+            <div class="col-12 break-before" x-data="cover_measurements" @zome-is-made.window="process">
                 <hr>
 
                 <div class="d-flex align-items-center">
@@ -736,21 +747,21 @@
                     </h5>
                     <!-- CSV Button -->
                     <div>
-                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                          :title="i18n('tooltip_export_2_format', 'TSV')"
-                          @click="download_tsv()">
-                        <i class="fa-solid fa-file"></i>
-                        <span class="fa-icon-file-type">TSV</span>
-                    </span>
+                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                              :title="i18n('tooltip_export_2_format', 'TSV')"
+                              @click="download_tsv()">
+                            <i class="fa-solid fa-file"></i>
+                            <span class="fa-icon-file-type">TSV</span>
+                        </span>
                     </div>
                     <div>
-                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                          title="Export to CSV format"
-                          :title="i18n('tooltip_export_2_format', 'CSV')"
-                          @click="download_csv()">
-                        <i class="fa-solid fa-file"></i>
-                        <span class="fa-icon-file-type">CSV</span>
-                    </span>
+                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                              title="Export to CSV format"
+                              :title="i18n('tooltip_export_2_format', 'CSV')"
+                              @click="download_csv()">
+                            <i class="fa-solid fa-file"></i>
+                            <span class="fa-icon-file-type">CSV</span>
+                        </span>
                     </div>
                 </div>
 
@@ -820,6 +831,26 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-12 break-before" x-data="framework_measurements" @zome-is-made.window="process">
+                <hr>
+
+                <h5 class="text-secondary mt-4 mb-4 me-auto">
+                    <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                    <span x-text="i18n('framework')" class="up-first"></span>
+                </h5>
+
+
+                <div class="row justify-content-between">
+                    <div class="col-md-6 col-xl-5 mt-2">
+                        <div class="bg-white rounded border position-relative"
+                             x-ref="timber_profile_container">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -904,7 +935,7 @@
     document.addEventListener('alpine:init', () => {
 
 
-        Alpine.data('measurements_v2', () => {
+        Alpine.data('framework_measurements', () => {
             return {
                 timber_profile_container: null,
                 async init() {
@@ -929,7 +960,7 @@
 
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
-                        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+                        // svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
                         svg.setAttribute('class', "m-2");
 
                         const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
@@ -946,7 +977,7 @@
         });
 
 
-        Alpine.data('measurements', () => {
+        Alpine.data('cover_measurements', () => {
             return {
                 cover_figs: [],
                 floor: null,
@@ -1270,7 +1301,7 @@
                         _.forEach(flattened_cover_3D, (fig) => {
                             mandala_figs.push(
                                 new Polygon2D(
-                                    fig.points.map(p => rotate_2d(swap_yz_axis(p), -ZOME.rotation_angles[i], O)),
+                                    fig.points.map(p => rotate_2d(swap_yz_axes(p), -ZOME.rotation_angles[i], O)),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
                                 )
@@ -1296,7 +1327,7 @@
                         _.forEach(flattened_cover_3D, (fig) => {
                             colored_spiral_figs.push(
                                 new Polygon2D(
-                                    fig.points.map(p => swap_yz_axis(p)),
+                                    fig.points.map(p => swap_yz_axes(p)),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
                                 )
@@ -1351,7 +1382,7 @@
         Alpine.data('renderer_3D', () => {
             let scene, camera, renderer, controls, canvas;              // Three JS Parameters
             const meshes = {
-                "axis": null,
+                "axes": null,
                 "zome_obj": null,
                 "zome_edges": null,
                 "zome_vertices": null,
@@ -1364,9 +1395,11 @@
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
 
-                draw_axis: true,
+                draw_axes: true,
                 draw_vanishing_lines: true,
                 draw_zome_vertices: false,
+                draw_labels: true,
+                draw_measurements: true,
 
                 show_vanishing_lines_switch: false,
                 show_vertices_switch: false,
@@ -1380,7 +1413,7 @@
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["axis", "vanishing_lines", "zome_vertices"].forEach(
+                    ["axes", "vanishing_lines", "zome_vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
@@ -1430,11 +1463,11 @@
                     // Add controls
                     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-                    // Add (x, y, z) Axis
-                    meshes.axis = new THREE.AxesHelper(WORLD_HEIGHT);
-                    meshes.axis.visible = this.draw_axis;
+                    // Add (x, y, z) Axes
+                    meshes.axes = new THREE.AxesHelper(WORLD_HEIGHT);
+                    meshes.axes.visible = this.draw_axes;
 
-                    scene.add(meshes.axis);
+                    scene.add(meshes.axes);
 
                     this.reset();
                     this.auto_size()
@@ -1574,6 +1607,7 @@
                                 num_faces[i] = obj.num_faces;
                                 colors[i] = ZOME.rotated_colors[obj.color.hex];
                             });
+
 
                             // Build geometry of first cover_3D
                             const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
@@ -2571,7 +2605,7 @@
 
                         // Swap y axis with z axis for 3D display
                         flattened_cover_3D[i] = new Polygon3D(
-                            rotated_points.map(p => swap_yz_axis(p)),
+                            rotated_points.map(p => swap_yz_axes(p)),
                             fig.label,
                             fig.color
                         )
