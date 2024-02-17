@@ -476,7 +476,7 @@
                                                 x-model="type_of_3D_objects">
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
                                             <option value="cover_3D" x-text="i18n('cover_3D')"></option>
-                                            <option value="mandala_3D" x-text="i18n('mandala_3D')"></option>
+                                            <option value="flattened_cover_3D" x-text="i18n('mandala_3D')"></option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -804,7 +804,7 @@
                                         <td>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
                                                  :fill="row[0].color.hex">
-                                                <polygon :points="row[0].to_resized_2D_points(32)"/>
+                                                <polygon :points="row[0].resize_points(32)"/>
                                             </svg>
                                         </td>
                                         <template x-for="(value, j) in row[1]" :key="j">
@@ -850,9 +850,6 @@
 <script src="js/PLYExporter.min.js"></script>
 <script src="js/GLTFExporter.min.js"></script>
 
-<!-- D3 -->
-<script src="js/d3-polygon.min.js"></script>
-
 <!-- Canvg -->
 <script src="js/canvg.min.js"></script>
 
@@ -876,6 +873,7 @@
 <script src="i18n/it.js?v=1.0.7b"></script>
 <script src="i18n/fr.js?v=1.0.7b"></script>
 <script src="i18n/pl.js?v=1.0.7b"></script>
+<script src="i18n/sv.js?v=1.0.7b"></script>
 
 <!-- Core and geometry functions -->
 <script src="js/core.js?v=1.0.7b"></script>
@@ -897,6 +895,7 @@
         it: I18N_IT,
         fr: I18N_FR,
         pl: I18N_PL,
+        sv: I18N_SV,
     }
 
     // Use a global variable to store ZOME data
@@ -912,7 +911,6 @@
                     this.timber_profile_container = this.$refs.timber_profile_container;
                 },
 
-
                 process() {
                     // Group prims by hash
                     const hash_grouped_skeleton_3D = ZOME.hash_grouped_skeleton_3D;
@@ -924,14 +922,10 @@
                         // Take the first element of group
                         const prism = group[0];
 
-                        let planar_prism = prism.planar();
-                        const planar_fig = planar_prism.top;
-                        planar_fig.compute_boundaries();
-
-                        console.log("PLANAR PRISM", planar_fig.points, planar_prism.color)
-                        const svg_points = planar_fig.to_2D_points()
-                        const width = planar_fig.width;
-                        const height = planar_fig.height;
+                        const fig = prism.flatten("top");
+                        const svg_points = fig.fit_points()
+                        const width = fig.width;
+                        const height = fig.height;
 
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
@@ -942,11 +936,9 @@
                         polygon.setAttribute('points', `${svg_points}`);
                         polygon.setAttribute('stroke', 'black');
                         polygon.setAttribute('stroke-width', '0.1px');
-                        polygon.setAttribute('fill', planar_prism.color.hex);
-
+                        polygon.setAttribute('fill', prism.color.hex);
 
                         svg.appendChild(polygon);
-
                         this.timber_profile_container.appendChild(svg);
                     });
                 },
@@ -959,9 +951,7 @@
                 cover_figs: [],
                 floor: null,
 
-                __to_real_world: null,
                 async init() {
-                    this.__to_real_world = _.debounce(this.to_real_world, 1);
                 },
                 get figs() {
                     return this.has_floor ? [...this.cover_figs, this.floor] : this.cover_figs;
@@ -1042,10 +1032,11 @@
                 get table_rows() {
                     const rows = new Array(this.figs.length);
                     _.forEach(this.figs, (fig, i) => {
-                        rows[i] = [fig, [
+                        const flattened_fig = fig.flatten();
+                        rows[i] = [flattened_fig, [
                             i + 1,
-                            humanize_distance(fig.width),
-                            humanize_distance(fig.height),
+                            humanize_distance(flattened_fig.width),
+                            humanize_distance(flattened_fig.height),
                             humanize_arr(unique_arr(_.map(fig.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(fig.angles, a => humanize_angle(rad2deg(a))))),
                             humanize_angle(rad2deg(fig.slope)),
@@ -1056,28 +1047,9 @@
                     return rows;
                 },
                 process() {
-                    this.__to_real_world();
-                },
-
-                to_real_world() {
                     // Clone structure
-                    const cover_3D = ZOME.cover_3D;
-                    const num_figs = cover_3D.length;
-
-                    // Resize cover figs
-                    const cover_figs = new Array(num_figs);
-                    _.forEach(cover_3D, (fig, i) => {
-                        // Planar fig
-                        let planar_fig = fig.planar();
-                        // TODO : Get the all slope
-
-                        cover_figs[i] = planar_fig;
-
-                    });
-
-                    // Refresh proxy
-                    this.floor = (ZOME.floor) ? ZOME.floor.planar() : null;
-                    this.cover_figs = cover_figs;
+                    this.floor = (ZOME.floor) ? ZOME.floor : null;
+                    this.cover_figs = ZOME.cover_3D;
                 },
             };
         });
@@ -1171,7 +1143,7 @@
                     // Save document
                     doc.end();
 
-                    const filename = this.gen_filename("_planar_figs.pdf");
+                    const filename = this.gen_filename("_flattened_figs.pdf");
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
                         download(filename, url);
@@ -1183,7 +1155,7 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    const filename = this.gen_filename("_planar_figs.svg");
+                    const filename = this.gen_filename("_flattened_figs.svg");
                     download(filename, window.URL.createObjectURL(blob));
                 },
                 process() {
@@ -1266,7 +1238,7 @@
                             iF++
                             if (this.draw_centroid) {
                                 const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                                const centroid = d3.polygonCentroid(points);
+                                const centroid = get_centroid(points);
                                 c.setAttribute('cx', `${centroid[0]}`);
                                 c.setAttribute('cy', `${centroid[1]}`);
                                 c.setAttribute('r', '1');
@@ -1290,15 +1262,15 @@
                     });
                 },
                 draw_mandala_figs() {
-                    const planar_cover_2D = ZOME.planar_cover_2D;
+                    const flattened_cover_3D = ZOME.flattened_cover_3D;
 
                     // For each color, rotate piece around the origin
                     const mandala_figs = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(planar_cover_2D, (fig) => {
+                        _.forEach(flattened_cover_3D, (fig) => {
                             mandala_figs.push(
-                                new Polygon3D(
-                                    fig.points.map(p => rotate_2d(p, -ZOME.rotation_angles[i], O)),
+                                new Polygon2D(
+                                    fig.points.map(p => rotate_2d(swap_yz_axis(p), -ZOME.rotation_angles[i], O)),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
                                 )
@@ -1312,19 +1284,19 @@
 
                     // Add a last page if floor exists
                     if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.planar()]);
+                        pages.push([ZOME.floor.flatten()]);
                     }
                 },
                 draw_spiral_figs() {
-                    const planar_cover_2D = ZOME.planar_cover_2D;
+                    const flattened_cover_3D = ZOME.flattened_cover_3D;
 
                     // For each color, Add a page with cover_3D figs
                     for (let i = 0; i < ZOME.num; i++) {
                         const colored_spiral_figs = [];
-                        _.forEach(planar_cover_2D, (fig) => {
+                        _.forEach(flattened_cover_3D, (fig) => {
                             colored_spiral_figs.push(
-                                new Polygon3D(
-                                    fig.points,
+                                new Polygon2D(
+                                    fig.points.map(p => swap_yz_axis(p)),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
                                 )
@@ -1335,7 +1307,7 @@
 
                     // Add Floor at last page if floor exists
                     if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.planar()]);
+                        pages.push([ZOME.floor.flatten()]);
                     }
                 },
                 next_page() {
@@ -1740,7 +1712,7 @@
                             break;
                         case "m":
                         case "M":
-                            this.type_of_3D_objects = "mandala_3D";
+                            this.type_of_3D_objects = "flattened_cover_3D";
                             break;
                         case "s":
                         case "S":
@@ -2575,41 +2547,34 @@
                         });
                     }
 
-                    // Build planar_cover_2D and mandala_3D
-                    const mandala_3D = new Array(cover_3D.length);
-                    const planar_cover_2D = new Array(cover_3D.length);
-
-                    // Compute cover planar figs
-                    let O = [0, 0, 0], planar_points = [];
+                    // Build flattened_cover_3D for mandala_3D display
+                    const flattened_cover_3D = new Array(cover_3D.length);
+                    let O = [0, 0, 0];
                     let rotated_A;
                     _.forEach(cover_3D, (fig, i) => {
-                        let planar_fig = fig.planar();
+                        let flattened_fig = fig.flatten();
 
                         // Move to Origin and rotate to match with previous piece
-                        planar_points = planar_fig.points.map(p => add(p, O));
+                        let rotated_points = flattened_fig.points.map(p => add(p, O));
                         if (i > 0) {
-                            a = angle(A, O, planar_points[1]);
-                            rotated_A = rotate_2d(planar_points[1], a, O);
+                            a = angle(A, O, rotated_points[1]);
+                            rotated_A = rotate_2d(rotated_points[1], a, O);
 
                             // Rotate the other way if rotatedA is not too close to A
                             if (to_decimal(dist(rotated_A, A)) != 0) {
                                 a = -a;
                             }
-                            planar_points = planar_points.map(p => rotate_2d(p, a, O));
+                            rotated_points = rotated_points.map(p => rotate_2d(p, a, O));
                         }
-                        O = planar_points[planar_points.length - 1];
-                        A = planar_points[planar_points.length - 2];
+                        O = rotated_points[rotated_points.length - 1];
+                        A = rotated_points[rotated_points.length - 2];
 
-                        // Save planar figs
-                        planar_fig.points = planar_points;
-                        planar_cover_2D[i] = planar_fig;
-
-                        // Adapt points for 3D view
-                        mandala_3D[i] = new Polygon3D(
-                            planar_points.map(p => [p[0], p[2], p[1]]),
-                            planar_fig.label,
-                            planar_fig.color,
-                        );
+                        // Swap y axis with z axis for 3D display
+                        flattened_cover_3D[i] = new Polygon3D(
+                            rotated_points.map(p => swap_yz_axis(p)),
+                            fig.label,
+                            fig.color
+                        )
                     });
 
                     // Save Zome and dispatch it
@@ -2629,8 +2594,7 @@
                         hash_grouped_skeleton_3D: hash_grouped_skeleton_3D,
                         skeleton_3D_hashes: skeleton_3D_hashes,
 
-                        mandala_3D: mandala_3D,
-                        planar_cover_2D: planar_cover_2D,
+                        flattened_cover_3D: flattened_cover_3D,
                         floor: floor,
                         vanishing_lines: vanishing_lines,
                     });
