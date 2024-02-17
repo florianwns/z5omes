@@ -1473,7 +1473,11 @@
                     this.auto_size()
                     this.animate()
 
-                    this.$dispatch('zome-renderer-is-ready');
+                    const loader = new THREE.FontLoader();
+                    loader.load('webfonts/helvetiker_regular.typeface.json', (font) => {
+                        this.font = font;
+                        this.$dispatch('zome-renderer-is-ready');
+                    });
                 },
                 auto_size() {
                     const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
