@@ -602,22 +602,6 @@
                                                    id="draw-axes-switch" x-model="draw_axes">
                                         </div>
 
-                                        <!-- Draw Labels -->
-                                        <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-labels-switch"
-                                                   x-text="i18n('labels')"></label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-labels-switch" x-model="draw_labels">
-                                        </div>
-
-                                        <!-- Draw Measurements -->
-                                        <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-measurements-switch"
-                                                   x-text="i18n('measurements')"></label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-measurements-switch" x-model="draw_measurements">
-                                        </div>
-
                                         <!-- Draw Zome Vertices -->
                                         <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
                                             <label class="form-check-label" for="draw-zome-vertices-switch"
@@ -1386,7 +1370,6 @@
                 "zome_obj": null,
                 "zome_edges": null,
                 "zome_vertices": null,
-                "vanishing_lines": null,
             }
 
             return {
@@ -1396,10 +1379,8 @@
                 type_of_3D_objects: "skeleton_3D",
 
                 draw_axes: true,
-                draw_vanishing_lines: true,
-                draw_zome_vertices: false,
                 draw_labels: true,
-                draw_measurements: true,
+                draw_zome_vertices: false,
 
                 show_vanishing_lines_switch: false,
                 show_vertices_switch: false,
@@ -1526,25 +1507,25 @@
                 },
                 clear() {
                     // Clean old meshes
+                    if (meshes.vanishing_lines instanceof THREE.Group) {
+                        scene.remove(meshes.vanishing_lines)
+                    }
+                    meshes.vanishing_lines = new THREE.Group();
+
                     if (meshes.zome_obj instanceof THREE.Group) {
                         scene.remove(meshes.zome_obj)
                     }
                     meshes.zome_obj = new THREE.Group();
 
-                    if (meshes.zome_lines instanceof THREE.Group) {
-                        scene.remove(meshes.zome_lines)
+                    if (meshes.zome_edges instanceof THREE.Group) {
+                        scene.remove(meshes.zome_edges)
                     }
-                    meshes.zome_lines = new THREE.Group();
+                    meshes.zome_edges = new THREE.Group();
 
                     if (meshes.zome_vertices instanceof THREE.Group) {
                         scene.remove(meshes.zome_vertices)
                     }
                     meshes.zome_vertices = new THREE.Group();
-
-                    if (meshes.vanishing_lines instanceof THREE.Group) {
-                        scene.remove(meshes.vanishing_lines)
-                    }
-                    meshes.vanishing_lines = new THREE.Group();
                 },
 
                 process() {
@@ -1612,7 +1593,6 @@
                                 colors[i] = ZOME.rotated_colors[obj.color.hex];
                             });
 
-
                             // Build geometry of first cover_3D
                             const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
                             spiral_geometry.computeVertexNormals()
@@ -1623,8 +1603,8 @@
                                 const rotated_spiral_geometry = spiral_geometry.clone()
                                 rotated_spiral_geometry.points
                                 // Rotate the new geometry
-                                const a = ZOME.rotation_angles[i];
-                                rotated_spiral_geometry.rotateY(a);
+                                const theta = ZOME.rotation_angles[i];
+                                rotated_spiral_geometry.rotateY(theta);
 
                                 // Get colors
                                 for (let j = 0; j < num_figs; j++) {
@@ -1635,10 +1615,10 @@
                                 meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
 
                                 const rotated_edge_geometry = edge_geometry.clone()
-                                rotated_edge_geometry.rotateY(a);
+                                rotated_edge_geometry.rotateY(theta);
 
                                 const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
-                                meshes.zome_lines.add(spiral_lines);
+                                meshes.zome_edges.add(spiral_lines);
                             }
                         }
                     }
@@ -1663,15 +1643,15 @@
 
                             const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
                             const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                            meshes.zome_lines.add(spiral_lines);
+                            meshes.zome_edges.add(spiral_lines);
                         }
                     }
 
                     // Add the final obj mesh to the scene
                     meshes.zome_obj.rotation.y = zome_obj_rotation;
-                    meshes.zome_lines.rotation.y = zome_obj_rotation;
+                    meshes.zome_edges.rotation.y = zome_obj_rotation;
                     scene.add(meshes.zome_obj);
-                    scene.add(meshes.zome_lines);
+                    scene.add(meshes.zome_edges);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -1700,8 +1680,8 @@
                         if (meshes.zome_vertices instanceof THREE.Group) {
                             meshes.zome_vertices.rotation.y -= this.speed
                         }
-                        if (meshes.zome_lines instanceof THREE.Group) {
-                            meshes.zome_lines.rotation.y -= this.speed
+                        if (meshes.zome_edges instanceof THREE.Group) {
+                            meshes.zome_edges.rotation.y -= this.speed
                         }
                         if (meshes.vanishing_lines instanceof THREE.Group) {
                             meshes.vanishing_lines.rotation.y -= this.speed

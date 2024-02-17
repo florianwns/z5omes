@@ -326,7 +326,7 @@ function dihedral_angle_between_planes(plane1, plane2) {
 }
 
 
-function matrix_from_points(a, b, c) {
+function rotation_matrix_from_points(a, b, c) {
     const axis1 = new THREE.Vector3(...sub(a, b)).normalize()
     const axis2 = new THREE.Vector3(...sub(c, b)).normalize()
     const axis3 = new THREE.Vector3().crossVectors(axis1, axis2).normalize();
@@ -353,8 +353,8 @@ function flatten_3D_points(points, origin, start_pt1, start_pt2, horizontally = 
         : rotate_2d([0, dist_2_pt2, 0], theta);
 
     // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
-    const matrix1 = matrix_from_points(start_pt1, origin, start_pt2).invert();
-    const matrix2 = matrix_from_points(end_pt1, zero, end_pt2);
+    const matrix1 = rotation_matrix_from_points(start_pt1, origin, start_pt2).invert();
+    const matrix2 = rotation_matrix_from_points(end_pt1, zero, end_pt2);
     const Q = new THREE.Quaternion();
     Q.setFromRotationMatrix(matrix2.multiply(matrix1));
 
@@ -612,8 +612,19 @@ class Color {
 
 const COLOR_BASE = Color.from_angles(0, 0);
 
-class LabeledGeometry {
+class LabeledObject {
+    constructor(label, color) {
+        // With color and label it's more fun
+        this.label = label || "";
+        this.color = color || COLOR_BASE;
+    }
+}
+
+class Base3DGeometry extends LabeledObject {
     constructor(points, label, color) {
+        // Call parent constructor
+        super(label, color);
+
         const num_points = points.length;
         if (num_points < 3) {
             console.error("Not enough points to make a simple geometry");
@@ -624,16 +635,6 @@ class LabeledGeometry {
         this.points = points;
         this.num_points = this.points.length;
 
-        // With color and label it's more fun
-        this.label = label || "";
-        this.color = color || COLOR_BASE;
-    }
-}
-
-class Base3DGeometry extends LabeledGeometry {
-    constructor(points, label, color) {
-        // Call parent constructor
-        super(points, label, color);
 
         // Take first point as Origin
         this.origin = this.points[0];
