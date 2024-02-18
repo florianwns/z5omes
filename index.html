@@ -1336,7 +1336,7 @@
                         _.forEach(flattened_cover_3D, (fig) => {
                             mandala_figs.push(
                                 new Polygon2D(
-                                    fig.points.map(p => rotate_2d(swap_yz_axes(p), -ZOME.rotation_angles[i], O)),
+                                    swap_axes(fig.points, "XZY").map(p => rotate_2d(p, -ZOME.rotation_angles[i], O)),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
                                 )
@@ -1362,7 +1362,7 @@
                         _.forEach(flattened_cover_3D, (fig) => {
                             colored_spiral_figs.push(
                                 new Polygon2D(
-                                    fig.points.map(p => swap_yz_axes(p)),
+                                    swap_axes(fig.points, "XZY"),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
                                 )
@@ -2110,18 +2110,18 @@
                 get can_use_screenfull() {
                     return screenfull && screenfull.isEnabled && !IS_MOBILE;
                 },
-                get num_assembly_directions(){
+                get num_assembly_directions() {
                     // Constrains the assembly direction depending
                     // on assembly method to avoid not coplanar polygon on beveled method
-                    if(this.params.assembly_method === 1){
+                    if (this.params.assembly_method === 1) {
                         return 2;
                     }
                     return ASSEMBLY_DIRECTIONS.length;
                 },
-                get constrained_assembly_direction(){
+                get constrained_assembly_direction() {
                     return this.params.assembly_direction % this.num_assembly_directions;
                 },
-                set constrained_assembly_direction(value){
+                set constrained_assembly_direction(value) {
                     this.params.assembly_direction = value % this.num_assembly_directions;
                 },
                 reset_params() {
@@ -2678,7 +2678,7 @@
 
                         // Swap y axis with z axis for 3D display
                         flattened_cover_3D[i] = new Polygon3D(
-                            rotated_points.map(p => swap_yz_axes(p)),
+                            swap_axes(rotated_points, "XZY"),
                             fig.label,
                             fig.color
                         )

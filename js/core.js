@@ -115,10 +115,23 @@ function mul(p1, k) {
     return [p1[0] * k, p1[1] * k, p1[2] * k];
 }
 
-function swap_yz_axes(p1) {
-    // Swap the y axis with the z axis
-    return [p1[0], p1[2], p1[1]];
+function swap_axes(points, axes_order = "XYZ") {
+    return points.map(p => {
+        const reordered_point = [p[0], p[1], p[2]];
+        const axis_indexes = ["X", "Y", "Z"].map(c => axes_order.indexOf(c));
+        for (let i = 0; i < 3; i++) {
+            const axis_index = axis_indexes[i];
+            if (axis_index === -1) {
+                console.error("Please use only one X, Y, Z for the axes_order");
+                return;
+            }
+            reordered_point[axis_index] = p[i];
+        }
+        ;
+        return reordered_point;
+    });
 }
+
 
 function dot_product(vec1, vec2) {
     // The dot product or scalar product of two 3D vectors (or points
@@ -887,20 +900,17 @@ class TrapezoidalPrism extends Base3DGeometry {
 
     flatten_2D(side = "top") {
         let flattened_points, opposite_side;
-        const [A, B, C, D, E, F, G, H] = this.points;
-        flattened_points = flatten_3D_points(this.points, B, D, A, true);
-
         switch (side) {
             case "top":
-                flattened_points = flatten_3D_points(this.points, B, D, A, true);
+                flattened_points = this.flattened_points;
                 opposite_side = "bottom";
                 break;
             case "left":
-                flattened_points = flatten_3D_points(this.points, A, C, E, true);
+                flattened_points = this.flattened_points;
                 opposite_side = "right";
                 break;
             case "front":
-                flattened_points = flatten_3D_points(this.points, D, H, C, false);
+                flattened_points = this.flattened_points;
                 opposite_side = "back";
                 break;
         }
