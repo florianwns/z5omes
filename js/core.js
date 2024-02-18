@@ -313,15 +313,17 @@ function calculate_euler_angles(point1, point2) {
     return [pitch, roll, yaw];
 }
 
-function rotate_2d(vec, theta, origin = [0, 0, 0]) {
+function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
     const cos_theta = Math.cos(theta);
 
-    // Rotate an 2D vector [x, y, 0] around an origin
+    // Rotate an 2D vector around z axis with an origin
     let delta = sub(vec, origin);
-    let x = delta[0] * cos_theta - delta[1] * sin_theta + origin[0];
-    let y = delta[0] * sin_theta + delta[1] * cos_theta + origin[1];
-    return [x, y, 0]
+    return [
+        delta[0] * cos_theta - delta[1] * sin_theta + origin[0],
+        delta[0] * sin_theta + delta[1] * cos_theta + origin[1],
+        vec[2] + origin[2]
+    ];
 }
 
 function dihedral_angle(a, b, c) {
@@ -361,8 +363,8 @@ function flatten_3D_points(points, origin, start_pt1, start_pt2, horizontally = 
         ? [dist_2_pt1, 0, 0]
         : [0, dist_2_pt1, 0];
     const end_pt2 = (horizontally)
-        ? rotate_2d([dist_2_pt2, 0, 0], theta)
-        : rotate_2d([0, dist_2_pt2, 0], theta);
+        ? rotate_point_around_z_axis([dist_2_pt2, 0, 0], -theta)
+        : rotate_point_around_z_axis([0, dist_2_pt2, 0], theta);
 
     // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
     const matrix1 = rotation_matrix_from_points(start_pt1, origin, start_pt2).invert();
@@ -449,7 +451,7 @@ function from_mm(v, unit) {
 }
 
 function hsl2rgb(h, s, l) {
-    // Convert HSL color to RGB color (0 to 1 value not 255)
+    // Convert HSL color to RGB color (0 to 100 value not 255)
     s /= 100;
     l /= 100;
     const k = n => (n + h / 30) % 12;
@@ -713,7 +715,7 @@ class Polygon2D extends Base3DGeometry {
         this.points_2D = this.points.map(p => [p[0], p[1]]);
     }
 
-    fit_points() {
+    fit_points_2D() {
         // Adjust the points so the minimum values end up at zero
         return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min]);
     }
@@ -883,10 +885,10 @@ class TrapezoidalPrism extends Base3DGeometry {
                 return [A, C, D, B];     // Top side
             case "bottom":
                 return [E, G, H, F];     // Bottom side
-            case "left":
-                return [A, E, G, C];     // Left side
             case "right":
-                return [B, F, H, D];     // Right side
+                return [D, H, F, B];     // Right side
+            case "left":
+                return [C, G, E, A];     // Left side
             case "front":
                 return [C, G, H, D];     // Front side
             case "back":
@@ -899,18 +901,20 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 
     flatten_2D(side = "top") {
+        // flatten pair of sides with three choices "top", "right" and "front";
+        // Because svg display is different than three.js display, we reverse some axes.
         let flattened_points, opposite_side;
         switch (side) {
             case "top":
-                flattened_points = this.flattened_points;
+                flattened_points = swap_axes(this.flattened_points, "XZY");
                 opposite_side = "bottom";
                 break;
-            case "left":
-                flattened_points = this.flattened_points;
-                opposite_side = "right";
+            case "right":
+                flattened_points = this.flattened_points.map(p => [p[0], -p[1], 0]);
+                opposite_side = "left";
                 break;
             case "front":
-                flattened_points = this.flattened_points;
+                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [-p[0], -p[1], 0])
                 opposite_side = "back";
                 break;
         }

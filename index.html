@@ -833,11 +833,10 @@
 
 
                 <div class="row justify-content-between">
-                    <div class="col-md-6 col-xl-5 mt-2">
+                    <div class="col-12 mt-2">
                         <div class="bg-white rounded border position-relative"
                              x-ref="timber_profile_container">
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -941,7 +940,7 @@
                     this.timber_profile_container.innerHTML = "";
 
                     // Define the 6 sides
-                    const sides = ["top", "left", "front"];
+                    const sides = ["top", "right", "front"];
 
                     // Reset boundaries
                     let x_max = Number.MIN_VALUE,
@@ -980,29 +979,31 @@
 
                         // Draw all fig sides
                         _.forEach(side_figs, (fig, i) => {
-
                             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                             svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                             svg.setAttribute('viewBox', `0 0 ${max_width} ${max_height}`);
                             svg.setAttribute('class', "m-2");
 
-                            const fig_points = fig.fit_points()
+                            const fig_points = fig.fit_points_2D();
 
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+
                             polygon_front.setAttribute('points', `${fig_points.slice(0, 4)}`);
                             polygon_front.setAttribute('stroke', 'black');
-                            polygon_front.setAttribute('stroke-width', '0.1px');
+                            polygon_front.setAttribute('stroke-width', '1px');
+                            polygon_front.setAttribute('fill-opacity', "0.9");
                             polygon_front.setAttribute('fill', prism.color.hex);
-                            polygon_front.setAttribute('fill-opacity', "0.7");
 
-                            const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_behind.setAttribute('points', `${fig_points.slice(4, 8)}`);
-                            polygon_behind.setAttribute('stroke', 'black');
-                            polygon_behind.setAttribute('stroke-width', '0.1px');
-                            polygon_behind.setAttribute('fill', "#FF0000");
+                            if(i < 2){
+                                const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                                polygon_behind.setAttribute('points', `${fig_points.slice(4, 8)}`);
+                                polygon_behind.setAttribute('stroke', 'black');
+                                polygon_behind.setAttribute('stroke-dasharray', '10, 10');
+                                polygon_behind.setAttribute('stroke-width', '1px');
+                                polygon_behind.setAttribute('fill', prism.color.hex);
+                                svg.appendChild(polygon_behind);
+                            }
 
-
-                            svg.appendChild(polygon_behind);
                             svg.appendChild(polygon_front);
                             this.timber_profile_container.appendChild(svg);
                         });
@@ -1336,7 +1337,7 @@
                         _.forEach(flattened_cover_3D, (fig) => {
                             mandala_figs.push(
                                 new Polygon2D(
-                                    swap_axes(fig.points, "XZY").map(p => rotate_2d(p, -ZOME.rotation_angles[i], O)),
+                                    swap_axes(fig.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
                                     fig.label,
                                     ZOME.rotated_colors[fig.color.hex][i],
                                 )
@@ -2665,13 +2666,13 @@
                         let rotated_points = flattened_fig.points.map(p => add(p, O));
                         if (i > 0) {
                             a = angle(A, O, rotated_points[1]);
-                            rotated_A = rotate_2d(rotated_points[1], a, O);
+                            rotated_A = rotate_point_around_z_axis(rotated_points[1], a, O);
 
                             // Rotate the other way if rotatedA is not too close to A
                             if (to_decimal(dist(rotated_A, A)) != 0) {
                                 a = -a;
                             }
-                            rotated_points = rotated_points.map(p => rotate_2d(p, a, O));
+                            rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, a, O));
                         }
                         O = rotated_points[rotated_points.length - 1];
                         A = rotated_points[rotated_points.length - 2];
