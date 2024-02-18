@@ -329,7 +329,7 @@
                     <button class="btn btn-primary" type="button"
                             data-bs-toggle="tooltip"
                             :title="i18n('help_am_param_3')"
-                            @click="params.assembly_direction = (params.assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
+                            @click="constrained_assembly_direction = constrained_assembly_direction + 1">
                         <i class="fa-solid fa-fw"
                            :class="ASSEMBLY_DIRECTION_ICONS[params.assembly_direction]"
                         ></i>
@@ -1903,10 +1903,10 @@
 
                     // Init params
                     this.params = sync_params_from_url(this.params);
-
                     if (!this.params.language) {
                         this.params.language = I18_DEFAULT_LANGUAGE;
                     }
+                    this.params.assembly_direction = this.constrained_assembly_direction;
                     this.save_params(false);
 
                     // Add shape parameter listeners
@@ -1918,6 +1918,11 @@
                         });
                     });
 
+
+                    // Constrains the assembly direction depending on assembly method
+                    this.$watch("params.assembly_method", (value) => {
+                        this.params.assembly_direction = this.constrained_assembly_direction;
+                    });
 
                     // Refresh the height_ratio if you change the zome params.num
                     this.$watch("params.num", (value) => {
@@ -2108,6 +2113,20 @@
                 get can_use_screenfull() {
                     return screenfull && screenfull.isEnabled && !IS_MOBILE;
                 },
+                get num_assembly_directions(){
+                    // Constrains the assembly direction depending
+                    // on assembly method to avoid not coplanar polygon on beveled method
+                    if(this.params.assembly_method === 1){
+                        return ASSEMBLY_DIRECTIONS.length - 1;
+                    }
+                    return ASSEMBLY_DIRECTIONS.length;
+                },
+                get constrained_assembly_direction(){
+                    return this.params.assembly_direction % this.num_assembly_directions;
+                },
+                set constrained_assembly_direction(value){
+                    this.params.assembly_direction = value % this.num_assembly_directions;
+                },
                 reset_params() {
                     this.params = _.cloneDeep(this.params_backup);
                     this.show_toast(this.i18n('toast_settings_restored'), "rotate")
@@ -2195,7 +2214,7 @@
 
                     // Get assembly parameters
                     const ASSEMBLY_METHOD = this.params.assembly_method;
-                    const ASSEMBLY_DIRECTION = this.params.assembly_direction;
+                    const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
 
                     // Constants
