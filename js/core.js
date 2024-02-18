@@ -325,7 +325,6 @@ function dihedral_angle_between_planes(plane1, plane2) {
     return theta;
 }
 
-
 function rotation_matrix_from_points(a, b, c) {
     const axis1 = new THREE.Vector3(...sub(a, b)).normalize()
     const axis2 = new THREE.Vector3(...sub(c, b)).normalize()
@@ -369,6 +368,28 @@ function flatten_3D_points(points, origin, start_pt1, start_pt2, horizontally = 
 
     return flattened_points;
 }
+
+function is_coplanar(points) {
+    // Function to check the coplanarity of a polygon
+    // Calculation of the normal vector of the first triangle formed by the first three points
+    const vec1 = sub(points[1], points[0]);
+    const vec2 = sub(points[2], points[0]);
+    const norm_vec = cross_product(vec1, vec2);
+    const num_points = points.length;
+
+    if (num_points > 3) {
+        // Checking coplanarity by checking that the scalar product of the normal vectors
+        // of each face of the polygon is close to zero (due to numerical approximations)
+        for (let i = 3; i < num_points; i++) {
+            const vec_to_check = sub(points[i], points[0])
+            if (Math.abs(dot_product(norm_vec, vec_to_check)) > 0.000001) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 
 // ---------------------------------
 // ========== Conversions ==========
@@ -706,6 +727,11 @@ class Polygon3D extends Base3DGeometry {
     constructor(points, label, color) {
         // Call parent constructor
         super(points, label, color);
+
+        // Check coplanarity
+        if (this.num_points > 3 && !is_coplanar(this.points)) {
+            console.error(`The polygon is not coplanar`);
+        }
 
         // Because we consider this polygon coplanar, we make a plane with 3 points
         this.plane = points_2_plane(this.points[0], this.points[1], this.points[this.num_points - 1]);
