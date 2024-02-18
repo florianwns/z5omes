@@ -2,11 +2,14 @@
 
 * [x] Améliorer la fonction planar pour aligner verticalement ou horizontalement la figure
 * [x] Refonte du code : les planar points deviennent une variable de polygone flattened
+* [x] Trouver pourquoi l'axe y est inversé sur certains prism
   
+* [ ] Ajouter les dimensions au flattened points
 
 * [ ] faire la différence entre outer_cover_3D/inner_cover_3D et vertices
-* [ ] changer l'aide de ZH "visible part  of zome" ???  
+* [ ] Changer l'aide de ZH "visible part  of zome" ???  
 * [ ] Coller la base du zome au sol => vanishing pt is 0 for last part
+
 * [ ] Donner à chaque montant le label de la figure dont il provient
 * [ ] Construire/ Indexer les montants du bas vers le haut.
   

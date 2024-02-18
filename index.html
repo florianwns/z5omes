@@ -2595,7 +2595,11 @@
                             G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
                             H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
-                            // Build a TrapezoidalPrism
+                            // Build a TrapezoidalPrism depends on xpansion direction
+                            if (XPANSION_DIRECTION === -1) {
+                                // reverse top and bottom sides
+                                [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
+                            }
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", fig.color);
                             skeleton_3D.push(timber_prism);
 

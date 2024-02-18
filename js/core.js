@@ -267,52 +267,6 @@ function angle(p1, p2, p3) {
     return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
-function angle_without_one_axis(p1, p2, p3, hidden_axis) {
-    // angle_without_one_axis cannot work because we loose the direction... please use angle_between vecs
-    switch (hidden_axis) {
-        case "x":
-        case "X":
-        case "roll":
-            return angle_between_vectors(
-                sub([0, p1[1], p1[2]], [0, p2[1], p2[2]]),
-                sub([0, p3[1], p3[2]], [0, p2[1], p2[2]])
-            );
-        case "y":
-        case "Y":
-        case "pitch":
-            return angle_between_vectors(
-                sub([p1[0], 0, p1[2]], [p2[0], 0, p2[2]]),
-                sub([p3[0], 0, p3[2]], [p2[0], 0, p2[2]])
-            );
-        case "z":
-        case "Z":
-        case "yaw":
-            return angle_between_vectors(
-                sub([p1[0], p1[1], 0], [p2[0], p2[1], 0]),
-                sub([p3[0], p3[1], 0], [p2[0], p2[1], 0])
-            );
-        default:
-            return 0;
-    }
-}
-
-function calculate_euler_angles(point1, point2) {
-    // Calcul du vecteur
-    const [dx, dy, dz] = sub(point2, point1);
-
-    // Calcul de l'angle de yaw (rotation autour de l'axe z)
-    const yaw = Math.atan2(dy, dx);
-
-    // Projection des vecteurs sur le plan xy
-    const dxProjected = Math.sqrt(dx * dx + dy * dy);
-    const pitch = Math.atan2(dz, dxProjected);
-
-    // Calcul de l'angle de roll (rotation autour de l'axe x)
-    const roll = Math.atan2(dy, dz);
-
-    return [pitch, roll, yaw];
-}
-
 function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
     const sin_theta = Math.sin(theta);
     const cos_theta = Math.cos(theta);
