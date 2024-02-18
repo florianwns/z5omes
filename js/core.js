@@ -335,7 +335,7 @@ function rotation_matrix_from_points(a, b, c) {
 
 function flatten_3D_points(points, origin, start_pt1, start_pt2, horizontally = true) {
     // Flattens the 3D points with the origin at zero to 2D points
-    // and the start_pt1 is aligned on X axis if horizontally is true, y axis otherwise
+    // and the start_pt1 is aligned on x axis if horizontally is true, y axis otherwise
     // Use quaternion method to flat points
 
     // Compute the angle/distances with the origin point
@@ -549,27 +549,33 @@ function unique_arr(arr) {
     return [...s];
 }
 
-function get_2D_boundaries(points) {
+
+function get_boundaries(points) {
     // Compute Boundaries
     let x_max = Number.MIN_VALUE,
         y_max = Number.MIN_VALUE,
+        z_max = Number.MIN_VALUE,
         x_min = Number.MAX_VALUE,
-        y_min = Number.MAX_VALUE;
+        y_min = Number.MAX_VALUE,
+        z_min = Number.MAX_VALUE;
 
     for (let i = 0; i < points.length; i++) {
-        const [x, y] = points[i];
+        const [x, y, z] = points[i];
 
         // Save Boundaries
         if (x < x_min) x_min = x;
         if (x > x_max) x_max = x;
         if (y < y_min) y_min = y;
         if (y > y_max) y_max = y;
+        if (z < z_min) z_min = z;
+        if (z > z_max) z_max = z;
     }
 
     // Compute width and height from 2D boundaries
     const width = Math.abs(x_max - x_min);
     const height = Math.abs(y_max - y_min);
-    return [x_min, x_max, y_min, y_max, width, height];
+    const depth = Math.abs(z_max - z_min);
+    return [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth];
 }
 
 function download(filename, href) {
@@ -639,8 +645,25 @@ class Base3DGeometry extends LabeledObject {
         this.origin = this.points[0];
         this.centroid = get_centroid(points);
 
+        // Compute boundaries
+        const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = get_boundaries(this.points);
+        this.x_min = x_min;
+        this.x_max = x_max
+        this.y_min = y_min;
+        this.y_max = y_max;
+        this.z_min = z_min;
+        this.z_max = z_max;
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+
         // Compute the slope on the x and z Axes, maybe there is a better method
         this.slope = angle(this.origin, this.centroid, [this.origin[0], this.centroid[1], this.origin[2]]);
+    }
+
+    fit_points() {
+        // Adjust the points so the minimum values end up at zero
+        return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2] - this.z_min]);
     }
 }
 
@@ -654,15 +677,6 @@ class Polygon2D extends Base3DGeometry {
 
         // Points without the z axis
         this.points_2D = this.points.map(p => [p[0], p[1]]);
-
-        // Compute boundaries
-        const [x_min, x_max, y_min, y_max, width, height] = get_2D_boundaries(this.points_2D);
-        this.x_min = x_min;
-        this.x_max = x_max
-        this.y_min = y_min;
-        this.y_max = y_max;
-        this.width = width;
-        this.height = height;
     }
 
     fit_points() {
@@ -751,7 +765,7 @@ class Polygon3D extends Base3DGeometry {
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
     }
 
-    flatten() {
+    flatten_2D() {
         return new Polygon2D(this.flattened_points, this.label, this.color);
     }
 }
@@ -775,6 +789,10 @@ class TrapezoidalPrism extends Base3DGeometry {
         this.right = new Polygon3D(this.filter_points_by_side("right", this.points));    // Right side
         this.front = new Polygon3D(this.filter_points_by_side("front", this.points));    // Front side
         this.back = new Polygon3D(this.filter_points_by_side("back", this.points));      // Back side
+
+        // Flattens point with the right side at zero
+        const [A, B, C, D, E, F, G, H] = this.points;
+        this.flattened_points = flatten_3D_points(this.points, D, B, H, true);
 
         // Arrays of THREE.Vector3 for 3D visualization
         this.faces = [];
@@ -838,8 +856,13 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 
     flatten(side = "top") {
+        return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
+    }
+
+    flatten_2D(side = "top") {
         let flattened_points, opposite_side;
         const [A, B, C, D, E, F, G, H] = this.points;
+        flattened_points = flatten_3D_points(this.points, B, D, A, true);
 
         switch (side) {
             case "top":
@@ -878,6 +901,7 @@ class Zome {
             hash_grouped_skeleton_3D = null,
             skeleton_3D_hashes = null,
             flattened_cover_3D = null,
+            timber_profiles_3D = null,
             floor = null,
             vanishing_lines = null
         }
@@ -893,6 +917,7 @@ class Zome {
         this.hash_grouped_skeleton_3D = hash_grouped_skeleton_3D || [];
         this.skeleton_3D_hashes = skeleton_3D_hashes || [];
         this.flattened_cover_3D = flattened_cover_3D || [];
+        this.timber_profiles_3D = timber_profiles_3D || [];
         this.floor = floor || null;
         this.vanishing_lines = vanishing_lines || [];
     }

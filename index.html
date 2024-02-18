@@ -475,6 +475,8 @@
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
+                                            <option selected value="timber_profiles_3D"
+                                                    x-text="i18n('timber_profiles_3D')"></option>
                                             <option value="cover_3D" x-text="i18n('cover_3D')"></option>
                                             <option value="flattened_cover_3D" x-text="i18n('mandala_3D')"></option>
                                         </select>
@@ -952,7 +954,7 @@
 
                         // Get min max from all fig sides
                         _.forEach(sides, (side, i) => {
-                            const fig = prism.flatten(side);
+                            const fig = prism.flatten_2D(side);
 
                             if (fig.x_min < x_min) x_min = fig.x_min;
                             if (fig.x_max > x_max) x_max = fig.x_max;
@@ -966,10 +968,6 @@
                         });
                     });
 
-                    console.log(all_labeled_figs);
-                    console.log(max_height, max_width);
-
-
                     _.forIn(hash_grouped_skeleton_3D, group => {
                         // Take the first element of group
                         const prism = group[0];
@@ -978,7 +976,6 @@
                         // Draw all fig sides
                         _.forEach(side_figs, (fig, i) => {
 
-                            console.log(fig)
                             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                             svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                             svg.setAttribute('viewBox', `0 0 ${max_width} ${max_height}`);
@@ -1096,7 +1093,7 @@
                 get table_rows() {
                     const rows = new Array(this.figs.length);
                     _.forEach(this.figs, (fig, i) => {
-                        const flattened_fig = fig.flatten();
+                        const flattened_fig = fig.flatten_2D();
                         rows[i] = [flattened_fig, [
                             i + 1,
                             humanize_distance(flattened_fig.width),
@@ -1348,7 +1345,7 @@
 
                     // Add a last page if floor exists
                     if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.flatten()]);
+                        pages.push([ZOME.floor.flatten_2D()]);
                     }
                 },
                 draw_spiral_figs() {
@@ -1371,7 +1368,7 @@
 
                     // Add Floor at last page if floor exists
                     if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.flatten()]);
+                        pages.push([ZOME.floor.flatten_2D()]);
                     }
                 },
                 next_page() {
@@ -1623,79 +1620,98 @@
                     const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
                     const edge_material = new THREE.LineBasicMaterial({color: 0x333333});
 
-                    // Build 3D Skeleton Faces
-                    const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
-                    if (spiral) {
-                        // Pre-Compute geometry points, colors and num_faces
-                        let face_points = [];
-                        let edge_points = [];
-
-                        const num_figs = spiral.length;
+                    // Build 3D faces and edges
+                    if (this.type_of_3D_objects == "timber_profiles_3D") {
+                        const timbers_3D = ZOME.timber_profiles_3D;
+                        const num_figs = timbers_3D.length;
                         if (num_figs) {
-                            const colors = new Array(num_figs);
-                            const num_faces = new Array(num_figs);
-                            const face_colors = new Array(num_figs);
-                            _.forEach(spiral, (obj, i) => {
-                                face_points.push(...obj.faces);
-                                edge_points.push(...obj.edge_points);
-                                num_faces[i] = obj.num_faces;
-                                colors[i] = ZOME.rotated_colors[obj.color.hex];
+                            _.forEach(timbers_3D, (obj, i) => {
+                                const timbers_geometry = new THREE.BufferGeometry().setFromPoints(obj.faces)
+                                timbers_geometry.computeVertexNormals()
+
+                                const face_colors = _.times(obj.num_faces, _.constant(obj.color.rgb));
+                                timbers_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+                                meshes.zome_obj.add(new THREE.Mesh(timbers_geometry, material))
+
+                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(obj.edge_points)
+                                const timbers_lines = new THREE.LineSegments(edge_geometry, edge_material);
+                                meshes.zome_edges.add(timbers_lines);
                             });
+                        }
+                    } else {
+                        // Same as above but for spirals with geometry cloning for more efficiency
+                        const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
+                        if (spiral) {
+                            // Pre-Compute geometry points, colors and num_faces
+                            let face_points = [];
+                            let edge_points = [];
 
-                            // Build geometry of first cover_3D
-                            const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
-                            spiral_geometry.computeVertexNormals()
-                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
+                            const num_figs = spiral.length;
+                            if (num_figs) {
+                                const colors = new Array(num_figs);
+                                const num_faces = new Array(num_figs);
+                                const face_colors = new Array(num_figs);
+                                _.forEach(spiral, (obj, i) => {
+                                    face_points.push(...obj.faces);
+                                    edge_points.push(...obj.edge_points);
+                                    num_faces[i] = obj.num_faces;
+                                    colors[i] = ZOME.rotated_colors[obj.color.hex];
+                                });
 
-                            // Compute All faces geometries and colors
-                            for (let i = 0; i < ZOME.num; i++) {
-                                const rotated_spiral_geometry = spiral_geometry.clone()
-                                rotated_spiral_geometry.points
-                                // Rotate the new geometry
-                                const theta = ZOME.rotation_angles[i];
-                                rotated_spiral_geometry.rotateY(theta);
+                                // Build geometry of first cover_3D
+                                const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
+                                spiral_geometry.computeVertexNormals()
+                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
 
-                                // Get colors
-                                for (let j = 0; j < num_figs; j++) {
-                                    face_colors[j] = _.times(num_faces[j], _.constant(colors[j][i].rgb));
+                                // Compute all faces geometries and colors
+                                for (let i = 0; i < ZOME.num; i++) {
+                                    const rotated_spiral_geometry = spiral_geometry.clone()
+                                    rotated_spiral_geometry.points
+                                    // Rotate the new geometry
+                                    const theta = ZOME.rotation_angles[i];
+                                    rotated_spiral_geometry.rotateY(theta);
+
+                                    // Get colors
+                                    for (let j = 0; j < num_figs; j++) {
+                                        face_colors[j] = _.times(num_faces[j], _.constant(colors[j][i].rgb));
+                                    }
+
+                                    rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+                                    meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
+
+                                    const rotated_edge_geometry = edge_geometry.clone()
+                                    rotated_edge_geometry.rotateY(theta);
+
+                                    const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
+                                    meshes.zome_edges.add(spiral_lines);
                                 }
+                            }
+                        }
 
-                                rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
+                        // Draw Zome Floor only if draw cover
+                        if (this.type_of_3D_objects == "cover_3D") {
+                            // Build 3D Floor Faces
+                            const floor = ZOME.floor;
+                            if (floor !== null) {
+                                const floor_geometry = new THREE.BufferGeometry();
+                                floor_geometry.setFromPoints(floor.faces)
 
-                                const rotated_edge_geometry = edge_geometry.clone()
-                                rotated_edge_geometry.rotateY(theta);
+                                const face_colors = [];
+                                _.forEach(floor.faces, () => {
+                                    face_colors.push(...floor.color.rgb);
+                                });
 
-                                const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
+                                floor_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                                floor_geometry.computeVertexNormals()
+
+                                meshes.zome_obj.add(new THREE.Mesh(floor_geometry, material))
+
+                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
+                                const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
                                 meshes.zome_edges.add(spiral_lines);
                             }
                         }
                     }
-
-                    // Draw Zome Floor only if draw cover
-                    if (this.type_of_3D_objects == "cover_3D") {
-                        // Build 3D Floor Faces
-                        const floor = ZOME.floor;
-                        if (floor !== null) {
-                            const floor_geometry = new THREE.BufferGeometry();
-                            floor_geometry.setFromPoints(floor.faces)
-
-                            const face_colors = [];
-                            _.forEach(floor.faces, () => {
-                                face_colors.push(...floor.color.rgb);
-                            });
-
-                            floor_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                            floor_geometry.computeVertexNormals()
-
-                            meshes.zome_obj.add(new THREE.Mesh(floor_geometry, material))
-
-                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
-                            const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                            meshes.zome_edges.add(spiral_lines);
-                        }
-                    }
-
                     // Add the final obj mesh to the scene
                     meshes.zome_obj.rotation.y = zome_obj_rotation;
                     meshes.zome_edges.rotation.y = zome_obj_rotation;
@@ -2619,7 +2635,7 @@
                     let O = [0, 0, 0];
                     let rotated_A;
                     _.forEach(cover_3D, (fig, i) => {
-                        let flattened_fig = fig.flatten();
+                        let flattened_fig = fig.flatten_2D();
 
                         // Move to Origin and rotate to match with previous piece
                         let rotated_points = flattened_fig.points.map(p => add(p, O));
@@ -2644,6 +2660,24 @@
                         )
                     });
 
+                    // Build timber_profiles_3D
+                    const timber_profiles_3D = [];
+                    let z_origin = 0;
+                    _.forIn(hash_grouped_skeleton_3D, group => {
+                        // Take the first element of group
+                        const fig = group[0].flatten();
+                        const translated_points = new Array(fig.num_points);
+                        _.forEach(fig.fit_points(), (point, i) => {
+                            translated_points[i] = add(point, [0, 0, z_origin]);
+                        });
+
+                        // Add space between timbers
+                        z_origin += fig.depth + 50;
+                        timber_profiles_3D.push(
+                            new TrapezoidalPrism(translated_points, fig.label, fig.color)
+                        );
+                    });
+
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num: N,
@@ -2662,6 +2696,7 @@
                         skeleton_3D_hashes: skeleton_3D_hashes,
 
                         flattened_cover_3D: flattened_cover_3D,
+                        timber_profiles_3D: timber_profiles_3D,
                         floor: floor,
                         vanishing_lines: vanishing_lines,
                     });
