@@ -64,7 +64,7 @@ const I18N_FR = {
 
         // Keyboard shortcuts
         key_S_3D_view: "Sélectionner l'objet 'Squelette 3D'",
-        key_E_3D_view: "Sélectionner l'objet 'Couverture 3D'",
+        key_C_3D_view: "Sélectionner l'objet 'Couverture 3D'",
         key_M_3D_view: "Sélectionner l'objet 'Mandala 3D'",
         key_H_3D_view: "Restaurer la vue caméra",
         key_left_3D_view: "Vue de gauche",

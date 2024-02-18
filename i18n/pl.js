@@ -64,7 +64,7 @@ const I18N_PL = {
 
         // Keyboard shortcuts
         key_S_3D_view: "Wybierz obiekt 'Szkielet 3D'",
-        key_E_3D_view: "Wybierz obiekt 'Wypełnienie 3D'",
+        key_C_3D_view: "Wybierz obiekt 'Wypełnienie 3D'",
         key_M_3D_view: "Wybierz obiekt 'Mandala 3D'",
         key_H_3D_view: "Zresetuj widok",
         key_left_3D_view: "Widok z lewej strony",

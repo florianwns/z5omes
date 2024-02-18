@@ -526,14 +526,19 @@
                                                                 <span x-text="i18n('key_S_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('E')">E
+                                                                <button class="key me-2" @click="keydown('C')">C
                                                                 </button>
-                                                                <span x-text="i18n('key_E_3D_view')"></span>
+                                                                <span x-text="i18n('key_C_3D_view')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('M')">M
                                                                 </button>
                                                                 <span x-text="i18n('key_M_3D_view')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('T')">T
+                                                                </button>
+                                                                <span x-text="i18n('key_T_3D_view')"></span>
                                                             </li>
 
                                                             <!-- Camera view -->
@@ -1785,8 +1790,8 @@
                         case " ":
                             this.is_spinning = !this.is_spinning;
                             break;
-                        case "e":
-                        case "E":
+                        case "c":
+                        case "C":
                             this.type_of_3D_objects = "cover_3D";
                             break;
                         case "h":
@@ -1796,6 +1801,10 @@
                         case "m":
                         case "M":
                             this.type_of_3D_objects = "flattened_cover_3D";
+                            break;
+                        case "t":
+                        case "T":
+                            this.type_of_3D_objects = "timber_profiles_3D";
                             break;
                         case "s":
                         case "S":

@@ -65,8 +65,9 @@ const I18N_EN = {
 
         // Keyboard shortcuts
         key_S_3D_view: "Select '3D Skeleton' object",
-        key_E_3D_view: "Select '3D Cover' object",
+        key_C_3D_view: "Select '3D Cover' object",
         key_M_3D_view: "Select '3D Mandala' object",
+        key_T_3D_view: "Select '3D Timber profiles' object",
         key_H_3D_view: "Reset camera view",
         key_left_3D_view: "Left side view",
         key_up_3D_view: "Top view",

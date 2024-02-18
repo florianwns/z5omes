@@ -64,7 +64,7 @@ const I18N_SV = {
 
         // Keyboard shortcuts
         key_S_3D_view: "Välj '3D Skelett' objekt",
-        key_E_3D_view: "Välj '3D Cover' objekt",
+        key_C_3D_view: "Välj '3D Cover' objekt",
         key_M_3D_view: "Välj '3D Mandala' objekt",
         key_H_3D_view: "Återställ kamervy",
         key_left_3D_view: "Vänster vy",
