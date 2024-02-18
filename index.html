@@ -1918,7 +1918,6 @@
                         });
                     });
 
-
                     // Constrains the assembly direction depending on assembly method
                     this.$watch("params.assembly_method", (value) => {
                         this.params.assembly_direction = this.constrained_assembly_direction;
@@ -1940,7 +1939,6 @@
                             this.clamp("z_vanishing_point_in_mm", this.zome_centroid);
                         });
                     });
-
 
                     // Use ClipboardJS to copy URL
                     const clipboard = new ClipboardJS("#copy-url-btn", {
@@ -1971,7 +1969,6 @@
                 },
                 i18n(key, value = null) {
                     // Translation function using JSON dictionnaries
-
                     // Return the key if not found in language and default language dictionaries
                     let translated_txt = key;
 
@@ -2117,7 +2114,7 @@
                     // Constrains the assembly direction depending
                     // on assembly method to avoid not coplanar polygon on beveled method
                     if(this.params.assembly_method === 1){
-                        return ASSEMBLY_DIRECTIONS.length - 1;
+                        return 2;
                     }
                     return ASSEMBLY_DIRECTIONS.length;
                 },
@@ -2412,7 +2409,6 @@
                             }
                         }
                     });
-
 
                     // Build Timbers using the assembly method
                     const skeleton_3D = [], vanishing_lines = [];
