@@ -6,7 +6,9 @@
   
 * [ ] Ajouter les dimensions au flattened points
 
-* [ ] faire la différence entre outer_cover_3D/inner_cover_3D et vertices
+* [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
+  
+* [ ] Faire la différence entre outer_cover_3D/inner_cover_3D et vertices
 * [ ] Changer l'aide de ZH "visible part  of zome" ???  
 * [ ] Coller la base du zome au sol => vanishing pt is 0 for last part
 

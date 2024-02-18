@@ -994,7 +994,7 @@
                             polygon_front.setAttribute('fill-opacity', "0.9");
                             polygon_front.setAttribute('fill', prism.color.hex);
 
-                            if(i < 2){
+                            if (i < 2) {
                                 const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                                 polygon_behind.setAttribute('points', `${fig_points.slice(4, 8)}`);
                                 polygon_behind.setAttribute('stroke', 'black');
@@ -2214,6 +2214,7 @@
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
+                    const OUTWARD_EXPANSION = XPANSION_DIRECTION === -1;
 
                     // Constants
                     const M = N - 1;
@@ -2596,7 +2597,7 @@
                             H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
                             // Build a TrapezoidalPrism depends on xpansion direction
-                            if (XPANSION_DIRECTION === -1) {
+                            if (OUTWARD_EXPANSION) {
                                 // reverse top and bottom sides
                                 [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
                             }
