@@ -477,8 +477,12 @@
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
                                             <option selected value="timber_profiles_3D"
                                                     x-text="i18n('timber_profiles_3D')"></option>
-                                            <option value="cover_3D" x-text="i18n('cover_3D')"></option>
-                                            <option value="flattened_cover_3D" x-text="i18n('mandala_3D')"></option>
+                                            <option value="external_faces_3D"
+                                                    x-text="i18n('external_faces_3D')"></option>
+                                            <option value="internal_faces_3D"
+                                                    x-text="i18n('internal_faces_3D')"></option>
+                                            <option value="zomandala_3D"
+                                                    x-text="i18n('mandala_3D')"></option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -655,8 +659,8 @@
                                     <div class="mb-2">
                                         <select class="form-select" aria-label="Kind of drawing"
                                                 x-model="kind_of_drawing">
-                                            <option selected value="mandala_figs" x-text="i18n('mandala')"></option>
-                                            <option value="spiral_figs" x-text="i18n('spirals')"></option>
+                                            <option selected value="mandala_faces" x-text="i18n('mandala')"></option>
+                                            <option value="spiral_faces" x-text="i18n('spirals')"></option>
                                         </select>
                                     </div>
 
@@ -681,7 +685,7 @@
                                     <div class="input-group input-group-sm mt-2">
                                         <!-- Draw color -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_fig_color')"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_color')"
                                                 :class="draw_color ? '' : 'btn-secondary'"
                                                 @click="draw_color = !draw_color">
                                             <i class="fa-regular fa-droplet fa-fw"></i>
@@ -689,7 +693,7 @@
 
                                         <!-- Draw centroid -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_fig_centroid')"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_centroid')"
                                                 :class="draw_centroid ? '' : 'btn-secondary'"
                                                 @click="draw_centroid = !draw_centroid">
                                             <i class="fa-regular fa-circle-dot fa-fw"></i>
@@ -728,7 +732,7 @@
                 </div>
             </div>
 
-            <div class="col-12 break-before" x-data="cover_measurements" @zome-is-made.window="process">
+            <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
                 <hr>
 
                 <div class="d-flex align-items-center">
@@ -760,16 +764,16 @@
                     <div class="col-md-6 col-xl-5 mt-2">
                         <ul class="list-group small">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('cover_num_figures')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="cover_num_figs"></span>
+                                <span x-text="i18n('total_number_of_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="total_number_of_faces"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('cover_widest_diameter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="cover_widest_diameter"></span>
+                                <span x-text="i18n('widest_diameter_of_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="widest_diameter_of_faces"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('cover_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="cover_area"></span>
+                                <span x-text="i18n('total_area_of_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="total_area_of_faces"></span>
                             </li>
                         </ul>
                     </div>
@@ -904,6 +908,7 @@
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
+    // const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
@@ -934,7 +939,7 @@
 
                 process() {
                     // Group prims by hash
-                    const hash_grouped_skeleton_3D = ZOME.hash_grouped_skeleton_3D;
+                    const skeleton_3D_grouped_by_hash = ZOME.skeleton_3D_grouped_by_hash;
 
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
@@ -950,45 +955,45 @@
                         max_height = Number.MIN_VALUE,
                         max_width = Number.MIN_VALUE;
 
-                    let all_labeled_figs = {};
-                    _.forIn(hash_grouped_skeleton_3D, group => {
+                    let all_labeled_faces = {};
+                    _.forIn(skeleton_3D_grouped_by_hash, group => {
                         // Take the first element of group
                         const prism = group[0];
-                        all_labeled_figs[prism.label] = new Array(sides.length);
+                        all_labeled_faces[prism.label] = new Array(sides.length);
 
-                        // Get min max from all fig sides
+                        // Get min max from all face sides
                         _.forEach(sides, (side, i) => {
-                            const fig = prism.flatten_2D(side);
+                            const face = prism.flatten_2D(side);
 
-                            if (fig.x_min < x_min) x_min = fig.x_min;
-                            if (fig.x_max > x_max) x_max = fig.x_max;
-                            if (fig.y_min < y_min) y_min = fig.y_min;
-                            if (fig.y_max > y_max) y_max = fig.y_max;
+                            if (face.x_min < x_min) x_min = face.x_min;
+                            if (face.x_max > x_max) x_max = face.x_max;
+                            if (face.y_min < y_min) y_min = face.y_min;
+                            if (face.y_max > y_max) y_max = face.y_max;
 
-                            if (fig.width > max_width) max_width = fig.width;
-                            if (fig.height > max_height) max_height = fig.height;
+                            if (face.width > max_width) max_width = face.width;
+                            if (face.height > max_height) max_height = face.height;
 
-                            all_labeled_figs[prism.label][i] = fig;
+                            all_labeled_faces[prism.label][i] = face;
                         });
                     });
 
-                    _.forIn(hash_grouped_skeleton_3D, group => {
+                    _.forIn(skeleton_3D_grouped_by_hash, group => {
                         // Take the first element of group
                         const prism = group[0];
-                        const side_figs = all_labeled_figs[prism.label];
+                        const side_faces = all_labeled_faces[prism.label];
 
-                        // Draw all fig sides
-                        _.forEach(side_figs, (fig, i) => {
+                        // Draw all face sides
+                        _.forEach(side_faces, (face, i) => {
                             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                             svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                             svg.setAttribute('viewBox', `0 0 ${max_width} ${max_height}`);
                             svg.setAttribute('class', "m-2");
 
-                            const fig_points = fig.fit_points_2D();
+                            const face_points = face.fit_points_2D();
 
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
 
-                            polygon_front.setAttribute('points', `${fig_points.slice(0, 4)}`);
+                            polygon_front.setAttribute('points', `${face_points.slice(0, 4)}`);
                             polygon_front.setAttribute('stroke', 'black');
                             polygon_front.setAttribute('stroke-width', '1px');
                             polygon_front.setAttribute('fill-opacity', "0.9");
@@ -996,7 +1001,7 @@
 
                             if (i < 2) {
                                 const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                                polygon_behind.setAttribute('points', `${fig_points.slice(4, 8)}`);
+                                polygon_behind.setAttribute('points', `${face_points.slice(4, 8)}`);
                                 polygon_behind.setAttribute('stroke', 'black');
                                 polygon_behind.setAttribute('stroke-dasharray', '10, 10');
                                 polygon_behind.setAttribute('stroke-width', '1px');
@@ -1013,29 +1018,29 @@
         });
 
 
-        Alpine.data('cover_measurements', () => {
+        Alpine.data('face_measurements', () => {
             return {
-                cover_figs: [],
+                external_faces: [],
                 floor: null,
 
                 async init() {
                 },
-                get figs() {
-                    return this.has_floor ? [...this.cover_figs, this.floor] : this.cover_figs;
+                get faces() {
+                    return this.has_floor ? [...this.external_faces, this.floor] : this.external_faces;
                 },
                 get has_floor() {
                     return this.floor !== null;
                 },
-                get cover_widest_diameter() {
-                    const value = _.reduce(this.cover_figs, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                get widest_diameter_of_faces() {
+                    const value = _.reduce(this.external_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
-                get cover_area() {
-                    const value = _.reduce(this.cover_figs, (res, p) => res + p.area * ZOME.num, 0);
+                get total_area_of_faces() {
+                    const value = _.reduce(this.external_faces, (res, p) => res + p.area * ZOME.num, 0);
                     return humanize_area(value);
                 },
-                get cover_num_figs() {
-                    return ZOME.num * this.cover_figs.length;
+                get total_number_of_faces() {
+                    return ZOME.num * this.external_faces.length;
                 },
                 get floor_diameter() {
                     const value = this.floor ? this.floor.diameter : 0;
@@ -1070,9 +1075,9 @@
                     obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
                     obj += `# https://florianwns.github.io/z5omes/\n`;
                     obj += hr;
-                    obj += `# ${this.i18n('cover_num_figures')} : ${this.cover_num_figs}\n`;
-                    obj += `# ${this.i18n('cover_widest_diameter')} : ${this.cover_widest_diameter}\n`;
-                    obj += `# ${this.i18n('cover_area')} : ${this.cover_area}\n`;
+                    obj += `# ${this.i18n('total_number_of_faces')} : ${this.total_number_of_faces}\n`;
+                    obj += `# ${this.i18n('widest_diameter_of_faces')} : ${this.widest_diameter_of_faces}\n`;
+                    obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
                     obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
                     obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
                     obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
@@ -1097,18 +1102,18 @@
                     ]
                 },
                 get table_rows() {
-                    const rows = new Array(this.figs.length);
-                    _.forEach(this.figs, (fig, i) => {
-                        const flattened_fig = fig.flatten_2D();
-                        rows[i] = [flattened_fig, [
-                            i + 1,
-                            humanize_distance(flattened_fig.width),
-                            humanize_distance(flattened_fig.height),
-                            humanize_arr(unique_arr(_.map(fig.edge_distances, v => humanize_distance(v)))),
-                            humanize_arr(unique_arr(_.map(fig.angles, a => humanize_angle(rad2deg(a))))),
-                            humanize_angle(rad2deg(fig.slope)),
-                            humanize_area(fig.area),
-                            humanize_distance(fig.diameter),
+                    const rows = new Array(this.faces.length);
+                    _.forEach(this.faces, (face, i) => {
+                        const flattened_face = face.flatten_2D();
+                        rows[i] = [flattened_face, [
+                            flattened_face.label, // i + 1
+                            humanize_distance(flattened_face.width),
+                            humanize_distance(flattened_face.height),
+                            humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
+                            humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
+                            humanize_angle(rad2deg(face.slope)),
+                            humanize_area(face.area),
+                            humanize_distance(face.diameter),
                         ]];
                     });
                     return rows;
@@ -1116,7 +1121,7 @@
                 process() {
                     // Clone structure
                     this.floor = (ZOME.floor) ? ZOME.floor : null;
-                    this.cover_figs = ZOME.cover_3D;
+                    this.external_faces = ZOME.external_faces_3D;
                 },
             };
         });
@@ -1134,7 +1139,7 @@
                 bulleted_list_colors: [],
                 zoom: 1,
                 num_col: 1,
-                kind_of_drawing: "mandala_figs",
+                kind_of_drawing: "mandala_faces",
                 draw_color: true,
                 draw_centroid: false,
 
@@ -1210,7 +1215,7 @@
                     // Save document
                     doc.end();
 
-                    const filename = this.gen_filename("_flattened_figs.pdf");
+                    const filename = this.gen_filename("_flattened_faces.pdf");
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
                         download(filename, url);
@@ -1222,36 +1227,36 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    const filename = this.gen_filename("_flattened_figs.svg");
+                    const filename = this.gen_filename("_flattened_faces.svg");
                     download(filename, window.URL.createObjectURL(blob));
                 },
                 process() {
                     // Init variables
                     pages = [];
                     switch (this.kind_of_drawing) {
-                        case 'spiral_figs':
-                            this.draw_spiral_figs();
+                        case 'spiral_faces':
+                            this.draw_spiral_faces();
                             break;
-                        case 'mandala_figs':
-                            this.draw_mandala_figs();
+                        case 'mandala_faces':
+                            this.draw_mandala_faces();
                             break;
                     }
 
                     // Compute boundaries for all pages
                     page_bounds = new Array(pages.length);
-                    _.forEach(pages, (page_figs, iP) => {
+                    _.forEach(pages, (page_faces, iP) => {
                         // Reset boundaries
                         let x_max = Number.MIN_VALUE,
                             y_max = Number.MIN_VALUE,
                             x_min = Number.MAX_VALUE,
                             y_min = Number.MAX_VALUE;
 
-                        // Get min max from all figs
-                        for (const fig of page_figs) {
-                            if (fig.x_min < x_min) x_min = fig.x_min;
-                            if (fig.x_max > x_max) x_max = fig.x_max;
-                            if (fig.y_min < y_min) y_min = fig.y_min;
-                            if (fig.y_max > y_max) y_max = fig.y_max;
+                        // Get min max from all faces
+                        for (const face of page_faces) {
+                            if (face.x_min < x_min) x_min = face.x_min;
+                            if (face.x_max > x_max) x_max = face.x_max;
+                            if (face.y_min < y_min) y_min = face.y_min;
+                            if (face.y_max > y_max) y_max = face.y_max;
                         }
 
                         const width = Math.abs(x_max - x_min);
@@ -1261,9 +1266,9 @@
 
                     // Add bulleted list
                     const bulleted_list_colors = new Array(pages.length);
-                    _.forEach(pages, (page_figs, iP) => {
+                    _.forEach(pages, (page_faces, iP) => {
                         // Add color of the first piece to bulleted list
-                        bulleted_list_colors[iP] = page_figs[0].color.hex;
+                        bulleted_list_colors[iP] = page_faces[0].color.hex;
                     });
 
                     // Save proxies
@@ -1283,24 +1288,24 @@
                     ) * this.zoom;
                     const center = [210 / 2, 297 / 2];
 
-                    // Build pages figs
+                    // Build pages faces
                     svg_elements_per_page = new Array(pages.length);
                     let iF, points;
                     _.forEach(pages, (page, iPa) => {
                         const num_elements = this.draw_centroid ? page.length * 2 + 1 : page.length + 1;
                         const svg_elements = new Array(num_elements);
                         iF = 0;
-                        _.forEach(page, fig => {
+                        _.forEach(page, face => {
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
-                            points = fig.points.map(p => [
+                            points = face.points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
                             ]);
                             el.setAttribute('points', `${points}`);
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', this.draw_color ? fig.color.hex : 'transparent');
+                            el.setAttribute('fill', this.draw_color ? face.color.hex : 'transparent');
                             svg_elements[iF] = el;
                             iF++
                             if (this.draw_centroid) {
@@ -1328,25 +1333,25 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                draw_mandala_figs() {
-                    const flattened_cover_3D = ZOME.flattened_cover_3D;
+                draw_mandala_faces() {
+                    const zomandala_3D = ZOME.zomandala_3D;
 
                     // For each color, rotate piece around the origin
-                    const mandala_figs = [], O = [0, 0, 0];
+                    const mandala_faces = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(flattened_cover_3D, (fig) => {
-                            mandala_figs.push(
+                        _.forEach(zomandala_3D, (face) => {
+                            mandala_faces.push(
                                 new Polygon2D(
-                                    swap_axes(fig.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
-                                    fig.label,
-                                    ZOME.rotated_colors[fig.color.hex][i],
+                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
+                                    face.label,
+                                    ZOME.rotated_colors[face.color.hex][i],
                                 )
                             );
                         });
                     }
 
-                    if (mandala_figs.length > 0) {
-                        pages.push(mandala_figs);
+                    if (mandala_faces.length > 0) {
+                        pages.push(mandala_faces);
                     }
 
                     // Add a last page if floor exists
@@ -1354,22 +1359,22 @@
                         pages.push([ZOME.floor.flatten_2D()]);
                     }
                 },
-                draw_spiral_figs() {
-                    const flattened_cover_3D = ZOME.flattened_cover_3D;
+                draw_spiral_faces() {
+                    const zomandala_3D = ZOME.zomandala_3D;
 
-                    // For each color, Add a page with cover_3D figs
+                    // For each color, Add a page with external_faces_3D faces
                     for (let i = 0; i < ZOME.num; i++) {
-                        const colored_spiral_figs = [];
-                        _.forEach(flattened_cover_3D, (fig) => {
-                            colored_spiral_figs.push(
+                        const colored_spiral_faces = [];
+                        _.forEach(zomandala_3D, (face) => {
+                            colored_spiral_faces.push(
                                 new Polygon2D(
-                                    swap_axes(fig.points, "XZY"),
-                                    fig.label,
-                                    ZOME.rotated_colors[fig.color.hex][i],
+                                    swap_axes(face.points, "XZY"),
+                                    face.label,
+                                    ZOME.rotated_colors[face.color.hex][i],
                                 )
                             );
                         });
-                        pages.push(colored_spiral_figs);
+                        pages.push(colored_spiral_faces);
                     }
 
                     // Add Floor at last page if floor exists
@@ -1629,13 +1634,13 @@
                     // Build 3D faces and edges
                     if (this.type_of_3D_objects == "timber_profiles_3D") {
                         const timbers_3D = ZOME.timber_profiles_3D;
-                        const num_figs = timbers_3D.length;
-                        if (num_figs) {
-                            _.forEach(timbers_3D, (obj, i) => {
-                                const timbers_geometry = new THREE.BufferGeometry().setFromPoints(obj.faces)
+                        const num_items = timbers_3D.length;
+                        if (num_items) {
+                            _.forEach(timbers_3D, obj => {
+                                const timbers_geometry = new THREE.BufferGeometry().setFromPoints(obj.face_points)
                                 timbers_geometry.computeVertexNormals()
 
-                                const face_colors = _.times(obj.num_faces, _.constant(obj.color.rgb));
+                                const face_colors = _.times(obj.num_face_points, _.constant(obj.color.rgb));
                                 timbers_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
                                 meshes.zome_obj.add(new THREE.Mesh(timbers_geometry, material))
 
@@ -1648,28 +1653,28 @@
                         // Same as above but for spirals with geometry cloning for more efficiency
                         const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
                         if (spiral) {
-                            // Pre-Compute geometry points, colors and num_faces
+                            // Pre-Compute spiral geometry, before cloning
                             let face_points = [];
                             let edge_points = [];
 
-                            const num_figs = spiral.length;
-                            if (num_figs) {
-                                const colors = new Array(num_figs);
-                                const num_faces = new Array(num_figs);
-                                const face_colors = new Array(num_figs);
-                                _.forEach(spiral, (obj, i) => {
-                                    face_points.push(...obj.faces);
-                                    edge_points.push(...obj.edge_points);
-                                    num_faces[i] = obj.num_faces;
-                                    colors[i] = ZOME.rotated_colors[obj.color.hex];
+                            const num_items = spiral.length;
+                            if (num_items) {
+                                const colors = new Array(num_items);
+                                const num_face_points = new Array(num_items);
+                                _.forEach(spiral, (item, i) => {
+                                    face_points.push(...item.face_points);
+                                    edge_points.push(...item.edge_points);
+                                    num_face_points[i] = item.num_face_points;
+                                    colors[i] = ZOME.rotated_colors[item.color.hex];
                                 });
 
-                                // Build geometry of first cover_3D
+                                // Build geometry of first external_faces_3D
                                 const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
                                 spiral_geometry.computeVertexNormals()
                                 const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
 
                                 // Compute all faces geometries and colors
+                                const face_colors = new Array(num_items);
                                 for (let i = 0; i < ZOME.num; i++) {
                                     const rotated_spiral_geometry = spiral_geometry.clone()
                                     rotated_spiral_geometry.points
@@ -1678,8 +1683,8 @@
                                     rotated_spiral_geometry.rotateY(theta);
 
                                     // Get colors
-                                    for (let j = 0; j < num_figs; j++) {
-                                        face_colors[j] = _.times(num_faces[j], _.constant(colors[j][i].rgb));
+                                    for (let j = 0; j < num_items; j++) {
+                                        face_colors[j] = _.times(num_face_points[j], _.constant(colors[j][i].rgb));
                                     }
 
                                     rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
@@ -1694,16 +1699,16 @@
                             }
                         }
 
-                        // Draw Zome Floor only if draw cover
-                        if (this.type_of_3D_objects == "cover_3D") {
+                        // Draw Zome Floor only if draw external_faces_3D
+                        if (this.type_of_3D_objects == "external_faces_3D") {
                             // Build 3D Floor Faces
                             const floor = ZOME.floor;
                             if (floor !== null) {
                                 const floor_geometry = new THREE.BufferGeometry();
-                                floor_geometry.setFromPoints(floor.faces)
+                                floor_geometry.setFromPoints(floor.face_points)
 
                                 const face_colors = [];
-                                _.forEach(floor.faces, () => {
+                                _.forEach(floor.face_points, () => {
                                     face_colors.push(...floor.color.rgb);
                                 });
 
@@ -1793,7 +1798,7 @@
                             break;
                         case "c":
                         case "C":
-                            this.type_of_3D_objects = "cover_3D";
+                            this.type_of_3D_objects = "external_faces_3D";
                             break;
                         case "h":
                         case "H":
@@ -1801,7 +1806,7 @@
                             break;
                         case "m":
                         case "M":
-                            this.type_of_3D_objects = "flattened_cover_3D";
+                            this.type_of_3D_objects = "zomandala_3D";
                             break;
                         case "t":
                         case "T":
@@ -1843,7 +1848,7 @@
                     language: null,
 
                     // Shape Parameters
-                    num: 10,                            // number of figs (kites or diamonds)
+                    num: 10,                            // number of faces (kites or diamonds)
                     theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
                     angle_unit: "deg",                  // Degrees or Radians
                     height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
@@ -2199,8 +2204,8 @@
                     this.is_computing = true;
 
                     // Init arrays
-                    let vertices = [];      // 3D point vector
-                    let cover_3D = [];
+                    let zome_vertices = [];      // 3D point vector
+                    let zome_faces_3D = [];
 
                     // Config Parameters
                     const N = this.params.num;
@@ -2214,7 +2219,7 @@
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
-                    const OUTWARD_EXPANSION = XPANSION_DIRECTION === -1;
+                    const OUTWARD_EXPANSION = ASSEMBLY_METHOD == 2 || XPANSION_DIRECTION === -1;
 
                     // Constants
                     const M = N - 1;
@@ -2222,7 +2227,7 @@
                     const TOTAL_HEIGHT = this.total_height;
 
                     // First Point at the top
-                    this.add_vertex(vertices, [0, ZOME_HEIGHT, 0]);
+                    this.add_vertex(zome_vertices, [0, ZOME_HEIGHT, 0]);
 
                     // First crown properties
                     const first_crown_radius = this.first_crown_radius;
@@ -2232,7 +2237,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
-                        a, dist_to_ground, y, fig;
+                        a, dist_to_ground, y, face;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -2249,7 +2254,7 @@
                             Math.max(0, ZOME_HEIGHT - first_crown_height),
                             first_crown_radius * Math.cos(a)
                         ];
-                        this.add_vertex(vertices, B);
+                        this.add_vertex(zome_vertices, B);
                     }
 
                     // Loop over crowns (M = N - 1), while zome does not hit ground
@@ -2267,11 +2272,11 @@
                             iB = ficc + i;                      // Index of B point        B ◇ C
                             iC = ficc + k;                      // Index of C point          D
 
-                            A = vertices[iA];
-                            B = vertices[iB];
-                            C = vertices[iC];
+                            A = zome_vertices[iA];
+                            B = zome_vertices[iB];
+                            C = zome_vertices[iC];
 
-                            // Compute the new point to close diamond/kite fig
+                            // Compute the new point to close diamond/kite face
                             D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
@@ -2280,12 +2285,12 @@
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
                                 // Add Shape to 3D
-                                iD = this.add_vertex(vertices, D);
+                                iD = this.add_vertex(zome_vertices, D);
 
                                 // Add only the first piece
                                 if (i == 0) {
-                                    fig = new Polygon3D([A, B, D, C]);
-                                    cover_3D.push(fig);
+                                    face = new Polygon3D([A, B, D, C]);
+                                    zome_faces_3D.push(face);
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
@@ -2300,13 +2305,13 @@
                                 F = add(C, mul(sub(D, C), u));
 
                                 // Add Truncated Kite to 3D
-                                iE = this.add_vertex(vertices, E);
-                                iF = this.add_vertex(vertices, F);
+                                iE = this.add_vertex(zome_vertices, E);
+                                iF = this.add_vertex(zome_vertices, F);
 
-                                // Add Truncated Kite to figs
+                                // Add Truncated Kite to faces
                                 if (i == 0) {
-                                    fig = new Polygon3D([A, B, E, F, C])
-                                    cover_3D.push(fig);
+                                    face = new Polygon3D([A, B, E, F, C])
+                                    zome_faces_3D.push(face);
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -2336,17 +2341,17 @@
                             iB = triangles[(iT + 1) % num_triangles]
                             iC = triangles[(iT + 3) % num_triangles]
 
-                            A = vertices[iA];
-                            B = vertices[iB];
-                            C = vertices[iC];
+                            A = zome_vertices[iA];
+                            B = zome_vertices[iB];
+                            C = zome_vertices[iC];
 
                             // Deal with case where B and C are too close, so we don't add them
                             const far_enough = to_decimal(dist(B, C), 2) !== 0;
                             if (far_enough) {
-                                // Add triangle to figs
+                                // Add triangle to faces
                                 if (iT == 0) {
-                                    fig = new Polygon3D([A, B, C]);
-                                    cover_3D.push(fig);
+                                    face = new Polygon3D([A, B, C]);
+                                    zome_faces_3D.push(face);
                                 }
                             }
 
@@ -2364,55 +2369,59 @@
                     // Finally add the floor piece
                     let floor = null;
                     if (floor_vertices.length >= 3) {
-                        fig = new Polygon3D(floor_vertices.map(iV => vertices[iV]), "F")
+                        face = new Polygon3D(floor_vertices.map(iV => zome_vertices[iV]), "F")
 
                         // Deal with case where points are too close to make a floor
-                        const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
+                        const far_enough = to_decimal(dist(face.points[0], face.points[1]), 2) !== 0;
                         if (far_enough) {
-                            floor = fig;
+                            floor = face;
                         }
                     }
 
-                    // Divide cover figs into two parts
-                    const framework_figs = [];
-                    const divide_polygons_into_two_parts = this.params.strengthening_of_timbers >= 1;
+                    // Divide external faces into two parts
+                    const framework_faces = [];
+                    const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
 
-                    _.forEach(cover_3D, (fig, j) => {
-                        const use_same_fig = !divide_polygons_into_two_parts
+                    _.forEach(zome_faces_3D, (face, j) => {
+                        const use_same_face = !divide_faces_into_two_parts
                             || j == 0
-                            || j == cover_3D.length - 1
-                            || fig.num_points == 3;
+                            || j == zome_faces_3D.length - 1
+                            || face.num_points == 3;
 
-                        if (use_same_fig) {
-                            framework_figs.push(fig);
+                        if (use_same_face) {
+                            framework_faces.push(face);
                         } else if (divide_horizontally) {
-                            switch (fig.num_points) {
+                            switch (face.num_points) {
                                 case 4:
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[3]]));
-                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3]]));
+                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[3]]));
+                                    framework_faces.push(new Polygon3D([face.points[1], face.points[2], face.points[3]]));
                                     break;
                                 case 5:
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[4]]));
-                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3], fig.points[4]]));
+                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[4]]));
+                                    framework_faces.push(new Polygon3D([face.points[1], face.points[2], face.points[3], face.points[4]]));
                                     break;
                             }
                         } else {
-                            switch (fig.num_points) {
+                            switch (face.num_points) {
                                 case 4:
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2]]));
-                                    framework_figs.push(new Polygon3D([fig.points[2], fig.points[3], fig.points[0]]));
+                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[2]]));
+                                    framework_faces.push(new Polygon3D([face.points[2], face.points[3], face.points[0]]));
                                     break;
                                 case 5:
-                                    const mid_pt = midpoint(fig.points[2], fig.points[3]);
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2], mid_pt]));
-                                    framework_figs.push(new Polygon3D([mid_pt, fig.points[3], fig.points[4], fig.points[0]]));
+                                    const mid_pt = midpoint(face.points[2], face.points[3]);
+                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[2], mid_pt]));
+                                    framework_faces.push(new Polygon3D([mid_pt, face.points[3], face.points[4], face.points[0]]));
                                     break;
                             }
                         }
                     });
 
-                    // Build Timbers using the assembly method
+                    // Build Timbers and External/Internal faces using the assembly method
+                    const num_framework_faces = framework_faces.length;
+                    const external_faces_3D = new Array(num_framework_faces),
+                        internal_faces_3D = new Array(num_framework_faces);
+
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -2422,8 +2431,11 @@
                     let theta, hypotenuse, adjacent_side, pivot_pt,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
-                    _.forEach(framework_figs, (fig) => {
-                        const num_points = fig.num_points;
+                    // Loop over the faces of the framework from bottom to top
+                    // to create labels in building logic
+                    for (let iFace = framework_faces.length - 1; iFace >= 0; iFace--) {
+                        const face = framework_faces[iFace];
+                        const num_points = face.num_points;
 
                         const ccw_vecs = new Array(num_points),
                             cw_vecs = new Array(num_points),
@@ -2437,15 +2449,15 @@
                             next_indexes = new Array(num_points);
 
                         // Calculate vectors and projected points to avoid multiple calculations
-                        _.forEach(fig.points, (first_pt, i) => {
-                            const next_index = (i + 1) % fig.num_points;
-                            const previous_index = (fig.num_points + i - 1) % fig.num_points;
+                        _.forEach(face.points, (first_pt, i) => {
+                            const next_index = (i + 1) % num_points;
+                            const previous_index = (num_points + i - 1) % num_points;
 
                             previous_indexes[i] = previous_index;
                             next_indexes[i] = next_index;
 
-                            const prev_pt = fig.points[previous_index];
-                            const sec_pt = fig.points[next_index];
+                            const prev_pt = face.points[previous_index];
+                            const sec_pt = face.points[next_index];
 
                             const first_2_sec_vec = sub(sec_pt, first_pt);
                             const first_2_prev_vec = sub(prev_pt, first_pt);
@@ -2466,7 +2478,7 @@
                                     break;
                                 case 1: // Beveled GoodKarma
                                 case 2: // Outward Xpansion
-                                    theta = fig.angles[i];
+                                    theta = face.angles[i];
                                     hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
                                     adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
                                     pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
@@ -2541,8 +2553,11 @@
                             );
                         });
 
-                        // Build the prism
-                        _.forEach(fig.points, (first_pt, i) => {
+                        // Build the prism and external/internal face
+                        let external_face_points = new Array(num_points),
+                            internal_face_points = new Array(num_points);
+
+                        _.forEach(face.points, (first_pt, i) => {
                             const prev_index = previous_indexes[i];    // previous index
                             const next_index = next_indexes[i];        // next index
 
@@ -2596,79 +2611,103 @@
                             G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
                             H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
 
-                            // Build a TrapezoidalPrism depends on xpansion direction
+                            // Reverse top and bottom sides depends on the xpansion direction
                             if (OUTWARD_EXPANSION) {
-                                // reverse top and bottom sides
                                 [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
                             }
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", fig.color);
+
+                            // Build a TrapezoidalPrism
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", face.color);
                             skeleton_3D.push(timber_prism);
+
+                            // Add external/internal face points
+                            external_face_points[i] = plan_intersection(A, sec_2_first_vec, wall_planes[prev_index]);
+                            internal_face_points[i] = plan_intersection(E, sec_2_first_vec, wall_planes[prev_index]);
 
                             // Add vanishing line
                             vanishing_lines.push([vanishing_pt, first_pt]);
                         });
-                    });
+
+                        external_faces_3D[iFace] = new Polygon3D(external_face_points);
+                        internal_faces_3D[iFace] = new Polygon3D(internal_face_points);
+                    }
 
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
                     const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
 
-                    const hash_grouped_skeleton_3D = _.groupBy(skeleton_3D, (fig) => fig.hash)
-                    const skeleton_3D_hashes = Object.keys(hash_grouped_skeleton_3D);
+                    const obj_to_label = [
+                        skeleton_3D,
+                        external_faces_3D,
+                        internal_faces_3D,
+                        zome_faces_3D
+                    ];
+                    const arr_of_obj_grouped_by_hash = _.map(obj_to_label, obj => _.groupBy(obj, (face) => face.hash));
 
-                    const hash_grouped_cover_3D = _.groupBy(cover_3D, (fig) => fig.hash)
-                    const cover_3D_hashes = Object.keys(hash_grouped_cover_3D);
+                    // Label all items
+                    const item_label_prefixes = ["T", "EF", , "IF", , "ZF"];
+                    _.forIn(arr_of_obj_grouped_by_hash, (obj_grouped_by_hash, i) => {
+                        // Get only hashes in array
+                        const hashes = Object.keys(obj_grouped_by_hash);
 
-                    // Apply color and labels
-                    if (PAINT_SIMILAR_PIECES) {
-                        // Compute cover colors
-                        let color_by_hash = {};
-                        _.forIn(cover_3D_hashes, (hash, i) => {
-                            const color = Color.from_index(i, cover_3D_hashes.length);
-                            color_by_hash[hash] = color;
-                            rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
+                        // Apply labels to items
+                        _.forEach(obj_to_label[i], item => {
+                            const item_index = hashes.findIndex((hash) => hash == item.hash)
+                            item.label = `${item_label_prefixes[i]}${item_index}`
                         });
+                    });
 
-                        _.forEach(cover_3D, (fig) => {
-                            fig.label = `F${cover_3D_hashes.findIndex((hash) => hash == fig.hash)}`
-                            fig.color = color_by_hash[fig.hash]
-                        });
+                    // Add colors to items
+                    _.forIn(arr_of_obj_grouped_by_hash, (obj_grouped_by_hash, i) => {
+                        // Get hash group
+                        const hashes = Object.keys(obj_grouped_by_hash);
+                        const num_hashes = hashes.length;
 
-                        // Compute skeleton color
-                        color_by_hash = {};
-                        _.forIn(skeleton_3D_hashes, (hash, i) => {
-                            const color = Color.from_index(i, skeleton_3D_hashes.length);
-                            color_by_hash[hash] = color;
-                            rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
-                        });
+                        if (PAINT_SIMILAR_PIECES) {
+                            // Associates a hash to a color
+                            const hash_to_color = {};
+                            _.forIn(hashes, (hash, j) => {
+                                if (!hash_to_color.hasOwnProperty(hash)) {
+                                    const color = Color.from_index(j, num_hashes);
+                                    hash_to_color[hash] = color;
+                                    rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
+                                }
+                            });
 
-                        _.forEach(skeleton_3D, (fig) => {
-                            fig.label = `T${skeleton_3D_hashes.findIndex((hash) => hash == fig.hash)}`
-                            fig.color = color_by_hash[fig.hash]
-                        });
-                    } else {
-                        // Paint colored spirals
-                        _.forEach(cover_3D, (fig) => {
-                            fig.label = `F${cover_3D_hashes.findIndex((hash) => hash == fig.hash)}`
-                            fig.color = Color.from_angles(a, fig.slope)
-                            rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
-                        });
+                            _.forEach(obj_to_label[i], item => {
+                                item.color = hash_to_color[item.hash]
+                            });
+                        } else {
+                            // Paint colored spirals
+                            _.forEach(obj_to_label[i], item => {
+                                const color = Color.from_angles(a, item.slope);
+                                item.color = color;
+                                if (!rotated_colors.hasOwnProperty(color.hex)) {
+                                    rotated_colors[color.hex] = _.map(
+                                        rotation_angles, (a) => Color.from_angles(a, item.slope)
+                                    );
+                                }
+                            });
+                        }
+                    });
 
-                        _.forEach(skeleton_3D, (fig) => {
-                            fig.label = `T${skeleton_3D_hashes.findIndex((hash) => hash == fig.hash)}`
-                            rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
-                        });
-                    }
+                    // Unpack variables
+                    const [
+                        skeleton_3D_grouped_by_hash,
+                        external_faces_3D_grouped_by_hash,
+                        internal_faces_3D_grouped_by_hash,
+                        zome_faces_3D_grouped_by_hash
+                    ] = arr_of_obj_grouped_by_hash;
 
-                    // Build flattened_cover_3D for mandala_3D display
-                    const flattened_cover_3D = new Array(cover_3D.length);
+                    // Build zomandala_3D
+                    const zomandala_3D = new Array(zome_faces_3D.length);
                     let O = [0, 0, 0];
                     let rotated_A;
-                    _.forEach(cover_3D, (fig, i) => {
-                        let flattened_fig = fig.flatten_2D();
+                    _.forEach(zome_faces_3D, (face, i) => {
+                        let flattened_face = face.flatten_2D();
 
                         // Move to Origin and rotate to match with previous piece
-                        let rotated_points = flattened_fig.points.map(p => add(p, O));
+                        let rotated_points = flattened_face.points.map(p => add(p, O));
                         if (i > 0) {
                             a = angle(A, O, rotated_points[1]);
                             rotated_A = rotate_point_around_z_axis(rotated_points[1], a, O);
@@ -2683,28 +2722,28 @@
                         A = rotated_points[rotated_points.length - 2];
 
                         // Swap y axis with z axis for 3D display
-                        flattened_cover_3D[i] = new Polygon3D(
+                        zomandala_3D[i] = new Polygon3D(
                             swap_axes(rotated_points, "XZY"),
-                            fig.label,
-                            fig.color
+                            face.label,
+                            face.color
                         )
                     });
 
                     // Build timber_profiles_3D
                     const timber_profiles_3D = [];
                     let z_origin = 0;
-                    _.forIn(hash_grouped_skeleton_3D, group => {
+                    _.forIn(skeleton_3D_grouped_by_hash, group => {
                         // Take the first element of group
-                        const fig = group[0].flatten();
-                        const translated_points = new Array(fig.num_points);
-                        _.forEach(fig.fit_points(), (point, i) => {
+                        const prism = group[0].flatten();
+                        const translated_points = new Array(prism.num_points);
+                        _.forEach(prism.fit_points(), (point, i) => {
                             translated_points[i] = add(point, [0, 0, z_origin]);
                         });
 
                         // Add space between timbers
-                        z_origin += fig.depth + 50;
+                        z_origin += prism.depth + 50;
                         timber_profiles_3D.push(
-                            new TrapezoidalPrism(translated_points, fig.label, fig.color)
+                            new TrapezoidalPrism(translated_points, prism.label, prism.color)
                         );
                     });
 
@@ -2713,19 +2752,18 @@
                         num: N,
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
-                        vertices: vertices,
+                        vertices: zome_vertices,
 
-                        // Cover 3D
-                        cover_3D: cover_3D,
-                        hash_grouped_cover_3D: hash_grouped_cover_3D,
-                        cover_3D_hashes: cover_3D_hashes,
-
-                        // Skeleton 3D
                         skeleton_3D: skeleton_3D,
-                        hash_grouped_skeleton_3D: hash_grouped_skeleton_3D,
-                        skeleton_3D_hashes: skeleton_3D_hashes,
+                        skeleton_3D_grouped_by_hash: skeleton_3D_grouped_by_hash,
 
-                        flattened_cover_3D: flattened_cover_3D,
+                        external_faces_3D: external_faces_3D,
+                        external_faces_3D_grouped_by_hash: external_faces_3D_grouped_by_hash,
+
+                        internal_faces_3D: internal_faces_3D,
+                        internal_faces_3D_grouped_by_hash: internal_faces_3D_grouped_by_hash,
+
+                        zomandala_3D: zomandala_3D,
                         timber_profiles_3D: timber_profiles_3D,
                         floor: floor,
                         vanishing_lines: vanishing_lines,

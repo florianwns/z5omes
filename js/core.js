@@ -708,11 +708,11 @@ class Polygon3D extends Base3DGeometry {
         // TODO : remove from the class and compute distance outside
         this.diameter = 2 * dist(this.points[1], [0, this.points[1][1], 0]);
 
-        // Compute number of faces of a polygon for 3D visualization
-        this.num_faces = 3 * (this.num_points - 2);
+        // Compute number of points to make faces of a polygon for 3D visualization
+        this.num_face_points = 3 * (this.num_points - 2);
 
         // Arrays of THREE.Vector3 for 3D visualization
-        this.faces = new Array(this.num_faces);
+        this.face_points = new Array(this.num_face_points);
         this.edge_points = new Array(this.num_points * 2);
 
         // Geometry parameters
@@ -744,11 +744,11 @@ class Polygon3D extends Base3DGeometry {
             this.edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
 
             // Compute face triangle
-            if (face_index < this.num_faces) {
-                // Faces for 3D
-                this.faces[face_index] = new THREE.Vector3(...this.origin)
-                this.faces[face_index + 1] = new THREE.Vector3(...next_point)
-                this.faces[face_index + 2] = new THREE.Vector3(...next_next_point)
+            if (face_index < this.num_face_points) {
+                // Faces points for 3D display
+                this.face_points[face_index] = new THREE.Vector3(...this.origin)
+                this.face_points[face_index + 1] = new THREE.Vector3(...next_point)
+                this.face_points[face_index + 2] = new THREE.Vector3(...next_next_point)
                 face_index += 3;
             }
         });
@@ -790,7 +790,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         this.flattened_points = flatten_3D_points(this.points, D, B, H, true);
 
         // Arrays of THREE.Vector3 for 3D visualization
-        this.faces = [];
+        this.face_points = [];
         this.edge_points = []
 
         // Geometry parameters
@@ -800,7 +800,7 @@ class TrapezoidalPrism extends Base3DGeometry {
 
         const polygons = [this.top, this.bottom, this.left, this.right, this.front, this.back];
         _.forEach(polygons, (fig) => {
-            this.faces.push(...fig.faces);
+            this.face_points.push(...fig.face_points);
             this.edge_points.push(...fig.edge_points);
 
             this.angles.push(...fig.angles);
@@ -808,7 +808,7 @@ class TrapezoidalPrism extends Base3DGeometry {
             this.area += fig.area; // recompute area
 
         });
-        this.num_faces = this.faces.length
+        this.num_face_points = this.face_points.length
 
         // Compute hash to compare prims
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
@@ -888,14 +888,19 @@ class Zome {
             rotation_angles = null,
             rotated_colors = null,
             vertices = null,
-            cover_3D = null,
-            hash_grouped_cover_3D = null,
-            cover_3D_hashes = null,
+
             skeleton_3D = null,
-            hash_grouped_skeleton_3D = null,
-            skeleton_3D_hashes = null,
-            flattened_cover_3D = null,
+            skeleton_3D_grouped_by_hash = null,
+
+            external_faces_3D = null,
+            external_faces_3D_grouped_by_hash = null,
+
+            internal_faces_3D = null,
+            internal_faces_3D_grouped_by_hash = null,
+
             timber_profiles_3D = null,
+            zomandala_3D = null,
+
             floor = null,
             vanishing_lines = null
         }
@@ -904,14 +909,19 @@ class Zome {
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
         this.vertices = vertices || [];
-        this.cover_3D = cover_3D || [];
-        this.hash_grouped_cover_3D = hash_grouped_cover_3D || [];
-        this.cover_3D_hashes = cover_3D_hashes || [];
+
         this.skeleton_3D = skeleton_3D || [];
-        this.hash_grouped_skeleton_3D = hash_grouped_skeleton_3D || [];
-        this.skeleton_3D_hashes = skeleton_3D_hashes || [];
-        this.flattened_cover_3D = flattened_cover_3D || [];
+        this.skeleton_3D_grouped_by_hash = skeleton_3D_grouped_by_hash || [];
+
+        this.external_faces_3D = external_faces_3D || [];
+        this.external_faces_3D_grouped_by_hash = external_faces_3D_grouped_by_hash || [];
+
+        this.internal_faces_3D = internal_faces_3D || [];
+        this.internal_faces_3D_grouped_by_hash = internal_faces_3D_grouped_by_hash || [];
+
+        this.zomandala_3D = zomandala_3D || [];
         this.timber_profiles_3D = timber_profiles_3D || [];
+
         this.floor = floor || null;
         this.vanishing_lines = vanishing_lines || [];
     }
