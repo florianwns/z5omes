@@ -764,6 +764,39 @@ class Polygon3D extends Base3DGeometry {
     flatten_2D() {
         return new Polygon2D(this.flattened_points, this.label, this.color);
     }
+
+    divide(horizontally = true) {
+        // Divide polygon into two parts horizontally or vertically
+        if (this.num_points < 3 || this.num_points > 5) {
+            console.error("Divide function is only implemented for polygons with 3,4 or 5 points");
+        }
+
+        let parts = []
+        switch (this.num_points) {
+            case 3:
+                parts.push(new Polygon3D(this.points));
+            case 4:
+                if (horizontally) {
+                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[3]]));
+                    parts.push(new Polygon3D([this.points[1], this.points[2], this.points[3]]));
+                } else {
+                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[2]]));
+                    parts.push(new Polygon3D([this.points[2], this.points[3], this.points[0]]));
+                }
+                break;
+            case 5:
+                if (horizontally) {
+                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[4]]));
+                    parts.push(new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]]));
+                } else {
+                    const mid_pt = midpoint(this.points[2], this.points[3]);
+                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt]));
+                    parts.push(new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]]));
+                }
+                break;
+        }
+        return parts;
+    }
 }
 
 

@@ -2397,7 +2397,7 @@
                         }
                     }
 
-                    // Divide zome faces into two parts
+                    // Divide zome faces into two parts to add strengthening of timbers
                     const framework_faces = [];
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
@@ -2410,29 +2410,8 @@
 
                         if (use_same_face) {
                             framework_faces.push(face);
-                        } else if (divide_horizontally) {
-                            switch (face.num_points) {
-                                case 4:
-                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[3]]));
-                                    framework_faces.push(new Polygon3D([face.points[1], face.points[2], face.points[3]]));
-                                    break;
-                                case 5:
-                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[4]]));
-                                    framework_faces.push(new Polygon3D([face.points[1], face.points[2], face.points[3], face.points[4]]));
-                                    break;
-                            }
                         } else {
-                            switch (face.num_points) {
-                                case 4:
-                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[2]]));
-                                    framework_faces.push(new Polygon3D([face.points[2], face.points[3], face.points[0]]));
-                                    break;
-                                case 5:
-                                    const mid_pt = midpoint(face.points[2], face.points[3]);
-                                    framework_faces.push(new Polygon3D([face.points[0], face.points[1], face.points[2], mid_pt]));
-                                    framework_faces.push(new Polygon3D([mid_pt, face.points[3], face.points[4], face.points[0]]));
-                                    break;
-                            }
+                            framework_faces.push(...face.divide(divide_horizontally))
                         }
                     });
 
