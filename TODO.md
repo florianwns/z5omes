@@ -7,6 +7,10 @@
 * [x] Donner à chaque montant le label de la figure dont il provient
 * [x] Construire/ Indexer les montants du bas vers le haut => utiliser average des points en Y
 
+
+* [ ] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
+
+
 * [ ] Les external/internal faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
 
 * [ ] Reconstruire le sol à partir des external faces

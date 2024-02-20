@@ -698,7 +698,8 @@ class Polygon3D extends Base3DGeometry {
         super(points, label, color);
 
         // Check coplanarity
-        if (this.num_points > 3 && !is_coplanar(this.points)) {
+        this.is_coplanar = this.num_points == 3 || is_coplanar(this.points);
+        if (!this.is_coplanar) {
             console.error(`The polygon is not coplanar`);
         }
 
@@ -723,16 +724,16 @@ class Polygon3D extends Base3DGeometry {
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
         let face_index = 0;
-        _.forEach(this.points, (current_point, i) => {
+        _.forEach(this.points, (cur_point, i) => {
             const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
             const next_point = this.points[(i + 1) % this.num_points];
             const next_next_point = this.points[(i + 2) % this.num_points];
 
             // Compute angle in radians
-            this.angles.push(angle(prev_point, current_point, next_point));
+            this.angles.push(angle(prev_point, cur_point, next_point));
 
             // Compute edges distances, and perimeter
-            const d = dist(current_point, next_point)
+            const d = dist(cur_point, next_point)
             this.edge_distances.push(d);
             this.perimeter += d;
 
@@ -740,7 +741,7 @@ class Polygon3D extends Base3DGeometry {
             this.area += triangle_area_from_points(this.origin, next_point, next_next_point);
 
             // Prepare line segments points
-            this.edge_points[i * 2] = new THREE.Vector3(...current_point);
+            this.edge_points[i * 2] = new THREE.Vector3(...cur_point);
             this.edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
 
             // Compute face triangle

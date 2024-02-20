@@ -685,7 +685,7 @@
                                     <div class="input-group input-group-sm mt-2">
                                         <!-- Draw color -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_color')"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_colors')"
                                                 :class="draw_color ? '' : 'btn-secondary'"
                                                 @click="draw_color = !draw_color">
                                             <i class="fa-regular fa-droplet fa-fw"></i>
@@ -693,7 +693,7 @@
 
                                         <!-- Draw centroid -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_centroid')"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_centroids')"
                                                 :class="draw_centroid ? '' : 'btn-secondary'"
                                                 @click="draw_centroid = !draw_centroid">
                                             <i class="fa-regular fa-circle-dot fa-fw"></i>
@@ -1166,7 +1166,7 @@
 
                     // Add swipe
                     const hammer = new Hammer(this.A4_sheet.parentNode);
-                    hammer.on('swiperight', (e) => this.previous_page());
+                    hammer.on('swiperight', (e) => this.prev_page());
                     hammer.on('swipeleft', (e) => this.next_page());
                 },
                 get grid_pct() {
@@ -1385,7 +1385,7 @@
                 next_page() {
                     this.page_index = (this.page_index + 1) % svg_elements_per_page.length;
                 },
-                previous_page() {
+                prev_page() {
                     this.page_index = (svg_elements_per_page.length + this.page_index - 1) % svg_elements_per_page.length;
                 },
                 keydown(key) {
@@ -1394,7 +1394,7 @@
                         case "ArrowUp":
                         case "Left":
                         case "ArrowLeft":
-                            this.previous_page();
+                            this.prev_page();
                             break;
                         case "Down":
                         case "ArrowDown":
@@ -2378,7 +2378,7 @@
                         }
                     }
 
-                    // Divide external faces into two parts
+                    // Divide zome faces into two parts
                     const framework_faces = [];
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
@@ -2417,10 +2417,9 @@
                         }
                     });
 
-                    // Build Timbers and External/Internal faces using the assembly method
-                    const num_framework_faces = framework_faces.length;
-                    const external_faces_3D = new Array(num_framework_faces),
-                        internal_faces_3D = new Array(num_framework_faces);
+                    // Build External/Internal faces
+                    const external_faces_3D = new Array(zome_faces_3D.length),
+                        internal_faces_3D = new Array(zome_faces_3D.length);
 
                     const skeleton_3D = [], vanishing_lines = [];
 
@@ -2443,31 +2442,31 @@
                             horizontal_proj_vecs = new Array(num_points),
                             wall_planes = new Array(num_points),
                             shifted_wall_planes = new Array(num_points),
-                            previous_indexes = new Array(num_points),
+                            prev_indexes = new Array(num_points),
                             next_indexes = new Array(num_points);
 
                         // Calculate vectors and projected points to avoid multiple calculations
-                        _.forEach(face.points, (first_pt, i) => {
+                        _.forEach(face.points, (cur_pt, i) => {
                             const next_index = (i + 1) % num_points;
-                            const previous_index = (num_points + i - 1) % num_points;
+                            const prev_index = (num_points + i - 1) % num_points;
 
-                            previous_indexes[i] = previous_index;
+                            prev_indexes[i] = prev_index;
                             next_indexes[i] = next_index;
 
-                            const prev_pt = face.points[previous_index];
+                            const prev_pt = face.points[prev_index];
                             const sec_pt = face.points[next_index];
 
-                            const first_2_sec_vec = sub(sec_pt, first_pt);
-                            const first_2_prev_vec = sub(prev_pt, first_pt);
+                            const cur_2_sec_vec = sub(sec_pt, cur_pt);
+                            const cur_2_prev_vec = sub(prev_pt, cur_pt);
 
-                            const mid_pt = midpoint(first_pt, sec_pt);
+                            const mid_pt = midpoint(cur_pt, sec_pt);
                             const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
 
                             switch (ASSEMBLY_METHOD) {
                                 case 0: // GoodKarma
-                                    horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
+                                    horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
-                                    vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
+                                    vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
 
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
@@ -2479,27 +2478,27 @@
                                     theta = face.angles[i];
                                     hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
                                     adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
-                                    pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
+                                    pivot_pt = point_to(mid_pt, cur_2_sec_vec, -adjacent_side);
 
-                                    thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
+                                    thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
                                     horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
 
                                     if (to_decimal(theta) == to_decimal(TAU_Q)) {
                                         // Add Hack to avoid issues with bad cross_products on 90° angles
-                                        vertical_proj_vec = cross_product(first_2_sec_vec, first_2_prev_vec);
+                                        vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
                                     } else if (theta > TAU_Q) {
                                         // Change direction if theta is greater than 90°,
                                         // Because pivot point is after mid_pt, so the direction is opposite
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
+                                        vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_prev_vec);
                                     } else {
                                         // The normal way if theta is smaller than 90 °
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(first_2_prev_vec, -1));
+                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(cur_2_prev_vec, -1));
                                     }
 
                                     if (ASSEMBLY_METHOD == 1) {
                                         vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
 
-                                        wall_planes[i] = points_2_plane(first_pt, mid_pt, vanishing_pt);
+                                        wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
                                         width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                                         const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[i])
@@ -2517,8 +2516,8 @@
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                             // Push vectors
-                            ccw_vecs[i] = first_2_sec_vec;
-                            cw_vecs[i] = first_2_prev_vec;
+                            ccw_vecs[i] = cur_2_sec_vec;
+                            cw_vecs[i] = cur_2_prev_vec;
                             horizontal_proj_vecs[i] = horizontal_proj_vec;
 
                             // Push points
@@ -2531,12 +2530,12 @@
                                 case 0: // GoodKarma
                                 case 1: // Beveled GoodKarma
                                     // Use vanishing pt for wall
-                                    wall_planes[i] = points_2_plane(first_pt, mid_pt, vanishing_pt);
+                                    wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
                                     break;
                                 case 2: // Outward Xpansion
                                     // Use vertical proj rather vanishing pt
                                     wall_planes[i] = points_2_plane(
-                                        first_pt,
+                                        cur_pt,
                                         mid_pt,
                                         point_to(mid_pt, vertical_proj_vec, 100)
                                     );
@@ -2545,7 +2544,7 @@
 
                             // Same floor for shifted wall
                             shifted_wall_planes[i] = points_2_plane(
-                                point_to(thickness_offset_pt, first_2_sec_vec, 100),
+                                point_to(thickness_offset_pt, cur_2_sec_vec, 100),
                                 thickness_offset_pt,
                                 width_offset_pt,
                             );
@@ -2555,18 +2554,17 @@
                         let external_face_points = new Array(num_points),
                             internal_face_points = new Array(num_points);
 
-                        _.forEach(face.points, (first_pt, i) => {
-                            const prev_index = previous_indexes[i];    // previous index
+                        _.forEach(face.points, (cur_pt, i) => {
+                            const prev_index = prev_indexes[i];    // previous index
                             const next_index = next_indexes[i];        // next index
 
-                            // Get polygon points, first is the current point and last is n-1 point
                             thickness_offset_pt = thickness_offset_pts[i];
                             width_offset_pt = width_offset_pts[i];
 
                             // Get vectors
                             const mid_pt = mid_pts[i];
-                            const first_2_sec_vec = ccw_vecs[i];
-                            const sec_2_first_vec = cw_vecs[next_index];
+                            const cur_2_sec_vec = ccw_vecs[i];
+                            const sec_2_cur_vec = cw_vecs[next_index];
 
                             // Compute Planes to make point intersections
                             let planes = new Array(4);
@@ -2598,16 +2596,16 @@
                             )
 
                             // A, B, C, D is the top part (trapezoid) of the timber
-                            A = plan_intersection(mid_pt, sec_2_first_vec, planes[0]);
-                            B = plan_intersection(thickness_offset_pt, sec_2_first_vec, planes[1]);
-                            C = plan_intersection(mid_pt, first_2_sec_vec, planes[2])
-                            D = plan_intersection(thickness_offset_pt, first_2_sec_vec, planes[3])
+                            A = plan_intersection(mid_pt, sec_2_cur_vec, planes[0]);
+                            B = plan_intersection(thickness_offset_pt, sec_2_cur_vec, planes[1]);
+                            C = plan_intersection(mid_pt, cur_2_sec_vec, planes[2])
+                            D = plan_intersection(thickness_offset_pt, cur_2_sec_vec, planes[3])
 
                             // E, F, G, H is the bottom part (trapezoid) of the timber
-                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_first_vec, planes[0]);
-                            F = plan_intersection(width_offset_pt, sec_2_first_vec, planes[1]);
-                            G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
-                            H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
+                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_cur_vec, planes[0]);
+                            F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
+                            G = plan_intersection(mid_pt_with_vertical_proj, cur_2_sec_vec, planes[2]);
+                            H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
 
                             // Reverse top and bottom sides depends on the xpansion direction
                             if (OUTWARD_EXPANSION) {
@@ -2619,11 +2617,11 @@
                             skeleton_3D.push(timber_prism);
 
                             // Add external/internal face points
-                            external_face_points[i] = plan_intersection(A, sec_2_first_vec, wall_planes[prev_index]);
-                            internal_face_points[i] = plan_intersection(E, sec_2_first_vec, wall_planes[prev_index]);
+                            external_face_points[i] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
+                            internal_face_points[i] = plan_intersection(E, sec_2_cur_vec, wall_planes[prev_index]);
 
                             // Add vanishing line
-                            vanishing_lines.push([vanishing_pt, first_pt]);
+                            vanishing_lines.push([vanishing_pt, cur_pt]);
                         });
 
                         external_faces_3D[iFace] = new Polygon3D(external_face_points);
