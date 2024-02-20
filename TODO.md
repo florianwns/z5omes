@@ -8,8 +8,7 @@
 * [x] Construire/ Indexer les montants du bas vers le haut => utiliser average des points en Y
 * [x] Ajoût des mandalas externes et internes pour faciliter la découpe sur logiciel 3D.
 * [x] Les outer/inner faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
-
-* [ ] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
+* [x] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
 
 * [ ] Reconstruire le sol à partir des outer faces
 
@@ -22,7 +21,7 @@
 * [ ] Changer l'aide de ZH "visible part  of zome" ???  
 * [ ] Coller la base du zome au sol => vanishing pt is 0 for last part
   
-* [ ] Les dessins de profils sont toujours fais de la même façon :
+* [x] Les dessins de profils sont toujours fais de la même façon :
   
   * La largeur est fixe (équivalent à la longueur du montant)
   * La face de devant est dessiné au trait plein

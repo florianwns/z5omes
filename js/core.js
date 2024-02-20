@@ -334,7 +334,7 @@ function flatten_3D_points(points, origin, start_pt1, start_pt2, horizontally = 
     return flattened_points;
 }
 
-function is_coplanar(points) {
+function check_is_coplanar(points) {
     // Function to check the coplanarity of a polygon
     // Calculation of the normal vector of the first triangle formed by the first three points
     const vec1 = sub(points[1], points[0]);
@@ -347,7 +347,7 @@ function is_coplanar(points) {
         // of each face of the polygon is close to zero (due to numerical approximations)
         for (let i = 3; i < num_points; i++) {
             const vec_to_check = sub(points[i], points[0])
-            if (Math.abs(dot_product(norm_vec, vec_to_check)) > 0.000001) {
+            if (Math.abs(dot_product(norm_vec, vec_to_check)) > 0.001) {
                 return false;
             }
         }
@@ -696,7 +696,7 @@ class Polygon3D extends Base3DGeometry {
         super(points, label, color);
 
         // Check coplanarity
-        this.is_coplanar = this.num_points == 3 || is_coplanar(this.points);
+        this.is_coplanar = this.num_points == 3 || check_is_coplanar(this.points);
         if (!this.is_coplanar) {
             console.error(`The polygon is not coplanar`);
         }
