@@ -5,21 +5,22 @@
 * [x] Trouver pourquoi l'axe y est inversé sur certains prism
 * [x] Faire la différence entre external_faces/internal_faces
 * [x] Donner à chaque montant le label de la figure dont il provient
+* [x] Construire/ Indexer les montants du bas vers le haut => utiliser average des points en Y
+
+* [ ] Les external/internal faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
 
 
 * [ ] Reconstruire le sol à partir des external faces
-  
-* [ ] Les external/internal faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
+
 
 * [ ] Mettre à jour les traductions avec les termes manquants
 
-* [ ] Ajouter les dimensions au flattened points
+* [ ] Ajouter les dimensions aux flattened points
+  
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
   
 * [ ] Changer l'aide de ZH "visible part  of zome" ???  
 * [ ] Coller la base du zome au sol => vanishing pt is 0 for last part
-
-* [ ] Construire/ Indexer les montants du bas vers le haut.
   
 * [ ] Les dessins de profils sont toujours fais de la même façon :
   
