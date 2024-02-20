@@ -3,18 +3,15 @@
 * [x] Améliorer la fonction planar pour aligner verticalement ou horizontalement la figure
 * [x] Refonte du code : les planar points deviennent une variable de polygone flattened
 * [x] Trouver pourquoi l'axe y est inversé sur certains prism
-* [x] Faire la différence entre external_faces/internal_faces
+* [x] Faire la différence entre outer_faces/inner_faces
 * [x] Donner à chaque montant le label de la figure dont il provient
 * [x] Construire/ Indexer les montants du bas vers le haut => utiliser average des points en Y
 * [x] Ajoût des mandalas externes et internes pour faciliter la découpe sur logiciel 3D.
+* [x] Les outer/inner faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
 
-* [ ] Les external/internal faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
-
-  
 * [ ] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
 
-
-* [ ] Reconstruire le sol à partir des external faces
+* [ ] Reconstruire le sol à partir des outer faces
 
 * [ ] Mettre à jour les traductions avec les termes manquants
 

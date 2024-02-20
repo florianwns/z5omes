@@ -933,16 +933,16 @@ class Zome {
             skeleton_3D = null,
             skeleton_3D_hash_collections = null,
 
-            external_faces_3D = null,
-            external_faces_3D_hash_collections = null,
+            outer_faces_3D = null,
+            outer_faces_3D_hash_collections = null,
 
-            internal_faces_3D = null,
-            internal_faces_3D_hash_collections = null,
+            inner_faces_3D = null,
+            inner_faces_3D_hash_collections = null,
 
             timber_profiles_3D = null,
             mandala_3D = null,
-            mandala_3D_of_external_faces = null,
-            mandala_3D_of_internal_faces = null,
+            mandala_3D_of_outer_faces = null,
+            mandala_3D_of_inner_faces = null,
 
             floor = null,
             vanishing_lines = null
@@ -956,16 +956,16 @@ class Zome {
         this.skeleton_3D = skeleton_3D || [];
         this.skeleton_3D_hash_collections = skeleton_3D_hash_collections || [];
 
-        this.external_faces_3D = external_faces_3D || [];
-        this.external_faces_3D_hash_collections = external_faces_3D_hash_collections || [];
+        this.outer_faces_3D = outer_faces_3D || [];
+        this.outer_faces_3D_hash_collections = outer_faces_3D_hash_collections || [];
 
-        this.internal_faces_3D = internal_faces_3D || [];
-        this.internal_faces_3D_hash_collections = internal_faces_3D_hash_collections || [];
+        this.inner_faces_3D = inner_faces_3D || [];
+        this.inner_faces_3D_hash_collections = inner_faces_3D_hash_collections || [];
 
         this.timber_profiles_3D = timber_profiles_3D || [];
         this.mandala_3D = mandala_3D || [];
-        this.mandala_3D_of_external_faces = mandala_3D_of_external_faces || [];
-        this.mandala_3D_of_internal_faces = mandala_3D_of_internal_faces || [];
+        this.mandala_3D_of_outer_faces = mandala_3D_of_outer_faces || [];
+        this.mandala_3D_of_inner_faces = mandala_3D_of_inner_faces || [];
 
         this.floor = floor || null;
         this.vanishing_lines = vanishing_lines || [];
