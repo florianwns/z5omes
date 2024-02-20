@@ -276,7 +276,7 @@ function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
     return [
         delta[0] * cos_theta - delta[1] * sin_theta + origin[0],
         delta[0] * sin_theta + delta[1] * cos_theta + origin[1],
-        vec[2] + origin[2]
+        0
     ];
 }
 
@@ -909,7 +909,9 @@ class Zome {
             internal_faces_3D_hash_collections = null,
 
             timber_profiles_3D = null,
-            zomandala_3D = null,
+            mandala_3D = null,
+            mandala_3D_of_external_faces = null,
+            mandala_3D_of_internal_faces = null,
 
             floor = null,
             vanishing_lines = null
@@ -929,8 +931,10 @@ class Zome {
         this.internal_faces_3D = internal_faces_3D || [];
         this.internal_faces_3D_hash_collections = internal_faces_3D_hash_collections || [];
 
-        this.zomandala_3D = zomandala_3D || [];
         this.timber_profiles_3D = timber_profiles_3D || [];
+        this.mandala_3D = mandala_3D || [];
+        this.mandala_3D_of_external_faces = mandala_3D_of_external_faces || [];
+        this.mandala_3D_of_internal_faces = mandala_3D_of_internal_faces || [];
 
         this.floor = floor || null;
         this.vanishing_lines = vanishing_lines || [];

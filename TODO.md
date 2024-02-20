@@ -6,12 +6,13 @@
 * [x] Faire la différence entre external_faces/internal_faces
 * [x] Donner à chaque montant le label de la figure dont il provient
 * [x] Construire/ Indexer les montants du bas vers le haut => utiliser average des points en Y
-
-
-* [ ] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
-
+* [x] Ajoût des mandalas externes et internes pour faciliter la découpe sur logiciel 3D.
 
 * [ ] Les external/internal faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
+
+  
+* [ ] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
+
 
 * [ ] Reconstruire le sol à partir des external faces
 

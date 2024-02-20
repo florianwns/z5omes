@@ -15,8 +15,9 @@ const I18N_EN = {
         keyboard_shortcuts: "Keyboard shorcuts",
         skeleton_3D: "3D Skeleton",
         external_faces_3D: "3D External faces",
-        internal_faces_3D: "3D internal faces",
-        mandala_3D: "3D Mandala",
+        internal_faces_3D: "3D Internal faces",
+        mandala_3D_of_external_faces: "3D Mandala of external faces",
+        mandala_3D_of_internal_faces: "3D Mandala of internal faces",
         timber_profiles_3D: "3D Timber profiles",
         mandala: 'Mandala',
         spirals: 'Spirals',
@@ -65,10 +66,6 @@ const I18N_EN = {
         help_zc_param: "Place the vanishing point at the centroid of the entire zome",
 
         // Keyboard shortcuts
-        key_S_3D_view: "Select '3D Skeleton' object",
-        key_C_3D_view: "Select '3D Cover' object",
-        key_M_3D_view: "Select '3D Mandala' object",
-        key_T_3D_view: "Select '3D Timber profiles' object",
         key_H_3D_view: "Reset camera view",
         key_left_3D_view: "Left side view",
         key_up_3D_view: "Top view",

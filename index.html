@@ -471,7 +471,7 @@
 
 
                                     <div class="mb-2">
-                                        <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
+                                        <!-- Draw Zome Env/ Zome Skeleton/ Mandala -->
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
@@ -481,8 +481,10 @@
                                                     x-text="i18n('external_faces_3D')"></option>
                                             <option value="internal_faces_3D"
                                                     x-text="i18n('internal_faces_3D')"></option>
-                                            <option value="zomandala_3D"
-                                                    x-text="i18n('mandala_3D')"></option>
+                                            <option value="mandala_3D_of_external_faces"
+                                                    x-text="i18n('mandala_3D_of_external_faces')"></option>
+                                            <option value="mandala_3D_of_internal_faces"
+                                                    x-text="i18n('mandala_3D_of_internal_faces')"></option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -527,24 +529,33 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('S')">S
                                                                 </button>
-                                                                <span x-text="i18n('key_S_3D_view')"></span>
-                                                            </li>
-                                                            <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('C')">C
-                                                                </button>
-                                                                <span x-text="i18n('key_C_3D_view')"></span>
-                                                            </li>
-                                                            <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('M')">M
-                                                                </button>
-                                                                <span x-text="i18n('key_M_3D_view')"></span>
+                                                                <span x-text="i18n('skeleton_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('T')">T
                                                                 </button>
-                                                                <span x-text="i18n('key_T_3D_view')"></span>
+                                                                <span x-text="i18n('timber_profiles_3D')"></span>
                                                             </li>
-
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('E')">E
+                                                                </button>
+                                                                <span x-text="i18n('external_faces_3D')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('I')">I
+                                                                </button>
+                                                                <span x-text="i18n('internal_faces_3D')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Z')">Z
+                                                                </button>
+                                                                <span x-text="i18n('mandala_3D_of_external_faces')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('U')">U
+                                                                </button>
+                                                                <span x-text="i18n('mandala_3D_of_internal_faces')"></span>
+                                                            </li>
                                                             <!-- Camera view -->
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('H')">H
@@ -1334,12 +1345,12 @@
                     });
                 },
                 draw_mandala_faces() {
-                    const zomandala_3D = ZOME.zomandala_3D;
+                    const mandala_3D = ZOME.mandala_3D;
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(zomandala_3D, (face) => {
+                        _.forEach(mandala_3D, (face) => {
                             mandala_faces.push(
                                 new Polygon2D(
                                     swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
@@ -1360,12 +1371,12 @@
                     }
                 },
                 draw_spiral_faces() {
-                    const zomandala_3D = ZOME.zomandala_3D;
+                    const mandala_3D = ZOME.mandala_3D;
 
                     // For each color, Add a page with external_faces_3D faces
                     for (let i = 0; i < ZOME.num; i++) {
                         const colored_spiral_faces = [];
-                        _.forEach(zomandala_3D, (face) => {
+                        _.forEach(mandala_3D, (face) => {
                             colored_spiral_faces.push(
                                 new Polygon2D(
                                     swap_axes(face.points, "XZY"),
@@ -1796,17 +1807,25 @@
                         case " ":
                             this.is_spinning = !this.is_spinning;
                             break;
-                        case "c":
-                        case "C":
+                        case "e":
+                        case "E":
                             this.type_of_3D_objects = "external_faces_3D";
+                            break;
+                        case "i":
+                        case "I":
+                            this.type_of_3D_objects = "internal_faces_3D";
                             break;
                         case "h":
                         case "H":
                             this.reset();
                             break;
-                        case "m":
-                        case "M":
-                            this.type_of_3D_objects = "zomandala_3D";
+                        case "z":
+                        case "Z":
+                            this.type_of_3D_objects = "mandala_3D_of_external_faces";
+                            break;
+                        case "u":
+                        case "U":
+                            this.type_of_3D_objects = "mandala_3D_of_internal_faces";
                             break;
                         case "t":
                         case "T":
@@ -2701,35 +2720,43 @@
                         internal_faces_3D_hash_collections,
                     ] = arr_of_obj_hash_collections;
 
-                    // Build zomandala_3D
-                    const zomandala_3D = new Array(zome_faces_3D.length);
-                    let O = [0, 0, 0];
-                    let rotated_A;
-                    _.forEach(zome_faces_3D, (face, i) => {
-                        let flattened_face = face.flatten_2D();
+                    // Build Mandalas
+                    const [
+                        mandala_3D,
+                        mandala_3D_of_external_faces,
+                        mandala_3D_of_internal_faces
+                    ] = _.map([zome_faces_3D, external_faces_3D, internal_faces_3D], obj_3D => {
+                        const mandala_3D = new Array(obj_3D.length);
+                        let O = [0, 0, 0];
+                        let rotated_A;
+                        _.forEach(obj_3D, (face, i) => {
+                            let flattened_face = face.flatten_2D();
 
-                        // Move to Origin and rotate to match with previous piece
-                        let rotated_points = flattened_face.points.map(p => add(p, O));
-                        if (i > 0) {
-                            a = angle(A, O, rotated_points[1]);
-                            rotated_A = rotate_point_around_z_axis(rotated_points[1], a, O);
+                            // Move to Origin and rotate to match with previous piece
+                            let rotated_points = flattened_face.points.map(p => add(p, O));
+                            if (i > 0) {
+                                a = angle(A, O, rotated_points[1]);
+                                rotated_A = rotate_point_around_z_axis(rotated_points[1], a, O);
 
-                            // Rotate the other way if rotatedA is not too close to A
-                            if (to_decimal(dist(rotated_A, A)) != 0) {
-                                a = -a;
+                                // Rotate the other way if rotatedA is not too close to A
+                                if (to_decimal(dist(rotated_A, A)) != 0) {
+                                    a = -a;
+                                }
+                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, a, O));
                             }
-                            rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, a, O));
-                        }
-                        O = rotated_points[rotated_points.length - 1];
-                        A = rotated_points[rotated_points.length - 2];
+                            O = rotated_points[rotated_points.length - 1];
+                            A = rotated_points[rotated_points.length - 2];
 
-                        // Swap y axis with z axis for 3D display
-                        zomandala_3D[i] = new Polygon3D(
-                            swap_axes(rotated_points, "XZY"),
-                            face.label,
-                            face.color
-                        )
+                            // Swap y axis with z axis for 3D display
+                            mandala_3D[i] = new Polygon3D(
+                                swap_axes(rotated_points, "XZY"),
+                                face.label,
+                                face.color
+                            )
+                        });
+                        return mandala_3D;
                     });
+
 
                     // Build timber_profiles_3D
                     const timber_profiles_3D = [];
@@ -2765,8 +2792,11 @@
                         internal_faces_3D: internal_faces_3D,
                         internal_faces_3D_hash_collections: internal_faces_3D_hash_collections,
 
-                        zomandala_3D: zomandala_3D,
                         timber_profiles_3D: timber_profiles_3D,
+                        mandala_3D: mandala_3D,
+                        mandala_3D_of_external_faces: mandala_3D_of_external_faces,
+                        mandala_3D_of_internal_faces: mandala_3D_of_internal_faces,
+
                         floor: floor,
                         vanishing_lines: vanishing_lines,
                     });
