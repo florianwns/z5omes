@@ -196,12 +196,8 @@ function point_to(p1, vec, d) {
     return point;
 }
 
-function angle_between_vectors(u, v) {
-    const dot = dot_product(u, v);
-    const u_length = len(u);
-    const v_length = len(v);
-
-    const theta = Math.acos(dot / (u_length * v_length));
+function angle_between_vectors(vec1, vec2) {
+    const theta = Math.acos(dot_product(vec1, vec2) / (len(vec1) * len(vec2)));
     return theta;
 }
 
@@ -647,8 +643,10 @@ class Base3DGeometry extends LabeledObject {
         this.height = height;
         this.depth = depth;
 
-        // Compute the slope on the x and z Axes, maybe there is a better method
-        this.slope = angle(this.origin, this.centroid, [this.origin[0], this.centroid[1], this.origin[2]]);
+        // Compute the slope based on normal vector and vertical axis
+        const norm_vec = cross_product(sub(this.points[1], this.points[0]), sub(this.points[2], this.points[0]));
+        const slope = angle_between_vectors(norm_vec, [0, 1, 0])
+        this.slope = (slope > TAU_Q) ? Math.PI - slope : slope;
     }
 
     fit_points() {
