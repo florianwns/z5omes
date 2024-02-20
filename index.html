@@ -2384,7 +2384,6 @@
                         }
                     }
 
-
                     // Finally add the floor piece
                     let floor = null;
                     if (floor_vertices.length >= 3) {
@@ -2401,14 +2400,8 @@
                     const framework_faces = [];
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
-
                     _.forEach(zome_faces_3D, (face, j) => {
-                        const use_same_face = !divide_faces_into_two_parts
-                            || j == 0
-                            || j == zome_faces_3D.length - 1
-                            || face.num_points == 3;
-
-                        if (use_same_face) {
+                        if (!divide_faces_into_two_parts || j == 0 || j == zome_faces_3D.length - 1) {
                             framework_faces.push(face);
                         } else {
                             framework_faces.push(...face.divide(divide_horizontally))
@@ -2523,7 +2516,7 @@
                             thickness_offset_pts[i] = thickness_offset_pt;
                             width_offset_pts[i] = width_offset_pt;
 
-                            //Push Planes
+                            // Push Planes
                             switch (ASSEMBLY_METHOD) {
                                 case 0: // GoodKarma
                                 case 1: // Beveled GoodKarma
