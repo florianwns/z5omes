@@ -477,14 +477,14 @@
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
                                             <option selected value="timber_profiles_3D"
                                                     x-text="i18n('timber_profiles_3D')"></option>
-                                            <option value="external_faces_3D"
-                                                    x-text="i18n('external_faces_3D')"></option>
-                                            <option value="internal_faces_3D"
-                                                    x-text="i18n('internal_faces_3D')"></option>
-                                            <option value="mandala_3D_of_external_faces"
-                                                    x-text="i18n('mandala_3D_of_external_faces')"></option>
-                                            <option value="mandala_3D_of_internal_faces"
-                                                    x-text="i18n('mandala_3D_of_internal_faces')"></option>
+                                            <option value="outer_faces_3D"
+                                                    x-text="i18n('outer_faces_3D')"></option>
+                                            <option value="inner_faces_3D"
+                                                    x-text="i18n('inner_faces_3D')"></option>
+                                            <option value="mandala_3D_of_outer_faces"
+                                                    x-text="i18n('mandala_3D_of_outer_faces')"></option>
+                                            <option value="mandala_3D_of_inner_faces"
+                                                    x-text="i18n('mandala_3D_of_inner_faces')"></option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -539,22 +539,22 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('E')">E
                                                                 </button>
-                                                                <span x-text="i18n('external_faces_3D')"></span>
+                                                                <span x-text="i18n('outer_faces_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('I')">I
                                                                 </button>
-                                                                <span x-text="i18n('internal_faces_3D')"></span>
+                                                                <span x-text="i18n('inner_faces_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('Z')">Z
                                                                 </button>
-                                                                <span x-text="i18n('mandala_3D_of_external_faces')"></span>
+                                                                <span x-text="i18n('mandala_3D_of_outer_faces')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('U')">U
                                                                 </button>
-                                                                <span x-text="i18n('mandala_3D_of_internal_faces')"></span>
+                                                                <span x-text="i18n('mandala_3D_of_inner_faces')"></span>
                                                             </li>
                                                             <!-- Camera view -->
                                                             <li class="d-flex align-items-center mb-2">
@@ -1031,27 +1031,27 @@
 
         Alpine.data('face_measurements', () => {
             return {
-                external_faces: [],
+                outer_faces: [],
                 floor: null,
 
                 async init() {
                 },
                 get faces() {
-                    return this.has_floor ? [...this.external_faces, this.floor] : this.external_faces;
+                    return this.has_floor ? [...this.outer_faces, this.floor] : this.outer_faces;
                 },
                 get has_floor() {
                     return this.floor !== null;
                 },
                 get widest_diameter_of_faces() {
-                    const value = _.reduce(this.external_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                    const value = _.reduce(this.outer_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
                 get total_area_of_faces() {
-                    const value = _.reduce(this.external_faces, (res, p) => res + p.area * ZOME.num, 0);
+                    const value = _.reduce(this.outer_faces, (res, p) => res + p.area * ZOME.num, 0);
                     return humanize_area(value);
                 },
                 get total_number_of_faces() {
-                    return ZOME.num * this.external_faces.length;
+                    return ZOME.num * this.outer_faces.length;
                 },
                 get floor_diameter() {
                     const value = this.floor ? this.floor.diameter : 0;
@@ -1132,7 +1132,7 @@
                 process() {
                     // Clone structure
                     this.floor = (ZOME.floor) ? ZOME.floor : null;
-                    this.external_faces = ZOME.external_faces_3D;
+                    this.outer_faces = ZOME.outer_faces_3D;
                 },
             };
         });
@@ -1373,7 +1373,7 @@
                 draw_spiral_faces() {
                     const mandala_3D = ZOME.mandala_3D;
 
-                    // For each color, Add a page with external_faces_3D faces
+                    // For each color, Add a page with outer_faces_3D faces
                     for (let i = 0; i < ZOME.num; i++) {
                         const colored_spiral_faces = [];
                         _.forEach(mandala_3D, (face) => {
@@ -1679,7 +1679,7 @@
                                     colors[i] = ZOME.rotated_colors[item.color.hex];
                                 });
 
-                                // Build geometry of first external_faces_3D
+                                // Build geometry of first outer_faces_3D
                                 const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
                                 spiral_geometry.computeVertexNormals()
                                 const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
@@ -1710,8 +1710,8 @@
                             }
                         }
 
-                        // Draw Zome Floor only if draw external_faces_3D
-                        if (this.type_of_3D_objects == "external_faces_3D") {
+                        // Draw Zome Floor only if draw outer_faces_3D
+                        if (this.type_of_3D_objects == "outer_faces_3D") {
                             // Build 3D Floor Faces
                             const floor = ZOME.floor;
                             if (floor !== null) {
@@ -1809,11 +1809,11 @@
                             break;
                         case "e":
                         case "E":
-                            this.type_of_3D_objects = "external_faces_3D";
+                            this.type_of_3D_objects = "outer_faces_3D";
                             break;
                         case "i":
                         case "I":
-                            this.type_of_3D_objects = "internal_faces_3D";
+                            this.type_of_3D_objects = "inner_faces_3D";
                             break;
                         case "h":
                         case "H":
@@ -1821,11 +1821,11 @@
                             break;
                         case "z":
                         case "Z":
-                            this.type_of_3D_objects = "mandala_3D_of_external_faces";
+                            this.type_of_3D_objects = "mandala_3D_of_outer_faces";
                             break;
                         case "u":
                         case "U":
-                            this.type_of_3D_objects = "mandala_3D_of_internal_faces";
+                            this.type_of_3D_objects = "mandala_3D_of_inner_faces";
                             break;
                         case "t":
                         case "T":
@@ -2222,8 +2222,8 @@
                 make_zome() {
                     this.is_computing = true;
 
-                    // Init arrays
-                    let zome_vertices = [];      // 3D point vector
+                    // Init arrays of 3D points
+                    let zome_vertices = [];
                     let zome_faces_3D = [];
 
                     // Config Parameters
@@ -2256,7 +2256,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
-                        a, dist_to_ground, y, face;
+                        theta, dist_to_ground, y, face;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -2265,15 +2265,15 @@
                     const INCR_RAD = TAU / N;
                     const rotation_angles = new Array(N);
                     for (let i = 0; i < N; i++) {
-                        a = i * INCR_RAD;
-                        rotation_angles[i] = a;
+                        theta = i * INCR_RAD;
+                        rotation_angles[i] = theta;
 
-                        B = [
-                            first_crown_radius * Math.sin(a),
+                        A = [
+                            first_crown_radius * Math.sin(theta),
                             Math.max(0, ZOME_HEIGHT - first_crown_height),
-                            first_crown_radius * Math.cos(a)
+                            first_crown_radius * Math.cos(theta)
                         ];
-                        this.add_vertex(zome_vertices, B);
+                        this.add_vertex(zome_vertices, A);
                     }
 
                     // Loop over crowns (M = N - 1), while zome does not hit ground
@@ -2397,20 +2397,27 @@
                     }
 
                     // Divide zome faces into two parts to add strengthening of timbers
-                    const framework_faces = [];
+                    let framework_faces = [], framework_crowns = [];
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
-                    _.forEach(zome_faces_3D, (face, j) => {
-                        if (!divide_faces_into_two_parts || j == 0 || j == zome_faces_3D.length - 1) {
+                    _.forEach(zome_faces_3D, (face, iCrown) => {
+                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown == zome_faces_3D.length - 1) {
                             framework_faces.push(face);
+                            framework_crowns.push(iCrown);
                         } else {
-                            framework_faces.push(...face.divide(divide_horizontally))
+                            _.forEach(face.divide(divide_horizontally), part_of_face => {
+                                framework_faces.push(part_of_face);
+                                framework_crowns.push(iCrown);
+                            });
                         }
                     });
 
-                    // Build External/Internal faces
-                    const external_faces_3D = new Array(zome_faces_3D.length),
-                        internal_faces_3D = new Array(zome_faces_3D.length);
+                    // Build Outer/Inner faces
+                    const outer_faces_3D = new Array(zome_faces_3D.length),
+                        inner_faces_3D = new Array(zome_faces_3D.length);
+
+                    let outer_face_points = new Array(zome_faces_3D[0].num_points),
+                        inner_face_points = new Array(zome_faces_3D[0].num_points);
 
                     const skeleton_3D = [], vanishing_lines = [];
 
@@ -2418,12 +2425,13 @@
                     const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
 
                     // Build Timbers using the assembly method
-                    let theta, hypotenuse, adjacent_side, pivot_pt,
+                    let hypotenuse, adjacent_side, pivot_pt,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     // Loop over the faces of the framework to build timbers
                     _.forEach(framework_faces, (face, iFace) => {
                         const num_points = face.num_points;
+                        const iCrown = framework_crowns[iFace];
 
                         const ccw_vecs = new Array(num_points),
                             cw_vecs = new Array(num_points),
@@ -2541,10 +2549,7 @@
                             );
                         });
 
-                        // Build the prism and external/internal face
-                        let external_face_points = new Array(num_points),
-                            internal_face_points = new Array(num_points);
-
+                        // Build the prism and outer/inner faces
                         _.forEach(face.points, (cur_pt, i) => {
                             const prev_index = prev_indexes[i];    // previous index
                             const next_index = next_indexes[i];        // next index
@@ -2607,16 +2612,34 @@
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", face.color);
                             skeleton_3D.push(timber_prism);
 
-                            // Add external/internal face points
-                            external_face_points[i] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
-                            internal_face_points[i] = plan_intersection(E, sec_2_cur_vec, wall_planes[prev_index]);
+                            // Until the exterior/interior face has been built
+                            if (outer_faces_3D[iCrown] === undefined) {
+                                const crown_face = zome_faces_3D[iCrown]
+                                // If at least one is undefined
+                                if (_.some(outer_face_points, p => p === undefined)){
+                                    const crown_face_point_index = _.findIndex(crown_face.points, p => _.isEqual(p, cur_pt));
+                                    if (crown_face_point_index > -1) {
+                                        outer_face_points[crown_face_point_index] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
+                                        inner_face_points[crown_face_point_index] = plan_intersection(E, sec_2_cur_vec, wall_planes[prev_index]);
+                                    }
+                                }
 
-                            // Add vanishing line
+                                // If every points are defined
+                                if (_.every(outer_face_points, p => p !== undefined)) {
+                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points);
+                                    inner_faces_3D[iCrown] = new Polygon3D(inner_face_points);
+
+                                    // Create next array as long as possible
+                                    const next_iCrown = iCrown + 1;
+                                    if (next_iCrown < zome_faces_3D.length) {
+                                        outer_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
+                                        inner_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
+                                    }
+                                }
+                            }
+
                             vanishing_lines.push([vanishing_pt, cur_pt]);
                         });
-
-                        external_faces_3D[iFace] = new Polygon3D(external_face_points);
-                        internal_faces_3D[iFace] = new Polygon3D(internal_face_points);
                     });
 
                     // 🎨 Build rotated colors
@@ -2625,8 +2648,8 @@
 
                     const obj_3D_to_label = [
                         skeleton_3D,
-                        external_faces_3D,
-                        internal_faces_3D,
+                        outer_faces_3D,
+                        inner_faces_3D,
                         zome_faces_3D,
                     ];
 
@@ -2674,12 +2697,12 @@
                         } else {
                             // Paint colored spirals
                             _.forEach(obj_3D_to_label[i], item => {
-                                const color = Color.from_angles(a, item.slope);
+                                const color = Color.from_angles(0, item.slope);
                                 item.color = color;
                                 if (!rotated_colors.hasOwnProperty(color.hex)) {
-                                    rotated_colors[color.hex] = _.map(
-                                        rotation_angles, (a) => Color.from_angles(a, item.slope)
-                                    );
+                                    rotated_colors[color.hex] = _.map(rotation_angles, a => {
+                                        return Color.from_angles(a, item.slope)
+                                    });
                                 }
                             });
                         }
@@ -2688,16 +2711,16 @@
                     // Unpack variables
                     const [
                         skeleton_3D_hash_collections,
-                        external_faces_3D_hash_collections,
-                        internal_faces_3D_hash_collections,
+                        outer_faces_3D_hash_collections,
+                        inner_faces_3D_hash_collections,
                     ] = arr_of_obj_hash_collections;
 
                     // Build Mandalas
                     const [
                         mandala_3D,
-                        mandala_3D_of_external_faces,
-                        mandala_3D_of_internal_faces
-                    ] = _.map([zome_faces_3D, external_faces_3D, internal_faces_3D], obj_3D => {
+                        mandala_3D_of_outer_faces,
+                        mandala_3D_of_inner_faces
+                    ] = _.map([zome_faces_3D, outer_faces_3D, inner_faces_3D], obj_3D => {
                         const mandala_3D = new Array(obj_3D.length);
                         let O = [0, 0, 0];
                         let rotated_A;
@@ -2707,14 +2730,14 @@
                             // Move to Origin and rotate to match with previous piece
                             let rotated_points = flattened_face.points.map(p => add(p, O));
                             if (i > 0) {
-                                a = angle(A, O, rotated_points[1]);
-                                rotated_A = rotate_point_around_z_axis(rotated_points[1], a, O);
+                                theta = angle(A, O, rotated_points[1]);
+                                rotated_A = rotate_point_around_z_axis(rotated_points[1], theta, O);
 
                                 // Rotate the other way if rotatedA is not too close to A
                                 if (to_decimal(dist(rotated_A, A)) != 0) {
-                                    a = -a;
+                                    theta = -theta;
                                 }
-                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, a, O));
+                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, theta, O));
                             }
                             O = rotated_points[rotated_points.length - 1];
                             A = rotated_points[rotated_points.length - 2];
@@ -2758,16 +2781,16 @@
                         skeleton_3D: skeleton_3D,
                         skeleton_3D_hash_collections: skeleton_3D_hash_collections,
 
-                        external_faces_3D: external_faces_3D,
-                        external_faces_3D_hash_collections: external_faces_3D_hash_collections,
+                        outer_faces_3D: outer_faces_3D,
+                        outer_faces_3D_hash_collections: outer_faces_3D_hash_collections,
 
-                        internal_faces_3D: internal_faces_3D,
-                        internal_faces_3D_hash_collections: internal_faces_3D_hash_collections,
+                        inner_faces_3D: inner_faces_3D,
+                        inner_faces_3D_hash_collections: inner_faces_3D_hash_collections,
 
                         timber_profiles_3D: timber_profiles_3D,
                         mandala_3D: mandala_3D,
-                        mandala_3D_of_external_faces: mandala_3D_of_external_faces,
-                        mandala_3D_of_internal_faces: mandala_3D_of_internal_faces,
+                        mandala_3D_of_outer_faces: mandala_3D_of_outer_faces,
+                        mandala_3D_of_inner_faces: mandala_3D_of_inner_faces,
 
                         floor: floor,
                         vanishing_lines: vanishing_lines,
