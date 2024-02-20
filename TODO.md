@@ -9,9 +9,7 @@
 
 * [ ] Les external/internal faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
 
-
 * [ ] Reconstruire le sol à partir des external faces
-
 
 * [ ] Mettre à jour les traductions avec les termes manquants
 

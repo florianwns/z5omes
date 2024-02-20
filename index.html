@@ -2431,10 +2431,8 @@
                     let theta, hypotenuse, adjacent_side, pivot_pt,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
-                    // Loop over the faces of the framework from bottom to top
-                    // to create labels in building logic
-                    for (let iFace = framework_faces.length - 1; iFace >= 0; iFace--) {
-                        const face = framework_faces[iFace];
+                    // Loop over the faces of the framework to build timbers
+                    _.forEach(framework_faces, (face, iFace) => {
                         const num_points = face.num_points;
 
                         const ccw_vecs = new Array(num_points),
@@ -2630,7 +2628,7 @@
 
                         external_faces_3D[iFace] = new Polygon3D(external_face_points);
                         internal_faces_3D[iFace] = new Polygon3D(internal_face_points);
-                    }
+                    });
 
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
