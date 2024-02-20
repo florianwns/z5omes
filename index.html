@@ -939,7 +939,7 @@
 
                 process() {
                     // Group prims by hash
-                    const skeleton_3D_grouped_by_hash = ZOME.skeleton_3D_grouped_by_hash;
+                    const skeleton_3D_hash_collections = ZOME.skeleton_3D_hash_collections;
 
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
@@ -956,9 +956,9 @@
                         max_width = Number.MIN_VALUE;
 
                     let all_labeled_faces = {};
-                    _.forIn(skeleton_3D_grouped_by_hash, group => {
+                    _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the first element of group
-                        const prism = group[0];
+                        const prism = collection.item;
                         all_labeled_faces[prism.label] = new Array(sides.length);
 
                         // Get min max from all face sides
@@ -977,9 +977,9 @@
                         });
                     });
 
-                    _.forIn(skeleton_3D_grouped_by_hash, group => {
+                    _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the first element of group
-                        const prism = group[0];
+                        const prism = collection.item;
                         const side_faces = all_labeled_faces[prism.label];
 
                         // Draw all face sides
@@ -2636,31 +2636,38 @@
                     let rotated_colors = {};
                     const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
 
-                    const obj_to_label = [
+                    const obj_3D_to_label = [
                         skeleton_3D,
                         external_faces_3D,
                         internal_faces_3D,
-                        zome_faces_3D
+                        zome_faces_3D,
                     ];
-                    const arr_of_obj_grouped_by_hash = _.map(obj_to_label, obj => _.groupBy(obj, (face) => face.hash));
+
+                    // Group items by hash and sort them by Y position
+                    const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
+                        // Compute hash to compare objects
+                        const grouped_by_hash = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                            return new ItemHashCollection(group[0], hash, group.length);
+                        });
+
+                        // Sort collection by an average of vertical position
+                        return _.sortBy(grouped_by_hash, group => average(group.item.points)[1]);
+                    });
 
                     // Label all items
-                    const item_label_prefixes = ["T", "EF", , "IF", , "ZF"];
-                    _.forIn(arr_of_obj_grouped_by_hash, (obj_grouped_by_hash, i) => {
-                        // Get only hashes in array
-                        const hashes = Object.keys(obj_grouped_by_hash);
-
+                    const item_label_prefixes = ["TP", "EF", "IF", "ZF"];
+                    _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
                         // Apply labels to items
-                        _.forEach(obj_to_label[i], item => {
-                            const item_index = hashes.findIndex((hash) => hash == item.hash)
+                        _.forEach(obj_3D_to_label[i], item => {
+                            const item_index = 1 + _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
                             item.label = `${item_label_prefixes[i]}${item_index}`
                         });
                     });
 
                     // Add colors to items
-                    _.forIn(arr_of_obj_grouped_by_hash, (obj_grouped_by_hash, i) => {
+                    _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
                         // Get hash group
-                        const hashes = Object.keys(obj_grouped_by_hash);
+                        const hashes = obj_hash_collections.map(collection => collection.hash);
                         const num_hashes = hashes.length;
 
                         if (PAINT_SIMILAR_PIECES) {
@@ -2674,12 +2681,12 @@
                                 }
                             });
 
-                            _.forEach(obj_to_label[i], item => {
+                            _.forEach(obj_3D_to_label[i], item => {
                                 item.color = hash_to_color[item.hash]
                             });
                         } else {
                             // Paint colored spirals
-                            _.forEach(obj_to_label[i], item => {
+                            _.forEach(obj_3D_to_label[i], item => {
                                 const color = Color.from_angles(a, item.slope);
                                 item.color = color;
                                 if (!rotated_colors.hasOwnProperty(color.hex)) {
@@ -2693,11 +2700,10 @@
 
                     // Unpack variables
                     const [
-                        skeleton_3D_grouped_by_hash,
-                        external_faces_3D_grouped_by_hash,
-                        internal_faces_3D_grouped_by_hash,
-                        zome_faces_3D_grouped_by_hash
-                    ] = arr_of_obj_grouped_by_hash;
+                        skeleton_3D_hash_collections,
+                        external_faces_3D_hash_collections,
+                        internal_faces_3D_hash_collections,
+                    ] = arr_of_obj_hash_collections;
 
                     // Build zomandala_3D
                     const zomandala_3D = new Array(zome_faces_3D.length);
@@ -2732,9 +2738,9 @@
                     // Build timber_profiles_3D
                     const timber_profiles_3D = [];
                     let z_origin = 0;
-                    _.forIn(skeleton_3D_grouped_by_hash, group => {
-                        // Take the first element of group
-                        const prism = group[0].flatten();
+                    _.forIn(skeleton_3D_hash_collections, collection => {
+                        // Retrieve the prism from collection and flatten it
+                        const prism = collection.item.flatten();
                         const translated_points = new Array(prism.num_points);
                         _.forEach(prism.fit_points(), (point, i) => {
                             translated_points[i] = add(point, [0, 0, z_origin]);
@@ -2755,13 +2761,13 @@
                         vertices: zome_vertices,
 
                         skeleton_3D: skeleton_3D,
-                        skeleton_3D_grouped_by_hash: skeleton_3D_grouped_by_hash,
+                        skeleton_3D_hash_collections: skeleton_3D_hash_collections,
 
                         external_faces_3D: external_faces_3D,
-                        external_faces_3D_grouped_by_hash: external_faces_3D_grouped_by_hash,
+                        external_faces_3D_hash_collections: external_faces_3D_hash_collections,
 
                         internal_faces_3D: internal_faces_3D,
-                        internal_faces_3D_grouped_by_hash: internal_faces_3D_grouped_by_hash,
+                        internal_faces_3D_hash_collections: internal_faces_3D_hash_collections,
 
                         zomandala_3D: zomandala_3D,
                         timber_profiles_3D: timber_profiles_3D,

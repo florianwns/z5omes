@@ -881,6 +881,15 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 }
 
+
+class ItemHashCollection {
+    constructor(item, hash, count = 1) {
+        this.item = item;
+        this.hash = hash;
+        this.count = count;
+    }
+}
+
 class Zome {
     constructor(
         {
@@ -890,13 +899,13 @@ class Zome {
             vertices = null,
 
             skeleton_3D = null,
-            skeleton_3D_grouped_by_hash = null,
+            skeleton_3D_hash_collections = null,
 
             external_faces_3D = null,
-            external_faces_3D_grouped_by_hash = null,
+            external_faces_3D_hash_collections = null,
 
             internal_faces_3D = null,
-            internal_faces_3D_grouped_by_hash = null,
+            internal_faces_3D_hash_collections = null,
 
             timber_profiles_3D = null,
             zomandala_3D = null,
@@ -911,13 +920,13 @@ class Zome {
         this.vertices = vertices || [];
 
         this.skeleton_3D = skeleton_3D || [];
-        this.skeleton_3D_grouped_by_hash = skeleton_3D_grouped_by_hash || [];
+        this.skeleton_3D_hash_collections = skeleton_3D_hash_collections || [];
 
         this.external_faces_3D = external_faces_3D || [];
-        this.external_faces_3D_grouped_by_hash = external_faces_3D_grouped_by_hash || [];
+        this.external_faces_3D_hash_collections = external_faces_3D_hash_collections || [];
 
         this.internal_faces_3D = internal_faces_3D || [];
-        this.internal_faces_3D_grouped_by_hash = internal_faces_3D_grouped_by_hash || [];
+        this.internal_faces_3D_hash_collections = internal_faces_3D_hash_collections || [];
 
         this.zomandala_3D = zomandala_3D || [];
         this.timber_profiles_3D = timber_profiles_3D || [];
