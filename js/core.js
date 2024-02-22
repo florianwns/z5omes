@@ -297,28 +297,28 @@ function rotation_matrix_from_points(a, b, c) {
     return new THREE.Matrix4().makeBasis(axis1, axis2, axis3);
 }
 
-function flatten_3D_points(points, origin, start_pt1, start_pt2, horizontally = true) {
-    // Flattens the 3D points with the origin at zero to 2D points
-    // and the start_pt1 is aligned on x axis if horizontally is true, y axis otherwise
+function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
+    // Flattens the 3D points with the pt2 at zero to 2D points
+    // and the pt1 is aligned on x axis if horizontally is true, y axis otherwise
     // Use quaternion method to flat points
 
-    // Compute the angle/distances with the origin point
-    const theta = angle(start_pt1, origin, start_pt2);
-    const dist_2_pt1 = dist(origin, start_pt1);
-    const dist_2_pt2 = dist(origin, start_pt2);
+    // Compute the angle/distances with the pt2 point
+    const theta = angle(pt1, pt2, pt3);
+    const dist_2_pt1 = dist(pt2, pt1);
+    const dist_2_pt3 = dist(pt2, pt3);
 
     // Define end points depends on horizontally variable
     const zero = [0, 0, 0];
     const end_pt1 = (horizontally)
         ? [dist_2_pt1, 0, 0]
         : [0, dist_2_pt1, 0];
-    const end_pt2 = (horizontally)
-        ? rotate_point_around_z_axis([dist_2_pt2, 0, 0], -theta)
-        : rotate_point_around_z_axis([0, dist_2_pt2, 0], theta);
+    const end_pt3 = (horizontally)
+        ? rotate_point_around_z_axis([dist_2_pt3, 0, 0], -theta)
+        : rotate_point_around_z_axis([0, dist_2_pt3, 0], theta);
 
     // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
-    const matrix1 = rotation_matrix_from_points(start_pt1, origin, start_pt2).invert();
-    const matrix2 = rotation_matrix_from_points(end_pt1, zero, end_pt2);
+    const matrix1 = rotation_matrix_from_points(pt1, pt2, pt3).invert();
+    const matrix2 = rotation_matrix_from_points(end_pt1, zero, end_pt3);
     const Q = new THREE.Quaternion();
     Q.setFromRotationMatrix(matrix2.multiply(matrix1));
 
@@ -753,7 +753,7 @@ class Polygon3D extends Base3DGeometry {
         });
 
         // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-        this.flattened_points = flatten_3D_points(this.points, this.origin, this.centroid, this.points[1], false);
+        this.flattened_points = flatten_3D_points(this.points, this.centroid, this.origin, this.points[1], false);
 
         // Compute hash to compare polygons
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
@@ -819,7 +819,7 @@ class TrapezoidalPrism extends Base3DGeometry {
 
         // Flattens point with the right side at zero
         const [A, B, C, D, E, F, G, H] = this.points;
-        this.flattened_points = flatten_3D_points(this.points, D, B, H, true);
+        this.flattened_points = flatten_3D_points(this.points, B, D, H, true);
 
         // Arrays of THREE.Vector3 for 3D visualization
         this.face_points = [];
@@ -892,7 +892,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         let flattened_points, opposite_side;
         switch (side) {
             case "top":
-                flattened_points = swap_axes(this.flattened_points, "XZY");
+                flattened_points = swap_axes(this.flattened_points, "XZY")
                 opposite_side = "bottom";
                 break;
             case "right":
