@@ -10,11 +10,23 @@
 * [x] Les outer/inner faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
 * [x] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
 
+* [ ] Ajouter les dimensions aux flattened points
+* [ ] Reprendre les codes couleurs des axes XYZ de three JS pour bien comprendre la dessin de coupes
+* [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D 
+
+  
 * [ ] Reconstruire le sol à partir des outer faces
 
-* [ ] Mettre à jour les traductions avec les termes manquants
+* [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
 
-* [ ] Ajouter les dimensions aux flattened points
+* [ ] Mettre à jour les autres traductions avec les termes manquants
+
+
+  * Commencer à dessiner la premier polygone (vue de dessus)
+  * La hauteur du dessin est fixe
+  * Sa largeur est donc relative.... on peut la tronquer avec des pointillés
+  * l'angle de coupe arrière est dessinée en pointillés
+  * Ajouter les indexs des montants/faces sur la 3D
   
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
   
@@ -34,12 +46,6 @@
 
 * [ ] Grouper les montants lors de l'export
 
-* [ ] Intersection avec le modèle sketchup à regarder.
-
-* [ ] Différencier les couvertures intérieur et extérieur. 
-
-* [ ] Habillage intérieur : Plafond == couverture intérieur
-
 * [ ] S'inspirer des nommages de l'application acidome 
   
   * base => platform / floor
@@ -55,21 +61,12 @@
 
 * [ ] L'aide switche avec le click bouton si plusieurs params
 
-* [ ] Et enfin dessiner les côtes (mode acidome) de chaque montants
-  
-  * Commencer à dessiner la premier polygone (vue de dessus)
-  * La hauteur du dessin est fixe
-  * Sa largeur est donc relative.... on peut la tronquer avec des pointillés
-  * l'angle de coupe arrière est dessinée en pointillés
-  * Ajouter les indexs des montants/faces sur la 3D
-
 * [ ] Ajouter une page wikipedia avec des vidéos pour l'apprentissage de la construction zome
 
 * [ ] Et une page community pour les gens qui n'auraient pas facebook
 
 * [ ] Rajouter une option pour surelever le zome. avec des murs
 
-* [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
 
 * [ ] Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 
