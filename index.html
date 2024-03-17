@@ -955,7 +955,7 @@
                     this.timber_profile_container.innerHTML = "";
 
                     // Define sides
-                    const sides = ["top", "right"];
+                    const side_names = ["top", "right"];
 
                     // Reset boundaries
                     let x_max = Number.MIN_VALUE,
@@ -965,73 +965,158 @@
                         max_height = Number.MIN_VALUE,
                         max_width = Number.MIN_VALUE;
 
-                    // Flatten face and define global boundaries
-                    let all_labeled_faces = {};
+                    // Flatten side and define global boundaries
+                    let all_labeled_sides = {};
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the first element of group
                         const prism = collection.item;
-                        all_labeled_faces[prism.label] = new Array(sides.length);
+                        all_labeled_sides[prism.label] = new Array(side_names.length);
 
                         // Get min max from all face sides
-                        _.forEach(sides, (side, i) => {
-                            const face = prism.flatten_2D(side);
+                        _.forEach(side_names, (side_name, i) => {
+                            const side = prism.flatten_2D(side_name);
 
-                            if (face.x_min < x_min) x_min = face.x_min;
-                            if (face.x_max > x_max) x_max = face.x_max;
-                            if (face.y_min < y_min) y_min = face.y_min;
-                            if (face.y_max > y_max) y_max = face.y_max;
+                            if (side.x_min < x_min) x_min = side.x_min;
+                            if (side.x_max > x_max) x_max = side.x_max;
+                            if (side.y_min < y_min) y_min = side.y_min;
+                            if (side.y_max > y_max) y_max = side.y_max;
 
-                            if (face.width > max_width) max_width = face.width;
-                            if (face.height > max_height) max_height = face.height;
+                            if (side.width > max_width) max_width = side.width;
+                            if (side.height > max_height) max_height = side.height;
 
-                            all_labeled_faces[prism.label][i] = face;
+                            all_labeled_sides[prism.label][i] = side;
                         });
                     });
 
-                    const y_padding = 20;
+                    const title_font_size = 7;
+                    const title_height = 15;
+                    const font_size = 6;
+                    const text_padding = 2;
+
+                    const x_padding = 28;
+                    const y_padding = 10;
+
+                    const svg_width = max_width / 4 + 2 * x_padding;
+
+                    const stroke_dash_arr = '2, 2';
+                    const stroke_width = '0.5';
+
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the first element of group
                         const prism = collection.item;
-                        const side_faces = all_labeled_faces[prism.label];
-                        const total_face_height = _.reduce(side_faces, (res, face) => res + face.height, y_padding);
+                        const sides = all_labeled_sides[prism.label];
+                        const sum_side_height = _.reduce(sides, (res, side) => res + side.height, 0);
+                        const svg_height = sum_side_height
+                            + 5 * y_padding
+                            + 2 * title_height;
+
+                        let side_y_start, side_y_end,
+                            vertical_line_start, vertical_line_end;
+                        const vertical_line_xs = new Set();
 
                         // Draw one svg for all sides
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
-                        svg.setAttribute('viewBox', `0 0 ${max_width} ${total_face_height}`);
+                        svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
                         svg.setAttribute('class', "m-2");
 
-                        // Draw face sides
-                        _.forEach(side_faces, (face, i) => {
+                        // Draw sides
+                        _.forEach(sides, (side, i) => {
                             // compute y start for the right face
-                            const y_start = (i === 0) ? 0 : (side_faces[0].height + y_padding);
+                            const title_y_start = (i === 0)
+                                ? 0
+                                : sides[0].height + title_height + 3 * y_padding;
+
+                            const title_y_middle = title_y_start + title_height / 2
+                            const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                            label_title.setAttribute('x', `${svg_width / 2}`);
+                            label_title.setAttribute('y', `${title_y_middle}`);
+                            label_title.setAttribute('text-anchor', 'middle');
+                            label_title.setAttribute('alignment-baseline', 'center');
+                            label_title.setAttribute('font-size', `${title_font_size}`);
+                            label_title.setAttribute('fill', '#fefee2');
+                            label_title.setAttribute('stroke', 'black');
+                            label_title.setAttribute('paint-order', 'stroke');
+                            label_title.innerHTML = `${this.i18n('Profile')} '${prism.label}' - ${side_names[i]} ${this.i18n('view')}`;
+                            svg.appendChild(label_title);
+
+                            // compute y start for the right side
+                            side_y_start = title_y_start + title_height;
+                            side_y_end = side_y_start + side.height;
 
                             // fit points
-                            let face_points = face.points.map(p => [
-                                p[0] - face.x_min,
-                                p[1] - face.y_min + y_start,
+                            const fitted_points = side.fit_points_2D();
+                            let drawing_points = fitted_points.map((p, j) => [
+                                (p[0] < side.width / 2)
+                                    ? p[0] + x_padding
+                                    : svg_width - x_padding - (side.width - p[0]),
+                                p[1] + side_y_start,
                             ]);
 
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_front.setAttribute('points', `${face_points.slice(0, 4)}`);
+                            polygon_front.setAttribute('points', `${drawing_points.slice(0, 4)}`);
                             polygon_front.setAttribute('stroke', 'black');
-                            polygon_front.setAttribute('stroke-width', '1px');
+                            polygon_front.setAttribute('stroke-width', `${stroke_width}px`);
                             polygon_front.setAttribute('fill-opacity', "0.9");
                             polygon_front.setAttribute('fill', prism.color.hex);
+                            svg.appendChild(polygon_front);
 
                             if (i < 2) {
                                 const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                                polygon_behind.setAttribute('points', `${face_points.slice(4, 8)}`);
+                                polygon_behind.setAttribute('points', `${drawing_points.slice(4, 8)}`);
                                 polygon_behind.setAttribute('stroke', 'black');
-                                polygon_behind.setAttribute('stroke-dasharray', '10, 10');
-                                polygon_behind.setAttribute('stroke-width', '1px');
+                                polygon_behind.setAttribute('stroke-dasharray', stroke_dash_arr);
+                                polygon_behind.setAttribute('stroke-width', `${stroke_width}px`);
                                 polygon_behind.setAttribute('fill', prism.color.hex);
                                 svg.appendChild(polygon_behind);
                             }
-
                             svg.appendChild(polygon_front);
-                            this.timber_profile_container.appendChild(svg);
+
+                            // compute vertical lines start/end
+                            if (i == 0) {
+                                vertical_line_start = side_y_start;
+                            } else {
+                                vertical_line_end = side_y_end;
+                            }
+
+
+                            _.forEach(drawing_points, (p, j) => {
+                                vertical_line_xs.add(p[0]);
+
+                                const real_pt = fitted_points[j];
+                                const index_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                index_text.setAttribute('x', p[0] + text_padding);
+                                index_text.setAttribute('text-anchor', 'start');
+                                (real_pt[1] < side.height / 2)
+                                    ? index_text.setAttribute('y', `${p[1] - text_padding}`)
+                                    : index_text.setAttribute('y', `${p[1] + font_size + text_padding}`);
+
+                                index_text.setAttribute('font-size', `${font_size}`);
+                                index_text.setAttribute('fill', '#fefee2');
+                                index_text.setAttribute('stroke', 'black');
+                                index_text.setAttribute('paint-order', 'stroke');
+
+                                // index_text.innerHTML = j;
+                                index_text.innerHTML = `${to_decimal(real_pt[0], 1)}`;
+
+                                svg.appendChild(index_text);
+                            });
                         });
+
+                        // Draw vertical lines to get a visual alignment
+                        for (const x of vertical_line_xs) {
+                            const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                            vertical_line.setAttribute('x1', x);
+                            vertical_line.setAttribute('y1', `${vertical_line_start}`);
+                            vertical_line.setAttribute('x2', x);
+                            vertical_line.setAttribute('y2', `${vertical_line_end}`);
+                            vertical_line.setAttribute('stroke', 'black');
+                            vertical_line.setAttribute('stroke-dasharray', stroke_dash_arr);
+                            vertical_line.setAttribute('stroke-width', `${stroke_width}px`);
+                            svg.appendChild(vertical_line);
+                        }
+
+                        this.timber_profile_container.appendChild(svg);
                     });
                 },
             };
