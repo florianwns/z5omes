@@ -797,7 +797,6 @@ class Polygon3D extends Base3DGeometry {
     }
 }
 
-
 class TrapezoidalPrism extends Base3DGeometry {
     constructor(points, label, color) {
         const num_points = points.length;
@@ -817,9 +816,9 @@ class TrapezoidalPrism extends Base3DGeometry {
         this.front = new Polygon3D(this.filter_points_by_side("front", this.points));    // Front side
         this.back = new Polygon3D(this.filter_points_by_side("back", this.points));      // Back side
 
-        // Flattens point with the right side at zero
+        // Flattens point with the front side at zero
         const [A, B, C, D, E, F, G, H] = this.points;
-        this.flattened_points = flatten_3D_points(this.points, B, D, H, true);
+        this.flattened_points = flatten_3D_points(this.points, D, B, A, true);
 
         // Arrays of THREE.Vector3 for 3D visualization
         this.face_points = [];
@@ -867,18 +866,18 @@ class TrapezoidalPrism extends Base3DGeometry {
         // Filter the 6 sides points of TrapezoidalPrism for Polygon construction
         const [A, B, C, D, E, F, G, H] = points || this.points;
         switch (side) {
-            case "top":
-                return [A, C, D, B];     // Top side
-            case "bottom":
-                return [E, G, H, F];     // Bottom side
-            case "right":
-                return [D, H, F, B];     // Right side
-            case "left":
-                return [C, G, E, A];     // Left side
             case "front":
-                return [C, G, H, D];     // Front side
+                return [B, A, C, D];     // Front side
             case "back":
-                return [A, E, F, B];     // Back side
+                return [F, E, G, H];     // Back side
+            case "top":
+                return [F, B, D, H];     // Top side
+            case "bottom":
+                return [E, A, C, G];     // Bottom side
+            case "right":
+                return [D, C, G, H];     // Right side
+            case "left":
+                return [B, A, E, F];     // Left side
         }
     }
 
@@ -891,17 +890,17 @@ class TrapezoidalPrism extends Base3DGeometry {
         // Because svg display is different than three.js display, we reverse some axes.
         let flattened_points, opposite_side;
         switch (side) {
+            case "front":
+                flattened_points = this.flattened_points.map(p => [p[0], -p[1], 0]);
+                opposite_side = "back";
+                break;
             case "top":
-                flattened_points = swap_axes(this.flattened_points, "XZY")
+                flattened_points = swap_axes(this.flattened_points, "XZY").map(p => [p[0], -p[1], 0])
                 opposite_side = "bottom";
                 break;
             case "right":
-                flattened_points = this.flattened_points.map(p => [p[0], -p[1], 0]);
-                opposite_side = "left";
-                break;
-            case "front":
                 flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [-p[0], -p[1], 0])
-                opposite_side = "back";
+                opposite_side = "left";
                 break;
         }
 

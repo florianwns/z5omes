@@ -9,11 +9,13 @@
 * [x] Ajoût des mandalas externes et internes pour faciliter la découpe sur logiciel 3D.
 * [x] Les outer/inner faces ne doivent plus se diviser en triangle si renfort horizontal/vertical
 * [x] comprendre pourquoi le polygone tronqué projeté ne sont pas coplanaire
-
-* [ ] Ajouter les dimensions aux flattened points
+* [x] Ajouter les dimensions aux flattened points
+* [x] Revoir l'orientation des timber profiles pour que les vues correspondent
+* [x] Faire en sorte que les pointillés soient derrière les valeurs
+* [x] Eviter le chevauchement des écritures
+  
 * [ ] Reprendre les codes couleurs des axes XYZ de three JS pour bien comprendre la dessin de coupes
-* [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D 
-
+* [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
   
 * [ ] Reconstruire le sol à partir des outer faces
 

@@ -919,8 +919,8 @@
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
-    // const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
-    const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
+    const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
+    // const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
 
@@ -955,7 +955,7 @@
                     this.timber_profile_container.innerHTML = "";
 
                     // Define sides
-                    const side_names = ["top", "right"];
+                    const side_names = ["front", "top"];
 
                     // Reset boundaries
                     let x_max = Number.MIN_VALUE,
@@ -988,16 +988,14 @@
                         });
                     });
 
+                    // Drawing parameters
                     const title_font_size = 7;
                     const title_height = 15;
-                    const font_size = 6;
+                    const font_size = 5;
                     const text_padding = 2;
-
                     const x_padding = 28;
                     const y_padding = 10;
-
                     const svg_width = max_width / 4 + 2 * x_padding;
-
                     const stroke_dash_arr = '2, 2';
                     const stroke_width = '0.5';
 
@@ -1012,7 +1010,6 @@
 
                         let side_y_start, side_y_end,
                             vertical_line_start, vertical_line_end;
-                        const vertical_line_xs = new Set();
 
                         // Draw one svg for all sides
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1021,6 +1018,7 @@
                         svg.setAttribute('class', "m-2");
 
                         // Draw sides
+                        let measurement_texts = [];
                         _.forEach(sides, (side, i) => {
                             // compute y start for the right face
                             const title_y_start = (i === 0)
@@ -1057,7 +1055,7 @@
                             polygon_front.setAttribute('points', `${drawing_points.slice(0, 4)}`);
                             polygon_front.setAttribute('stroke', 'black');
                             polygon_front.setAttribute('stroke-width', `${stroke_width}px`);
-                            polygon_front.setAttribute('fill-opacity', "0.9");
+                            polygon_front.setAttribute('fill-opacity', "0.7");
                             polygon_front.setAttribute('fill', prism.color.hex);
                             svg.appendChild(polygon_front);
 
@@ -1073,48 +1071,52 @@
                             svg.appendChild(polygon_front);
 
                             // compute vertical lines start/end
-                            if (i == 0) {
+                            if (i === 0) {
                                 vertical_line_start = side_y_start;
                             } else {
                                 vertical_line_end = side_y_end;
                             }
 
-
                             _.forEach(drawing_points, (p, j) => {
-                                vertical_line_xs.add(p[0]);
+                                // Draw vertical lines to get a visual alignment
+                                if(i === 1){
+                                    const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                    vertical_line.setAttribute('x1', p[0]);
+                                    vertical_line.setAttribute('y1', `${vertical_line_start}`);
+                                    vertical_line.setAttribute('x2', p[0]);
+                                    vertical_line.setAttribute('y2', `${vertical_line_end}`);
+                                    vertical_line.setAttribute('stroke', 'black');
+                                    vertical_line.setAttribute('stroke-opacity', '0.5');
+                                    vertical_line.setAttribute('stroke-dasharray', stroke_dash_arr);
+                                    vertical_line.setAttribute('stroke-width', `${stroke_width}px`);
+                                    svg.appendChild(vertical_line);
+                                }
 
                                 const real_pt = fitted_points[j];
-                                const index_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                index_text.setAttribute('x', p[0] + text_padding);
-                                index_text.setAttribute('text-anchor', 'start');
-                                (real_pt[1] < side.height / 2)
-                                    ? index_text.setAttribute('y', `${p[1] - text_padding}`)
-                                    : index_text.setAttribute('y', `${p[1] + font_size + text_padding}`);
+                                const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                measurement_text.setAttribute('x', p[0] + text_padding);
+                                measurement_text.setAttribute('text-anchor', 'start');
 
-                                index_text.setAttribute('font-size', `${font_size}`);
-                                index_text.setAttribute('fill', '#fefee2');
-                                index_text.setAttribute('stroke', 'black');
-                                index_text.setAttribute('paint-order', 'stroke');
+                                // Avoid overlapping text
+                                const side_text_padding = (j < 4) ? text_padding : text_padding * 4;
+                                (real_pt[1] < side.height / 2)
+                                    ? measurement_text.setAttribute('y', `${p[1] - side_text_padding}`)
+                                    : measurement_text.setAttribute('y', `${p[1] + font_size + side_text_padding}`);
+
+                                measurement_text.setAttribute('font-size', `${font_size}`);
+                                measurement_text.setAttribute('fill', '#fefee2');
+                                measurement_text.setAttribute('stroke', 'black');
+                                measurement_text.setAttribute('paint-order', 'stroke');
 
                                 // index_text.innerHTML = j;
-                                index_text.innerHTML = `${to_decimal(real_pt[0], 1)}`;
-
-                                svg.appendChild(index_text);
+                                measurement_text.innerHTML = `${to_decimal(real_pt[0], FLOAT_2_STR_PRECISION)}`;
+                                measurement_texts.push(measurement_text);
                             });
                         });
 
-                        // Draw vertical lines to get a visual alignment
-                        for (const x of vertical_line_xs) {
-                            const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                            vertical_line.setAttribute('x1', x);
-                            vertical_line.setAttribute('y1', `${vertical_line_start}`);
-                            vertical_line.setAttribute('x2', x);
-                            vertical_line.setAttribute('y2', `${vertical_line_end}`);
-                            vertical_line.setAttribute('stroke', 'black');
-                            vertical_line.setAttribute('stroke-dasharray', stroke_dash_arr);
-                            vertical_line.setAttribute('stroke-width', `${stroke_width}px`);
-                            svg.appendChild(vertical_line);
-                        }
+                        _.forEach(measurement_texts, el => {
+                            svg.appendChild(el);
+                        });
 
                         this.timber_profile_container.appendChild(svg);
                     });
@@ -2755,7 +2757,7 @@
                         });
 
                         // Sort collection by an average of vertical position
-                        return _.sortBy(grouped_by_hash, group => average(group.item.points)[1]);
+                        return grouped_by_hash; //_.sortBy(grouped_by_hash, group => average(group.item.points)[1]);
                     });
 
                     // Label all items
