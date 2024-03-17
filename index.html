@@ -940,7 +940,6 @@
 
     document.addEventListener('alpine:init', () => {
 
-
         Alpine.data('framework_measurements', () => {
             return {
                 timber_profile_container: null,
@@ -955,8 +954,8 @@
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
 
-                    // Define the 6 sides
-                    const sides = ["top", "right", "front"];
+                    // Define sides
+                    const sides = ["top", "right"];
 
                     // Reset boundaries
                     let x_max = Number.MIN_VALUE,
@@ -966,6 +965,7 @@
                         max_height = Number.MIN_VALUE,
                         max_width = Number.MIN_VALUE;
 
+                    // Flatten face and define global boundaries
                     let all_labeled_faces = {};
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the first element of group
@@ -988,22 +988,31 @@
                         });
                     });
 
+                    const y_padding = 20;
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the first element of group
                         const prism = collection.item;
                         const side_faces = all_labeled_faces[prism.label];
+                        const total_face_height = _.reduce(side_faces, (res, face) => res + face.height, y_padding);
 
-                        // Draw all face sides
+                        // Draw one svg for all sides
+                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                        svg.setAttribute('viewBox', `0 0 ${max_width} ${total_face_height}`);
+                        svg.setAttribute('class', "m-2");
+
+                        // Draw face sides
                         _.forEach(side_faces, (face, i) => {
-                            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                            svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
-                            svg.setAttribute('viewBox', `0 0 ${max_width} ${max_height}`);
-                            svg.setAttribute('class', "m-2");
+                            // compute y start for the right face
+                            const y_start = (i === 0) ? 0 : (side_faces[0].height + y_padding);
 
-                            const face_points = face.fit_points_2D();
+                            // fit points
+                            let face_points = face.points.map(p => [
+                                p[0] - face.x_min,
+                                p[1] - face.y_min + y_start,
+                            ]);
 
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-
                             polygon_front.setAttribute('points', `${face_points.slice(0, 4)}`);
                             polygon_front.setAttribute('stroke', 'black');
                             polygon_front.setAttribute('stroke-width', '1px');
@@ -2616,7 +2625,7 @@
                             if (outer_faces_3D[iCrown] === undefined) {
                                 const crown_face = zome_faces_3D[iCrown]
                                 // If at least one is undefined
-                                if (_.some(outer_face_points, p => p === undefined)){
+                                if (_.some(outer_face_points, p => p === undefined)) {
                                     const crown_face_point_index = _.findIndex(crown_face.points, p => _.isEqual(p, cur_pt));
                                     if (crown_face_point_index > -1) {
                                         outer_face_points[crown_face_point_index] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
