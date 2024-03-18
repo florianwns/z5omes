@@ -15,12 +15,14 @@
 * [x] Eviter le chevauchement des écritures
 * [x] Ajouter les angles de coupes d'abord sans dessiner les arcs de cercle
 
+* [ ] Ajouter l'angle diedre du côté intérieur au centre de la pièce ?
+
+
 * [ ] Ajouter les délimitations de la pièce
 * [ ] Ajouter timber with and thickness
 * [ ] Centrer les pièces sur la largeur
 * [ ] Ajouter la quantité de pièce à usiner
 * [ ] Ajouter les pointillés au centre de la pièce pour notifier que c'est un coupe
-* [ ] Ajouter l'angle diedre du côté intérieur au centre de la pièce ?
 
 
 * [ ] ajouter une limite ou adapter le ratio pour eviter les chevauchement des côtes

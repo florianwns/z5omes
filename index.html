@@ -1127,6 +1127,7 @@
                                     measurement_text.setAttribute('paint-order', 'stroke');
 
                                     measurement_text.innerHTML = `${rounded_x}`;
+
                                     svg_elements_with_priority.push([measurement_text, 20]);
 
                                     // add the rounded value to avoid multiple texts
@@ -1138,18 +1139,19 @@
                             //nst [0, 1, 2, 3, 4, 5, 6, 7] = side.points;
                             const [A, B, C, D, E, F, G, H] = drawing_points;
 
+                            const base_plane = points_2_plane(A, B, C);
                             const angles_params = [
                                 [Math.abs(TAU_Q - angle(A, B, C)), point_between(B, A, dist(B, A) / 5), 'end', 'red', '∠'],
                                 [Math.abs(TAU_Q - angle(D, C, B)), point_between(C, D, dist(D, C) / 5), 'start', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, C), points_2_plane(A, B, E))), point_between(B, A, dist(B, A) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, C), points_2_plane(C, D, H))), point_between(C, D, dist(D, C) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, C), points_2_plane(A, D, E))), point_between(D, A, dist(D, A) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, C), points_2_plane(B, C, F))), point_between(B, C, dist(B, C) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(B, A, dist(B, A) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(C, D, dist(D, C) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), point_between(D, A, dist(D, A) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), point_between(B, C, dist(B, C) / 2), 'middle', 'blue', '∟'],
                             ];
-                            _.forEach(angles_params, (params, j) => {
+                            _.forEach(angles_params, params => {
                                 const [theta, text_pos, anchor, color, icon] = params;
 
-                                // do not diplay if 0
+                                // Do not display angle if 0
                                 if (to_decimal(theta) == 0) return;
 
                                 const [x, y] = text_pos;
