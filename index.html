@@ -990,7 +990,7 @@
 
                     // Drawing parameters
                     const title_font_size = 7;
-                    const title_height = 15;
+                    const title_height = 40;
                     const font_size = 5;
                     const text_padding = 2;
                     const x_padding = 28;
@@ -1005,7 +1005,7 @@
                         const sides = all_labeled_sides[prism.label];
                         const sum_side_height = _.reduce(sides, (res, side) => res + side.height, 0);
                         const svg_height = sum_side_height
-                            + 5 * y_padding
+                            + 4 * y_padding
                             + 2 * title_height;
 
                         let side_y_start, side_y_end,
@@ -1017,26 +1017,41 @@
                         svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
                         svg.setAttribute('class', "m-2");
 
-                        // Draw sides
                         let svg_elements_with_priority = [];
+
+                        // Add label title vertically at the left of the svg
+                        const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        label_title.setAttribute('x', `${(x_padding - font_size) / 2}`);
+                        label_title.setAttribute('y', `${svg_height / 2}`);
+                        label_title.setAttribute('text-anchor', 'middle');
+                        label_title.setAttribute('alignment-baseline', 'center');
+                        label_title.setAttribute('font-size', `${title_font_size}`);
+                        label_title.setAttribute('fill', '#fefee2');
+                        label_title.setAttribute('stroke', 'black');
+                        label_title.setAttribute('paint-order', 'stroke');
+                        label_title.setAttribute('writing-mode', 'vertical-lr');
+                        label_title.innerHTML = `${this.i18n('Profile')} '${prism.label}'`;
+                        svg_elements_with_priority.push([label_title, 25]);
+
+                        // Draw sides
                         _.forEach(sides, (side, i) => {
                             // compute y start for the right face
                             const title_y_start = (i === 0)
                                 ? 0
-                                : sides[0].height + title_height + 3 * y_padding;
+                                : sides[0].height + title_height + 2 * y_padding;
 
                             const title_y_middle = title_y_start + title_height / 2
-                            const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                            label_title.setAttribute('x', `${svg_width / 2}`);
-                            label_title.setAttribute('y', `${title_y_middle}`);
-                            label_title.setAttribute('text-anchor', 'middle');
-                            label_title.setAttribute('alignment-baseline', 'center');
-                            label_title.setAttribute('font-size', `${title_font_size}`);
-                            label_title.setAttribute('fill', '#fefee2');
-                            label_title.setAttribute('stroke', 'black');
-                            label_title.setAttribute('paint-order', 'stroke');
-                            label_title.innerHTML = `${this.i18n('Profile')} '${prism.label}' - ${side_names[i]} ${this.i18n('view')}`;
-                            svg_elements_with_priority.push([label_title, 5]);
+                            const info_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                            info_title.setAttribute('x', `${svg_width / 2}`);
+                            info_title.setAttribute('y', `${title_y_middle}`);
+                            info_title.setAttribute('text-anchor', 'middle');
+                            info_title.setAttribute('alignment-baseline', 'center');
+                            info_title.setAttribute('font-size', `${title_font_size}`);
+                            info_title.setAttribute('fill', '#fefee2');
+                            info_title.setAttribute('stroke', 'black');
+                            info_title.setAttribute('paint-order', 'stroke');
+                            info_title.innerHTML = `${side_names[i]} ${this.i18n('view')}`;
+                            svg_elements_with_priority.push([info_title, 5]);
 
                             // compute y start for the right side
                             side_y_start = title_y_start + title_height;
