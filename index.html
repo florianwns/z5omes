@@ -1009,11 +1009,6 @@
                     const right_column_x_start = left_column_x_start + left_column_width + x_padding;
                     const svg_width = right_column_x_start + right_column_width + x_padding;
 
-                    console.log("left_column_x_start", left_column_x_start);
-                    console.log("left_column_width", left_column_width);
-                    console.log("right_column_x_start", right_column_x_start);
-                    console.log("right_column_width", right_column_width);
-
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the item of collection
                         const prism = collection.item;
@@ -1170,7 +1165,7 @@
 
 
                             // Compute angles
-                            //nst [0, 1, 2, 3, 4, 5, 6, 7] = side.points;
+                            //    [0, 1, 2, 3, 4, 5, 6, 7]
                             const [a, b, c, d, e, f, g, h] = drawing_points; // with z axis equals to 0
                             const [A, B, C, D, E, F, G, H] = fitted_points;
 
