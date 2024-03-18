@@ -885,21 +885,21 @@ class TrapezoidalPrism extends Base3DGeometry {
         return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
     }
 
-    flatten_2D(side = "top") {
+    flatten_2D(side) {
         // flatten pair of sides with three choices "top", "right" and "front";
         // Because svg display is different than three.js display, we reverse some axes.
         let flattened_points, opposite_side;
         switch (side) {
             case "front":
-                flattened_points = this.flattened_points.map(p => [p[0], -p[1], 0]);
+                flattened_points = this.flattened_points.map(p => [p[0], -p[1], p[2]]);
                 opposite_side = "back";
                 break;
-            case "top":
-                flattened_points = swap_axes(this.flattened_points, "XZY").map(p => [p[0], -p[1], 0])
-                opposite_side = "bottom";
+            case "bottom":
+                flattened_points = swap_axes(this.flattened_points, "XZY").map(p => [p[0], -p[1], p[2]])
+                opposite_side = "top";
                 break;
             case "right":
-                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [-p[0], -p[1], 0])
+                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [p[0], -p[1], p[2]])
                 opposite_side = "left";
                 break;
         }
