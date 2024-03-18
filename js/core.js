@@ -272,7 +272,7 @@ function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
     return [
         delta[0] * cos_theta - delta[1] * sin_theta + origin[0],
         delta[0] * sin_theta + delta[1] * cos_theta + origin[1],
-        0
+        vec[2],
     ];
 }
 
@@ -386,6 +386,10 @@ function rad2deg(rad) {
 
 function to_decimal(x, num_digits = FLOAT_PRECISION) {
     return parseFloat(x.toFixed(num_digits));
+}
+
+function to_int(x) {
+    return to_decimal(x, 0);
 }
 
 function to_mm(v, unit) {
@@ -899,7 +903,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
     }
 
-    flatten_2D(side) {
+    flatten_2D(side, rotation_angle) {
         // flatten pair of sides with three choices "top", "right" and "front";
         // Because svg display is different than three.js display, we reverse some axes.
         let flattened_points, opposite_side;
@@ -913,9 +917,15 @@ class TrapezoidalPrism extends Base3DGeometry {
                 opposite_side = "top";
                 break;
             case "right":
-                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [p[0], -p[1], p[2]])
+                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [-p[0], -p[1], p[2]])
                 opposite_side = "left";
                 break;
+        }
+
+        if (rotation_angle !== null) {
+            flattened_points = flattened_points.map(p => {
+                return rotate_point_around_z_axis(p, rotation_angle);
+            });
         }
 
         return new Polygon2D([

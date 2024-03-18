@@ -955,15 +955,12 @@
                     this.timber_profile_container.innerHTML = "";
 
                     // Define sides
-                    const side_names = ["front", "bottom"];
+                    const side_names = ["right", "right", "front", "bottom"];
 
                     // Reset boundaries
-                    let x_max = Number.MIN_VALUE,
-                        y_max = Number.MIN_VALUE,
-                        x_min = Number.MAX_VALUE,
-                        y_min = Number.MAX_VALUE,
-                        max_height = Number.MIN_VALUE,
-                        max_width = Number.MIN_VALUE;
+                    let max_height = Number.MIN_VALUE,
+                        left_column_max_width = Number.MIN_VALUE,
+                        right_column_max_width = Number.MIN_VALUE;
 
                     // Flatten side and define global boundaries
                     let all_labeled_sides = {};
@@ -972,54 +969,74 @@
                         const prism = collection.item;
                         all_labeled_sides[prism.label] = new Array(side_names.length);
 
-                        // Get min max from all face sides
+                        // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
-                            const side = prism.flatten_2D(side_name);
+                            const side = prism.flatten_2D(side_name, (i === 1) ? TAU_Q : null);
 
-                            if (side.x_min < x_min) x_min = side.x_min;
-                            if (side.x_max > x_max) x_max = side.x_max;
-                            if (side.y_min < y_min) y_min = side.y_min;
-                            if (side.y_max > y_max) y_max = side.y_max;
-
-                            if (side.width > max_width) max_width = side.width;
+                            switch (i) {
+                                case 0:
+                                case 1:
+                                    if (side.width > left_column_max_width) left_column_max_width = side.width;
+                                    break;
+                                case 2 :
+                                case 3 :
+                                    if (side.width > right_column_max_width) right_column_max_width = side.width;
+                                    break;
+                            }
                             if (side.height > max_height) max_height = side.height;
-
                             all_labeled_sides[prism.label][i] = side;
                         });
                     });
 
-                    // Drawing parameters
-                    const width_divider = 1 + to_decimal(max_width / 750, 0);
-                    const font_size_factor = max_width / width_divider;
-                    const title_font_size = font_size_factor / 60;
+                    // Adapt the drawing parameters
+                    const width_divider = 1 + to_decimal(right_column_max_width / 750, 0);
+
+                    const left_column_width = left_column_max_width;
+                    const right_column_width = right_column_max_width / width_divider;
+
+                    const font_size_factor = right_column_width;
+                    const title_font_size = font_size_factor / 50;
                     const title_height = title_font_size * 4;
-                    const font_size = font_size_factor / 75;
+                    const font_size = font_size_factor / 60;
                     const stroke_width = font_size / 10;
                     const text_padding = font_size / 2;
-                    const x_padding = font_size * 6;
-                    const y_padding = font_size * 2;
+                    const x_padding = font_size * 4;
+                    const y_padding = font_size * 1.5;
                     const stroke_dash_arr = '2, 2';
 
-                    const svg_max_width = max_width / width_divider + 2 * x_padding;
+                    // Compute svg max width
+                    const left_column_x_start = x_padding;
+                    const right_column_x_start = left_column_x_start + left_column_width + x_padding;
+                    const svg_width = right_column_x_start + right_column_width + x_padding;
+
+                    console.log("left_column_x_start", left_column_x_start);
+                    console.log("left_column_width", left_column_width);
+                    console.log("right_column_x_start", right_column_x_start);
+                    console.log("right_column_width", right_column_width);
 
                     _.forIn(skeleton_3D_hash_collections, collection => {
-                        // Take the first element of group
+                        // Take the item of collection
                         const prism = collection.item;
                         const sides = all_labeled_sides[prism.label];
-                        const sum_side_height = _.reduce(sides, (res, side) => res + side.height, 0);
+
+                        // Get sides of left and right columns
+                        const left_column_sides = sides.slice(0, 2);
+                        const right_column_sides = sides.slice(2, 4);
+
+                        // Compute sum of side heights of the right column (front and bottom). same as left column
+                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height, 0);
+
                         const svg_height = sum_side_height
-                            + 4 * y_padding
+                            + 5 * y_padding
                             + 2 * title_height;
 
-                        const svg_width = svg_max_width - (max_width - sides[0].width) / width_divider;
-
-                        let side_y_start, side_y_end,
+                        let draw_y_start, draw_y_end,
                             vertical_line_start, vertical_line_end;
 
                         // Draw one svg for all sides
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
-                        svg.setAttribute('viewBox', `0 0 ${svg_max_width} ${svg_height}`);
+                        svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
                         svg.setAttribute('class', "m-2 border-bottom");
 
                         let svg_elements_with_priority = [];
@@ -1038,32 +1055,48 @@
                         // Draw sides
                         _.forEach(sides, (side, i) => {
                             // compute y start for the right face
-                            const title_y_start = (i === 0)
-                                ? 0
-                                : sides[0].height + title_height + 2 * y_padding;
+                            const line_y_start = (i % 2 === 0)
+                                ? y_padding
+                                : sides[0].height + title_height + 3 * y_padding;
 
-                            const title_y_middle = title_y_start + title_font_size * 1.5;
-                            const info_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                            info_title.setAttribute('x', `${svg_width / 2}`);
-                            info_title.setAttribute('y', `${title_y_middle}`);
-                            info_title.setAttribute('text-anchor', 'middle');
-                            info_title.setAttribute('alignment-baseline', 'center');
-                            info_title.setAttribute('font-size', `${title_font_size}`);
-                            info_title.innerHTML = `${side_names[i]} ${this.i18n('view')}`;
-                            svg_elements_with_priority.push([info_title, 5]);
+
+                            const column_width = (i < 2) ? left_column_width : right_column_width;
+
+                            // Adapt the drawing width of the right column
+                            const drawing_width = (i < 2)
+                                ? side.width
+                                : right_column_width - (right_column_max_width - side.width) / width_divider;
+
+                            const column_padding = (column_width - drawing_width) / 2;
+                            const column_x_start = (i < 2)
+                                ? left_column_x_start + column_padding
+                                : right_column_x_start + column_padding;
+
+                            if (i !== 1) {
+                                const info_y_middle = line_y_start + title_font_size * 1.5;
+                                const info_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+                                info_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
+                                info_title.setAttribute('y', `${info_y_middle}`);
+                                info_title.setAttribute('text-anchor', 'middle');
+                                info_title.setAttribute('alignment-baseline', 'center');
+                                info_title.setAttribute('font-size', `${title_font_size}`);
+                                info_title.innerHTML = `${side_names[i]}`;
+                                svg_elements_with_priority.push([info_title, 5]);
+                            }
 
                             // compute y start for the right side
-                            side_y_start = title_y_start + title_height;
-                            side_y_end = side_y_start + side.height;
+                            draw_y_start = line_y_start + title_height;
+                            draw_y_end = draw_y_start + side.height;
 
                             // fit points
                             const fitted_points = side.fit_points();
-                            const drawing_points = fitted_points.map((p, j) => [
-                                (p[0] < side.width / 2 || width_divider <= 1)
-                                    ? p[0] + x_padding
-                                    : svg_width - x_padding - (side.width - p[0]),
-                                p[1] + side_y_start,
-                                p[2],
+                            const drawing_points = fitted_points.map(p => [
+                                (i < 2 || p[0] < side.width / 2 || width_divider <= 1)
+                                    ? column_x_start + p[0]
+                                    : column_x_start + drawing_width - (side.width - p[0]),
+                                draw_y_start + p[1],
+                                0,
                             ]);
 
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
@@ -1083,16 +1116,16 @@
                             svg_elements_with_priority.push([polygon_behind, 9]);
 
                             // Compute vertical lines start/end
-                            if (i === 0) {
-                                vertical_line_start = side_y_start;
+                            if (i % 2 === 0) {
+                                vertical_line_start = draw_y_start;
                             } else {
-                                vertical_line_end = side_y_end;
+                                vertical_line_end = draw_y_end;
                             }
 
                             let rounded_xs = [];
                             _.forEach(drawing_points, (p, j) => {
                                 // Draw vertical lines to get a visual alignment
-                                if (i === 1) {
+                                if (i === 3) {
                                     const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                                     vertical_line.setAttribute('x1', p[0]);
                                     vertical_line.setAttribute('y1', `${vertical_line_start}`);
@@ -1106,10 +1139,10 @@
                                 }
 
                                 const real_pt = fitted_points[j];
-                                const rounded_x = to_decimal(real_pt[0], FLOAT_2_STR_PRECISION);
+                                const rounded_x = to_int(real_pt[0]);
                                 // const rounded_x = j;
                                 if (!rounded_xs.includes(rounded_x)) {
-                                    const is_boundary = rounded_x == 0 || rounded_x == to_decimal(side.width, FLOAT_2_STR_PRECISION);
+                                    const is_boundary = rounded_x == 0 || rounded_x == to_int(side.width);
 
                                     const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                                     measurement_text.setAttribute('x', p[0]);
@@ -1135,24 +1168,28 @@
                                 }
                             });
 
+
                             // Compute angles
                             //nst [0, 1, 2, 3, 4, 5, 6, 7] = side.points;
-                            const [A, B, C, D, E, F, G, H] = drawing_points;
+                            const [a, b, c, d, e, f, g, h] = drawing_points; // with z axis equals to 0
+                            const [A, B, C, D, E, F, G, H] = fitted_points;
 
                             const base_plane = points_2_plane(A, B, C);
-                            const angles_params = [
-                                [Math.abs(TAU_Q - angle(A, B, C)), point_between(B, A, dist(B, A) / 5), 'end', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle(D, C, B)), point_between(C, D, dist(D, C) / 5), 'start', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(B, A, dist(B, A) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(C, D, dist(D, C) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), point_between(D, A, dist(D, A) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), point_between(B, C, dist(B, C) / 2), 'middle', 'blue', '∟'],
+                            const angles_params = (i < 2) ? [
+                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
+                            ] : [
+                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, a, dist(b, a) / 5), 'end', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(d, c, b)), point_between(c, d, dist(d, c) / 5), 'start', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), point_between(d, a, dist(d, a) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), point_between(b, c, dist(b, c) / 2), 'middle', 'blue', '∟'],
                             ];
                             _.forEach(angles_params, params => {
                                 const [theta, text_pos, anchor, color, icon] = params;
 
                                 // Do not display angle if 0
-                                if (to_decimal(theta) == 0) return;
+                                if (to_decimal(theta, 1) === 0) return;
 
                                 const [x, y] = text_pos;
                                 const angle_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
