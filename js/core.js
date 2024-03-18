@@ -15,7 +15,7 @@
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
 const FLOAT_PRECISION = 7;
-const FLOAT_2_STR_PRECISION = 2;
+const FLOAT_2_STR_PRECISION = 1;
 
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
@@ -284,9 +284,9 @@ function dihedral_angle(a, b, c) {
     )
 }
 
-function dihedral_angle_between_planes(plane1, plane2) {
+function angle_between_planes(plane1, plane2) {
     const dot = dot_product(plane1, plane2);
-    const theta = Math.PI - Math.acos(dot / (len(plane1) * len(plane2)));
+    const theta = Math.acos(dot / (len(plane1) * len(plane2)));
     return theta;
 }
 
@@ -356,9 +356,23 @@ function check_is_coplanar(points) {
 }
 
 
+// -------------------------
+// ========== SVG ==========
+// -------------------------
+
+function circle_path(cx, cy, r) {
+    return 'M ' + cx + ' ' + cy + ' m -' + r + ', 0 a ' + r + ',' + r + ' 0 1,1 ' + (r * 2) + ',0 a ' + r + ',' + r + ' 0 1,1 -' + (r * 2) + ',0';
+}
+
 // ---------------------------------
 // ========== Conversions ==========
 // ---------------------------------
+
+function convert_3D_to_2D(points) {
+    // Points without the z axis
+    return points.map(p => [p[0], p[1]]);
+}
+
 
 function deg2rad(deg) {
     // Convert degrees to radians
@@ -518,9 +532,9 @@ function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
     }
 }
 
-function humanize_angle(a, fractionDigits = 2) {
+function humanize_angle(a, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display angle in degrees
-    return !isNaN(a) ? a.toFixed(fractionDigits) + "°" : "";
+    return !isNaN(a) ? a.toFixed(num_digits) + "°" : "";
 }
 
 function humanize_arr(arr, unit = "") {
@@ -664,15 +678,15 @@ class Polygon2D extends Base3DGeometry {
         super(points, label, color);
 
         // Points without the z axis
-        this.points_2D = this.points.map(p => [p[0], p[1]]);
+        this.points_2D = convert_3D_to_2D(this.points);
     }
 
-    fit_points_2D() {
-        // Adjust the points so the minimum values end up at zero
-        return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min]);
+    fit_points() {
+        // Adjust the points so the minimum values end up at zero on X and Y axis
+        return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2]]);
     }
 
-    resize_points(size = null) {
+    resize_points_2D(size = null) {
         // Recompute pixel positions to a specific size (ex : for svg display)
         const pixel_ratio = size / Math.max(this.height, this.width);
         const center = size / 2;

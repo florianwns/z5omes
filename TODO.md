@@ -13,6 +13,18 @@
 * [x] Revoir l'orientation des timber profiles pour que les vues correspondent
 * [x] Faire en sorte que les pointillés soient derrière les valeurs
 * [x] Eviter le chevauchement des écritures
+
+
+* [ ] Ajouter les pointillés au centre de la pièce pour notifier que c'est un coupe
+* [ ] Ajouter la hauteur de la pièce
+  
+* [ ] Ajouter les angles de coupes d'abord sans dessiner les arcs de cercle
+  
+* [ ] Ajouter les angles en dessinant l'arc de cercle pour l'angle de coupe  
+* [ ] Ajouter l'angle diedre au centre du côté intérieur
+
+
+* [ ] ajouter une limite ou adapter le ratio pour eviter les chevauchement des côtes
   
 * [ ] Reprendre les codes couleurs des axes XYZ de three JS pour bien comprendre la dessin de coupes
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
