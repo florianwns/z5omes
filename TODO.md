@@ -13,15 +13,14 @@
 * [x] Revoir l'orientation des timber profiles pour que les vues correspondent
 * [x] Faire en sorte que les pointillés soient derrière les valeurs
 * [x] Eviter le chevauchement des écritures
+* [x] Ajouter les angles de coupes d'abord sans dessiner les arcs de cercle
 
-
+* [ ] Ajouter les délimitations de la pièce
+* [ ] Ajouter timber with and thickness
+* [ ] Centrer les pièces sur la largeur
+* [ ] Ajouter la quantité de pièce à usiner
 * [ ] Ajouter les pointillés au centre de la pièce pour notifier que c'est un coupe
-* [ ] Ajouter la hauteur de la pièce
-  
-* [ ] Ajouter les angles de coupes d'abord sans dessiner les arcs de cercle
-  
-* [ ] Ajouter les angles en dessinant l'arc de cercle pour l'angle de coupe  
-* [ ] Ajouter l'angle diedre au centre du côté intérieur
+* [ ] Ajouter l'angle diedre du côté intérieur au centre de la pièce ?
 
 
 * [ ] ajouter une limite ou adapter le ratio pour eviter les chevauchement des côtes
