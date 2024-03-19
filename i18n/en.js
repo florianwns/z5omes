@@ -19,6 +19,7 @@ const I18N_EN = {
         mandala_3D_of_outer_faces: "3D Mandala of outer faces",
         mandala_3D_of_inner_faces: "3D Mandala of inner faces",
         timber_profiles_3D: "3D Timber profiles",
+        profile: "profile",
         mandala: 'Mandala',
         spirals: 'Spirals',
         zome_made_with: "This zome was made with",

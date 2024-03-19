@@ -950,16 +950,14 @@
 
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
-                    const container_width = this.timber_profile_container.offsetWidth;
 
                     // Define sides
-                    const side_names = ["right", "right", "front", "bottom"];
+                    const side_names = ["left", "left", "front", "bottom"];
 
                     // Reset boundaries
                     let max_height = Number.MIN_VALUE,
                         left_column_max_width = Number.MIN_VALUE,
-                        right_column_max_width = Number.MIN_VALUE,
-                        right_column_max_space_at_the_center = Number.MAX_VALUE;
+                        right_column_max_width = Number.MIN_VALUE;
 
                     // Flatten side and define global boundaries
                     let all_labeled_sides = {};
@@ -978,11 +976,6 @@
                                     break;
                                 case 2 :
                                     if (side.width > right_column_max_width) right_column_max_width = side.width;
-
-                                    // Compute the space at the center
-                                    const sorted_xs = _.sortBy(side.points, p => p[0]);
-                                    const space_at_the_center = sorted_xs[4][0] - sorted_xs[3][0];
-                                    if (space_at_the_center < right_column_max_space_at_the_center) right_column_max_space_at_the_center = space_at_the_center;
                                     break;
                             }
                             if (side.height > max_height) max_height = side.height;
@@ -1018,7 +1011,6 @@
                         const sides = all_labeled_sides[prism.label];
 
                         // Get sides of left and right columns
-                        const left_column_sides = sides.slice(0, 2);
                         const right_column_sides = sides.slice(2, 4);
 
                         // Compute sum of side heights of the right column (front and bottom). same as left column
@@ -1045,7 +1037,11 @@
                         label_title.setAttribute('alignment-baseline', 'center');
                         label_title.setAttribute('font-size', `${title_font_size}`);
                         label_title.setAttribute('writing-mode', 'vertical-lr');
-                        label_title.innerHTML = `${this.i18n('Profile')} ${prism.label}`;
+                        label_title.setAttribute('font-weight', 'bold');
+                        label_title.setAttribute('fill', `${prism.color.hex}`);
+                        label_title.setAttribute('style', 'text-transform: capitalize');
+
+                        label_title.innerHTML = `${this.i18n('profile')} ${prism.label}`;
                         svg_elements_with_priority.push([label_title, 25]);
 
                         // Draw sides
@@ -1069,15 +1065,30 @@
                                 : right_column_x_start + column_padding;
 
                             if (i !== 1) {
-                                const info_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                info_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
-                                info_title.setAttribute('y', `${line_y_start + y_padding}`);
-                                info_title.setAttribute('text-anchor', 'middle');
-                                info_title.setAttribute('alignment-baseline', 'center');
-                                info_title.setAttribute('font-size', `${title_font_size}`);
-                                info_title.innerHTML = `${side_names[i]}`;
-                                svg_elements_with_priority.push([info_title, 5]);
+                                const side_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                side_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
+                                side_title.setAttribute('y', `${line_y_start + y_padding}`);
+                                side_title.setAttribute('text-anchor', 'middle');
+                                side_title.setAttribute('alignment-baseline', 'center');
+                                side_title.setAttribute('font-size', `${title_font_size}`);
+                                side_title.setAttribute('style', 'text-transform: capitalize');
+
+                                side_title.innerHTML = `${side_names[i]}`;
+                                svg_elements_with_priority.push([side_title, 5]);
                             }
+                            if(i === 0){
+                                const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                count_text.setAttribute('x', `${svg_width - x_padding}`);
+                                count_text.setAttribute('y', `${line_y_start + y_padding}`);
+                                count_text.setAttribute('text-anchor', 'end');
+                                count_text.setAttribute('font-size', `${title_font_size}`);
+                                count_text.setAttribute('font-weight', 'bold');
+                                count_text.setAttribute('fill', `${prism.color.hex}`);
+                                count_text.innerHTML = `X ${collection.count}`;
+                                svg_elements_with_priority.push([count_text, 5]);
+                            }
+
+
 
                             // compute y start for the right side
                             draw_y_start = line_y_start + 2 * y_padding;
@@ -2844,7 +2855,7 @@
                     const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
                         // Compute hash to compare objects
                         const grouped_by_hash = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
-                            return new ItemHashCollection(group[0], hash, group.length);
+                            return new ItemHashCollection(group[0], hash, group.length * N);
                         });
 
                         // Sort collection by an average of vertical position

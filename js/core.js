@@ -916,9 +916,9 @@ class TrapezoidalPrism extends Base3DGeometry {
                 flattened_points = swap_axes(this.flattened_points, "XZY").map(p => [p[0], -p[1], p[2]])
                 opposite_side = "top";
                 break;
-            case "right":
-                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [-p[0], -p[1], p[2]])
-                opposite_side = "left";
+            case "left":
+                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [p[0], -p[1], p[2]])
+                opposite_side = "right";
                 break;
         }
 
