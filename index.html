@@ -953,6 +953,7 @@
 
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
+                    const container_width = this.timber_profile_container.offsetWidth;
 
                     // Define sides
                     const side_names = ["right", "right", "front", "bottom"];
@@ -960,7 +961,7 @@
                     // Reset boundaries
                     let max_height = Number.MIN_VALUE,
                         left_column_max_width = Number.MIN_VALUE,
-                        right_column_max_width = Number.MIN_VALUE;
+                        right_column_width_avg = 0;
 
                     // Flatten side and define global boundaries
                     let all_labeled_sides = {};
@@ -972,15 +973,13 @@
                         // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
                             const side = prism.flatten_2D(side_name, (i === 1) ? TAU_Q : null);
-
                             switch (i) {
                                 case 0:
                                 case 1:
                                     if (side.width > left_column_max_width) left_column_max_width = side.width;
                                     break;
                                 case 2 :
-                                case 3 :
-                                    if (side.width > right_column_max_width) right_column_max_width = side.width;
+                                    right_column_width_avg += side.width;
                                     break;
                             }
                             if (side.height > max_height) max_height = side.height;
@@ -988,21 +987,22 @@
                         });
                     });
 
-                    // Adapt the drawing parameters
-                    const width_divider = 1 + to_decimal(right_column_max_width / 750, 0);
+                    right_column_width_avg /= skeleton_3D_hash_collections.length;
 
-                    const left_column_width = left_column_max_width;
-                    const right_column_width = right_column_max_width / width_divider;
-
-                    const font_size_factor = right_column_width;
-                    const title_font_size = font_size_factor / 50;
+                    // Font size depends on container width
+                    const font_size_factor = container_width;
+                    const title_font_size = font_size_factor / 60;
                     const title_height = title_font_size * 4;
-                    const font_size = font_size_factor / 60;
+                    const font_size = font_size_factor / 70;
                     const stroke_width = font_size / 10;
                     const text_padding = font_size / 2;
                     const x_padding = font_size * 4;
                     const y_padding = font_size * 1.5;
                     const stroke_dash_arr = '2, 2';
+
+                    // Adapt the drawing parameters
+                    const left_column_width = left_column_max_width;
+                    const right_column_width = right_column_width_avg;
 
                     // Compute svg max width
                     const left_column_x_start = x_padding;
@@ -1058,9 +1058,9 @@
                             const column_width = (i < 2) ? left_column_width : right_column_width;
 
                             // Adapt the drawing width of the right column
-                            const drawing_width = (i < 2)
-                                ? side.width
-                                : right_column_width - (right_column_max_width - side.width) / width_divider;
+                            const drawing_width = (i >= 2 && side.width > right_column_width_avg)
+                                ? right_column_width_avg
+                                : side.width;
 
                             const column_padding = (column_width - drawing_width) / 2;
                             const column_x_start = (i < 2)
@@ -1087,7 +1087,7 @@
                             // fit points
                             const fitted_points = side.fit_points();
                             const drawing_points = fitted_points.map(p => [
-                                (i < 2 || p[0] < side.width / 2 || width_divider <= 1)
+                                (i < 2 || p[0] < side.width / 2)
                                     ? column_x_start + p[0]
                                     : column_x_start + drawing_width - (side.width - p[0]),
                                 draw_y_start + p[1],
