@@ -14,9 +14,12 @@
 * [x] Faire en sorte que les pointillés soient derrière les valeurs
 * [x] Eviter le chevauchement des écritures
 * [x] Ajouter les angles de coupes d'abord sans dessiner les arcs de cercle
+* [*] Adapatative design en fixant la taille
+  
 
 * [ ] Ajouter l'angle diedre du côté intérieur au centre de la pièce ?
 
+* [ ] ajouter un width reducer en se basant sur le plus petit delta entre les 4 points de gauche et de droite 
 
 * [ ] Ajouter les délimitations de la pièce
 * [ ] Ajouter timber with and thickness

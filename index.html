@@ -840,15 +840,12 @@
 
             <div class="col-12 break-before" x-data="framework_measurements" @zome-is-made.window="process">
                 <hr>
-
                 <h5 class="text-secondary mt-4 mb-4 me-auto">
                     <i class="fa-solid fa-frame rotate-45 me-1"></i>
                     <span x-text="i18n('framework')" class="up-first"></span>
                 </h5>
-
-
-                <div class="row justify-content-between">
-                    <div class="col-12 mt-2">
+                <div class="overflow-scroll">
+                    <div class="mx-auto" style="width:640px;">
                         <div class="bg-white rounded border position-relative"
                              x-ref="timber_profile_container">
                         </div>
@@ -961,7 +958,8 @@
                     // Reset boundaries
                     let max_height = Number.MIN_VALUE,
                         left_column_max_width = Number.MIN_VALUE,
-                        right_column_width_avg = 0;
+                        right_column_max_width = Number.MIN_VALUE,
+                        right_column_max_space_at_the_center = Number.MAX_VALUE;
 
                     // Flatten side and define global boundaries
                     let all_labeled_sides = {};
@@ -979,7 +977,12 @@
                                     if (side.width > left_column_max_width) left_column_max_width = side.width;
                                     break;
                                 case 2 :
-                                    right_column_width_avg += side.width;
+                                    if (side.width > right_column_max_width) right_column_max_width = side.width;
+
+                                    // Compute the space at the center
+                                    const sorted_xs = _.sortBy(side.points, p => p[0]);
+                                    const space_at_the_center = sorted_xs[4][0] - sorted_xs[3][0];
+                                    if (space_at_the_center < right_column_max_space_at_the_center) right_column_max_space_at_the_center = space_at_the_center;
                                     break;
                             }
                             if (side.height > max_height) max_height = side.height;
@@ -987,27 +990,27 @@
                         });
                     });
 
-                    right_column_width_avg /= skeleton_3D_hash_collections.length;
-
                     // Font size depends on container width
-                    const font_size_factor = container_width;
-                    const title_font_size = font_size_factor / 60;
-                    const title_height = title_font_size * 4;
-                    const font_size = font_size_factor / 70;
+                    const svg_width = 640;
+                    const title_font_size = 14;
+                    const x_padding = 40;
+                    const font_size = 12;
+                    const y_padding = font_size * 4;
+
                     const stroke_width = font_size / 10;
                     const text_padding = font_size / 2;
-                    const x_padding = font_size * 4;
-                    const y_padding = font_size * 1.5;
                     const stroke_dash_arr = '2, 2';
 
-                    // Adapt the drawing parameters
-                    const left_column_width = left_column_max_width;
-                    const right_column_width = right_column_width_avg;
+                    // Compute column width
+                    const available_width = svg_width - 4 * x_padding;
+                    const left_column_width = available_width / 8;
+                    const right_column_width = left_column_width * 7
+                    const pixel_ratio = (left_column_max_width > left_column_width)
+                        ? left_column_width / left_column_max_width
+                        : left_column_max_width / left_column_width;
 
-                    // Compute svg max width
                     const left_column_x_start = x_padding;
-                    const right_column_x_start = left_column_x_start + left_column_width + x_padding;
-                    const svg_width = right_column_x_start + right_column_width + x_padding;
+                    const right_column_x_start = left_column_x_start + left_column_width + 2 * x_padding;
 
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Take the item of collection
@@ -1021,9 +1024,7 @@
                         // Compute sum of side heights of the right column (front and bottom). same as left column
                         const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height, 0);
 
-                        const svg_height = sum_side_height
-                            + 5 * y_padding
-                            + 2 * title_height;
+                        const svg_height = sum_side_height + 6 * y_padding;
 
                         let draw_y_start, draw_y_end,
                             vertical_line_start, vertical_line_end;
@@ -1049,18 +1050,18 @@
 
                         // Draw sides
                         _.forEach(sides, (side, i) => {
-                            // compute y start for the right face
+                            // Compute y start
                             const line_y_start = (i % 2 === 0)
-                                ? y_padding
-                                : sides[0].height + title_height + 3 * y_padding;
-
+                                ? 0
+                                : draw_y_end + y_padding;
 
                             const column_width = (i < 2) ? left_column_width : right_column_width;
 
                             // Adapt the drawing width of the right column
-                            const drawing_width = (i >= 2 && side.width > right_column_width_avg)
-                                ? right_column_width_avg
-                                : side.width;
+                            const adaptive_drawing = (side.width * pixel_ratio > column_width);
+                            const drawing_width = (adaptive_drawing)
+                                ? column_width
+                                : side.width * pixel_ratio;
 
                             const column_padding = (column_width - drawing_width) / 2;
                             const column_x_start = (i < 2)
@@ -1068,11 +1069,9 @@
                                 : right_column_x_start + column_padding;
 
                             if (i !== 1) {
-                                const info_y_middle = line_y_start + title_font_size * 1.5;
                                 const info_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-
                                 info_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
-                                info_title.setAttribute('y', `${info_y_middle}`);
+                                info_title.setAttribute('y', `${line_y_start + y_padding}`);
                                 info_title.setAttribute('text-anchor', 'middle');
                                 info_title.setAttribute('alignment-baseline', 'center');
                                 info_title.setAttribute('font-size', `${title_font_size}`);
@@ -1081,16 +1080,16 @@
                             }
 
                             // compute y start for the right side
-                            draw_y_start = line_y_start + title_height;
-                            draw_y_end = draw_y_start + side.height;
+                            draw_y_start = line_y_start + 2 * y_padding;
+                            draw_y_end = draw_y_start + side.height * pixel_ratio;
 
                             // fit points
                             const fitted_points = side.fit_points();
                             const drawing_points = fitted_points.map(p => [
                                 (i < 2 || p[0] < side.width / 2)
-                                    ? column_x_start + p[0]
-                                    : column_x_start + drawing_width - (side.width - p[0]),
-                                draw_y_start + p[1],
+                                    ? column_x_start + p[0] * pixel_ratio
+                                    : column_x_start + drawing_width - (side.width - p[0]) * pixel_ratio,
+                                draw_y_start + p[1] * pixel_ratio,
                                 0,
                             ]);
 
@@ -1173,8 +1172,8 @@
                             const angles_params = (i < 2) ? [
                                 [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
                             ] : [
-                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, a, dist(b, a) / 5), 'end', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle(d, c, b)), point_between(c, d, dist(d, c) / 5), 'start', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(d, c, b)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), point_between(d, a, dist(d, a) / 2), 'middle', 'blue', '∟'],
