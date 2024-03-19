@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.7c" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.8b" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -329,7 +329,7 @@
                     <button class="btn btn-primary" type="button"
                             data-bs-toggle="tooltip"
                             :title="i18n('help_am_param_3')"
-                            @click="params.assembly_direction = (params.assembly_direction + 1) % ASSEMBLY_DIRECTION_ICONS.length">
+                            @click="constrained_assembly_direction = constrained_assembly_direction + 1">
                         <i class="fa-solid fa-fw"
                            :class="ASSEMBLY_DIRECTION_ICONS[params.assembly_direction]"
                         ></i>
@@ -471,12 +471,20 @@
 
 
                                     <div class="mb-2">
-                                        <!-- Draw Zome Env/ Zome Skeleton/ Zomandala -->
+                                        <!-- Draw Zome Env/ Zome Skeleton/ Mandala -->
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
-                                            <option value="cover_3D" x-text="i18n('cover_3D')"></option>
-                                            <option value="mandala_3D" x-text="i18n('mandala_3D')"></option>
+                                            <option selected value="timber_profiles_3D"
+                                                    x-text="i18n('timber_profiles_3D')"></option>
+                                            <option value="outer_faces_3D"
+                                                    x-text="i18n('outer_faces_3D')"></option>
+                                            <option value="inner_faces_3D"
+                                                    x-text="i18n('inner_faces_3D')"></option>
+                                            <option value="mandala_3D_of_outer_faces"
+                                                    x-text="i18n('mandala_3D_of_outer_faces')"></option>
+                                            <option value="mandala_3D_of_inner_faces"
+                                                    x-text="i18n('mandala_3D_of_inner_faces')"></option>
                                         </select>
                                     </div>
                                     <!-- Canvas for Zome 3D rendering -->
@@ -521,19 +529,33 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('S')">S
                                                                 </button>
-                                                                <span x-text="i18n('key_S_3D_view')"></span>
+                                                                <span x-text="i18n('skeleton_3D')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('T')">T
+                                                                </button>
+                                                                <span x-text="i18n('timber_profiles_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('E')">E
                                                                 </button>
-                                                                <span x-text="i18n('key_E_3D_view')"></span>
+                                                                <span x-text="i18n('outer_faces_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('M')">M
+                                                                <button class="key me-2" @click="keydown('I')">I
                                                                 </button>
-                                                                <span x-text="i18n('key_M_3D_view')"></span>
+                                                                <span x-text="i18n('inner_faces_3D')"></span>
                                                             </li>
-
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('Z')">Z
+                                                                </button>
+                                                                <span x-text="i18n('mandala_3D_of_outer_faces')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('U')">U
+                                                                </button>
+                                                                <span x-text="i18n('mandala_3D_of_inner_faces')"></span>
+                                                            </li>
                                                             <!-- Camera view -->
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('H')">H
@@ -594,12 +616,12 @@
                                                    id="draw-vanishing-lines" x-model="draw_vanishing_lines">
                                         </div>
 
-                                        <!-- Draw Axis -->
+                                        <!-- Draw Axes -->
                                         <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-axis-switch"
-                                                   x-text="i18n('axis')"></label>
+                                            <label class="form-check-label" for="draw-axes-switch"
+                                                   x-text="i18n('axes')"></label>
                                             <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-axis-switch" x-model="draw_axis">
+                                                   id="draw-axes-switch" x-model="draw_axes">
                                         </div>
 
                                         <!-- Draw Zome Vertices -->
@@ -648,8 +670,8 @@
                                     <div class="mb-2">
                                         <select class="form-select" aria-label="Kind of drawing"
                                                 x-model="kind_of_drawing">
-                                            <option selected value="mandala_figs" x-text="i18n('mandala')"></option>
-                                            <option value="spiral_figs" x-text="i18n('spirals')"></option>
+                                            <option selected value="mandala_faces" x-text="i18n('mandala')"></option>
+                                            <option value="spiral_faces" x-text="i18n('spirals')"></option>
                                         </select>
                                     </div>
 
@@ -674,7 +696,7 @@
                                     <div class="input-group input-group-sm mt-2">
                                         <!-- Draw color -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_fig_color')"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_colors')"
                                                 :class="draw_color ? '' : 'btn-secondary'"
                                                 @click="draw_color = !draw_color">
                                             <i class="fa-regular fa-droplet fa-fw"></i>
@@ -682,7 +704,7 @@
 
                                         <!-- Draw centroid -->
                                         <button class="btn btn-primary" type="button"
-                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_fig_centroid')"
+                                                data-bs-toggle="tooltip" :title="i18n('tooltip_draw_face_centroids')"
                                                 :class="draw_centroid ? '' : 'btn-secondary'"
                                                 @click="draw_centroid = !draw_centroid">
                                             <i class="fa-regular fa-circle-dot fa-fw"></i>
@@ -721,7 +743,7 @@
                 </div>
             </div>
 
-            <div class="col-12 break-before" x-data="measurements" @zome-is-made.window="process">
+            <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
                 <hr>
 
                 <div class="d-flex align-items-center">
@@ -731,21 +753,21 @@
                     </h5>
                     <!-- CSV Button -->
                     <div>
-                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                          :title="i18n('tooltip_export_2_format', 'TSV')"
-                          @click="download_tsv()">
-                        <i class="fa-solid fa-file"></i>
-                        <span class="fa-icon-file-type">TSV</span>
-                    </span>
+                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                              :title="i18n('tooltip_export_2_format', 'TSV')"
+                              @click="download_tsv()">
+                            <i class="fa-solid fa-file"></i>
+                            <span class="fa-icon-file-type">TSV</span>
+                        </span>
                     </div>
                     <div>
-                    <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                          title="Export to CSV format"
-                          :title="i18n('tooltip_export_2_format', 'CSV')"
-                          @click="download_csv()">
-                        <i class="fa-solid fa-file"></i>
-                        <span class="fa-icon-file-type">CSV</span>
-                    </span>
+                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                              title="Export to CSV format"
+                              :title="i18n('tooltip_export_2_format', 'CSV')"
+                              @click="download_csv()">
+                            <i class="fa-solid fa-file"></i>
+                            <span class="fa-icon-file-type">CSV</span>
+                        </span>
                     </div>
                 </div>
 
@@ -753,16 +775,16 @@
                     <div class="col-md-6 col-xl-5 mt-2">
                         <ul class="list-group small">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('cover_num_figures')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="cover_num_figs"></span>
+                                <span x-text="i18n('total_number_of_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="total_number_of_faces"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('cover_widest_diameter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="cover_widest_diameter"></span>
+                                <span x-text="i18n('widest_diameter_of_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="widest_diameter_of_faces"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('cover_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="cover_area"></span>
+                                <span x-text="i18n('total_area_of_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="total_area_of_faces"></span>
                             </li>
                         </ul>
                     </div>
@@ -799,7 +821,7 @@
                                         <td>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
                                                  :fill="row[0].color.hex">
-                                                <polygon :points="to_svg_points(row[0], 32)"/>
+                                                <polygon :points="row[0].resize_points_2D(32)"/>
                                             </svg>
                                         </td>
                                         <template x-for="(value, j) in row[1]" :key="j">
@@ -815,6 +837,22 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-12 break-before" x-data="framework_measurements" @zome-is-made.window="process">
+                <hr>
+                <h5 class="text-secondary mt-4 mb-4 me-auto">
+                    <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                    <span x-text="i18n('framework')" class="up-first"></span>
+                </h5>
+                <div class="overflow-scroll">
+                    <div class="mx-auto" style="width:640px;">
+                        <div class="bg-white rounded border position-relative"
+                             x-ref="timber_profile_container">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -845,9 +883,6 @@
 <script src="js/PLYExporter.min.js"></script>
 <script src="js/GLTFExporter.min.js"></script>
 
-<!-- D3 -->
-<script src="js/d3-polygon.min.js"></script>
-
 <!-- Canvg -->
 <script src="js/canvg.min.js"></script>
 
@@ -866,19 +901,22 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/en.js?v=1.0.7c"></script>
-<script src="i18n/fr.js?v=1.0.7c"></script>
-<script src="i18n/es.js?v=1.0.7c"></script>
-<script src="i18n/pl.js?v=1.0.7c"></script>
+<script src="i18n/es.js?v=1.0.8b"></script>
+<script src="i18n/en.js?v=1.0.8b"></script>
+<script src="i18n/it.js?v=1.0.8b"></script>
+<script src="i18n/fr.js?v=1.0.8b"></script>
+<script src="i18n/pl.js?v=1.0.8b"></script>
+<script src="i18n/sv.js?v=1.0.8b"></script>
 
 <!-- Core and geometry functions -->
-<script src="js/core.js?v=1.0.7c"></script>
+<script src="js/core.js?v=1.0.8b"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
+    // const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
@@ -886,41 +924,332 @@
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
     const I18N_LANGUAGES = {
-        en: I18N_EN,
         es: I18N_ES,
+        en: I18N_EN,
+        it: I18N_IT,
         fr: I18N_FR,
         pl: I18N_PL,
+        sv: I18N_SV,
     }
 
     // Use a global variable to store ZOME data
     let ZOME = new Zome({});
 
     document.addEventListener('alpine:init', () => {
-        Alpine.data('measurements', () => {
+
+        Alpine.data('framework_measurements', () => {
             return {
-                cover_figs: [],
+                timber_profile_container: null,
+                async init() {
+                    this.timber_profile_container = this.$refs.timber_profile_container;
+                },
+
+                process() {
+                    // Group prims by hash
+                    const skeleton_3D_hash_collections = ZOME.skeleton_3D_hash_collections;
+
+                    // Clear content
+                    this.timber_profile_container.innerHTML = "";
+
+                    // Define sides
+                    const side_names = ["left", "left", "front", "bottom"];
+
+                    // Reset boundaries
+                    let max_height = Number.MIN_VALUE,
+                        left_column_max_width = Number.MIN_VALUE,
+                        right_column_max_width = Number.MIN_VALUE;
+
+                    // Flatten side and define global boundaries
+                    let all_labeled_sides = {};
+                    _.forIn(skeleton_3D_hash_collections, collection => {
+                        // Take the first element of group
+                        const prism = collection.item;
+                        all_labeled_sides[prism.label] = new Array(side_names.length);
+
+                        // Get min max for front and bottom sides
+                        _.forEach(side_names, (side_name, i) => {
+                            const side = prism.flatten_2D(side_name, (i === 1) ? TAU_Q : null);
+                            switch (i) {
+                                case 0:
+                                case 1:
+                                    if (side.width > left_column_max_width) left_column_max_width = side.width;
+                                    break;
+                                case 2 :
+                                    if (side.width > right_column_max_width) right_column_max_width = side.width;
+                                    break;
+                            }
+                            if (side.height > max_height) max_height = side.height;
+                            all_labeled_sides[prism.label][i] = side;
+                        });
+                    });
+
+                    // Font size depends on container width
+                    const svg_width = this.timber_profile_container.parentNode.offsetWidth;
+                    const title_font_size = 14;
+                    const x_padding = 40;
+                    const font_size = 12;
+                    const y_padding = font_size * 4;
+
+                    const stroke_width = font_size / 10;
+                    const text_padding = font_size / 2;
+                    const stroke_dash_arr = '2, 2';
+
+                    // Compute column width
+                    const available_width = svg_width - 4 * x_padding;
+                    const left_column_width = available_width / 8;
+                    const right_column_width = left_column_width * 7
+                    const pixel_ratio = (left_column_max_width > left_column_width)
+                        ? left_column_width / left_column_max_width
+                        : left_column_max_width / left_column_width;
+
+                    const left_column_x_start = x_padding;
+                    const right_column_x_start = left_column_x_start + left_column_width + 2 * x_padding;
+
+                    _.forIn(skeleton_3D_hash_collections, collection => {
+                        // Take the item of collection
+                        const prism = collection.item;
+                        const sides = all_labeled_sides[prism.label];
+
+                        // Get sides of left and right columns
+                        const right_column_sides = sides.slice(2, 4);
+
+                        // Compute sum of side heights of the right column (front and bottom). same as left column
+                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height, 0);
+
+                        const svg_height = sum_side_height + 6 * y_padding;
+
+                        let draw_y_start, draw_y_end,
+                            vertical_line_start, vertical_line_end;
+
+                        // Draw one svg for all sides
+                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                        svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
+                        svg.setAttribute('class', "m-2 border-bottom");
+
+                        let svg_elements_with_priority = [];
+
+                        // Add label title vertically at the left of the svg
+                        const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        label_title.setAttribute('x', `${(x_padding - font_size) / 2}`);
+                        label_title.setAttribute('y', `${svg_height / 2}`);
+                        label_title.setAttribute('text-anchor', 'middle');
+                        label_title.setAttribute('alignment-baseline', 'center');
+                        label_title.setAttribute('font-size', `${title_font_size}`);
+                        label_title.setAttribute('writing-mode', 'vertical-lr');
+                        label_title.setAttribute('font-weight', 'bold');
+                        label_title.setAttribute('fill', `${prism.color.hex}`);
+                        label_title.setAttribute('style', 'text-transform: capitalize');
+
+                        label_title.innerHTML = `${this.i18n('profile')} ${prism.label}`;
+                        svg_elements_with_priority.push([label_title, 25]);
+
+                        // Draw sides
+                        _.forEach(sides, (side, i) => {
+                            // Compute y start
+                            const line_y_start = (i % 2 === 0)
+                                ? 0
+                                : draw_y_end + y_padding;
+
+                            const column_width = (i < 2) ? left_column_width : right_column_width;
+
+                            // Adapt the drawing width of the right column
+                            const adaptive_drawing = (side.width * pixel_ratio > column_width);
+                            const drawing_width = (adaptive_drawing)
+                                ? column_width
+                                : side.width * pixel_ratio;
+
+                            const column_padding = (column_width - drawing_width) / 2;
+                            const column_x_start = (i < 2)
+                                ? left_column_x_start + column_padding
+                                : right_column_x_start + column_padding;
+
+                            if (i !== 1) {
+                                const side_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                side_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
+                                side_title.setAttribute('y', `${line_y_start + y_padding}`);
+                                side_title.setAttribute('text-anchor', 'middle');
+                                side_title.setAttribute('alignment-baseline', 'center');
+                                side_title.setAttribute('font-size', `${title_font_size}`);
+                                side_title.setAttribute('style', 'text-transform: capitalize');
+
+                                side_title.innerHTML = `${side_names[i]}`;
+                                svg_elements_with_priority.push([side_title, 5]);
+                            }
+                            if(i === 0){
+                                const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                count_text.setAttribute('x', `${svg_width - x_padding}`);
+                                count_text.setAttribute('y', `${line_y_start + y_padding}`);
+                                count_text.setAttribute('text-anchor', 'end');
+                                count_text.setAttribute('font-size', `${title_font_size}`);
+                                count_text.setAttribute('font-weight', 'bold');
+                                count_text.setAttribute('fill', `${prism.color.hex}`);
+                                count_text.innerHTML = `X ${collection.count}`;
+                                svg_elements_with_priority.push([count_text, 5]);
+                            }
+
+
+
+                            // compute y start for the right side
+                            draw_y_start = line_y_start + 2 * y_padding;
+                            draw_y_end = draw_y_start + side.height * pixel_ratio;
+
+                            // fit points
+                            const fitted_points = side.fit_points();
+                            const drawing_points = fitted_points.map(p => [
+                                (i < 2 || p[0] < side.width / 2)
+                                    ? column_x_start + p[0] * pixel_ratio
+                                    : column_x_start + drawing_width - (side.width - p[0]) * pixel_ratio,
+                                draw_y_start + p[1] * pixel_ratio,
+                                0,
+                            ]);
+
+                            const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            polygon_front.setAttribute('points', `${convert_3D_to_2D(drawing_points.slice(0, 4))}`);
+                            polygon_front.setAttribute('stroke', 'black');
+                            polygon_front.setAttribute('stroke-width', `${stroke_width}px`);
+                            polygon_front.setAttribute('fill-opacity', "0.7");
+                            polygon_front.setAttribute('fill', prism.color.hex);
+                            svg_elements_with_priority.push([polygon_front, 10]);
+
+                            const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            polygon_behind.setAttribute('points', `${convert_3D_to_2D(drawing_points.slice(4, 8))}`);
+                            polygon_behind.setAttribute('stroke', 'black');
+                            polygon_behind.setAttribute('stroke-dasharray', stroke_dash_arr);
+                            polygon_behind.setAttribute('stroke-width', `${stroke_width}px`);
+                            polygon_behind.setAttribute('fill', prism.color.hex);
+                            svg_elements_with_priority.push([polygon_behind, 9]);
+
+                            // Compute vertical lines start/end
+                            if (i % 2 === 0) {
+                                vertical_line_start = draw_y_start;
+                            } else {
+                                vertical_line_end = draw_y_end;
+                            }
+
+                            let rounded_xs = [];
+                            _.forEach(drawing_points, (p, j) => {
+                                // Draw vertical lines to get a visual alignment
+                                if (i === 3) {
+                                    const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                    vertical_line.setAttribute('x1', p[0]);
+                                    vertical_line.setAttribute('y1', `${vertical_line_start}`);
+                                    vertical_line.setAttribute('x2', p[0]);
+                                    vertical_line.setAttribute('y2', `${vertical_line_end}`);
+                                    vertical_line.setAttribute('stroke', 'black');
+                                    vertical_line.setAttribute('stroke-opacity', '0.5');
+                                    vertical_line.setAttribute('stroke-dasharray', stroke_dash_arr);
+                                    vertical_line.setAttribute('stroke-width', `${stroke_width}px`);
+                                    svg_elements_with_priority.push([vertical_line, 11]);
+                                }
+
+                                const real_pt = fitted_points[j];
+                                const rounded_x = to_int(real_pt[0]);
+                                // const rounded_x = j;
+                                if (!rounded_xs.includes(rounded_x)) {
+                                    const is_boundary = rounded_x == 0 || rounded_x == to_int(side.width);
+
+                                    const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                    measurement_text.setAttribute('x', p[0]);
+                                    measurement_text.setAttribute('text-anchor', 'middle');
+
+                                    // Avoid overlapping text
+                                    const side_text_padding = (j < 4) ? text_padding : text_padding * 3;
+                                    (real_pt[1] < side.height / 2)
+                                        ? measurement_text.setAttribute('y', `${p[1] - side_text_padding}`)
+                                        : measurement_text.setAttribute('y', `${p[1] + font_size + side_text_padding}`);
+
+                                    measurement_text.setAttribute('font-size', `${font_size}`);
+                                    measurement_text.setAttribute('font-weight', (is_boundary) ? 'bold' : 'normal');
+                                    measurement_text.setAttribute('stroke', 'white');
+                                    measurement_text.setAttribute('paint-order', 'stroke');
+
+                                    measurement_text.innerHTML = `${rounded_x}`;
+
+                                    svg_elements_with_priority.push([measurement_text, 20]);
+
+                                    // add the rounded value to avoid multiple texts
+                                    rounded_xs.push(rounded_x);
+                                }
+                            });
+
+
+                            // Compute angles
+                            //    [0, 1, 2, 3, 4, 5, 6, 7]
+                            const [a, b, c, d, e, f, g, h] = drawing_points; // with z axis equals to 0
+                            const [A, B, C, D, E, F, G, H] = fitted_points;
+
+                            const base_plane = points_2_plane(A, B, C);
+                            const angles_params = (i < 2) ? [
+                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
+                            ] : [
+                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(d, c, b)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), point_between(d, a, dist(d, a) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), point_between(b, c, dist(b, c) / 2), 'middle', 'blue', '∟'],
+                            ];
+                            _.forEach(angles_params, params => {
+                                const [theta, text_pos, anchor, color, icon] = params;
+
+                                // Do not display angle if 0
+                                if (to_decimal(theta, 1) === 0) return;
+
+                                const [x, y] = text_pos;
+                                const angle_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                                angle_text.setAttribute('x', `${x}`);
+                                angle_text.setAttribute('y', `${y}`);
+                                angle_text.setAttribute('text-anchor', anchor);
+                                angle_text.setAttribute('font-size', `${font_size}`);
+                                angle_text.setAttribute('fill', color);
+                                angle_text.setAttribute('stroke', 'white');
+                                angle_text.setAttribute('stroke-width', '2px');
+                                angle_text.setAttribute('paint-order', 'stroke');
+
+                                const theta_deg = humanize_angle(rad2deg(theta));
+                                angle_text.innerHTML = `${icon}${theta_deg}`;
+                                svg_elements_with_priority.push([angle_text, 21]);
+                            });
+
+                        });
+
+                        // Sort svg elements by priority
+                        const svg_elements_sorted_by_priority = _.sortBy(svg_elements_with_priority, item => item[1]);
+                        _.forEach(svg_elements_sorted_by_priority, item => {
+                            svg.appendChild(item[0]);
+                        });
+
+                        this.timber_profile_container.appendChild(svg);
+                    });
+                },
+            };
+        });
+
+
+        Alpine.data('face_measurements', () => {
+            return {
+                outer_faces: [],
                 floor: null,
 
-                __to_real_world: null,
                 async init() {
-                    this.__to_real_world = _.debounce(this.to_real_world, 1);
                 },
-                get figs() {
-                    return this.has_floor ? [...this.cover_figs, this.floor] : this.cover_figs;
+                get faces() {
+                    return this.has_floor ? [...this.outer_faces, this.floor] : this.outer_faces;
                 },
                 get has_floor() {
                     return this.floor !== null;
                 },
-                get cover_widest_diameter() {
-                    const value = _.reduce(this.cover_figs, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                get widest_diameter_of_faces() {
+                    const value = _.reduce(this.outer_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
-                get cover_area() {
-                    const value = _.reduce(this.cover_figs, (res, p) => res + p.area * ZOME.num, 0);
+                get total_area_of_faces() {
+                    const value = _.reduce(this.outer_faces, (res, p) => res + p.area * ZOME.num, 0);
                     return humanize_area(value);
                 },
-                get cover_num_figs() {
-                    return ZOME.num * this.cover_figs.length;
+                get total_number_of_faces() {
+                    return ZOME.num * this.outer_faces.length;
                 },
                 get floor_diameter() {
                     const value = this.floor ? this.floor.diameter : 0;
@@ -955,9 +1284,9 @@
                     obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
                     obj += `# https://florianwns.github.io/z5omes/\n`;
                     obj += hr;
-                    obj += `# ${this.i18n('cover_num_figures')} : ${this.cover_num_figs}\n`;
-                    obj += `# ${this.i18n('cover_widest_diameter')} : ${this.cover_widest_diameter}\n`;
-                    obj += `# ${this.i18n('cover_area')} : ${this.cover_area}\n`;
+                    obj += `# ${this.i18n('total_number_of_faces')} : ${this.total_number_of_faces}\n`;
+                    obj += `# ${this.i18n('widest_diameter_of_faces')} : ${this.widest_diameter_of_faces}\n`;
+                    obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
                     obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
                     obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
                     obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
@@ -982,50 +1311,26 @@
                     ]
                 },
                 get table_rows() {
-                    const rows = new Array(this.figs.length);
-                    _.forEach(this.figs, (fig, i) => {
-                        rows[i] = [fig, [
-                            i + 1,
-                            humanize_distance(fig.width),
-                            humanize_distance(fig.height),
-                            humanize_arr(unique_arr(_.map(fig.edge_distances, v => humanize_distance(v)))),
-                            humanize_arr(unique_arr(_.map(fig.angles, a => humanize_angle(rad2deg(a))))),
-                            humanize_angle(rad2deg(fig.slope)),
-                            humanize_area(fig.area),
-                            humanize_distance(fig.diameter),
+                    const rows = new Array(this.faces.length);
+                    _.forEach(this.faces, (face, i) => {
+                        const flattened_face = face.flatten_2D();
+                        rows[i] = [flattened_face, [
+                            flattened_face.label, // i + 1
+                            humanize_distance(flattened_face.width),
+                            humanize_distance(flattened_face.height),
+                            humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
+                            humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
+                            humanize_angle(rad2deg(face.slope)),
+                            humanize_area(face.area),
+                            humanize_distance(face.diameter),
                         ]];
                     });
                     return rows;
                 },
                 process() {
-                    this.__to_real_world();
-                },
-                to_svg_points(piece, size) {
-                    // Recompute pixel positions
-                    const [xMin, xMax, yMin, yMax] = get_boundaries(piece.points);
-                    const pixel_ratio = size / Math.max(piece.height, piece.width);
-                    const center = size / 2;
-                    return piece.points.map(p => [
-                        (p[0] - xMin - piece.width / 2) * pixel_ratio + center,
-                        (p[1] - yMin - piece.height / 2) * pixel_ratio + center,
-                    ]);
-                },
-                to_real_world() {
                     // Clone structure
-                    const cover_3D = ZOME.cover_3D;
-                    const num_figs = cover_3D.length;
-
-                    // Resize cover figs
-                    const cover_figs = new Array(num_figs);
-                    _.forEach(cover_3D, (fig, i) => {
-                        // Planar fig
-                        let planar_fig = fig.planar();
-                        cover_figs[i] = planar_fig;
-                    });
-
-                    // Refresh proxy
-                    this.floor = (ZOME.floor) ? ZOME.floor.planar() : null;
-                    this.cover_figs = cover_figs;
+                    this.floor = (ZOME.floor) ? ZOME.floor : null;
+                    this.outer_faces = ZOME.outer_faces_3D;
                 },
             };
         });
@@ -1043,7 +1348,7 @@
                 bulleted_list_colors: [],
                 zoom: 1,
                 num_col: 1,
-                kind_of_drawing: "mandala_figs",
+                kind_of_drawing: "mandala_faces",
                 draw_color: true,
                 draw_centroid: false,
 
@@ -1070,18 +1375,12 @@
 
                     // Add swipe
                     const hammer = new Hammer(this.A4_sheet.parentNode);
-                    hammer.on('swiperight', (e) => this.previous_page());
+                    hammer.on('swiperight', (e) => this.prev_page());
                     hammer.on('swipeleft', (e) => this.next_page());
                 },
                 get grid_pct() {
                     // Compute Grid size in percent for css drawing
                     return 100 / this.num_col;
-                },
-                to_svg_points(piece, size) {
-                    // Recompute pixel positions
-                    const center = size / 2;
-                    const pixel_ratio = size / Math.max(piece.height, piece.width);
-                    return piece.points.map(p => [p[0] * pixel_ratio + center, p[1] * pixel_ratio]);
                 },
                 download_pdf() {
                     // Create empty PDF document
@@ -1125,7 +1424,7 @@
                     // Save document
                     doc.end();
 
-                    const filename = this.gen_filename("_planar_figs.pdf");
+                    const filename = this.gen_filename("_flattened_faces.pdf");
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
                         download(filename, url);
@@ -1137,49 +1436,48 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    const filename = this.gen_filename("_planar_figs.svg");
+                    const filename = this.gen_filename("_flattened_faces.svg");
                     download(filename, window.URL.createObjectURL(blob));
                 },
                 process() {
                     // Init variables
                     pages = [];
                     switch (this.kind_of_drawing) {
-                        case 'spiral_figs':
-                            this.draw_spiral_figs();
+                        case 'spiral_faces':
+                            this.draw_spiral_faces();
                             break;
-                        case 'mandala_figs':
-                            this.draw_mandala_figs();
+                        case 'mandala_faces':
+                            this.draw_mandala_faces();
                             break;
                     }
 
                     // Compute boundaries for all pages
                     page_bounds = new Array(pages.length);
-                    _.forEach(pages, (page_figs, iP) => {
+                    _.forEach(pages, (page_faces, iP) => {
                         // Reset boundaries
-                        let xMax = Number.MIN_VALUE, yMax = Number.MIN_VALUE,
-                            xMin = Number.MAX_VALUE, yMin = Number.MAX_VALUE;
+                        let x_max = Number.MIN_VALUE,
+                            y_max = Number.MIN_VALUE,
+                            x_min = Number.MAX_VALUE,
+                            y_min = Number.MAX_VALUE;
 
-                        // Compute boundaries of all figs
-                        for (const fig of page_figs) {
-                            const [xPMin, xPMax, yPMin, yPMax] = get_boundaries(fig.points);
-
-                            // Save boundaries
-                            if (xPMin < xMin) xMin = xPMin;
-                            if (xPMax > xMax) xMax = xPMax;
-                            if (yPMin < yMin) yMin = yPMin;
-                            if (yPMax > yMax) yMax = yPMax;
+                        // Get min max from all faces
+                        for (const face of page_faces) {
+                            if (face.x_min < x_min) x_min = face.x_min;
+                            if (face.x_max > x_max) x_max = face.x_max;
+                            if (face.y_min < y_min) y_min = face.y_min;
+                            if (face.y_max > y_max) y_max = face.y_max;
                         }
 
-                        const width = Math.abs(xMax - xMin);
-                        const height = Math.abs(yMax - yMin);
-                        page_bounds[iP] = [xMin, yMin, width, height];
+                        const width = Math.abs(x_max - x_min);
+                        const height = Math.abs(y_max - y_min);
+                        page_bounds[iP] = [x_min, y_min, width, height];
                     });
 
                     // Add bulleted list
                     const bulleted_list_colors = new Array(pages.length);
-                    _.forEach(pages, (page_figs, iP) => {
+                    _.forEach(pages, (page_faces, iP) => {
                         // Add color of the first piece to bulleted list
-                        bulleted_list_colors[iP] = page_figs[0].color.hex;
+                        bulleted_list_colors[iP] = page_faces[0].color.hex;
                     });
 
                     // Save proxies
@@ -1191,37 +1489,37 @@
                 },
                 build_elements_per_page() {
                     // Compute the same pixel ratio for all pages
-                    const maxWidth = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
-                    const maxHeight = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
+                    const max_width = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[2]), Number.MIN_VALUE);
+                    const max_height = _.reduce(page_bounds, (res, arr) => Math.max(res, arr[3]), Number.MIN_VALUE);
                     const border = 6;
                     const pixel_ratio = Math.min(
-                        (210 - 2 * border) / maxWidth, (297 - 6 * border) / maxHeight
+                        (210 - 2 * border) / max_width, (297 - 6 * border) / max_height
                     ) * this.zoom;
                     const center = [210 / 2, 297 / 2];
 
-                    // Build pages figs
+                    // Build pages faces
                     svg_elements_per_page = new Array(pages.length);
                     let iF, points;
                     _.forEach(pages, (page, iPa) => {
                         const num_elements = this.draw_centroid ? page.length * 2 + 1 : page.length + 1;
                         const svg_elements = new Array(num_elements);
                         iF = 0;
-                        _.forEach(page, fig => {
+                        _.forEach(page, face => {
                             const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
-                            points = fig.points.map(p => [
+                            points = face.points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
                             ]);
                             el.setAttribute('points', `${points}`);
                             el.setAttribute('stroke', 'black');
                             el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', this.draw_color ? fig.color.hex : 'transparent');
+                            el.setAttribute('fill', this.draw_color ? face.color.hex : 'transparent');
                             svg_elements[iF] = el;
                             iF++
                             if (this.draw_centroid) {
                                 const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                                const centroid = d3.polygonCentroid(points);
+                                const centroid = get_centroid(points);
                                 c.setAttribute('cx', `${centroid[0]}`);
                                 c.setAttribute('cy', `${centroid[1]}`);
                                 c.setAttribute('r', '1');
@@ -1244,52 +1542,59 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                draw_mandala_figs() {
-                    const planar_cover_2D = ZOME.planar_cover_2D;
+                draw_mandala_faces() {
+                    const mandala_3D = ZOME.mandala_3D;
 
                     // For each color, rotate piece around the origin
-                    const mandala_figs = [], O = [0, 0, 0];
+                    const mandala_faces = [], O = [0, 0, 0];
                     for (let i = 0; i < ZOME.num; i++) {
-                        _.forEach(planar_cover_2D, (spiral_fig, j) => {
-                            const fig = _.cloneDeep(spiral_fig);
-                            fig.points = fig.points.map(p => rotate_2d(p, -ZOME.rotation_angles[i], O));
-                            fig.color = ZOME.rotated_colors[fig.color.hex][i];
-                            mandala_figs.push(fig)
+                        _.forEach(mandala_3D, (face) => {
+                            mandala_faces.push(
+                                new Polygon2D(
+                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
+                                    face.label,
+                                    ZOME.rotated_colors[face.color.hex][i],
+                                )
+                            );
                         });
                     }
 
-                    if (mandala_figs.length > 0) {
-                        pages.push(mandala_figs);
+                    if (mandala_faces.length > 0) {
+                        pages.push(mandala_faces);
                     }
 
                     // Add a last page if floor exists
                     if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.planar()]);
+                        pages.push([ZOME.floor.flatten_2D()]);
                     }
                 },
-                draw_spiral_figs() {
-                    const planar_cover_2D = ZOME.planar_cover_2D;
+                draw_spiral_faces() {
+                    const mandala_3D = ZOME.mandala_3D;
 
-                    // For each color, Add a page with cover_3D figs
+                    // For each color, Add a page with outer_faces_3D faces
                     for (let i = 0; i < ZOME.num; i++) {
-                        const colored_spiral_figs = [];
-                        _.forEach(planar_cover_2D, (spiral_fig, j) => {
-                            const fig = _.cloneDeep(spiral_fig);
-                            fig.color = ZOME.rotated_colors[fig.color.hex][i];
-                            colored_spiral_figs.push(fig)
+                        const colored_spiral_faces = [];
+                        _.forEach(mandala_3D, (face) => {
+                            colored_spiral_faces.push(
+                                new Polygon2D(
+                                    swap_axes(face.points, "XZY"),
+                                    face.label,
+                                    ZOME.rotated_colors[face.color.hex][i],
+                                )
+                            );
                         });
-                        pages.push(colored_spiral_figs);
+                        pages.push(colored_spiral_faces);
                     }
 
                     // Add Floor at last page if floor exists
                     if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.planar()]);
+                        pages.push([ZOME.floor.flatten_2D()]);
                     }
                 },
                 next_page() {
                     this.page_index = (this.page_index + 1) % svg_elements_per_page.length;
                 },
-                previous_page() {
+                prev_page() {
                     this.page_index = (svg_elements_per_page.length + this.page_index - 1) % svg_elements_per_page.length;
                 },
                 keydown(key) {
@@ -1298,7 +1603,7 @@
                         case "ArrowUp":
                         case "Left":
                         case "ArrowLeft":
-                            this.previous_page();
+                            this.prev_page();
                             break;
                         case "Down":
                         case "ArrowDown":
@@ -1327,11 +1632,10 @@
         Alpine.data('renderer_3D', () => {
             let scene, camera, renderer, controls, canvas;              // Three JS Parameters
             const meshes = {
-                "axis": null,
+                "axes": null,
                 "zome_obj": null,
                 "zome_edges": null,
                 "zome_vertices": null,
-                "vanishing_lines": null,
             }
 
             return {
@@ -1340,7 +1644,7 @@
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
 
-                draw_axis: true,
+                draw_axes: true,
                 draw_vanishing_lines: true,
                 draw_zome_vertices: false,
 
@@ -1356,7 +1660,7 @@
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["axis", "vanishing_lines", "zome_vertices"].forEach(
+                    ["axes", "vanishing_lines", "zome_vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
@@ -1406,17 +1710,21 @@
                     // Add controls
                     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-                    // Add (x, y, z) Axis
-                    meshes.axis = new THREE.AxesHelper(WORLD_HEIGHT);
-                    meshes.axis.visible = this.draw_axis;
+                    // Add (x, y, z) Axes
+                    meshes.axes = new THREE.AxesHelper(WORLD_HEIGHT);
+                    meshes.axes.visible = this.draw_axes;
 
-                    scene.add(meshes.axis);
+                    scene.add(meshes.axes);
 
                     this.reset();
                     this.auto_size()
                     this.animate()
 
-                    this.$dispatch('zome-renderer-is-ready');
+                    const loader = new THREE.FontLoader();
+                    loader.load('webfonts/helvetiker_regular.typeface.json', (font) => {
+                        this.font = font;
+                        this.$dispatch('zome-renderer-is-ready');
+                    });
                 },
                 auto_size() {
                     const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
@@ -1465,25 +1773,25 @@
                 },
                 clear() {
                     // Clean old meshes
+                    if (meshes.vanishing_lines instanceof THREE.Group) {
+                        scene.remove(meshes.vanishing_lines)
+                    }
+                    meshes.vanishing_lines = new THREE.Group();
+
                     if (meshes.zome_obj instanceof THREE.Group) {
                         scene.remove(meshes.zome_obj)
                     }
                     meshes.zome_obj = new THREE.Group();
 
-                    if (meshes.zome_lines instanceof THREE.Group) {
-                        scene.remove(meshes.zome_lines)
+                    if (meshes.zome_edges instanceof THREE.Group) {
+                        scene.remove(meshes.zome_edges)
                     }
-                    meshes.zome_lines = new THREE.Group();
+                    meshes.zome_edges = new THREE.Group();
 
                     if (meshes.zome_vertices instanceof THREE.Group) {
                         scene.remove(meshes.zome_vertices)
                     }
                     meshes.zome_vertices = new THREE.Group();
-
-                    if (meshes.vanishing_lines instanceof THREE.Group) {
-                        scene.remove(meshes.vanishing_lines)
-                    }
-                    meshes.vanishing_lines = new THREE.Group();
                 },
 
                 process() {
@@ -1532,84 +1840,103 @@
                     const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
                     const edge_material = new THREE.LineBasicMaterial({color: 0x333333});
 
-                    // Build 3D Skeleton Faces
-                    const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
-                    if (spiral) {
-                        // Pre-Compute geometry points, colors and num_faces
-                        let face_points = [];
-                        let edge_points = [];
+                    // Build 3D faces and edges
+                    if (this.type_of_3D_objects == "timber_profiles_3D") {
+                        const timbers_3D = ZOME.timber_profiles_3D;
+                        const num_items = timbers_3D.length;
+                        if (num_items) {
+                            _.forEach(timbers_3D, obj => {
+                                const timbers_geometry = new THREE.BufferGeometry().setFromPoints(obj.face_points)
+                                timbers_geometry.computeVertexNormals()
 
-                        const num_figs = spiral.length;
-                        if (num_figs) {
-                            const colors = new Array(num_figs);
-                            const num_faces = new Array(num_figs);
-                            const face_colors = new Array(num_figs);
-                            _.forEach(spiral, (obj, i) => {
-                                face_points.push(...obj.faces);
-                                edge_points.push(...obj.edge_points);
-                                num_faces[i] = obj.num_faces;
-                                colors[i] = ZOME.rotated_colors[obj.color.hex];
+                                const face_colors = _.times(obj.num_face_points, _.constant(obj.color.rgb));
+                                timbers_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+                                meshes.zome_obj.add(new THREE.Mesh(timbers_geometry, material))
+
+                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(obj.edge_points)
+                                const timbers_lines = new THREE.LineSegments(edge_geometry, edge_material);
+                                meshes.zome_edges.add(timbers_lines);
                             });
+                        }
+                    } else {
+                        // Same as above but for spirals with geometry cloning for more efficiency
+                        const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
+                        if (spiral) {
+                            // Pre-Compute spiral geometry, before cloning
+                            let face_points = [];
+                            let edge_points = [];
 
-                            // Build geometry of first cover_3D
-                            const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
-                            spiral_geometry.computeVertexNormals()
-                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
+                            const num_items = spiral.length;
+                            if (num_items) {
+                                const colors = new Array(num_items);
+                                const num_face_points = new Array(num_items);
+                                _.forEach(spiral, (item, i) => {
+                                    face_points.push(...item.face_points);
+                                    edge_points.push(...item.edge_points);
+                                    num_face_points[i] = item.num_face_points;
+                                    colors[i] = ZOME.rotated_colors[item.color.hex];
+                                });
 
-                            // Compute All faces geometries and colors
-                            for (let i = 0; i < ZOME.num; i++) {
-                                const rotated_spiral_geometry = spiral_geometry.clone()
-                                rotated_spiral_geometry.points
-                                // Rotate the new geometry
-                                const a = ZOME.rotation_angles[i];
-                                rotated_spiral_geometry.rotateY(a);
+                                // Build geometry of first outer_faces_3D
+                                const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
+                                spiral_geometry.computeVertexNormals()
+                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
 
-                                // Get colors
-                                for (let j = 0; j < num_figs; j++) {
-                                    face_colors[j] = _.times(num_faces[j], _.constant(colors[j][i].rgb));
+                                // Compute all faces geometries and colors
+                                const face_colors = new Array(num_items);
+                                for (let i = 0; i < ZOME.num; i++) {
+                                    const rotated_spiral_geometry = spiral_geometry.clone()
+                                    rotated_spiral_geometry.points
+                                    // Rotate the new geometry
+                                    const theta = ZOME.rotation_angles[i];
+                                    rotated_spiral_geometry.rotateY(theta);
+
+                                    // Get colors
+                                    for (let j = 0; j < num_items; j++) {
+                                        face_colors[j] = _.times(num_face_points[j], _.constant(colors[j][i].rgb));
+                                    }
+
+                                    rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+                                    meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
+
+                                    const rotated_edge_geometry = edge_geometry.clone()
+                                    rotated_edge_geometry.rotateY(theta);
+
+                                    const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
+                                    meshes.zome_edges.add(spiral_lines);
                                 }
+                            }
+                        }
 
-                                rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
+                        // Draw Zome Floor only if draw outer_faces_3D
+                        if (this.type_of_3D_objects == "outer_faces_3D") {
+                            // Build 3D Floor Faces
+                            const floor = ZOME.floor;
+                            if (floor !== null) {
+                                const floor_geometry = new THREE.BufferGeometry();
+                                floor_geometry.setFromPoints(floor.face_points)
 
-                                const rotated_edge_geometry = edge_geometry.clone()
-                                rotated_edge_geometry.rotateY(a);
+                                const face_colors = [];
+                                _.forEach(floor.face_points, () => {
+                                    face_colors.push(...floor.color.rgb);
+                                });
 
-                                const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
-                                meshes.zome_lines.add(spiral_lines);
+                                floor_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
+                                floor_geometry.computeVertexNormals()
+
+                                meshes.zome_obj.add(new THREE.Mesh(floor_geometry, material))
+
+                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
+                                const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
+                                meshes.zome_edges.add(spiral_lines);
                             }
                         }
                     }
-
-                    // Draw Zome Floor only if draw cover
-                    if (this.type_of_3D_objects == "cover_3D") {
-                        // Build 3D Floor Faces
-                        const floor = ZOME.floor;
-                        if (floor !== null) {
-                            const floor_geometry = new THREE.BufferGeometry();
-                            floor_geometry.setFromPoints(floor.faces)
-
-                            const face_colors = [];
-                            _.forEach(floor.faces, () => {
-                                face_colors.push(...floor.color.rgb);
-                            });
-
-                            floor_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                            floor_geometry.computeVertexNormals()
-
-                            meshes.zome_obj.add(new THREE.Mesh(floor_geometry, material))
-
-                            const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
-                            const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                            meshes.zome_lines.add(spiral_lines);
-                        }
-                    }
-
                     // Add the final obj mesh to the scene
                     meshes.zome_obj.rotation.y = zome_obj_rotation;
-                    meshes.zome_lines.rotation.y = zome_obj_rotation;
+                    meshes.zome_edges.rotation.y = zome_obj_rotation;
                     scene.add(meshes.zome_obj);
-                    scene.add(meshes.zome_lines);
+                    scene.add(meshes.zome_edges);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -1638,8 +1965,8 @@
                         if (meshes.zome_vertices instanceof THREE.Group) {
                             meshes.zome_vertices.rotation.y -= this.speed
                         }
-                        if (meshes.zome_lines instanceof THREE.Group) {
-                            meshes.zome_lines.rotation.y -= this.speed
+                        if (meshes.zome_edges instanceof THREE.Group) {
+                            meshes.zome_edges.rotation.y -= this.speed
                         }
                         if (meshes.vanishing_lines instanceof THREE.Group) {
                             meshes.vanishing_lines.rotation.y -= this.speed
@@ -1680,15 +2007,27 @@
                             break;
                         case "e":
                         case "E":
-                            this.type_of_3D_objects = "cover_3D";
+                            this.type_of_3D_objects = "outer_faces_3D";
+                            break;
+                        case "i":
+                        case "I":
+                            this.type_of_3D_objects = "inner_faces_3D";
                             break;
                         case "h":
                         case "H":
                             this.reset();
                             break;
-                        case "m":
-                        case "M":
-                            this.type_of_3D_objects = "mandala_3D";
+                        case "z":
+                        case "Z":
+                            this.type_of_3D_objects = "mandala_3D_of_outer_faces";
+                            break;
+                        case "u":
+                        case "U":
+                            this.type_of_3D_objects = "mandala_3D_of_inner_faces";
+                            break;
+                        case "t":
+                        case "T":
+                            this.type_of_3D_objects = "timber_profiles_3D";
                             break;
                         case "s":
                         case "S":
@@ -1726,7 +2065,7 @@
                     language: null,
 
                     // Shape Parameters
-                    num: 10,                            // number of figs (kites or diamonds)
+                    num: 10,                            // number of faces (kites or diamonds)
                     theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
                     angle_unit: "deg",                  // Degrees or Radians
                     height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
@@ -1737,15 +2076,15 @@
                     zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
                     timber_width_in_mm: 60,                             // Timber width in mm
                     timber_thickness_in_mm: 40,                         // Timber thickness in mm
-                    z_vanishing_point_in_mm: 0,
-                    assembly_method: 0,
+                    z_vanishing_point_in_mm: null,
+                    assembly_method: 1,
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     strengthening_of_timbers: 0,
 
                     // Commons parameters
                     help_is_displayed: false,
-                    paint_similar_pieces: false,
+                    paint_similar_pieces: true,
                 },
                 params_backup: null,
 
@@ -1790,6 +2129,7 @@
                     if (!this.params.language) {
                         this.params.language = I18_DEFAULT_LANGUAGE;
                     }
+                    this.params.assembly_direction = this.constrained_assembly_direction;
                     this.save_params(false);
 
                     // Add shape parameter listeners
@@ -1801,6 +2141,10 @@
                         });
                     });
 
+                    // Constrains the assembly direction depending on assembly method
+                    this.$watch("params.assembly_method", (value) => {
+                        this.params.assembly_direction = this.constrained_assembly_direction;
+                    });
 
                     // Refresh the height_ratio if you change the zome params.num
                     this.$watch("params.num", (value) => {
@@ -1818,7 +2162,6 @@
                             this.clamp("z_vanishing_point_in_mm", this.zome_centroid);
                         });
                     });
-
 
                     // Use ClipboardJS to copy URL
                     const clipboard = new ClipboardJS("#copy-url-btn", {
@@ -1849,7 +2192,6 @@
                 },
                 i18n(key, value = null) {
                     // Translation function using JSON dictionnaries
-
                     // Return the key if not found in language and default language dictionaries
                     let translated_txt = key;
 
@@ -1991,6 +2333,20 @@
                 get can_use_screenfull() {
                     return screenfull && screenfull.isEnabled && !IS_MOBILE;
                 },
+                get num_assembly_directions() {
+                    // Constrains the assembly direction depending
+                    // on assembly method to avoid not coplanar polygon on beveled method
+                    if (this.params.assembly_method === 1) {
+                        return 2;
+                    }
+                    return ASSEMBLY_DIRECTIONS.length;
+                },
+                get constrained_assembly_direction() {
+                    return this.params.assembly_direction % this.num_assembly_directions;
+                },
+                set constrained_assembly_direction(value) {
+                    this.params.assembly_direction = value % this.num_assembly_directions;
+                },
                 reset_params() {
                     this.params = _.cloneDeep(this.params_backup);
                     this.show_toast(this.i18n('toast_settings_restored'), "rotate")
@@ -2064,9 +2420,9 @@
                 make_zome() {
                     this.is_computing = true;
 
-                    // Init arrays
-                    let vertices = [];      // 3D point vector
-                    let cover_3D = [];
+                    // Init arrays of 3D points
+                    let zome_vertices = [];
+                    let zome_faces_3D = [];
 
                     // Config Parameters
                     const N = this.params.num;
@@ -2078,8 +2434,9 @@
 
                     // Get assembly parameters
                     const ASSEMBLY_METHOD = this.params.assembly_method;
-                    const ASSEMBLY_DIRECTION = this.params.assembly_direction;
+                    const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
+                    const OUTWARD_EXPANSION = ASSEMBLY_METHOD == 2 || XPANSION_DIRECTION === -1;
 
                     // Constants
                     const M = N - 1;
@@ -2087,7 +2444,7 @@
                     const TOTAL_HEIGHT = this.total_height;
 
                     // First Point at the top
-                    this.add_vertex(vertices, [0, ZOME_HEIGHT, 0]);
+                    this.add_vertex(zome_vertices, [0, ZOME_HEIGHT, 0]);
 
                     // First crown properties
                     const first_crown_radius = this.first_crown_radius;
@@ -2097,7 +2454,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
-                        a, dist_to_ground, y, fig;
+                        theta, dist_to_ground, y, face;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -2106,15 +2463,15 @@
                     const INCR_RAD = TAU / N;
                     const rotation_angles = new Array(N);
                     for (let i = 0; i < N; i++) {
-                        a = i * INCR_RAD;
-                        rotation_angles[i] = a;
+                        theta = i * INCR_RAD;
+                        rotation_angles[i] = theta;
 
-                        B = [
-                            first_crown_radius * Math.sin(a),
+                        A = [
+                            first_crown_radius * Math.sin(theta),
                             Math.max(0, ZOME_HEIGHT - first_crown_height),
-                            first_crown_radius * Math.cos(a)
+                            first_crown_radius * Math.cos(theta)
                         ];
-                        this.add_vertex(vertices, B);
+                        this.add_vertex(zome_vertices, A);
                     }
 
                     // Loop over crowns (M = N - 1), while zome does not hit ground
@@ -2132,11 +2489,11 @@
                             iB = ficc + i;                      // Index of B point        B ◇ C
                             iC = ficc + k;                      // Index of C point          D
 
-                            A = vertices[iA];
-                            B = vertices[iB];
-                            C = vertices[iC];
+                            A = zome_vertices[iA];
+                            B = zome_vertices[iB];
+                            C = zome_vertices[iC];
 
-                            // Compute the new point to close diamond/kite fig
+                            // Compute the new point to close diamond/kite face
                             D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
@@ -2145,12 +2502,12 @@
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
                                 // Add Shape to 3D
-                                iD = this.add_vertex(vertices, D);
+                                iD = this.add_vertex(zome_vertices, D);
 
                                 // Add only the first piece
                                 if (i == 0) {
-                                    fig = new Polygon3D([A, B, D, C]);
-                                    cover_3D.push(fig);
+                                    face = new Polygon3D([A, B, D, C]);
+                                    zome_faces_3D.push(face);
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
@@ -2165,13 +2522,13 @@
                                 F = add(C, mul(sub(D, C), u));
 
                                 // Add Truncated Kite to 3D
-                                iE = this.add_vertex(vertices, E);
-                                iF = this.add_vertex(vertices, F);
+                                iE = this.add_vertex(zome_vertices, E);
+                                iF = this.add_vertex(zome_vertices, F);
 
-                                // Add Truncated Kite to figs
+                                // Add Truncated Kite to faces
                                 if (i == 0) {
-                                    fig = new Polygon3D([A, B, E, F, C])
-                                    cover_3D.push(fig);
+                                    face = new Polygon3D([A, B, E, F, C])
+                                    zome_faces_3D.push(face);
                                 }
 
                                 // Add last triangles to close it after if needed
@@ -2201,17 +2558,17 @@
                             iB = triangles[(iT + 1) % num_triangles]
                             iC = triangles[(iT + 3) % num_triangles]
 
-                            A = vertices[iA];
-                            B = vertices[iB];
-                            C = vertices[iC];
+                            A = zome_vertices[iA];
+                            B = zome_vertices[iB];
+                            C = zome_vertices[iC];
 
                             // Deal with case where B and C are too close, so we don't add them
                             const far_enough = to_decimal(dist(B, C), 2) !== 0;
                             if (far_enough) {
-                                // Add triangle to figs
+                                // Add triangle to faces
                                 if (iT == 0) {
-                                    fig = new Polygon3D([A, B, C]);
-                                    cover_3D.push(fig);
+                                    face = new Polygon3D([A, B, C]);
+                                    zome_faces_3D.push(face);
                                 }
                             }
 
@@ -2225,71 +2582,54 @@
                         }
                     }
 
-
                     // Finally add the floor piece
                     let floor = null;
                     if (floor_vertices.length >= 3) {
-                        fig = new Polygon3D(floor_vertices.map(iV => vertices[iV]), "F")
+                        face = new Polygon3D(floor_vertices.map(iV => zome_vertices[iV]), "F")
 
                         // Deal with case where points are too close to make a floor
-                        const far_enough = to_decimal(dist(fig.points[0], fig.points[1]), 2) !== 0;
+                        const far_enough = to_decimal(dist(face.points[0], face.points[1]), 2) !== 0;
                         if (far_enough) {
-                            floor = fig;
+                            floor = face;
                         }
                     }
 
-                    // Divide cover figs into two parts
-                    const framework_figs = [];
-                    const divide_polygons_into_two_parts = this.params.strengthening_of_timbers >= 1;
+                    // Divide zome faces into two parts to add strengthening of timbers
+                    let framework_faces = [], framework_crowns = [];
+                    const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
-
-                    _.forEach(cover_3D, (fig, j) => {
-                        const use_same_fig = !divide_polygons_into_two_parts
-                            || j == 0
-                            || j == cover_3D.length - 1
-                            || fig.num_points == 3;
-
-                        if (use_same_fig) {
-                            framework_figs.push(fig);
-                        } else if (divide_horizontally) {
-                            switch (fig.num_points) {
-                                case 4:
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[3]]));
-                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3]]));
-                                    break;
-                                case 5:
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[4]]));
-                                    framework_figs.push(new Polygon3D([fig.points[1], fig.points[2], fig.points[3], fig.points[4]]));
-                                    break;
-                            }
+                    _.forEach(zome_faces_3D, (face, iCrown) => {
+                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown == zome_faces_3D.length - 1) {
+                            framework_faces.push(face);
+                            framework_crowns.push(iCrown);
                         } else {
-                            switch (fig.num_points) {
-                                case 4:
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2]]));
-                                    framework_figs.push(new Polygon3D([fig.points[2], fig.points[3], fig.points[0]]));
-                                    break;
-                                case 5:
-                                    const mid_pt = midpoint(fig.points[2], fig.points[3]);
-                                    framework_figs.push(new Polygon3D([fig.points[0], fig.points[1], fig.points[2], mid_pt]));
-                                    framework_figs.push(new Polygon3D([mid_pt, fig.points[3], fig.points[4], fig.points[0]]));
-                                    break;
-                            }
+                            _.forEach(face.divide(divide_horizontally), part_of_face => {
+                                framework_faces.push(part_of_face);
+                                framework_crowns.push(iCrown);
+                            });
                         }
                     });
 
+                    // Build Outer/Inner faces
+                    const outer_faces_3D = new Array(zome_faces_3D.length),
+                        inner_faces_3D = new Array(zome_faces_3D.length);
 
-                    // Build Timbers using the assembly method
+                    let outer_face_points = new Array(zome_faces_3D[0].num_points),
+                        inner_face_points = new Array(zome_faces_3D[0].num_points);
+
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
                     const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
 
                     // Build Timbers using the assembly method
-                    let theta, hypotenuse, adjacent_side, pivot_pt,
+                    let hypotenuse, adjacent_side, pivot_pt,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
-                    _.forEach(framework_figs, (fig) => {
-                        const num_points = fig.num_points;
+                    // Loop over the faces of the framework to build timbers
+                    _.forEach(framework_faces, (face, iFace) => {
+                        const num_points = face.num_points;
+                        const iCrown = framework_crowns[iFace];
 
                         const ccw_vecs = new Array(num_points),
                             cw_vecs = new Array(num_points),
@@ -2299,31 +2639,31 @@
                             horizontal_proj_vecs = new Array(num_points),
                             wall_planes = new Array(num_points),
                             shifted_wall_planes = new Array(num_points),
-                            previous_indexes = new Array(num_points),
+                            prev_indexes = new Array(num_points),
                             next_indexes = new Array(num_points);
 
                         // Calculate vectors and projected points to avoid multiple calculations
-                        _.forEach(fig.points, (first_pt, i) => {
-                            const next_index = (i + 1) % fig.num_points;
-                            const previous_index = (fig.num_points + i - 1) % fig.num_points;
+                        _.forEach(face.points, (cur_pt, i) => {
+                            const next_index = (i + 1) % num_points;
+                            const prev_index = (num_points + i - 1) % num_points;
 
-                            previous_indexes[i] = previous_index;
+                            prev_indexes[i] = prev_index;
                             next_indexes[i] = next_index;
 
-                            const prev_pt = fig.points[previous_index];
-                            const sec_pt = fig.points[next_index];
+                            const prev_pt = face.points[prev_index];
+                            const sec_pt = face.points[next_index];
 
-                            const first_2_sec_vec = sub(sec_pt, first_pt);
-                            const first_2_prev_vec = sub(prev_pt, first_pt);
+                            const cur_2_sec_vec = sub(sec_pt, cur_pt);
+                            const cur_2_prev_vec = sub(prev_pt, cur_pt);
 
-                            const mid_pt = midpoint(first_pt, sec_pt);
+                            const mid_pt = midpoint(cur_pt, sec_pt);
                             const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
 
                             switch (ASSEMBLY_METHOD) {
                                 case 0: // GoodKarma
-                                    horizontal_proj_vec = cross_product(first_2_sec_vec, mid_2_vanishing_vec);
+                                    horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
-                                    vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_sec_vec);
+                                    vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
 
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
@@ -2332,30 +2672,30 @@
                                     break;
                                 case 1: // Beveled GoodKarma
                                 case 2: // Outward Xpansion
-                                    theta = fig.angles[i];
+                                    theta = face.angles[i];
                                     hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
                                     adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
-                                    pivot_pt = point_to(mid_pt, first_2_sec_vec, -adjacent_side);
+                                    pivot_pt = point_to(mid_pt, cur_2_sec_vec, -adjacent_side);
 
-                                    thickness_offset_pt = point_to(pivot_pt, first_2_prev_vec, hypotenuse);
+                                    thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
                                     horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
 
                                     if (to_decimal(theta) == to_decimal(TAU_Q)) {
                                         // Add Hack to avoid issues with bad cross_products on 90° angles
-                                        vertical_proj_vec = cross_product(first_2_sec_vec, first_2_prev_vec);
+                                        vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
                                     } else if (theta > TAU_Q) {
                                         // Change direction if theta is greater than 90°,
                                         // Because pivot point is after mid_pt, so the direction is opposite
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, first_2_prev_vec);
+                                        vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_prev_vec);
                                     } else {
                                         // The normal way if theta is smaller than 90 °
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(first_2_prev_vec, -1));
+                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(cur_2_prev_vec, -1));
                                     }
 
                                     if (ASSEMBLY_METHOD == 1) {
                                         vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
 
-                                        wall_planes[i] = points_2_plane(first_pt, mid_pt, vanishing_pt);
+                                        wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
                                         width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                                         const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[i])
@@ -2373,8 +2713,8 @@
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                             // Push vectors
-                            ccw_vecs[i] = first_2_sec_vec;
-                            cw_vecs[i] = first_2_prev_vec;
+                            ccw_vecs[i] = cur_2_sec_vec;
+                            cw_vecs[i] = cur_2_prev_vec;
                             horizontal_proj_vecs[i] = horizontal_proj_vec;
 
                             // Push points
@@ -2382,17 +2722,17 @@
                             thickness_offset_pts[i] = thickness_offset_pt;
                             width_offset_pts[i] = width_offset_pt;
 
-                            //Push Planes
+                            // Push Planes
                             switch (ASSEMBLY_METHOD) {
                                 case 0: // GoodKarma
                                 case 1: // Beveled GoodKarma
                                     // Use vanishing pt for wall
-                                    wall_planes[i] = points_2_plane(first_pt, mid_pt, vanishing_pt);
+                                    wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
                                     break;
                                 case 2: // Outward Xpansion
                                     // Use vertical proj rather vanishing pt
                                     wall_planes[i] = points_2_plane(
-                                        first_pt,
+                                        cur_pt,
                                         mid_pt,
                                         point_to(mid_pt, vertical_proj_vec, 100)
                                     );
@@ -2401,25 +2741,24 @@
 
                             // Same floor for shifted wall
                             shifted_wall_planes[i] = points_2_plane(
-                                point_to(thickness_offset_pt, first_2_sec_vec, 100),
+                                point_to(thickness_offset_pt, cur_2_sec_vec, 100),
                                 thickness_offset_pt,
                                 width_offset_pt,
                             );
                         });
 
-                        // Build the prism
-                        _.forEach(fig.points, (first_pt, i) => {
-                            const prev_index = previous_indexes[i];    // previous index
+                        // Build the prism and outer/inner faces
+                        _.forEach(face.points, (cur_pt, i) => {
+                            const prev_index = prev_indexes[i];    // previous index
                             const next_index = next_indexes[i];        // next index
 
-                            // Get polygon points, first is the current point and last is n-1 point
                             thickness_offset_pt = thickness_offset_pts[i];
                             width_offset_pt = width_offset_pts[i];
 
                             // Get vectors
                             const mid_pt = mid_pts[i];
-                            const first_2_sec_vec = ccw_vecs[i];
-                            const sec_2_first_vec = cw_vecs[next_index];
+                            const cur_2_sec_vec = ccw_vecs[i];
+                            const sec_2_cur_vec = cw_vecs[next_index];
 
                             // Compute Planes to make point intersections
                             let planes = new Array(4);
@@ -2451,23 +2790,53 @@
                             )
 
                             // A, B, C, D is the top part (trapezoid) of the timber
-                            A = plan_intersection(mid_pt, sec_2_first_vec, planes[0]);
-                            B = plan_intersection(thickness_offset_pt, sec_2_first_vec, planes[1]);
-                            C = plan_intersection(mid_pt, first_2_sec_vec, planes[2])
-                            D = plan_intersection(thickness_offset_pt, first_2_sec_vec, planes[3])
+                            A = plan_intersection(mid_pt, sec_2_cur_vec, planes[0]);
+                            B = plan_intersection(thickness_offset_pt, sec_2_cur_vec, planes[1]);
+                            C = plan_intersection(mid_pt, cur_2_sec_vec, planes[2])
+                            D = plan_intersection(thickness_offset_pt, cur_2_sec_vec, planes[3])
 
                             // E, F, G, H is the bottom part (trapezoid) of the timber
-                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_first_vec, planes[0]);
-                            F = plan_intersection(width_offset_pt, sec_2_first_vec, planes[1]);
-                            G = plan_intersection(mid_pt_with_vertical_proj, first_2_sec_vec, planes[2]);
-                            H = plan_intersection(width_offset_pt, first_2_sec_vec, planes[3]);
+                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_cur_vec, planes[0]);
+                            F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
+                            G = plan_intersection(mid_pt_with_vertical_proj, cur_2_sec_vec, planes[2]);
+                            H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
+
+                            // Reverse top and bottom sides depends on the xpansion direction
+                            if (OUTWARD_EXPANSION) {
+                                [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
+                            }
 
                             // Build a TrapezoidalPrism
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", fig.color);
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", face.color);
                             skeleton_3D.push(timber_prism);
 
-                            // Add vanishing line
-                            vanishing_lines.push([vanishing_pt, first_pt]);
+                            // Until the exterior/interior face has been built
+                            if (outer_faces_3D[iCrown] === undefined) {
+                                const crown_face = zome_faces_3D[iCrown]
+                                // If at least one is undefined
+                                if (_.some(outer_face_points, p => p === undefined)) {
+                                    const crown_face_point_index = _.findIndex(crown_face.points, p => _.isEqual(p, cur_pt));
+                                    if (crown_face_point_index > -1) {
+                                        outer_face_points[crown_face_point_index] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
+                                        inner_face_points[crown_face_point_index] = plan_intersection(E, sec_2_cur_vec, wall_planes[prev_index]);
+                                    }
+                                }
+
+                                // If every points are defined
+                                if (_.every(outer_face_points, p => p !== undefined)) {
+                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points);
+                                    inner_faces_3D[iCrown] = new Polygon3D(inner_face_points);
+
+                                    // Create next array as long as possible
+                                    const next_iCrown = iCrown + 1;
+                                    if (next_iCrown < zome_faces_3D.length) {
+                                        outer_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
+                                        inner_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
+                                    }
+                                }
+                            }
+
+                            vanishing_lines.push([vanishing_pt, cur_pt]);
                         });
                     });
 
@@ -2475,84 +2844,128 @@
                     let rotated_colors = {};
                     const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
 
-                    const skeleton_hashes = Object.keys(_.groupBy(skeleton_3D, (fig) => fig.hash));
-                    const cover_hashes = Object.keys(_.groupBy(cover_3D, (fig) => fig.hash));
+                    const obj_3D_to_label = [
+                        skeleton_3D,
+                        outer_faces_3D,
+                        inner_faces_3D,
+                        zome_faces_3D,
+                    ];
 
-                    // Apply color and labels
-                    if (PAINT_SIMILAR_PIECES) {
-                        // Compute cover colors
-                        let color_by_hash = {};
-                        _.forIn(cover_hashes, (hash, i) => {
-                            const color = Color.from_index(i, cover_hashes.length);
-                            color_by_hash[hash] = color;
-                            rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
+                    // Group items by hash and sort them by Y position
+                    const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
+                        // Compute hash to compare objects
+                        const grouped_by_hash = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                            return new ItemHashCollection(group[0], hash, group.length * N);
                         });
 
-                        _.forEach(cover_3D, (fig) => {
-                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
-                            fig.color = color_by_hash[fig.hash]
+                        // Sort collection by an average of vertical position
+                        return grouped_by_hash; //_.sortBy(grouped_by_hash, group => average(group.item.points)[1]);
+                    });
+
+                    // Label all items
+                    const item_label_prefixes = ["TP", "EF", "IF", "ZF"];
+                    _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
+                        // Apply labels to items
+                        _.forEach(obj_3D_to_label[i], item => {
+                            const item_index = 1 + _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
+                            item.label = `${item_label_prefixes[i]}${item_index}`
                         });
+                    });
 
-                        // Compute skeleton color
-                        color_by_hash = {};
-                        _.forIn(skeleton_hashes, (hash, i) => {
-                            const color = Color.from_index(i, skeleton_hashes.length);
-                            color_by_hash[hash] = color;
-                            rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
-                        });
+                    // Add colors to items
+                    _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
+                        // Get hash group
+                        const hashes = obj_hash_collections.map(collection => collection.hash);
+                        const num_hashes = hashes.length;
 
-                        _.forEach(skeleton_3D, (fig) => {
-                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
-                            fig.color = color_by_hash[fig.hash]
-                        });
-                    } else {
-                        // Paint colored spirals
-                        _.forEach(cover_3D, (fig) => {
-                            fig.label = `F${cover_hashes.findIndex((hash) => hash == fig.hash)}`
-                            fig.color = Color.from_angles(a, fig.slope)
-                            rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
-                        });
+                        if (PAINT_SIMILAR_PIECES) {
+                            // Associates a hash to a color
+                            const hash_to_color = {};
+                            _.forIn(hashes, (hash, j) => {
+                                if (!hash_to_color.hasOwnProperty(hash)) {
+                                    const color = Color.from_index(j, num_hashes);
+                                    hash_to_color[hash] = color;
+                                    rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
+                                }
+                            });
 
-                        _.forEach(skeleton_3D, (fig) => {
-                            fig.label = `T${skeleton_hashes.findIndex((hash) => hash == fig.hash)}`
-                            rotated_colors[fig.color.hex] = _.map(rotation_angles, (a) => Color.from_angles(a, fig.slope));
-                        });
-                    }
-
-                    // Build planar_cover_2D and mandala_3D
-                    const mandala_3D = new Array(cover_3D.length);
-                    const planar_cover_2D = new Array(cover_3D.length);
-
-                    // Compute cover planar figs
-                    let O = [0, 0, 0], planar_points = [];
-                    let rotated_A;
-                    _.forEach(cover_3D, (fig, i) => {
-                        let planar_fig = fig.planar();
-
-                        // Move to Origin and rotate to match with previous piece
-                        planar_points = planar_fig.points.map(p => add(p, O));
-                        if (i > 0) {
-                            a = angle(A, O, planar_points[1]);
-                            rotated_A = rotate_2d(planar_points[1], a, O);
-
-                            // Rotate the other way if rotatedA is not too close to A
-                            if (to_decimal(dist(rotated_A, A)) != 0) {
-                                a = -a;
-                            }
-                            planar_points = planar_points.map(p => rotate_2d(p, a, O));
+                            _.forEach(obj_3D_to_label[i], item => {
+                                item.color = hash_to_color[item.hash]
+                            });
+                        } else {
+                            // Paint colored spirals
+                            _.forEach(obj_3D_to_label[i], item => {
+                                const color = Color.from_angles(0, item.slope);
+                                item.color = color;
+                                if (!rotated_colors.hasOwnProperty(color.hex)) {
+                                    rotated_colors[color.hex] = _.map(rotation_angles, a => {
+                                        return Color.from_angles(a, item.slope)
+                                    });
+                                }
+                            });
                         }
-                        O = planar_points[planar_points.length - 1];
-                        A = planar_points[planar_points.length - 2];
+                    });
 
-                        // Save planar figs
-                        planar_fig.points = planar_points;
-                        planar_cover_2D[i] = planar_fig;
+                    // Unpack variables
+                    const [
+                        skeleton_3D_hash_collections,
+                        outer_faces_3D_hash_collections,
+                        inner_faces_3D_hash_collections,
+                    ] = arr_of_obj_hash_collections;
 
-                        // Adapt points for 3D view
-                        mandala_3D[i] = new Polygon3D(
-                            planar_points.map(p => [p[0], p[2], p[1]]),
-                            planar_fig.label,
-                            planar_fig.color,
+                    // Build Mandalas
+                    const [
+                        mandala_3D,
+                        mandala_3D_of_outer_faces,
+                        mandala_3D_of_inner_faces
+                    ] = _.map([zome_faces_3D, outer_faces_3D, inner_faces_3D], obj_3D => {
+                        const mandala_3D = new Array(obj_3D.length);
+                        let O = [0, 0, 0];
+                        let rotated_A;
+                        _.forEach(obj_3D, (face, i) => {
+                            let flattened_face = face.flatten_2D();
+
+                            // Move to Origin and rotate to match with previous piece
+                            let rotated_points = flattened_face.points.map(p => add(p, O));
+                            if (i > 0) {
+                                theta = angle(A, O, rotated_points[1]);
+                                rotated_A = rotate_point_around_z_axis(rotated_points[1], theta, O);
+
+                                // Rotate the other way if rotatedA is not too close to A
+                                if (to_decimal(dist(rotated_A, A)) != 0) {
+                                    theta = -theta;
+                                }
+                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, theta, O));
+                            }
+                            O = rotated_points[rotated_points.length - 1];
+                            A = rotated_points[rotated_points.length - 2];
+
+                            // Swap y axis with z axis for 3D display
+                            mandala_3D[i] = new Polygon3D(
+                                swap_axes(rotated_points, "XZY"),
+                                face.label,
+                                face.color
+                            )
+                        });
+                        return mandala_3D;
+                    });
+
+
+                    // Build timber_profiles_3D
+                    const timber_profiles_3D = [];
+                    let z_origin = 0;
+                    _.forIn(skeleton_3D_hash_collections, collection => {
+                        // Retrieve the prism from collection and flatten it
+                        const prism = collection.item.flatten();
+                        const translated_points = new Array(prism.num_points);
+                        _.forEach(prism.fit_points(), (point, i) => {
+                            translated_points[i] = add(point, [0, 0, z_origin]);
+                        });
+
+                        // Add space between timbers
+                        z_origin += prism.depth + 50;
+                        timber_profiles_3D.push(
+                            new TrapezoidalPrism(translated_points, prism.label, prism.color)
                         );
                     });
 
@@ -2561,11 +2974,22 @@
                         num: N,
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
-                        vertices: vertices,
-                        cover_3D: cover_3D,
+                        vertices: zome_vertices,
+
                         skeleton_3D: skeleton_3D,
+                        skeleton_3D_hash_collections: skeleton_3D_hash_collections,
+
+                        outer_faces_3D: outer_faces_3D,
+                        outer_faces_3D_hash_collections: outer_faces_3D_hash_collections,
+
+                        inner_faces_3D: inner_faces_3D,
+                        inner_faces_3D_hash_collections: inner_faces_3D_hash_collections,
+
+                        timber_profiles_3D: timber_profiles_3D,
                         mandala_3D: mandala_3D,
-                        planar_cover_2D: planar_cover_2D,
+                        mandala_3D_of_outer_faces: mandala_3D_of_outer_faces,
+                        mandala_3D_of_inner_faces: mandala_3D_of_inner_faces,
+
                         floor: floor,
                         vanishing_lines: vanishing_lines,
                     });

@@ -8,7 +8,7 @@ const I18N_FR = {
         origami: "Origami",
         view_3D: "Vue 3D",
         vanishing_lines: "Lignes de fuite",
-        axis: "Axes",
+        axes: "Axes",
         spin: "Rotation",
         vertices: "Sommets",
         fullscreen: "Plein écran",
@@ -19,11 +19,6 @@ const I18N_FR = {
         mandala: 'Mandala',
         spirals: 'Spirales',
         zome_made_with: "Ce zome a été fabriqué avec",
-
-        // Options
-        opt_none: "Aucun",
-        opt_horizontal: "Horizontal",
-        opt_vertical: "Vertical",
 
         // Tooltips
         tooltip_display_help: "Afficher l'aide",
@@ -40,6 +35,11 @@ const I18N_FR = {
         tooltip_draw_fig_color: "Dessiner les couleurs",
         tooltip_draw_fig_centroid: "Dessiner le centre de gravité",
         tooltip_split_drawing: "Divisez le dessin en plusieurs feuilles A4 pour l'exporter au format PDF",
+
+        // Options
+        opt_none: "Aucun",
+        opt_horizontal: "Horizontal",
+        opt_vertical: "Vertical",
 
         // Help
         help_shape: "La forme d'un zome est déterminée par :",
@@ -62,10 +62,9 @@ const I18N_FR = {
         help_vp_param: "Hauteur du point de fuite (utilisé pour construire les méthodes 'GoodKarma')",
         help_zc_param: "Mettre le point de fuite au centre de gravité du zome entier",
 
-
         // Keyboard shortcuts
         key_S_3D_view: "Sélectionner l'objet 'Squelette 3D'",
-        key_E_3D_view: "Sélectionner l'objet 'Couverture 3D'",
+        key_C_3D_view: "Sélectionner l'objet 'Couverture 3D'",
         key_M_3D_view: "Sélectionner l'objet 'Mandala 3D'",
         key_H_3D_view: "Restaurer la vue caméra",
         key_left_3D_view: "Vue de gauche",
@@ -75,7 +74,6 @@ const I18N_FR = {
         key_space_3D_view: "Rotation on/off",
         key_mul_3D_view: "Augmenter la vitesse de rotation",
         key_div_3D_view: "Réduire la vitesse de rotation",
-
 
         // Measurements table
         measurements: "Mesures",
