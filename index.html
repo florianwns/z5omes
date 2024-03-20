@@ -323,8 +323,8 @@
                     <select class="form-select" aria-label="Assembly method"
                             x-model.number="params.assembly_method">
                         <option selected value=0>GoodKarma</option>
-                        <option value=1>Beveled GoodKarma</option>
-                        <option value=2>Outward Xpansion</option>
+                        <option value=1>Beveled</option>
+                        <option value=2>Xpansion</option>
                     </select>
                     <button class="btn btn-primary" type="button"
                             data-bs-toggle="tooltip"
@@ -2667,8 +2667,8 @@
                                     // Multiply vertical proj by xpansion direction
                                     vertical_proj_vec = mul(vertical_proj_vec, XPANSION_DIRECTION);
                                     break;
-                                case 1: // Beveled GoodKarma
-                                case 2: // Outward Xpansion
+                                case 1: // Beveled
+                                case 2: // Xpansion
                                     theta = face.angles[i];
                                     hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
                                     adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
@@ -2722,11 +2722,11 @@
                             // Push Planes
                             switch (ASSEMBLY_METHOD) {
                                 case 0: // GoodKarma
-                                case 1: // Beveled GoodKarma
+                                case 1: // Beveled
                                     // Use vanishing pt for wall
                                     wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
                                     break;
-                                case 2: // Outward Xpansion
+                                case 2: // Xpansion
                                     // Use vertical proj rather vanishing pt
                                     wall_planes[i] = points_2_plane(
                                         cur_pt,
@@ -2839,7 +2839,6 @@
 
                     // Build sole and floor
                     let floor = null, sole = null;
-
 
                     // 🎨 Build rotated colors
                     let rotated_colors = {};

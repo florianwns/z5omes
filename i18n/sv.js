@@ -59,7 +59,7 @@ const I18N_SV = {
         help_am_param_1: "Expandering riktning: ↑ utåt ↓ inåt",
         help_am_param_2: "Hopsättningsmetod",
         help_am_param_3: "Riktning hopsättning : Medsols, Motsols eller Symmetriskt runt Axel (SemiCone)",
-        help_vp_param: "Höjd på konvergspunkt (används för att bygga med 'GoodKarma' metoder)",
+        help_vp_param: "Höjd på konvergspunkt (används för att bygga med 'GoodKarma' och 'Beveled' metoder)",
         help_zc_param: "Placera konvergenspunkten i centroiden av hela zomen",
 
         // Keyboard shortcuts

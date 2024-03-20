@@ -59,7 +59,7 @@ const I18N_PL = {
         help_am_param_1: "Kierunek ekspansji: ↑ na zewnątrz lub ↓ do wewnątrz",
         help_am_param_2: "Sposób montażu",
         help_am_param_3: "Kierunek montażu: zgodnie z ruchem wskazówek zegara, przeciwnie do ruchu wskazówek zegara lub względem osi symetrii (SemiCone)",
-        help_vp_param: "Wysokość punktu zbiegu (używana przy budowie metodą 'GoodKarma')",
+        help_vp_param: "Wysokość punktu zbiegu (używana przy budowie metodą 'GoodKarma' i 'Beveled')",
         help_zc_param: "Ustaw punkt zbiegu w centrum zome",
 
         // Keyboard shortcuts

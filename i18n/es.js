@@ -59,7 +59,7 @@ const I18N_ES = {
         help_am_param_1: "Dirección de expansión: ↑ hacia afuera o ↓ hacia adentro",
         help_am_param_2: "Método de ensamblaje",
         help_am_param_3: "Dirección de ensamblaje: en sentido horario, en sentido antihorario o eje de simetría (SemiCone)",
-        help_vp_param: "Altura del punto de convergencia (utilizado para construir métodos 'GoodKarma')",
+        help_vp_param: "Altura del punto de convergencia (utilizado para construir métodos 'GoodKarma' y 'Beveled')",
         help_zc_param: "Colocar el punto de convergencia en el centroide de todo el zome",
 
         // Keyboard shortcuts
