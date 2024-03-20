@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.8b" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.8b01" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -901,15 +901,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.8b"></script>
-<script src="i18n/en.js?v=1.0.8b"></script>
-<script src="i18n/it.js?v=1.0.8b"></script>
-<script src="i18n/fr.js?v=1.0.8b"></script>
-<script src="i18n/pl.js?v=1.0.8b"></script>
-<script src="i18n/sv.js?v=1.0.8b"></script>
+<script src="i18n/es.js?v=1.0.8b01"></script>
+<script src="i18n/en.js?v=1.0.8b01"></script>
+<script src="i18n/it.js?v=1.0.8b01"></script>
+<script src="i18n/fr.js?v=1.0.8b01"></script>
+<script src="i18n/pl.js?v=1.0.8b01"></script>
+<script src="i18n/sv.js?v=1.0.8b01"></script>
 
 <!-- Core and geometry functions -->
-<script src="js/core.js?v=1.0.8b"></script>
+<script src="js/core.js?v=1.0.8b01"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1054,7 +1054,7 @@
                             const column_width = (i < 2) ? left_column_width : right_column_width;
 
                             // Adapt the drawing width of the right column
-                            const adaptive_drawing = (side.width * pixel_ratio > column_width);
+                            const adaptive_drawing = (i >= 2 && side.width * pixel_ratio > column_width);
                             const drawing_width = (adaptive_drawing)
                                 ? column_width
                                 : side.width * pixel_ratio;
@@ -1076,7 +1076,7 @@
                                 side_title.innerHTML = `${side_names[i]}`;
                                 svg_elements_with_priority.push([side_title, 5]);
                             }
-                            if(i === 0){
+                            if (i === 0) {
                                 const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                                 count_text.setAttribute('x', `${svg_width - x_padding}`);
                                 count_text.setAttribute('y', `${line_y_start + y_padding}`);
@@ -1087,8 +1087,6 @@
                                 count_text.innerHTML = `X ${collection.count}`;
                                 svg_elements_with_priority.push([count_text, 5]);
                             }
-
-
 
                             // compute y start for the right side
                             draw_y_start = line_y_start + 2 * y_padding;
@@ -1104,21 +1102,47 @@
                                 0,
                             ]);
 
+                            const front_points_3D = drawing_points.slice(0, 4);
+                            const front_points_2D = convert_3D_to_2D(front_points_3D);
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_front.setAttribute('points', `${convert_3D_to_2D(drawing_points.slice(0, 4))}`);
+                            polygon_front.setAttribute('points', `${front_points_2D}`);
                             polygon_front.setAttribute('stroke', 'black');
                             polygon_front.setAttribute('stroke-width', `${stroke_width}px`);
                             polygon_front.setAttribute('fill-opacity', "0.7");
                             polygon_front.setAttribute('fill', prism.color.hex);
                             svg_elements_with_priority.push([polygon_front, 10]);
 
+                            const behind_points_2D = convert_3D_to_2D(drawing_points.slice(4, 8));
                             const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_behind.setAttribute('points', `${convert_3D_to_2D(drawing_points.slice(4, 8))}`);
+                            polygon_behind.setAttribute('points', `${behind_points_2D}`);
                             polygon_behind.setAttribute('stroke', 'black');
                             polygon_behind.setAttribute('stroke-dasharray', stroke_dash_arr);
                             polygon_behind.setAttribute('stroke-width', `${stroke_width}px`);
                             polygon_behind.setAttribute('fill', prism.color.hex);
                             svg_elements_with_priority.push([polygon_behind, 9]);
+
+
+                            // Add dotted line at the center to show
+                            // that it's a truncated view of the timber profile
+                            if (adaptive_drawing) {
+                                for (let j = 1; j < 4; j += 2) {
+                                    const pt1 = front_points_3D[j], pt2 = front_points_3D[(j + 1) % 4];
+                                    const line_center = midpoint(pt1, pt2);
+                                    const dotted_line_start = point_to(line_center, sub(pt1, pt2), 20);
+                                    const dotted_line_end = point_to(line_center, sub(pt2, pt1), 20);
+
+                                    const dotted_line_at_the_center = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                    dotted_line_at_the_center.setAttribute('x1', dotted_line_start[0]);
+                                    dotted_line_at_the_center.setAttribute('y1', dotted_line_start[1]);
+                                    dotted_line_at_the_center.setAttribute('x2', dotted_line_end[0]);
+                                    dotted_line_at_the_center.setAttribute('y2', dotted_line_end[1]);
+                                    dotted_line_at_the_center.setAttribute('stroke', 'white');
+                                    dotted_line_at_the_center.setAttribute('stroke-opacity', '0.5');
+                                    dotted_line_at_the_center.setAttribute('stroke-dasharray', '5 5');
+                                    dotted_line_at_the_center.setAttribute('stroke-width', `${2 * stroke_width}px`);
+                                    svg_elements_with_priority.push([dotted_line_at_the_center, 12]);
+                                }
+                            }
 
                             // Compute vertical lines start/end
                             if (i % 2 === 0) {
@@ -1180,6 +1204,9 @@
                             const [A, B, C, D, E, F, G, H] = fitted_points;
 
                             const base_plane = points_2_plane(A, B, C);
+                            const y_shift_bottom = [0, font_size * 1.25, 0],
+                                y_shift_up = [0, -font_size * 0.5, 0];
+
                             const angles_params = (i < 2) ? [
                                 [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
                             ] : [
@@ -1187,9 +1214,10 @@
                                 [Math.abs(TAU_Q - angle(d, c, b)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), point_between(d, a, dist(d, a) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), point_between(b, c, dist(b, c) / 2), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', 'blue', '∟'],
+                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)), 'middle', 'blue', '∟'],
                             ];
+
                             _.forEach(angles_params, params => {
                                 const [theta, text_pos, anchor, color, icon] = params;
 
@@ -2664,7 +2692,6 @@
                                     horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
-
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                                     // Multiply vertical proj by xpansion direction
@@ -2972,6 +2999,8 @@
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num: N,
+                        assembly_method: ASSEMBLY_METHOD,
+
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
                         vertices: zome_vertices,

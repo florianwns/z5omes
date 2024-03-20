@@ -889,9 +889,9 @@ class TrapezoidalPrism extends Base3DGeometry {
             case "back":
                 return [F, E, G, H];     // Back side
             case "top":
-                return [F, B, D, H];     // Top side
+                return [B, F, H, D];     // Top side
             case "bottom":
-                return [E, A, C, G];     // Bottom side
+                return [A, E, G, C];     // Bottom side
             case "right":
                 return [D, C, G, H];     // Right side
             case "left":
@@ -949,6 +949,7 @@ class Zome {
     constructor(
         {
             num = null,
+            assembly_method = null,
             rotation_angles = null,
             rotated_colors = null,
             vertices = null,
@@ -972,6 +973,8 @@ class Zome {
         }
     ) {
         this.num = num || 0;
+        this.assembly_method = assembly_method || 0;
+
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
         this.vertices = vertices || [];
