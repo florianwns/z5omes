@@ -2339,9 +2339,6 @@
                         this.params.z_vanishing_point_in_mm = this.zome_centroid;
                     }
                 },
-                get is_partial() {
-                    return !(this.params.height_ratio == 1 && this.params.kite_ratio == 1);
-                },
                 get total_height() {
                     return this.params.zome_height_in_mm / this.params.height_ratio;
                 },
@@ -2468,7 +2465,6 @@
 
                     // Constants
                     const M = N - 1;
-                    const IS_PARTIAL = this.is_partial;
                     const TOTAL_HEIGHT = this.total_height;
 
                     // First Point at the top
@@ -2504,7 +2500,7 @@
 
                     // Loop over crowns (M = N - 1), while zome does not hit ground
                     let hit_ground = false;
-                    const triangles = [];
+                    const last_triangle_indexes = [];
                     for (let iR = 0; iR < M && !hit_ground; iR++) {         // iR => Crown index
                         ficc = iR * N + 1;                      // First Index on current crown
                         fipc = ficc - N;                        // First index on previous crown
@@ -2541,7 +2537,7 @@
                                 // Close the zome => Deal with case where this crown is exactly on the ground
                                 hit_ground = to_decimal(y, 2) == 0;
                                 if (hit_ground) {
-                                    triangles.push(iD, iD, iC);
+                                    last_triangle_indexes.push(iD, iD, iC);
                                 }
                             } else {
                                 // Compute the Truncated Kite
@@ -2560,7 +2556,7 @@
                                 }
 
                                 // Add last triangles to close it after if needed
-                                triangles.push(iE, iF, iC);
+                                last_triangle_indexes.push(iE, iF, iC);
                                 hit_ground = true;
                                 last_is_truncated = true;
                             }
@@ -2575,50 +2571,23 @@
                     }
 
                     // Close The Zome
-                    let floor_vertices = [];
-                    const num_triangles = triangles.length;
+                    const num_triangles = last_triangle_indexes.length;
                     if (num_triangles > 0) {
                         let iT = 0;
-                        for (let iN = 0; iN < N; iN++) {
-                            iT = iN * 3;
+                        iA = last_triangle_indexes[(iT + 2) % num_triangles]
+                        iB = last_triangle_indexes[(iT + 1) % num_triangles]
+                        iC = last_triangle_indexes[(iT + 3) % num_triangles]
 
-                            iA = triangles[(iT + 2) % num_triangles]
-                            iB = triangles[(iT + 1) % num_triangles]
-                            iC = triangles[(iT + 3) % num_triangles]
+                        A = zome_vertices[iA];
+                        B = zome_vertices[iB];
+                        C = zome_vertices[iC];
 
-                            A = zome_vertices[iA];
-                            B = zome_vertices[iB];
-                            C = zome_vertices[iC];
-
-                            // Deal with case where B and C are too close, so we don't add them
-                            const far_enough = to_decimal(dist(B, C), 2) !== 0;
-                            if (far_enough) {
-                                // Add triangle to faces
-                                if (iT == 0) {
-                                    face = new Polygon3D([A, B, C]);
-                                    zome_faces_3D.push(face);
-                                }
-                            }
-
-                            // Push floor vertices only if zome is partial
-                            if (IS_PARTIAL) {
-                                floor_vertices.push(iB);
-                                if (last_is_truncated && far_enough) {
-                                    floor_vertices.push(iC);
-                                }
-                            }
-                        }
-                    }
-
-                    // Finally add the floor piece
-                    let floor = null;
-                    if (floor_vertices.length >= 3) {
-                        face = new Polygon3D(floor_vertices.map(iV => zome_vertices[iV]), "F")
-
-                        // Deal with case where points are too close to make a floor
-                        const far_enough = to_decimal(dist(face.points[0], face.points[1]), 2) !== 0;
+                        // Deal with case where B and C are too close, so we don't add them
+                        const far_enough = to_decimal(dist(B, C), 2) !== 0;
                         if (far_enough) {
-                            floor = face;
+                            // Add triangle to faces
+                            face = new Polygon3D([A, B, C]);
+                            zome_faces_3D.push(face);
                         }
                     }
 
@@ -2639,8 +2608,9 @@
                     });
 
                     // Build Outer/Inner faces
-                    const outer_faces_3D = new Array(zome_faces_3D.length),
-                        inner_faces_3D = new Array(zome_faces_3D.length);
+                    const num_faces = zome_faces_3D.length
+                    const outer_faces_3D = new Array(num_faces),
+                        inner_faces_3D = new Array(num_faces);
 
                     let outer_face_points = new Array(zome_faces_3D[0].num_points),
                         inner_face_points = new Array(zome_faces_3D[0].num_points);
@@ -2866,6 +2836,10 @@
                             vanishing_lines.push([vanishing_pt, cur_pt]);
                         });
                     });
+
+                    // Build sole and floor
+                    let floor = null, sole = null;
+
 
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
