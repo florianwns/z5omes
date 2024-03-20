@@ -55,7 +55,7 @@ const I18N_EN = {
         help_kr_param: "Ratio of the length of the lower edges to that of the upper edges of a rhombus",
         help_set_rhombus_param: "Set to rhombus (equilateral)",
         help_painting_param: "Paint spirals or similar pieces",
-        help_zh_param: "Height of the visible part of the zome",
+        help_zh_param: "Height of the visible part of the zome before xpansion (outwards/inwards)",
         help_tw_param: "Width of timbers",
         help_tt_param: "Thickness of timbers",
         help_st_param: "Strengthening of timbers",
