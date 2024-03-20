@@ -1124,7 +1124,7 @@
 
                             // Add dotted line at the center to show
                             // that it's a truncated view of the timber profile
-                            if(adaptive_drawing){
+                            if (adaptive_drawing) {
                                 for (let j = 1; j < 4; j += 2) {
                                     const pt1 = front_points_3D[j], pt2 = front_points_3D[(j + 1) % 4];
                                     const line_center = midpoint(pt1, pt2);
@@ -1205,7 +1205,7 @@
 
                             const base_plane = points_2_plane(A, B, C);
                             const y_shift_bottom = [0, font_size * 1.25, 0],
-                                  y_shift_up = [0, -font_size * 0.5, 0];
+                                y_shift_up = [0, -font_size * 0.5, 0];
 
                             const angles_params = (i < 2) ? [
                                 [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
@@ -1217,6 +1217,7 @@
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)), 'middle', 'blue', '∟'],
                             ];
+
                             _.forEach(angles_params, params => {
                                 const [theta, text_pos, anchor, color, icon] = params;
 
@@ -2691,7 +2692,6 @@
                                     horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
                                     thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
                                     vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
-
                                     width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
 
                                     // Multiply vertical proj by xpansion direction
@@ -2999,6 +2999,8 @@
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num: N,
+                        assembly_method: ASSEMBLY_METHOD,
+
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
                         vertices: zome_vertices,

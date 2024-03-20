@@ -949,6 +949,7 @@ class Zome {
     constructor(
         {
             num = null,
+            assembly_method = null,
             rotation_angles = null,
             rotated_colors = null,
             vertices = null,
@@ -972,6 +973,8 @@ class Zome {
         }
     ) {
         this.num = num || 0;
+        this.assembly_method = assembly_method || 0;
+
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
         this.vertices = vertices || [];
