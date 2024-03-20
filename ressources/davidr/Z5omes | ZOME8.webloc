@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>URL</key>
+	<string>http://localhost:63342/zomes/index.html?q=eyJsYW5ndWFnZSI6ImVuIiwibnVtIjo4LCJ0aGV0YV9kZWciOjUyLCJhbmdsZV91bml0IjoiZGVnIiwiaGVpZ2h0X3JhdGlvIjowLjYyNSwia2l0ZV9yYXRpbyI6MSwibWVhc3VyaW5nX3VuaXQiOiJjbSIsInpvbWVfaGVpZ2h0X2luX21tIjoyNjIwLCJ0aW1iZXJfd2lkdGhfaW5fbW0iOjgwLCJ0aW1iZXJfdGhpY2tuZXNzX2luX21tIjo0MSwiel92YW5pc2hpbmdfcG9pbnRfaW5fbW0iOjAsImFzc2VtYmx5X21ldGhvZCI6MCwiYXNzZW1ibHlfZGlyZWN0aW9uIjoxLCJ4cGFuc2lvbl9kaXJlY3Rpb24iOjEsInN0cmVuZ3RoZW5pbmdfb2ZfdGltYmVycyI6MCwiaGVscF9pc19kaXNwbGF5ZWQiOmZhbHNlLCJwYWludF9zaW1pbGFyX3BpZWNlcyI6dHJ1ZX0%3D</string>
+</dict>
+</plist>
