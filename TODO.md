@@ -1,14 +1,17 @@
 # TODO-LIST
 
-* [x] Ajouter les pointillés au centre de la pièce pour notifier que c'est un coupe
+* [ ] Reconstruire le sol à partir des points des faces et le considérer comme la dernière pièce des faces
 
-* [ ] Ajouter l'angle diedre du côté intérieur au centre de la pièce ?
+* [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
 
+* [ ] Dessiner les faces avec les timbers profiles pour mieux comprendre le schéma de montage
+
+* [ ] Revoir la terminologie de assembly method et de assembly direction pour plus de clarté (coupe des angles, methode de coupe)
+  
+  
 * [ ] Grouper les montants lors de l'export
   
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
-  
-* [ ] Reconstruire le sol à partir des outer faces
 
 * [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
 
@@ -23,14 +26,9 @@
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
   
 * [ ] Changer l'aide de ZH "visible part  of zome" ???  
+
 * [ ] Coller la base du zome au sol => vanishing pt is 0 for last part
   
-* [x] Les dessins de profils sont toujours fais de la même façon :
-  
-  * La largeur est fixe (équivalent à la longueur du montant)
-  * La face de devant est dessiné au trait plein
-  * Celle de derrière en pointillés.
-
 * [ ] Rajouter les essences de bois pour calculer le poids total du zome
   
   * https://www.warmaths.fr/SCIENCES/densiteCatalogue..htm
