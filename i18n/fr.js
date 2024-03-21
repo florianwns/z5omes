@@ -59,7 +59,7 @@ const I18N_FR = {
         help_am_param_1: "Direction de l'expansion : ↑ vers l'extérieur ou ↓ l'intérieur",
         help_am_param_2: "Méthode d'assemblage",
         help_am_param_3: "Direction de l'assemblage : Sens horaire, anti-horaire ou axe de symétrie (SemiCone)",
-        help_vp_param: "Hauteur du point de fuite (utilisé pour construire les méthodes 'GoodKarma')",
+        help_vp_param: "Hauteur du point de fuite (utilisé pour construire les méthodes 'GoodKarma' et 'Beveled')",
         help_zc_param: "Mettre le point de fuite au centre de gravité du zome entier",
 
         // Keyboard shortcuts

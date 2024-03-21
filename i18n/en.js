@@ -63,7 +63,7 @@ const I18N_EN = {
         help_am_param_1: "Xpansion direction : ↑ outwards or ↓ inwards",
         help_am_param_2: "Assembly method",
         help_am_param_3: "Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)",
-        help_vp_param: "Height of vanishing point (used to build 'GoodKarma' methods)",
+        help_vp_param: "Height of vanishing point (used to build 'GoodKarma' and 'Beveled' methods)",
         help_zc_param: "Place the vanishing point at the centroid of the entire zome",
 
         // Keyboard shortcuts

@@ -59,7 +59,7 @@ const I18N_IT = {
         help_am_param_1: "Direzione di espansione: ↑ verso l'esterno oppure ↓ verso l'interno",
         help_am_param_2: "Metodo di assemblaggio",
         help_am_param_3: "Direzione di montaggio: Senso orario, antiorario o asse di simmetria (SemiCono)",
-        help_vp_param: "Altezza del punto di fuga (utilizzata per costruire metodi 'GoodKarma')",
+        help_vp_param: "Altezza del punto di fuga (utilizzata per costruire metodi 'GoodKarma' e 'Beveled')",
         help_zc_param: "Posizionare il punto di fuga al centro di gravità dell'intero zome",
 
         // Keyboard shortcuts

@@ -790,24 +790,40 @@ class Polygon3D extends Base3DGeometry {
         let parts = []
         switch (this.num_points) {
             case 3:
-                parts.push(new Polygon3D(this.points));
+                parts.push(new Polygon3D(this.points), this.label, this.color);
             case 4:
                 if (horizontally) {
-                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[3]]));
-                    parts.push(new Polygon3D([this.points[1], this.points[2], this.points[3]]));
+                    parts.push(
+                        new Polygon3D([this.points[0], this.points[1], this.points[3]], this.label, this.color)
+                    );
+                    parts.push(
+                        new Polygon3D([this.points[1], this.points[2], this.points[3]], this.label, this.color)
+                    );
                 } else {
-                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[2]]));
-                    parts.push(new Polygon3D([this.points[2], this.points[3], this.points[0]]));
+                    parts.push(
+                        new Polygon3D([this.points[0], this.points[1], this.points[2]], this.label, this.color)
+                    );
+                    parts.push(
+                        new Polygon3D([this.points[2], this.points[3], this.points[0]], this.label, this.color)
+                    );
                 }
                 break;
             case 5:
                 if (horizontally) {
-                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[4]]));
-                    parts.push(new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]]));
+                    parts.push(
+                        new Polygon3D([this.points[0], this.points[1], this.points[4]], this.label, this.color)
+                    );
+                    parts.push(
+                        new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]], this.label, this.color)
+                    );
                 } else {
                     const mid_pt = midpoint(this.points[2], this.points[3]);
-                    parts.push(new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt]));
-                    parts.push(new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]]));
+                    parts.push(
+                        new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt], this.label, this.color)
+                    );
+                    parts.push(
+                        new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]], this.label, this.color)
+                    );
                 }
                 break;
         }
