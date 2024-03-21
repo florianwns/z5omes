@@ -2614,23 +2614,33 @@
                     const outer_faces_3D = new Array(num_faces),
                         inner_faces_3D = new Array(num_faces);
 
-                    let outer_face_points = new Array(zome_faces_3D[0].num_points),
-                        inner_face_points = new Array(zome_faces_3D[0].num_points);
+                    let inner_face_points = new Array(zome_faces_3D[0].num_points),
+                        outer_face_points = new Array(zome_faces_3D[0].num_points);
 
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
                     const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
 
+                    // Variables for sole building
+                    let lowest_vertical_position = Number.MAX_VALUE,
+                        sole_params = [];
+
                     // Build Timbers using the assembly method
-                    let hypotenuse, adjacent_side, pivot_pt,
+                    let hypotenuse, adjacent_side, pivot_pt, last_iCrown, timber_label_index,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     // Loop over the faces of the framework to build timbers
                     _.forEach(framework_faces, (face, iFace) => {
                         const num_points = face.num_points;
-                        const iCrown = framework_crowns[iFace];
 
+                        // Get the crown index then reset the timber label index
+                        const iCrown = framework_crowns[iFace];
+                        if (iCrown != last_iCrown) {
+                            timber_label_index = 0;
+                        }
+
+                        // Declare multiple arrays
                         const ccw_vecs = new Array(num_points),
                             cw_vecs = new Array(num_points),
                             mid_pts = new Array(num_points),
@@ -2805,14 +2815,15 @@
                                 [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
                             }
 
-                            // Build a TrapezoidalPrism
-                            const timber_label = `${face.label}${i + 1}`;
+                            // Build a TrapezoidalPrism with a label prefixed from the crown face label
+                            const crown_face = zome_faces_3D[iCrown]
+                            timber_label_index += 1;
+                            const timber_label = `${crown_face.label}${timber_label_index}`;
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label, face.color);
                             skeleton_3D.push(timber_prism);
 
                             // Until the exterior/interior face has been built
                             if (outer_faces_3D[iCrown] === undefined) {
-                                const crown_face = zome_faces_3D[iCrown]
                                 // If at least one is undefined
                                 if (_.some(outer_face_points, p => p === undefined)) {
                                     const crown_face_point_index = _.findIndex(crown_face.points, p => _.isEqual(p, cur_pt));
@@ -2824,14 +2835,34 @@
 
                                 // If every points are defined
                                 if (_.every(outer_face_points, p => p !== undefined)) {
-                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points, crown_face.label, crown_face.color);
                                     inner_faces_3D[iCrown] = new Polygon3D(inner_face_points, crown_face.label, crown_face.color);
+                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points, crown_face.label, crown_face.color);
+
+                                    // Sole parameters computing
+                                    // On the two last crown, check if points are far enough
+                                    // Take vectors and points from outer/inner faces to build a sole timber
+                                    if ([3, 5].includes(crown_face.num_points)) {
+                                        const start_index = (crown_face.num_points === 5) ? 1 : 0;
+                                        [B, D, F, H] = [
+                                            outer_face_points[start_index + 1], // outer top left corner
+                                            outer_face_points[start_index + 2], // outer top right corner
+                                            inner_face_points[start_index + 1], // inner top left corner
+                                            inner_face_points[start_index + 2], // inner top right corner
+                                        ]
+
+                                        _.forEach([B, D, F, H], p => {
+                                            lowest_vertical_position = Math.min(p[1], lowest_vertical_position);
+                                        });
+
+                                        // Add sole params to build prism later with the lowest_vertical_position variable
+                                        sole_params.push([B, D, F, H]);
+                                    }
 
                                     // Create next array as long as possible
                                     const next_iCrown = iCrown + 1;
                                     if (next_iCrown < zome_faces_3D.length) {
-                                        outer_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
                                         inner_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
+                                        outer_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
                                     }
                                 }
                             }
@@ -2840,8 +2871,34 @@
                         });
                     });
 
-                    // Build sole and floor
-                    let floor = null, sole = null;
+                    // Build Sole timbers
+                    const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
+                    const floor_plane = points_2_plane(
+                        [0, floor_vertical_position, 0],
+                        [1, floor_vertical_position, 0],
+                        [0, floor_vertical_position, 1],
+                    );
+                    const go_to_ground_vec = [0, -1, 0];
+                    _.forEach(sole_params, (params, sole_index) => {
+                        const [B, D, F, H] = params;
+
+                        const [A, C, E, G] = [
+                            plan_intersection(B, go_to_ground_vec, floor_plane),
+                            plan_intersection(D, go_to_ground_vec, floor_plane),
+                            plan_intersection(F, go_to_ground_vec, floor_plane),
+                            plan_intersection(H, go_to_ground_vec, floor_plane),
+                        ]
+
+                        // Add a tilde to the Sole label
+                        const timber_label = `~${sole_index + 1}`;
+                        const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
+
+                        // Add sole timber to the global skeleton
+                        skeleton_3D.push(timber_prism);
+                    });
+
+                    // Build Floor
+                    const floor = null;
 
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
