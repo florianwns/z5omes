@@ -289,7 +289,7 @@
                           data-bs-toggle="tooltip" :title="i18n('help_st_param')">
                         ST
                     </span>
-                    <select class="form-select" aria-label="Assembly method"
+                    <select class="form-select" aria-label="Strengthening of timbers"
                             x-model.number="params.strengthening_of_timbers">
                         <option selected value=0 x-text="i18n('opt_none')"></option>
                         <option value=1 x-text="i18n('opt_horizontal')"></option>
@@ -359,6 +359,23 @@
                             <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
                         </button>
                     </div>
+                </div>
+
+                <!-- Add footing -->
+                <div x-show="params.help_is_displayed">
+                    <b>FF</b> :
+                    <span x-text="i18n('help_ft_param')"></span>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text"
+                          data-bs-toggle="tooltip" :title="i18n('help_ft_param')">
+                        FT
+                    </span>
+                    <select class="form-select" aria-label="Footing"
+                            x-model.number="params.add_footing">
+                        <option selected value=0 x-text="i18n('opt_none')"></option>
+                        <option value=1 x-text="i18n('opt_footing')"></option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -435,7 +452,7 @@
                              tabindex="0" x-data="renderer_3D" @resize.window="__auto_size"
                              @zome-is-made.window="process">
                             <div class="d-flex justify-content-center">
-                                <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
+                                <div style="width:calc(100% - 72px); max-width: 800px;" class="position-relative">
                                     <!-- Export to -->
                                     <div class="ps-2 exports-container" style="top:0px;">
                                         <div class="vstack">
@@ -845,7 +862,7 @@
                     <span x-text="i18n('framework')" class="up-first"></span>
                 </h5>
                 <div class="overflow-scroll">
-                    <div class="mx-auto" style="width:640px;">
+                    <div class="mx-auto" style="width:800px;">
                         <div class="bg-white rounded border position-relative"
                              x-ref="timber_profile_container">
                         </div>
@@ -2110,6 +2127,7 @@
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     strengthening_of_timbers: 0,
+                    add_footing:1,
 
                     // Commons parameters
                     help_is_displayed: false,
@@ -2622,9 +2640,9 @@
                     // Compute vanishing pt
                     const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
 
-                    // Variables for sole building
+                    // Variables for Footing building
                     let lowest_vertical_position = Number.MAX_VALUE,
-                        sole_params = [];
+                        footing_params = [];
 
                     // Build Timbers using the assembly method
                     let hypotenuse, adjacent_side, pivot_pt, last_iCrown, timber_label_index,
@@ -2838,10 +2856,10 @@
                                     inner_faces_3D[iCrown] = new Polygon3D(inner_face_points, crown_face.label, crown_face.color);
                                     outer_faces_3D[iCrown] = new Polygon3D(outer_face_points, crown_face.label, crown_face.color);
 
-                                    // Sole parameters computing
+                                    // Footing parameters computing
                                     // On the two last crown, check if points are far enough
-                                    // Take vectors and points from outer/inner faces to build a sole timber
-                                    if ([3, 5].includes(crown_face.num_points)) {
+                                    // Take vectors and points from outer/inner faces to build a Footing timber
+                                    if (this.params.add_footing && [3, 5].includes(crown_face.num_points)) {
                                         const start_index = (crown_face.num_points === 5) ? 1 : 0;
                                         [B, D, F, H] = [
                                             outer_face_points[start_index + 1], // outer top left corner
@@ -2854,8 +2872,8 @@
                                             lowest_vertical_position = Math.min(p[1], lowest_vertical_position);
                                         });
 
-                                        // Add sole params to build prism later with the lowest_vertical_position variable
-                                        sole_params.push([B, D, F, H]);
+                                        // Add Footing params to build prism later with the lowest_vertical_position variable
+                                        footing_params.push([B, D, F, H]);
                                     }
 
                                     // Create next array as long as possible
@@ -2871,31 +2889,33 @@
                         });
                     });
 
-                    // Build Sole timbers
-                    const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
-                    const floor_plane = points_2_plane(
-                        [0, floor_vertical_position, 0],
-                        [1, floor_vertical_position, 0],
-                        [0, floor_vertical_position, 1],
-                    );
-                    const go_to_ground_vec = [0, -1, 0];
-                    _.forEach(sole_params, (params, sole_index) => {
-                        const [B, D, F, H] = params;
+                    // Build Footing timbers
+                    if(this.params.add_footing === 1){
+                        const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
+                        const floor_plane = points_2_plane(
+                            [0, floor_vertical_position, 0],
+                            [1, floor_vertical_position, 0],
+                            [0, floor_vertical_position, 1],
+                        );
+                        const go_to_ground_vec = [0, -1, 0];
+                        _.forEach(footing_params, (params, footing_index) => {
+                            const [B, D, F, H] = params;
 
-                        const [A, C, E, G] = [
-                            plan_intersection(B, go_to_ground_vec, floor_plane),
-                            plan_intersection(D, go_to_ground_vec, floor_plane),
-                            plan_intersection(F, go_to_ground_vec, floor_plane),
-                            plan_intersection(H, go_to_ground_vec, floor_plane),
-                        ]
+                            const [A, C, E, G] = [
+                                plan_intersection(B, go_to_ground_vec, floor_plane),
+                                plan_intersection(D, go_to_ground_vec, floor_plane),
+                                plan_intersection(F, go_to_ground_vec, floor_plane),
+                                plan_intersection(H, go_to_ground_vec, floor_plane),
+                            ]
 
-                        // Add a tilde to the Sole label
-                        const timber_label = `~${sole_index + 1}`;
-                        const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
+                            // Add a tilde to the Footing label
+                            const timber_label = `~${footing_index + 1}`;
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
 
-                        // Add sole timber to the global skeleton
-                        skeleton_3D.push(timber_prism);
-                    });
+                            // Add Footing timber to the global skeleton
+                            skeleton_3D.push(timber_prism);
+                        });
+                    }
 
                     // Build Floor
                     const floor = null;
