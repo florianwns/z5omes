@@ -1,8 +1,10 @@
 # TODO-LIST
 
-* [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
+* [ ] Dessiner les crowns à plat avec les timbers profiles pour mieux comprendre le schéma de montage
 
-* [ ] Dessiner les faces avec les timbers profiles pour mieux comprendre le schéma de montage
+* [ ] Utiliser la css sticky pour afficher les crowns à côté des timbers profiles
+
+* [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
 
 * [ ] Revoir la terminologie de assembly method et de assembly direction pour plus de clarté (coupe des angles, methode de coupe)
 
