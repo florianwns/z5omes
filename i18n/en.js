@@ -41,9 +41,10 @@ const I18N_EN = {
         tooltip_split_drawing: "Split the drawing into multiple A4 sheets for export to PDF",
 
         // Options
-        opt_none: "none",
+        opt_none: "None",
         opt_horizontal: "Horizontal",
         opt_vertical: "Vertical",
+        opt_footing: "Footing",
 
         // Help
         help_shape: "The shape of a zome is determined by :",
@@ -65,6 +66,7 @@ const I18N_EN = {
         help_am_param_3: "Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)",
         help_vp_param: "Height of vanishing point (used to build 'GoodKarma' and 'Beveled' methods)",
         help_zc_param: "Place the vanishing point at the centroid of the entire zome",
+        help_ft_param: "Add a footing based on the half of timber width",
 
         // Keyboard shortcuts
         key_H_3D_view: "Reset camera view",

@@ -289,7 +289,7 @@
                           data-bs-toggle="tooltip" :title="i18n('help_st_param')">
                         ST
                     </span>
-                    <select class="form-select" aria-label="Assembly method"
+                    <select class="form-select" aria-label="Strengthening of timbers"
                             x-model.number="params.strengthening_of_timbers">
                         <option selected value=0 x-text="i18n('opt_none')"></option>
                         <option value=1 x-text="i18n('opt_horizontal')"></option>
@@ -359,6 +359,23 @@
                             <i class="fa-solid fa-arrows-to-circle fa-fw"></i>
                         </button>
                     </div>
+                </div>
+
+                <!-- Add footing -->
+                <div x-show="params.help_is_displayed">
+                    <b>FF</b> :
+                    <span x-text="i18n('help_ft_param')"></span>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text"
+                          data-bs-toggle="tooltip" :title="i18n('help_ft_param')">
+                        FT
+                    </span>
+                    <select class="form-select" aria-label="Footing"
+                            x-model.number="params.add_footing">
+                        <option selected value=0 x-text="i18n('opt_none')"></option>
+                        <option value=1 x-text="i18n('opt_footing')"></option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -435,7 +452,7 @@
                              tabindex="0" x-data="renderer_3D" @resize.window="__auto_size"
                              @zome-is-made.window="process">
                             <div class="d-flex justify-content-center">
-                                <div style="width:calc(100% - 72px); max-width: 700px;" class="position-relative">
+                                <div style="width:calc(100% - 72px); max-width: 800px;" class="position-relative">
                                     <!-- Export to -->
                                     <div class="ps-2 exports-container" style="top:0px;">
                                         <div class="vstack">
@@ -788,22 +805,6 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_floor">
-                        <ul class="list-group small">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_perimeter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_perimeter"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_diameter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_diameter"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
-                            </li>
-                        </ul>
-                    </div>
                     <div class="col-12 mt-3 mb-5">
                         <div class="table-responsive border border-bottom-0 bg-white rounded">
                             <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
@@ -845,7 +846,7 @@
                     <span x-text="i18n('framework')" class="up-first"></span>
                 </h5>
                 <div class="overflow-scroll">
-                    <div class="mx-auto" style="width:640px;">
+                    <div class="mx-auto" style="width:800px;">
                         <div class="bg-white rounded border position-relative"
                              x-ref="timber_profile_container">
                         </div>
@@ -1016,7 +1017,7 @@
                         const right_column_sides = sides.slice(2, 4);
 
                         // Compute sum of side heights of the right column (front and bottom). same as left column
-                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height * pixel_ratio, 0);
+                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height * (2 * pixel_ratio), 0);
                         const svg_height = sum_side_height + 6 * y_padding;
 
                         let draw_y_start, draw_y_end,
@@ -1091,7 +1092,7 @@
 
                             // compute y start for the right side
                             draw_y_start = line_y_start + 2 * y_padding;
-                            draw_y_end = draw_y_start + side.height * pixel_ratio;
+                            draw_y_end = draw_y_start + side.height * (2 * pixel_ratio);
 
                             // fit points
                             const fitted_points = side.fit_points();
@@ -1099,7 +1100,7 @@
                                 (i < 2 || p[0] < side.width / 2)
                                     ? column_x_start + p[0] * pixel_ratio
                                     : column_x_start + drawing_width - (side.width - p[0]) * pixel_ratio,
-                                draw_y_start + p[1] * pixel_ratio,
+                                draw_y_start + p[1] * (2 * pixel_ratio),
                                 0,
                             ]);
 
@@ -1259,15 +1260,11 @@
         Alpine.data('face_measurements', () => {
             return {
                 outer_faces: [],
-                floor: null,
 
                 async init() {
                 },
                 get faces() {
-                    return this.has_floor ? [...this.outer_faces, this.floor] : this.outer_faces;
-                },
-                get has_floor() {
-                    return this.floor !== null;
+                    return this.outer_faces;
                 },
                 get widest_diameter_of_faces() {
                     const value = _.reduce(this.outer_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
@@ -1279,18 +1276,6 @@
                 },
                 get total_number_of_faces() {
                     return ZOME.num * this.outer_faces.length;
-                },
-                get floor_diameter() {
-                    const value = this.floor ? this.floor.diameter : 0;
-                    return humanize_distance(value);
-                },
-                get floor_area() {
-                    const value = this.floor ? this.floor.area : 0
-                    return humanize_area(value);
-                },
-                get floor_perimeter() {
-                    const value = this.floor ? this.floor.perimeter : 0
-                    return humanize_distance(value);
                 },
                 format(key, value) {
                     return to_decimal(value, FLOAT_2_STR_PRECISION);
@@ -1316,9 +1301,6 @@
                     obj += `# ${this.i18n('total_number_of_faces')} : ${this.total_number_of_faces}\n`;
                     obj += `# ${this.i18n('widest_diameter_of_faces')} : ${this.widest_diameter_of_faces}\n`;
                     obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
-                    obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
-                    obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
-                    obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
                     obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
@@ -1358,7 +1340,6 @@
                 },
                 process() {
                     // Clone structure
-                    this.floor = (ZOME.floor) ? ZOME.floor : null;
                     this.outer_faces = ZOME.outer_faces_3D;
                 },
             };
@@ -1591,11 +1572,6 @@
                     if (mandala_faces.length > 0) {
                         pages.push(mandala_faces);
                     }
-
-                    // Add a last page if floor exists
-                    if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.flatten_2D()]);
-                    }
                 },
                 draw_spiral_faces() {
                     const mandala_3D = ZOME.mandala_3D;
@@ -1613,11 +1589,6 @@
                             );
                         });
                         pages.push(colored_spiral_faces);
-                    }
-
-                    // Add Floor at last page if floor exists
-                    if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.flatten_2D()]);
                     }
                 },
                 next_page() {
@@ -1936,30 +1907,6 @@
                                 }
                             }
                         }
-
-                        // Draw Zome Floor only if draw outer_faces_3D
-                        if (this.type_of_3D_objects == "outer_faces_3D") {
-                            // Build 3D Floor Faces
-                            const floor = ZOME.floor;
-                            if (floor !== null) {
-                                const floor_geometry = new THREE.BufferGeometry();
-                                floor_geometry.setFromPoints(floor.face_points)
-
-                                const face_colors = [];
-                                _.forEach(floor.face_points, () => {
-                                    face_colors.push(...floor.color.rgb);
-                                });
-
-                                floor_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                                floor_geometry.computeVertexNormals()
-
-                                meshes.zome_obj.add(new THREE.Mesh(floor_geometry, material))
-
-                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
-                                const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                                meshes.zome_edges.add(spiral_lines);
-                            }
-                        }
                     }
                     // Add the final obj mesh to the scene
                     meshes.zome_obj.rotation.y = zome_obj_rotation;
@@ -2110,6 +2057,7 @@
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     strengthening_of_timbers: 0,
+                    add_footing:1,
 
                     // Commons parameters
                     help_is_displayed: false,
@@ -2622,9 +2570,9 @@
                     // Compute vanishing pt
                     const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
 
-                    // Variables for sole building
+                    // Variables for Footing building
                     let lowest_vertical_position = Number.MAX_VALUE,
-                        sole_params = [];
+                        footing_params = [];
 
                     // Build Timbers using the assembly method
                     let hypotenuse, adjacent_side, pivot_pt, last_iCrown, timber_label_index,
@@ -2748,7 +2696,7 @@
                                     break;
                             }
 
-                            // Same floor for shifted wall
+                            // Shifted wall plane
                             shifted_wall_planes[i] = points_2_plane(
                                 point_to(thickness_offset_pt, cur_2_sec_vec, 100),
                                 thickness_offset_pt,
@@ -2838,10 +2786,10 @@
                                     inner_faces_3D[iCrown] = new Polygon3D(inner_face_points, crown_face.label, crown_face.color);
                                     outer_faces_3D[iCrown] = new Polygon3D(outer_face_points, crown_face.label, crown_face.color);
 
-                                    // Sole parameters computing
+                                    // Footing parameters computing
                                     // On the two last crown, check if points are far enough
-                                    // Take vectors and points from outer/inner faces to build a sole timber
-                                    if ([3, 5].includes(crown_face.num_points)) {
+                                    // Take vectors and points from outer/inner faces to build a Footing timber
+                                    if (this.params.add_footing && [3, 5].includes(crown_face.num_points)) {
                                         const start_index = (crown_face.num_points === 5) ? 1 : 0;
                                         [B, D, F, H] = [
                                             outer_face_points[start_index + 1], // outer top left corner
@@ -2854,8 +2802,8 @@
                                             lowest_vertical_position = Math.min(p[1], lowest_vertical_position);
                                         });
 
-                                        // Add sole params to build prism later with the lowest_vertical_position variable
-                                        sole_params.push([B, D, F, H]);
+                                        // Add Footing params to build prism later with the lowest_vertical_position variable
+                                        footing_params.push([B, D, F, H]);
                                     }
 
                                     // Create next array as long as possible
@@ -2871,34 +2819,33 @@
                         });
                     });
 
-                    // Build Sole timbers
-                    const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
-                    const floor_plane = points_2_plane(
-                        [0, floor_vertical_position, 0],
-                        [1, floor_vertical_position, 0],
-                        [0, floor_vertical_position, 1],
-                    );
-                    const go_to_ground_vec = [0, -1, 0];
-                    _.forEach(sole_params, (params, sole_index) => {
-                        const [B, D, F, H] = params;
+                    // Build Footing timbers
+                    if(this.params.add_footing === 1){
+                        const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
+                        const floor_plane = points_2_plane(
+                            [0, floor_vertical_position, 0],
+                            [1, floor_vertical_position, 0],
+                            [0, floor_vertical_position, 1],
+                        );
+                        const go_to_ground_vec = [0, -1, 0];
+                        _.forEach(footing_params, (params, footing_index) => {
+                            const [B, D, F, H] = params;
 
-                        const [A, C, E, G] = [
-                            plan_intersection(B, go_to_ground_vec, floor_plane),
-                            plan_intersection(D, go_to_ground_vec, floor_plane),
-                            plan_intersection(F, go_to_ground_vec, floor_plane),
-                            plan_intersection(H, go_to_ground_vec, floor_plane),
-                        ]
+                            const [A, C, E, G] = [
+                                plan_intersection(B, go_to_ground_vec, floor_plane),
+                                plan_intersection(D, go_to_ground_vec, floor_plane),
+                                plan_intersection(F, go_to_ground_vec, floor_plane),
+                                plan_intersection(H, go_to_ground_vec, floor_plane),
+                            ]
 
-                        // Add a tilde to the Sole label
-                        const timber_label = `~${sole_index + 1}`;
-                        const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
+                            // Add a tilde to the Footing label
+                            const timber_label = `~${footing_index + 1}`;
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
 
-                        // Add sole timber to the global skeleton
-                        skeleton_3D.push(timber_prism);
-                    });
-
-                    // Build Floor
-                    const floor = null;
+                            // Add Footing timber to the global skeleton
+                            skeleton_3D.push(timber_prism);
+                        });
+                    }
 
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
@@ -3052,7 +2999,6 @@
                         mandala_3D_of_outer_faces: mandala_3D_of_outer_faces,
                         mandala_3D_of_inner_faces: mandala_3D_of_inner_faces,
 
-                        floor: floor,
                         vanishing_lines: vanishing_lines,
                     });
 

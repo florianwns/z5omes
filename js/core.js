@@ -984,7 +984,6 @@ class Zome {
             mandala_3D_of_outer_faces = null,
             mandala_3D_of_inner_faces = null,
 
-            floor = null,
             vanishing_lines = null
         }
     ) {
@@ -1009,7 +1008,6 @@ class Zome {
         this.mandala_3D_of_outer_faces = mandala_3D_of_outer_faces || [];
         this.mandala_3D_of_inner_faces = mandala_3D_of_inner_faces || [];
 
-        this.floor = floor || null;
         this.vanishing_lines = vanishing_lines || [];
     }
 }

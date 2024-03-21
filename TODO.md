@@ -1,10 +1,5 @@
 # TODO-LIST
 
-* [ ] Option pour ajouter une semelle ou projeter les dernières pièces au sol
-  
-* [ ] Construire le sol à partir de la semelle
-  des points des faces et le considérer comme la dernière pièce des faces
-
 * [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
 
 * [ ] Dessiner les faces avec les timbers profiles pour mieux comprendre le schéma de montage
@@ -16,6 +11,18 @@
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
 
 * [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
+
+* [ ] Ajouter les labels et angles sur la 3D grace au canvastexture
+
+  https://threejs.org/docs/#api/en/textures/CanvasTexture
+  
+  const cv = document.createElement( 'canvas' );
+  cv.width = 1536 //  3 * 512   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  cv.height = 512;// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  const ctx = cv.getContext( '2d' );
+  
+  const txtGeometry = new THREE.BoxGeometry( 2.4, 0.8, 0.1 ); // w 3 : h 1 // <<<<<<<<<
+  const cvTexture = new THREE.Texture( cv );
 
 * [ ] Mettre à jour les autres traductions avec les termes manquants
 
