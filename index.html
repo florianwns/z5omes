@@ -113,7 +113,7 @@
                           data-bs-toggle="tooltip" :title="i18n('help_n_param')">
                         N
                     </span>
-                    <input class="form-control form-range" max="24" min="3" step="1" type="range"
+                    <input class="form-control form-range" :max="ALPHABET.length" min="3" step="1" type="range"
                            x-model.number="params.num" x-ref="num_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="params.num">
@@ -920,6 +920,8 @@
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
     const DEBUG = false;
+
+    const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
@@ -2478,7 +2480,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
-                        theta, dist_to_ground, y, face;
+                        theta, dist_to_ground, y, face, face_label;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -2501,15 +2503,16 @@
                     // Loop over crowns (M = N - 1), while zome does not hit ground
                     let hit_ground = false;
                     const last_triangle_indexes = [];
-                    for (let iR = 0; iR < M && !hit_ground; iR++) {         // iR => Crown index
-                        ficc = iR * N + 1;                      // First Index on current crown
+                    for (let iCrown = 0; iCrown < M && !hit_ground; iCrown++) {         // iR => Crown index
+                        ficc = iCrown * N + 1;                  // First Index on current crown
                         fipc = ficc - N;                        // First index on previous crown
+                        face_label = ALPHABET[iCrown];          // Alphabet letter distribution
 
                         // On current crown, Loop over points from left to right
                         for (let i = 0; i < N; i++) {
                             k = (i + 1) % N
 
-                            iA = (iR == 0) ? 0 : fipc + k;      // Index of A point          A
+                            iA = (iCrown == 0) ? 0 : fipc + k;      // Index of A point          A
                             iB = ficc + i;                      // Index of B point        B ◇ C
                             iC = ficc + k;                      // Index of C point          D
 
@@ -2530,7 +2533,7 @@
 
                                 // Add only the first piece
                                 if (i == 0) {
-                                    face = new Polygon3D([A, B, D, C]);
+                                    face = new Polygon3D([A, B, D, C], face_label);
                                     zome_faces_3D.push(face);
                                 }
 
@@ -2551,7 +2554,7 @@
 
                                 // Add Truncated Kite to faces
                                 if (i == 0) {
-                                    face = new Polygon3D([A, B, E, F, C])
+                                    face = new Polygon3D([A, B, E, F, C], face_label)
                                     zome_faces_3D.push(face);
                                 }
 
@@ -2573,10 +2576,9 @@
                     // Close The Zome
                     const num_triangles = last_triangle_indexes.length;
                     if (num_triangles > 0) {
-                        let iT = 0;
-                        iA = last_triangle_indexes[(iT + 2) % num_triangles]
-                        iB = last_triangle_indexes[(iT + 1) % num_triangles]
-                        iC = last_triangle_indexes[(iT + 3) % num_triangles]
+                        iA = last_triangle_indexes[2 % num_triangles]
+                        iB = last_triangle_indexes[1 % num_triangles]
+                        iC = last_triangle_indexes[3 % num_triangles]
 
                         A = zome_vertices[iA];
                         B = zome_vertices[iB];
@@ -2586,7 +2588,8 @@
                         const far_enough = to_decimal(dist(B, C), 2) !== 0;
                         if (far_enough) {
                             // Add triangle to faces
-                            face = new Polygon3D([A, B, C]);
+                            face_label = ALPHABET[zome_faces_3D.length];
+                            face = new Polygon3D([A, B, C], face_label);
                             zome_faces_3D.push(face);
                         }
                     }
@@ -2804,7 +2807,8 @@
                             }
 
                             // Build a TrapezoidalPrism
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], "", face.color);
+                            const timber_label = `${face.label}${i + 1}`;
+                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label, face.color);
                             skeleton_3D.push(timber_prism);
 
                             // Until the exterior/interior face has been built
@@ -2821,8 +2825,8 @@
 
                                 // If every points are defined
                                 if (_.every(outer_face_points, p => p !== undefined)) {
-                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points);
-                                    inner_faces_3D[iCrown] = new Polygon3D(inner_face_points);
+                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points, crown_face.label, crown_face.color);
+                                    inner_faces_3D[iCrown] = new Polygon3D(inner_face_points, crown_face.label, crown_face.color);
 
                                     // Create next array as long as possible
                                     const next_iCrown = iCrown + 1;
@@ -2859,16 +2863,16 @@
                         });
 
                         // Sort collection by an average of vertical position
-                        return grouped_by_hash; //_.sortBy(grouped_by_hash, group => average(group.item.points)[1]);
+                        //_.sortBy(grouped_by_hash, group => average(group.item.points)[1]);
+                        return grouped_by_hash;
                     });
 
-                    // Label all items
-                    const item_label_prefixes = ["TP", "EF", "IF", "ZF"];
+                    // Label all items with the first item label of the group
                     _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
                         // Apply labels to items
                         _.forEach(obj_3D_to_label[i], item => {
-                            const item_index = 1 + _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
-                            item.label = `${item_label_prefixes[i]}${item_index}`
+                            const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
+                            item.label = obj_hash_collections[collection_item_index].item.label;
                         });
                     });
 

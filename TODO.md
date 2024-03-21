@@ -1,14 +1,16 @@
 # TODO-LIST
 
-* [ ] Reconstruire le sol à partir des points des faces et le considérer comme la dernière pièce des faces
+* [ ] Option pour ajouter une semelle ou projeter les dernières pièces au sol
+  
+* [ ] Construire le sol à partir de la semelle
+  des points des faces et le considérer comme la dernière pièce des faces
 
 * [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
 
 * [ ] Dessiner les faces avec les timbers profiles pour mieux comprendre le schéma de montage
 
 * [ ] Revoir la terminologie de assembly method et de assembly direction pour plus de clarté (coupe des angles, methode de coupe)
-  
-  
+
 * [ ] Grouper les montants lors de l'export
   
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
