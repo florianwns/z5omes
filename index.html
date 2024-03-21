@@ -1016,8 +1016,7 @@
                         const right_column_sides = sides.slice(2, 4);
 
                         // Compute sum of side heights of the right column (front and bottom). same as left column
-                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height, 0);
-
+                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height * pixel_ratio, 0);
                         const svg_height = sum_side_height + 6 * y_padding;
 
                         let draw_y_start, draw_y_end,
