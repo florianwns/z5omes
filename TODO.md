@@ -1,7 +1,5 @@
 # TODO-LIST
 
-* [x] Option pour ajouter une semelle ou projeter les dernières pièces au sol
-
 * [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
 
 * [ ] Dessiner les faces avec les timbers profiles pour mieux comprendre le schéma de montage

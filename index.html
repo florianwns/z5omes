@@ -805,22 +805,6 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_floor">
-                        <ul class="list-group small">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_perimeter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_perimeter"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_diameter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_diameter"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
-                            </li>
-                        </ul>
-                    </div>
                     <div class="col-12 mt-3 mb-5">
                         <div class="table-responsive border border-bottom-0 bg-white rounded">
                             <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
@@ -1276,15 +1260,11 @@
         Alpine.data('face_measurements', () => {
             return {
                 outer_faces: [],
-                floor: null,
 
                 async init() {
                 },
                 get faces() {
-                    return this.has_floor ? [...this.outer_faces, this.floor] : this.outer_faces;
-                },
-                get has_floor() {
-                    return this.floor !== null;
+                    return this.outer_faces;
                 },
                 get widest_diameter_of_faces() {
                     const value = _.reduce(this.outer_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
@@ -1296,18 +1276,6 @@
                 },
                 get total_number_of_faces() {
                     return ZOME.num * this.outer_faces.length;
-                },
-                get floor_diameter() {
-                    const value = this.floor ? this.floor.diameter : 0;
-                    return humanize_distance(value);
-                },
-                get floor_area() {
-                    const value = this.floor ? this.floor.area : 0
-                    return humanize_area(value);
-                },
-                get floor_perimeter() {
-                    const value = this.floor ? this.floor.perimeter : 0
-                    return humanize_distance(value);
                 },
                 format(key, value) {
                     return to_decimal(value, FLOAT_2_STR_PRECISION);
@@ -1333,9 +1301,6 @@
                     obj += `# ${this.i18n('total_number_of_faces')} : ${this.total_number_of_faces}\n`;
                     obj += `# ${this.i18n('widest_diameter_of_faces')} : ${this.widest_diameter_of_faces}\n`;
                     obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
-                    obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
-                    obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
-                    obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
                     obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
@@ -1375,7 +1340,6 @@
                 },
                 process() {
                     // Clone structure
-                    this.floor = (ZOME.floor) ? ZOME.floor : null;
                     this.outer_faces = ZOME.outer_faces_3D;
                 },
             };
@@ -1608,11 +1572,6 @@
                     if (mandala_faces.length > 0) {
                         pages.push(mandala_faces);
                     }
-
-                    // Add a last page if floor exists
-                    if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.flatten_2D()]);
-                    }
                 },
                 draw_spiral_faces() {
                     const mandala_3D = ZOME.mandala_3D;
@@ -1630,11 +1589,6 @@
                             );
                         });
                         pages.push(colored_spiral_faces);
-                    }
-
-                    // Add Floor at last page if floor exists
-                    if (ZOME.floor !== null) {
-                        pages.push([ZOME.floor.flatten_2D()]);
                     }
                 },
                 next_page() {
@@ -1951,30 +1905,6 @@
                                     const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
                                     meshes.zome_edges.add(spiral_lines);
                                 }
-                            }
-                        }
-
-                        // Draw Zome Floor only if draw outer_faces_3D
-                        if (this.type_of_3D_objects == "outer_faces_3D") {
-                            // Build 3D Floor Faces
-                            const floor = ZOME.floor;
-                            if (floor !== null) {
-                                const floor_geometry = new THREE.BufferGeometry();
-                                floor_geometry.setFromPoints(floor.face_points)
-
-                                const face_colors = [];
-                                _.forEach(floor.face_points, () => {
-                                    face_colors.push(...floor.color.rgb);
-                                });
-
-                                floor_geometry.setAttribute('color', new THREE.Float32BufferAttribute(face_colors, 3));
-                                floor_geometry.computeVertexNormals()
-
-                                meshes.zome_obj.add(new THREE.Mesh(floor_geometry, material))
-
-                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(floor.edge_points)
-                                const spiral_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                                meshes.zome_edges.add(spiral_lines);
                             }
                         }
                     }
@@ -2766,7 +2696,7 @@
                                     break;
                             }
 
-                            // Same floor for shifted wall
+                            // Shifted wall plane
                             shifted_wall_planes[i] = points_2_plane(
                                 point_to(thickness_offset_pt, cur_2_sec_vec, 100),
                                 thickness_offset_pt,
@@ -2916,9 +2846,6 @@
                             skeleton_3D.push(timber_prism);
                         });
                     }
-
-                    // Build Floor
-                    const floor = null;
 
                     // 🎨 Build rotated colors
                     let rotated_colors = {};
@@ -3072,7 +2999,6 @@
                         mandala_3D_of_outer_faces: mandala_3D_of_outer_faces,
                         mandala_3D_of_inner_faces: mandala_3D_of_inner_faces,
 
-                        floor: floor,
                         vanishing_lines: vanishing_lines,
                     });
 
