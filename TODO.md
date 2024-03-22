@@ -1,5 +1,8 @@
 # TODO-LIST
 
+* [ ] Ajouter le zomandala (Différent du mandala)
+  https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
+  
 * [ ] Dessiner les crowns à plat avec les timbers profiles pour mieux comprendre le schéma de montage
 
 * [ ] Utiliser la css sticky pour afficher les crowns à côté des timbers profiles
