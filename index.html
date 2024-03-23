@@ -996,16 +996,14 @@
                     const y_padding = font_size * 4;
 
                     const stroke_width = font_size / 10;
-                    const text_padding = font_size / 2;
+                    const text_padding = font_size / 1.5;
                     const stroke_dash_arr = '2, 2';
 
                     // Compute column width
                     const available_width = svg_width - 4 * x_padding;
-                    const left_column_width = available_width / 8;
-                    const right_column_width = left_column_width * 7
-                    const pixel_ratio = (left_column_max_width > left_column_width)
-                        ? left_column_width / left_column_max_width
-                        : left_column_max_width / left_column_width;
+                    const left_column_width = available_width / 6;
+                    const right_column_width = left_column_width * 5;
+                    const pixel_ratio = left_column_width / left_column_max_width;
 
                     const left_column_x_start = x_padding;
                     const right_column_x_start = left_column_x_start + left_column_width + 2 * x_padding;
@@ -1019,7 +1017,7 @@
                         const right_column_sides = sides.slice(2, 4);
 
                         // Compute sum of side heights of the right column (front and bottom). same as left column
-                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height * (2 * pixel_ratio), 0);
+                        const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height * pixel_ratio, 0);
                         const svg_height = sum_side_height + 6 * y_padding;
 
                         let draw_y_start, draw_y_end,
@@ -1094,7 +1092,7 @@
 
                             // compute y start for the right side
                             draw_y_start = line_y_start + 2 * y_padding;
-                            draw_y_end = draw_y_start + side.height * (2 * pixel_ratio);
+                            draw_y_end = draw_y_start + side.height * pixel_ratio;
 
                             // fit points
                             const fitted_points = side.fit_points();
@@ -1102,7 +1100,7 @@
                                 (i < 2 || p[0] < side.width / 2)
                                     ? column_x_start + p[0] * pixel_ratio
                                     : column_x_start + drawing_width - (side.width - p[0]) * pixel_ratio,
-                                draw_y_start + p[1] * (2 * pixel_ratio),
+                                draw_y_start + p[1] * pixel_ratio,
                                 0,
                             ]);
 
@@ -1211,16 +1209,38 @@
                             const y_shift_bottom = [0, font_size * 1.25, 0],
                                 y_shift_up = [0, -font_size * 0.5, 0];
 
-                            const angles_params = (i < 2) ? [
-                                [Math.abs(TAU_Q - angle(A, B, C)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
-                            ] : [
-                                [Math.abs(TAU_Q - angle(A, B, C)), point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle(D, C, B)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', 'blue', '∟'],
-                                [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))), add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)), 'middle', 'blue', '∟'],
-                            ];
+                            const angles_params = (i < 2)
+                                ? [
+                                    [
+                                        Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, F), points_2_plane(B, C, G))),
+                                        point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'
+                                    ],
+                                ] : [
+                                    [
+                                        Math.abs(TAU_Q - angle(A, B, C)),
+                                        point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'
+                                    ],
+                                    [
+                                        Math.abs(TAU_Q - angle(D, C, B)),
+                                        point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'
+                                    ],
+                                    [
+                                        Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))),
+                                        point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'
+                                    ],
+                                    [
+                                        Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))),
+                                        point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'
+                                    ],
+                                    [
+                                        Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))),
+                                        add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', 'blue', '∟'
+                                    ],
+                                    [
+                                        Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))),
+                                        add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)), 'middle', 'blue', '∟'
+                                    ],
+                                ];
 
                             _.forEach(angles_params, params => {
                                 const [theta, text_pos, anchor, color, icon] = params;
