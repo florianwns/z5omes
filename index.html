@@ -386,7 +386,7 @@
             <div class="col mb-3 mt-3">
                 <div class="d-flex align-items-center">
                     <a href="https://florianwns.github.io/z5omes/"
-                       class="text-decoration-none me-auto d-flex align-items-center">
+                       class="text-decoration-none me-auto d-flex align-items-center position-relative">
                         <img src="img/logo_zome.svg" width="46" title="Z5omes" class="me-2">
                         <h2 id="#title" class="text-primary mb-0 ">
                             <span class="d-none d-md-inline-block">
@@ -394,6 +394,8 @@
                             </span>
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
+                        <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
+                              style="font-size: 10px; top:0px">v1.0.8b02</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -646,7 +648,7 @@
                                             <label class="form-check-label" for="draw-zome-vertices-switch"
                                                    x-text="i18n('vertices')"></label>
                                             <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-zome-vertices-switch" x-model="draw_zome_vertices">
+                                                   id="draw-zome-vertices-switch" x-model="draw_vertices">
                                         </div>
 
                                         <!-- Spin -->
@@ -971,7 +973,7 @@
 
                         // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
-                            const side = prism.flatten_2D(side_name, (i === 1) ? TAU_Q : null);
+                            const side = prism.flatten_2D(side_name, true, (i === 1) ? TAU_Q : null);
                             switch (i) {
                                 case 0:
                                 case 1:
@@ -1210,10 +1212,10 @@
                                 y_shift_up = [0, -font_size * 0.5, 0];
 
                             const angles_params = (i < 2) ? [
-                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(A, B, C)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
                             ] : [
-                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle(d, c, b)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(A, B, C)), point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(D, C, B)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', 'blue', '∟'],
@@ -1633,9 +1635,10 @@
             let scene, camera, renderer, controls, canvas;              // Three JS Parameters
             const meshes = {
                 "axes": null,
-                "zome_obj": null,
-                "zome_edges": null,
-                "zome_vertices": null,
+                "zome": null,
+                "labels": null,
+                "edges": null,
+                "vertices": null,
             }
 
             return {
@@ -1646,7 +1649,7 @@
 
                 draw_axes: true,
                 draw_vanishing_lines: true,
-                draw_zome_vertices: false,
+                draw_vertices: false,
 
                 show_vanishing_lines_switch: false,
                 show_vertices_switch: false,
@@ -1660,7 +1663,7 @@
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["axes", "vanishing_lines", "zome_vertices"].forEach(
+                    ["axes", "vanishing_lines", "vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
@@ -1778,25 +1781,25 @@
                     }
                     meshes.vanishing_lines = new THREE.Group();
 
-                    if (meshes.zome_obj instanceof THREE.Group) {
-                        scene.remove(meshes.zome_obj)
+                    if (meshes.zome instanceof THREE.Group) {
+                        scene.remove(meshes.zome)
                     }
-                    meshes.zome_obj = new THREE.Group();
+                    meshes.zome = new THREE.Group();
 
-                    if (meshes.zome_edges instanceof THREE.Group) {
-                        scene.remove(meshes.zome_edges)
+                    if (meshes.edges instanceof THREE.Group) {
+                        scene.remove(meshes.edges)
                     }
-                    meshes.zome_edges = new THREE.Group();
+                    meshes.edges = new THREE.Group();
 
-                    if (meshes.zome_vertices instanceof THREE.Group) {
-                        scene.remove(meshes.zome_vertices)
+                    if (meshes.vertices instanceof THREE.Group) {
+                        scene.remove(meshes.vertices)
                     }
-                    meshes.zome_vertices = new THREE.Group();
+                    meshes.vertices = new THREE.Group();
                 },
 
                 process() {
-                    const zome_obj_rotation = (meshes.zome_obj instanceof THREE.Group)
-                        ? meshes.zome_obj.rotation.y
+                    const zome_rotation = (meshes.zome instanceof THREE.Group)
+                        ? meshes.zome.rotation.y
                         : 0;
 
                     this.clear();
@@ -1820,7 +1823,7 @@
                         });
                     }
 
-                    meshes.vanishing_lines.rotation.y = zome_obj_rotation;
+                    meshes.vanishing_lines.rotation.y = zome_rotation;
                     scene.add(meshes.vanishing_lines);
                     this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
 
@@ -1830,15 +1833,17 @@
                         geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
 
                         const material = new THREE.PointsMaterial({color: 0x888888, size: 20});
-                        meshes.zome_vertices.add(new THREE.Points(geometry, material))
+                        meshes.vertices.add(new THREE.Points(geometry, material))
                     }
-                    meshes.zome_vertices.rotation.y = zome_obj_rotation;
-                    scene.add(meshes.zome_vertices);
-                    this.set_visibility("zome_vertices", this.show_vertices_switch && this.draw_zome_vertices);
+                    meshes.vertices.rotation.y = zome_rotation;
+                    scene.add(meshes.vertices);
+                    this.set_visibility("vertices", this.show_vertices_switch && this.draw_vertices);
 
                     // Use same material for all faces
                     const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
                     const edge_material = new THREE.LineBasicMaterial({color: 0x333333});
+
+                    const add_labels = true;
 
                     // Build 3D faces and edges
                     if (this.type_of_3D_objects == "timber_profiles_3D") {
@@ -1851,11 +1856,11 @@
 
                                 const face_colors = _.times(obj.num_face_points, _.constant(obj.color.rgb));
                                 timbers_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                meshes.zome_obj.add(new THREE.Mesh(timbers_geometry, material))
+                                meshes.zome.add(new THREE.Mesh(timbers_geometry, material))
 
                                 const edge_geometry = new THREE.BufferGeometry().setFromPoints(obj.edge_points)
                                 const timbers_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                                meshes.zome_edges.add(timbers_lines);
+                                meshes.edges.add(timbers_lines);
                             });
                         }
                     } else {
@@ -1875,6 +1880,13 @@
                                     edge_points.push(...item.edge_points);
                                     num_face_points[i] = item.num_face_points;
                                     colors[i] = ZOME.rotated_colors[item.color.hex];
+
+                                    // Get flattened item and prepare label positions
+                                    const side = "front";
+                                    const flattened_item = item.flatten_2D(side);
+                                    const item_front_3D = item.get_side(side);
+
+
                                 });
 
                                 // Build geometry of first outer_faces_3D
@@ -1897,22 +1909,28 @@
                                     }
 
                                     rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                    meshes.zome_obj.add(new THREE.Mesh(rotated_spiral_geometry, material))
+                                    meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
 
                                     const rotated_edge_geometry = edge_geometry.clone()
                                     rotated_edge_geometry.rotateY(theta);
 
                                     const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
-                                    meshes.zome_edges.add(spiral_lines);
+                                    meshes.edges.add(spiral_lines);
                                 }
                             }
                         }
                     }
+
+                    {
+                        const mesh = create_label_mesh("Z5omes", 0, 100, 0);
+                        scene.add(mesh);
+                    }
+
                     // Add the final obj mesh to the scene
-                    meshes.zome_obj.rotation.y = zome_obj_rotation;
-                    meshes.zome_edges.rotation.y = zome_obj_rotation;
-                    scene.add(meshes.zome_obj);
-                    scene.add(meshes.zome_edges);
+                    meshes.zome.rotation.y = zome_rotation;
+                    meshes.edges.rotation.y = zome_rotation;
+                    scene.add(meshes.zome);
+                    scene.add(meshes.edges);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -1938,17 +1956,17 @@
                 },
                 update() {
                     if (this.is_spinning) {
-                        if (meshes.zome_vertices instanceof THREE.Group) {
-                            meshes.zome_vertices.rotation.y -= this.speed
+                        if (meshes.vertices instanceof THREE.Group) {
+                            meshes.vertices.rotation.y -= this.speed
                         }
-                        if (meshes.zome_edges instanceof THREE.Group) {
-                            meshes.zome_edges.rotation.y -= this.speed
+                        if (meshes.edges instanceof THREE.Group) {
+                            meshes.edges.rotation.y -= this.speed
                         }
                         if (meshes.vanishing_lines instanceof THREE.Group) {
                             meshes.vanishing_lines.rotation.y -= this.speed
                         }
-                        if (meshes.zome_obj instanceof THREE.Group) {
-                            meshes.zome_obj.rotation.y -= this.speed
+                        if (meshes.zome instanceof THREE.Group) {
+                            meshes.zome.rotation.y -= this.speed
                         }
                     }
                 },
@@ -2057,7 +2075,7 @@
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     strengthening_of_timbers: 0,
-                    add_footing:1,
+                    add_footing: 1,
 
                     // Commons parameters
                     help_is_displayed: false,
@@ -2395,7 +2413,7 @@
                     this.is_computing = true;
 
                     // Init arrays of 3D points
-                    let zome_vertices = [];
+                    let vertices = [];
                     let zome_faces_3D = [];
 
                     // Config Parameters
@@ -2417,7 +2435,7 @@
                     const TOTAL_HEIGHT = this.total_height;
 
                     // First Point at the top
-                    this.add_vertex(zome_vertices, [0, ZOME_HEIGHT, 0]);
+                    this.add_vertex(vertices, [0, ZOME_HEIGHT, 0]);
 
                     // First crown properties
                     const first_crown_radius = this.first_crown_radius;
@@ -2444,7 +2462,7 @@
                             Math.max(0, ZOME_HEIGHT - first_crown_height),
                             first_crown_radius * Math.cos(theta)
                         ];
-                        this.add_vertex(zome_vertices, A);
+                        this.add_vertex(vertices, A);
                     }
 
                     // Loop over crowns (M = N - 1), while zome does not hit ground
@@ -2463,9 +2481,9 @@
                             iB = ficc + i;                      // Index of B point        B ◇ C
                             iC = ficc + k;                      // Index of C point          D
 
-                            A = zome_vertices[iA];
-                            B = zome_vertices[iB];
-                            C = zome_vertices[iC];
+                            A = vertices[iA];
+                            B = vertices[iB];
+                            C = vertices[iC];
 
                             // Compute the new point to close diamond/kite face
                             D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
@@ -2476,7 +2494,7 @@
                             // Add a tolerance to Y
                             if (y + 0.001 >= 0) {
                                 // Add Shape to 3D
-                                iD = this.add_vertex(zome_vertices, D);
+                                iD = this.add_vertex(vertices, D);
 
                                 // Add only the first piece
                                 if (i == 0) {
@@ -2496,8 +2514,8 @@
                                 F = add(C, mul(sub(D, C), u));
 
                                 // Add Truncated Kite to 3D
-                                iE = this.add_vertex(zome_vertices, E);
-                                iF = this.add_vertex(zome_vertices, F);
+                                iE = this.add_vertex(vertices, E);
+                                iF = this.add_vertex(vertices, F);
 
                                 // Add Truncated Kite to faces
                                 if (i == 0) {
@@ -2527,9 +2545,9 @@
                         iB = last_triangle_indexes[1 % num_triangles]
                         iC = last_triangle_indexes[3 % num_triangles]
 
-                        A = zome_vertices[iA];
-                        B = zome_vertices[iB];
-                        C = zome_vertices[iC];
+                        A = vertices[iA];
+                        B = vertices[iB];
+                        C = vertices[iC];
 
                         // Deal with case where B and C are too close, so we don't add them
                         const far_enough = to_decimal(dist(B, C), 2) !== 0;
@@ -2820,7 +2838,7 @@
                     });
 
                     // Build Footing timbers
-                    if(this.params.add_footing === 1){
+                    if (this.params.add_footing === 1) {
                         const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
                         const floor_plane = points_2_plane(
                             [0, floor_vertical_position, 0],
@@ -2983,7 +3001,7 @@
 
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
-                        vertices: zome_vertices,
+                        vertices: vertices,
 
                         skeleton_3D: skeleton_3D,
                         skeleton_3D_hash_collections: skeleton_3D_hash_collections,

@@ -1,8 +1,13 @@
 # TODO-LIST
 
-* [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
+* [ ] Ajouter le zomandala (Différent du mandala)
+  https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
+  
+* [ ] Dessiner les crowns à plat avec les timbers profiles pour mieux comprendre le schéma de montage
 
-* [ ] Dessiner les faces avec les timbers profiles pour mieux comprendre le schéma de montage
+* [ ] Utiliser la css sticky pour afficher les crowns à côté des timbers profiles
+
+* [ ] Ajouter l'angle diedre au niveau du dessing des faces avec les timbers profiles
 
 * [ ] Revoir la terminologie de assembly method et de assembly direction pour plus de clarté (coupe des angles, methode de coupe)
 
