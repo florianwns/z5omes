@@ -394,7 +394,8 @@
                             </span>
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
-                        <span class="d-none d-sm-inline-block text-muted position-absolute end-0" style="font-size: 10px; top:0px">v1.0.8b02</span>
+                        <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
+                              style="font-size: 10px; top:0px">v1.0.8b02</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -972,7 +973,7 @@
 
                         // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
-                            const side = prism.flatten_2D(side_name, (i === 1) ? TAU_Q : null);
+                            const side = prism.flatten_2D(side_name, true, (i === 1) ? TAU_Q : null);
                             switch (i) {
                                 case 0:
                                 case 1:
@@ -1841,6 +1842,8 @@
                     const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
                     const edge_material = new THREE.LineBasicMaterial({color: 0x333333});
 
+                    const add_labels = true;
+
                     // Build 3D faces and edges
                     if (this.type_of_3D_objects == "timber_profiles_3D") {
                         const timbers_3D = ZOME.timber_profiles_3D;
@@ -1876,6 +1879,13 @@
                                     edge_points.push(...item.edge_points);
                                     num_face_points[i] = item.num_face_points;
                                     colors[i] = ZOME.rotated_colors[item.color.hex];
+
+                                    // Get flattened item and prepare label positions
+                                    const side = "front";
+                                    const flattened_item = item.flatten_2D(side);
+                                    const item_front_3D = item.get_side(side);
+
+
                                 });
 
                                 // Build geometry of first outer_faces_3D
@@ -1909,6 +1919,7 @@
                             }
                         }
                     }
+
                     // Add the final obj mesh to the scene
                     meshes.zome_obj.rotation.y = zome_obj_rotation;
                     meshes.zome_edges.rotation.y = zome_obj_rotation;
@@ -2058,7 +2069,7 @@
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     strengthening_of_timbers: 0,
-                    add_footing:1,
+                    add_footing: 1,
 
                     // Commons parameters
                     help_is_displayed: false,
@@ -2821,7 +2832,7 @@
                     });
 
                     // Build Footing timbers
-                    if(this.params.add_footing === 1){
+                    if (this.params.add_footing === 1) {
                         const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
                         const floor_plane = points_2_plane(
                             [0, floor_vertical_position, 0],

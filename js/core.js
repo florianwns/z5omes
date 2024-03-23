@@ -364,6 +364,52 @@ function circle_path(cx, cy, r) {
     return 'M ' + cx + ' ' + cy + ' m -' + r + ', 0 a ' + r + ',' + r + ' 0 1,1 ' + (r * 2) + ',0 a ' + r + ',' + r + ' 0 1,1 -' + (r * 2) + ',0';
 }
 
+
+// --------------------------
+// ====== CANVAS/WEBGL ======
+// --------------------------
+
+function create_label_mesh(text, x, y, z, font_size = 26, padding = 4, background_color = 'black', text_color = 'white',) {
+    const canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d", {antialias: true, alpha: false});
+
+    // Trick to adapt the canvas size to the text
+    ctx.font = font_size + "px Roboto, sans-serif";
+    const text_width = ctx.measureText(text).width;
+    canvas.width = text_width + 2 * padding;
+    canvas.height = font_size + 2 * padding;
+    ctx = canvas.getContext("2d");
+    ctx.font = font_size + "px Arial";
+
+    // Set the background color
+    ctx.fillStyle = background_color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = text_color;
+
+    // Add 2 px to the vertical position to center the text
+    // (i don't know why, maybe a little shift due of the font style)
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 2);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+
+    const material = new THREE.MeshLambertMaterial({
+        side: THREE.FrontSide,
+        map: texture
+    });
+    const geometry = new THREE.PlaneGeometry(canvas.width, canvas.height, 10, 10);
+    const mesh = new THREE.Mesh(geometry, material);
+
+    mesh.overdraw = true;
+    // mesh.doubleSided = true;
+    mesh.position.x = x - canvas.width / 2;
+    mesh.position.y = y - canvas.height / 2;
+    return mesh;
+}
+
 // ---------------------------------
 // ========== Conversions ==========
 // ---------------------------------
@@ -671,6 +717,10 @@ class Base3DGeometry extends LabeledObject {
         // Adjust the points so the minimum values end up at zero
         return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2] - this.z_min]);
     }
+
+    get_side(side = "front") {
+        return this;
+    }
 }
 
 class Polygon2D extends Base3DGeometry {
@@ -842,14 +892,6 @@ class TrapezoidalPrism extends Base3DGeometry {
         // Call parent constructor
         super(points, label, color);
 
-        // Build the 6 sides of TrapezoidalPrism with Polygon
-        this.top = new Polygon3D(this.filter_points_by_side("top", this.points));        // Top side
-        this.bottom = new Polygon3D(this.filter_points_by_side("bottom", this.points));  // Bottom side
-        this.left = new Polygon3D(this.filter_points_by_side("left", this.points));      // Left side
-        this.right = new Polygon3D(this.filter_points_by_side("right", this.points));    // Right side
-        this.front = new Polygon3D(this.filter_points_by_side("front", this.points));    // Front side
-        this.back = new Polygon3D(this.filter_points_by_side("back", this.points));      // Back side
-
         // Flattens point with the front side at zero
         const [A, B, C, D, E, F, G, H] = this.points;
         this.flattened_points = flatten_3D_points(this.points, D, B, A, true);
@@ -863,7 +905,14 @@ class TrapezoidalPrism extends Base3DGeometry {
         this.angles = [];
         this.edge_distances = [];
 
-        const polygons = [this.top, this.bottom, this.left, this.right, this.front, this.back];
+        const polygons = [
+            this.get_side("top"),
+            this.get_side("bottom"),
+            this.get_side("left"),
+            this.get_side("right"),
+            this.get_side("front"),
+            this.get_side("back"),
+        ];
         _.forEach(polygons, (fig) => {
             this.face_points.push(...fig.face_points);
             this.edge_points.push(...fig.edge_points);
@@ -879,21 +928,8 @@ class TrapezoidalPrism extends Base3DGeometry {
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
     }
 
-    get_side(name = "top") {
-        switch (name) {
-            case "top":
-                return this.top;
-            case "bottom":
-                return this.bottom;
-            case "left":
-                return this.left;
-            case "right":
-                return this.right;
-            case "front":
-                return this.front;
-            case "back":
-                return this.back;
-        }
+    get_side(side = "front") {
+        return new Polygon3D(this.filter_points_by_side(side), this.label, this.color);
     }
 
     filter_points_by_side(side, points) {
@@ -915,26 +951,45 @@ class TrapezoidalPrism extends Base3DGeometry {
         }
     }
 
-    flatten(side = "top") {
+    get_opposite_side(side) {
+        // Filter the 6 sides points of TrapezoidalPrism for Polygon construction
+        switch (side) {
+            case "front":
+                return "back";
+            case "back":
+                return "front";
+            case "top":
+                return "bottom";
+            case "bottom":
+                return "top";
+            case "right":
+                return "left";
+            case "left":
+                return "right";
+        }
+    }
+
+    flatten() {
         return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
     }
 
-    flatten_2D(side, rotation_angle) {
-        // flatten pair of sides with three choices "top", "right" and "front";
+    flatten_2D(side = "front", add_opposite_side = false, rotation_angle = null) {
+        // flatten side (or pair of sides if add_opposite_side is true)
+        // with three choices "front", "bottom" and "left";
         // Because svg display is different than three.js display, we reverse some axes.
-        let flattened_points, opposite_side;
+        let flattened_points;
         switch (side) {
             case "front":
-                flattened_points = this.flattened_points.map(p => [p[0], -p[1], p[2]]);
-                opposite_side = "back";
+            case "back":
+                flattened_points = this.flattened_points.map(p => [p[0], -p[1], p[2]])
                 break;
             case "bottom":
-                flattened_points = swap_axes(this.flattened_points, "XZY").map(p => [p[0], -p[1], p[2]])
-                opposite_side = "top";
+            case "top":
+                flattened_points = swap_axes(this.flattened_points, "XZY").map(p => [p[0], -p[1], p[2]]);
                 break;
             case "left":
-                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [p[0], -p[1], p[2]])
-                opposite_side = "right";
+            case "right":
+                flattened_points = swap_axes(this.flattened_points, "ZYX").map(p => [p[0], -p[1], p[2]]);
                 break;
         }
 
@@ -944,11 +999,16 @@ class TrapezoidalPrism extends Base3DGeometry {
             });
         }
 
-        return new Polygon2D([
+        const filtered_points = add_opposite_side
+            ? [
                 ...this.filter_points_by_side(side, flattened_points),
-                ...this.filter_points_by_side(opposite_side, flattened_points)
-            ], this.label, this.color
-        );
+                ...this.filter_points_by_side(this.get_opposite_side(side), flattened_points)
+            ]
+            : this.filter_points_by_side(side, flattened_points);
+
+        console.log("this.flattened_points", this.flattened_points);
+        console.log("filtered_points", side, filtered_points)
+        return new Polygon2D(filtered_points, this.label, this.color);
     }
 }
 
