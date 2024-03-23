@@ -1212,10 +1212,10 @@
                                 y_shift_up = [0, -font_size * 0.5, 0];
 
                             const angles_params = (i < 2) ? [
-                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(A, B, C)), point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'],
                             ] : [
-                                [Math.abs(TAU_Q - angle(a, b, c)), point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'],
-                                [Math.abs(TAU_Q - angle(d, c, b)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(A, B, C)), point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'],
+                                [Math.abs(TAU_Q - angle(D, C, B)), point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))), point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))), point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'],
                                 [Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))), add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', 'blue', '∟'],
