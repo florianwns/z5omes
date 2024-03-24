@@ -1895,7 +1895,11 @@
                                     );
 
                                     // Rotate then center label text on top face
-                                    label_mesh.rotateX(-TAU_Q);
+                                    const rotation_angle = Math.PI - angle_between_planes(
+                                        plane_on_axis("Z", label_face.z_max),
+                                        label_face.plane
+                                    );
+                                    label_mesh.rotateX(-rotation_angle);
                                     const [x, y, z] = add(label_face.centroid, [0, 2, 0]);
                                     label_mesh.position.x = x;
                                     label_mesh.position.y = y;
@@ -1915,8 +1919,7 @@
                                 const num_items = spiral.length;
                                 if (num_items) {
                                     const crown_item_colors = new Array(num_items),
-                                        num_triangle_points = new Array(num_items),
-                                        item_labels = new Array(num_items);
+                                        num_triangle_points = new Array(num_items);
 
                                     _.forEach(spiral, (item, j) => {
                                         triangle_points.push(...item.triangle_points);
@@ -2878,11 +2881,8 @@
                     // Build Footing timbers
                     if (this.params.add_footing === 1) {
                         const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
-                        const floor_plane = points_2_plane(
-                            [0, floor_vertical_position, 0],
-                            [1, floor_vertical_position, 0],
-                            [0, floor_vertical_position, 1],
-                        );
+                        const floor_plane = plane_on_axis("Y", floor_vertical_position);
+
                         const go_to_ground_vec = [0, -1, 0];
                         _.forEach(footing_params, (params, footing_index) => {
                             const [B, D, F, H] = params;

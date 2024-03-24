@@ -211,6 +211,21 @@ function points_2_plane(p1, p2, p3) {
     return [norm_vec[0], norm_vec[1], norm_vec[2], d]
 }
 
+function plane_on_axis(axis = "X", value = 0) {
+    const axis_index = _.findIndex(["X", "Y", "Z"], item => item == axis.toUpperCase());
+    const points = [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+    ];
+
+    _.forEach(points, pt => {
+        pt[axis_index] = value;
+    });
+
+    return points_2_plane(...points);
+}
+
 function triangle_area_from_points(A, B, C) {
     // Heron formula to compute area of the triangle
     const ab = dist(A, B);
@@ -319,19 +334,21 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
     const matrix1 = rotation_matrix_from_points(pt1, pt2, pt3).invert();
     const matrix2 = rotation_matrix_from_points(end_pt1, zero, end_pt3);
-    const Q = new THREE.Quaternion();
-    Q.setFromRotationMatrix(matrix2.multiply(matrix1));
+
+    // Space to ground Quaternion
+    const quaternion = new THREE.Quaternion();
+    quaternion.setFromRotationMatrix(matrix2.multiply(matrix1));
 
     // Apply quaternion and sub translation vec to planar the face
     const flattened_points = new Array(points.length);
-    const translation_vec = new THREE.Vector3(...points[0]).applyQuaternion(Q);
+    const translation = new THREE.Vector3(...points[0]).applyQuaternion(quaternion);
     _.forEach(points, (point, i) => {
         flattened_points[i] = new THREE.Vector3(...point)
-            .applyQuaternion(Q).sub(translation_vec)
+            .applyQuaternion(quaternion).sub(translation)
             .toArray();
     });
 
-    return flattened_points;
+    return [flattened_points, quaternion, translation];
 }
 
 function check_is_coplanar(points) {
@@ -717,6 +734,11 @@ class Base3DGeometry extends LabeledObject {
         const norm_vec = cross_product(sub(this.points[1], this.points[0]), sub(this.points[2], this.points[0]));
         const slope = angle_between_vectors(norm_vec, [0, 1, 0])
         this.slope = (slope > TAU_Q) ? Math.PI - slope : slope;
+
+        // Declare flattened points parameters
+        this.flattened_points = null;
+        this.quaternion = null;
+        this.translation_vec = null
     }
 
     fit_points() {
@@ -724,7 +746,7 @@ class Base3DGeometry extends LabeledObject {
         return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2] - this.z_min]);
     }
 
-    get_face(side = "front") {
+    get_face(side = "top") {
         // return a Polygon 3D of a specific side
         return this;
     }
@@ -829,13 +851,13 @@ class Polygon3D extends Base3DGeometry {
         });
 
         // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-        this.flattened_points = flatten_3D_points(this.points, this.centroid, this.origin, this.points[1], false);
+        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, this.centroid, this.origin, this.points[1], false);
 
         // Compute hash to compare polygons
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
     }
 
-    flatten_2D() {
+    flatten_2D(side = "top") {
         return new Polygon2D(this.flattened_points, this.label, this.color);
     }
 
@@ -902,7 +924,7 @@ class TrapezoidalPrism extends Base3DGeometry {
 
         // Flattens point with the front side at zero
         const [A, B, C, D, E, F, G, H] = this.points;
-        this.flattened_points = flatten_3D_points(this.points, D, B, A, true);
+        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, D, B, A, true);
 
         // Arrays of THREE.Vector3 for 3D visualization
         this.triangle_points = [];
@@ -936,7 +958,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
     }
 
-    get_face(side = "front") {
+    get_face(side = "top") {
         // return a Polygon 3D of a specific side
         return new Polygon3D(this.filter_points_by_side(side), this.label, this.color);
     }
@@ -982,7 +1004,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
     }
 
-    flatten_2D(side = "front", add_opposite_side = false, rotation_angle = null) {
+    flatten_2D(side = "top", add_opposite_side = false, rotation_angle = null) {
         // flatten side (or pair of sides if add_opposite_side is true)
         // with three choices "front", "bottom" and "left";
         // Because svg display is different than three.js display, we reverse some axes.
