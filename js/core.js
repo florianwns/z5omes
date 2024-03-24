@@ -628,9 +628,9 @@ function get_boundaries(points) {
     }
 
     // Compute width and height from 2D boundaries
-    const width = Math.abs(x_max - x_min);
-    const height = Math.abs(y_max - y_min);
-    const depth = Math.abs(z_max - z_min);
+    const width = Math.abs(x_max - x_min);      // X Axis
+    const height = Math.abs(y_max - y_min);     // Y Axis
+    const depth = Math.abs(z_max - z_min);      // Z AXis
     return [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth];
 }
 
@@ -709,9 +709,9 @@ class Base3DGeometry extends LabeledObject {
         this.y_max = y_max;
         this.z_min = z_min;
         this.z_max = z_max;
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
+        this.width = width;     // X Axis
+        this.height = height;   // Y Axis
+        this.depth = depth;     // Z Axis
 
         // Compute the slope based on normal vector and vertical axis
         const norm_vec = cross_product(sub(this.points[1], this.points[0]), sub(this.points[2], this.points[0]));
