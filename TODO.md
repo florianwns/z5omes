@@ -1,5 +1,7 @@
 # TODO-LIST
 
+* [ ] Inverser le quaternion et l'appliquer au mesh du timber profile ...impeccable
+
 * [ ] Ajouter le zomandala (Différent du mandala)
   https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
   
