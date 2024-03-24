@@ -1788,7 +1788,7 @@
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
-                    const str = exporter.parse(scene);
+                    const str = exporter.parse(meshes.zome);
                     const blob = new Blob([str], {type: 'text/plain'});
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
