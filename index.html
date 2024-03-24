@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.8b02" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.8b03" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -395,7 +395,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.8b02</span>
+                              style="font-size: 10px; top:0px">v1.0.8b03</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -904,15 +904,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.8b02"></script>
-<script src="i18n/en.js?v=1.0.8b02"></script>
-<script src="i18n/it.js?v=1.0.8b02"></script>
-<script src="i18n/fr.js?v=1.0.8b02"></script>
-<script src="i18n/pl.js?v=1.0.8b02"></script>
-<script src="i18n/sv.js?v=1.0.8b02"></script>
+<script src="i18n/es.js?v=1.0.8b03"></script>
+<script src="i18n/en.js?v=1.0.8b03"></script>
+<script src="i18n/it.js?v=1.0.8b03"></script>
+<script src="i18n/fr.js?v=1.0.8b03"></script>
+<script src="i18n/pl.js?v=1.0.8b03"></script>
+<script src="i18n/sv.js?v=1.0.8b03"></script>
 
 <!-- Core and geometry functions -->
-<script src="js/core.js?v=1.0.8b02"></script>
+<script src="js/core.js?v=1.0.8b03"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1811,6 +1811,11 @@
                     }
                     meshes.edges = new THREE.Group();
 
+                    if (meshes.labels instanceof THREE.Group) {
+                        scene.remove(meshes.labels)
+                    }
+                    meshes.labels = new THREE.Group();
+
                     if (meshes.vertices instanceof THREE.Group) {
                         scene.remove(meshes.vertices)
                     }
@@ -1863,94 +1868,110 @@
                     const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
                     const edge_material = new THREE.LineBasicMaterial({color: 0x333333});
 
-                    const add_labels = true;
-
                     // Build 3D faces and edges
-                    if (this.type_of_3D_objects == "timber_profiles_3D") {
-                        const timbers_3D = ZOME.timber_profiles_3D;
-                        const num_items = timbers_3D.length;
-                        if (num_items) {
-                            _.forEach(timbers_3D, obj => {
-                                const timbers_geometry = new THREE.BufferGeometry().setFromPoints(obj.face_points)
-                                timbers_geometry.computeVertexNormals()
-
-                                const face_colors = _.times(obj.num_face_points, _.constant(obj.color.rgb));
-                                timbers_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                meshes.zome.add(new THREE.Mesh(timbers_geometry, material))
-
-                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(obj.edge_points)
-                                const timbers_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                                meshes.edges.add(timbers_lines);
-                            });
-                        }
-                    } else {
-                        // Same as above but for spirals with geometry cloning for more efficiency
-                        const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
-                        if (spiral) {
-                            // Pre-Compute spiral geometry, before cloning
-                            let face_points = [];
-                            let edge_points = [];
-
-                            const num_items = spiral.length;
+                    switch (this.type_of_3D_objects) {
+                        case "timber_profiles_3D" :
+                            const timbers_3D = ZOME.timber_profiles_3D;
+                            const num_items = timbers_3D.length;
                             if (num_items) {
-                                const colors = new Array(num_items);
-                                const num_face_points = new Array(num_items);
-                                _.forEach(spiral, (item, i) => {
-                                    face_points.push(...item.face_points);
-                                    edge_points.push(...item.edge_points);
-                                    num_face_points[i] = item.num_face_points;
-                                    colors[i] = ZOME.rotated_colors[item.color.hex];
+                                _.forEach(timbers_3D, item => {
+                                    const timbers_geometry = new THREE.BufferGeometry().setFromPoints(item.triangle_points)
+                                    timbers_geometry.computeVertexNormals()
 
-                                    // Get flattened item and prepare label positions
-                                    const side = "front";
-                                    const flattened_item = item.flatten_2D(side);
-                                    const item_front_3D = item.get_side(side);
+                                    const face_colors = _.times(item.num_triangle_points, _.constant(item.color.rgb));
+                                    timbers_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+                                    meshes.zome.add(new THREE.Mesh(timbers_geometry, material))
 
+                                    const edge_geometry = new THREE.BufferGeometry().setFromPoints(item.edge_points)
+                                    const timbers_lines = new THREE.LineSegments(edge_geometry, edge_material);
+                                    meshes.edges.add(timbers_lines);
 
+                                    // Get top face and compute label positions
+                                    const label_face = item.get_face("top");
+                                    const label_mesh = create_label_mesh(
+                                        item.label,
+                                        label_face.depth * 0.9, // font_face
+                                        (label_face.depth * 0.1) / 2, // padding
+                                    );
+
+                                    // Rotate then center label text on top face
+                                    const rotation_angle = Math.PI - angle_between_planes(
+                                        plane_on_axis("Z", label_face.z_max),
+                                        label_face.plane
+                                    );
+                                    label_mesh.rotateX(-rotation_angle);
+                                    const [x, y, z] = add(label_face.centroid, [0, 2, 0]);
+                                    label_mesh.position.x = x;
+                                    label_mesh.position.y = y;
+                                    label_mesh.position.z = z;
+
+                                    meshes.labels.add(label_mesh);
                                 });
+                            }
+                            break;
+                        default:
+                            // Same as above but for spirals with geometry cloning for more efficiency
+                            const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
+                            if (spiral) {
+                                // Pre-Compute spiral geometry, before cloning
+                                let triangle_points = [], edge_points = [];
 
-                                // Build geometry of first outer_faces_3D
-                                const spiral_geometry = new THREE.BufferGeometry().setFromPoints(face_points)
-                                spiral_geometry.computeVertexNormals()
-                                const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
+                                const num_items = spiral.length;
+                                if (num_items) {
+                                    const crown_item_colors = new Array(num_items),
+                                        num_triangle_points = new Array(num_items);
 
-                                // Compute all faces geometries and colors
-                                const face_colors = new Array(num_items);
-                                for (let i = 0; i < ZOME.num; i++) {
-                                    const rotated_spiral_geometry = spiral_geometry.clone()
-                                    rotated_spiral_geometry.points
-                                    // Rotate the new geometry
-                                    const theta = ZOME.rotation_angles[i];
-                                    rotated_spiral_geometry.rotateY(theta);
+                                    _.forEach(spiral, (item, j) => {
+                                        triangle_points.push(...item.triangle_points);
+                                        edge_points.push(...item.edge_points);
 
-                                    // Get colors
-                                    for (let j = 0; j < num_items; j++) {
-                                        face_colors[j] = _.times(num_face_points[j], _.constant(colors[j][i].rgb));
+                                        num_triangle_points[j] = item.num_triangle_points;
+                                        crown_item_colors[j] = ZOME.rotated_colors[item.color.hex];
+                                    });
+
+                                    // Build geometry of first outer_faces_3D
+                                    const spiral_geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
+                                    spiral_geometry.computeVertexNormals()
+
+                                    const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
+
+                                    // Compute all faces geometries and colors
+                                    const face_colors = new Array(num_items);
+                                    for (let i = 0; i < ZOME.num; i++) {
+                                        const rotated_spiral_geometry = spiral_geometry.clone()
+                                        rotated_spiral_geometry.points
+                                        // Rotate the new geometry
+                                        const theta = ZOME.rotation_angles[i];
+                                        rotated_spiral_geometry.rotateY(theta);
+
+                                        // Compute colors, and add labels
+                                        for (let j = 0; j < num_items; j++) {
+                                            face_colors[j] = _.times(num_triangle_points[j], _.constant(crown_item_colors[j][i].rgb));
+                                        }
+
+                                        rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
+                                        meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
+
+                                        const rotated_edge_geometry = edge_geometry.clone()
+                                        rotated_edge_geometry.rotateY(theta);
+
+                                        const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
+                                        meshes.edges.add(spiral_lines);
                                     }
-
-                                    rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                    meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
-
-                                    const rotated_edge_geometry = edge_geometry.clone()
-                                    rotated_edge_geometry.rotateY(theta);
-
-                                    const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
-                                    meshes.edges.add(spiral_lines);
                                 }
                             }
-                        }
-                    }
-
-                    {
-                        const mesh = create_label_mesh("Z5omes", 0, 100, 0);
-                        scene.add(mesh);
+                            break;
                     }
 
                     // Add the final obj mesh to the scene
                     meshes.zome.rotation.y = zome_rotation;
-                    meshes.edges.rotation.y = zome_rotation;
                     scene.add(meshes.zome);
+
+                    meshes.edges.rotation.y = zome_rotation;
                     scene.add(meshes.edges);
+
+                    meshes.labels.rotation.y = zome_rotation;
+                    scene.add(meshes.labels);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -2860,11 +2881,8 @@
                     // Build Footing timbers
                     if (this.params.add_footing === 1) {
                         const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
-                        const floor_plane = points_2_plane(
-                            [0, floor_vertical_position, 0],
-                            [1, floor_vertical_position, 0],
-                            [0, floor_vertical_position, 1],
-                        );
+                        const floor_plane = plane_on_axis("Y", floor_vertical_position);
+
                         const go_to_ground_vec = [0, -1, 0];
                         _.forEach(footing_params, (params, footing_index) => {
                             const [B, D, F, H] = params;
