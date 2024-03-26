@@ -1874,8 +1874,7 @@
                             const num_items = timbers_3D.length;
                             if (num_items) {
                                 _.forEach(timbers_3D, item => {
-                                    if(item.mesh === null) item.compute_mesh();
-
+                                    item.compute_mesh();
                                     meshes.obj.add(item.mesh)
                                     meshes.edges.add(item.edges);
 
@@ -1910,8 +1909,7 @@
                                 const num_items = spiral.length;
                                 if (num_items) {
                                     _.forEach(spiral, item => {
-                                        if(item.mesh === null) item.compute_mesh();
-
+                                        item.compute_mesh();
                                         for (let i = 0; i < ZOME.num; i++) {
                                             const mesh = clone_and_color_mesh(item.mesh, item.color);
                                             mesh.rotateY(ZOME.rotation_angles[i]);

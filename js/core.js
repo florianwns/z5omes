@@ -884,14 +884,13 @@ class Polygon3D extends Base3DGeometry {
             this.area += triangle_area_from_points(this.origin, next_point, next_next_point);
         });
 
-        // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, this.centroid, this.origin, this.points[1], false);
-
         // Compute hash to compare polygons
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
     }
 
     compute_mesh(){
+        if(this.mesh !== null)  return;
+
         // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
         const num_triangles = this.num_points - 2;
         const num_triangle_points = 3 * num_triangles;
@@ -941,7 +940,15 @@ class Polygon3D extends Base3DGeometry {
         // this.bounding_box.copy(this.geometry.boundingBox);
     }
 
+    compute_flattened_points(){
+        if(this.flattened_points !== null) return;
+
+        // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
+        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, this.centroid, this.origin, this.points[1], false);
+    }
+
     flatten_side(side = "top") {
+        this.compute_flattened_points();
         return new Polygon3D(this.flattened_points, this.label, this.color);
     }
 
@@ -1006,10 +1013,6 @@ class TrapezoidalPrism extends Base3DGeometry {
         // Call parent constructor
         super(points, label, color);
 
-        // Flattens point with the bottom side at zero
-        const [A, B, C, D, E, F, G, H] = this.points;
-        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, D, B, A, true);
-
         // Geometry parameters
         this.area = 0;
         this.angles = [];
@@ -1034,6 +1037,8 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 
     compute_mesh(){
+        if(this.mesh !== null)  return;
+
         // Group of geometries
         this.mesh = new THREE.Group();
         this.mesh.name = this.label;
@@ -1089,12 +1094,23 @@ class TrapezoidalPrism extends Base3DGeometry {
         }
     }
 
+    compute_flattened_points(){
+        if(this.flattened_points !== null) return;
+
+        // Flattens point with the bottom side at zero
+        const [A, B, C, D, E, F, G, H] = this.points;
+        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, D, B, A, true);
+    }
+
     flatten() {
+        this.compute_flattened_points();
         return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
     }
 
     flatten_side(side = "top", add_opposite_side = false, rotation_angle = null) {
-        // flatten side (or pair of sides if add_opposite_side is true)
+        this.compute_flattened_points();
+
+        // Flatten side (or pair of sides if add_opposite_side is true)
         // with three choices "front", "bottom" and "left";
         // Because svg display is different than three.js display, we reverse some axes.
         let flattened_points;
