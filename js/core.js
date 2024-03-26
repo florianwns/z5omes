@@ -19,7 +19,6 @@ const FLOAT_2_STR_PRECISION = 1;
 
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
-
 check_is_mobile = function () {
     let check = false;
     (function (a) {
@@ -312,6 +311,17 @@ function rotation_matrix_from_points(a, b, c) {
     return new THREE.Matrix4().makeBasis(axis1, axis2, axis3);
 }
 
+function quaternion_from_points(pt1, pt2, pt3, end_pt1, end_pt2, end_pt3) {
+    // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
+    const matrix1 = rotation_matrix_from_points(pt1, pt2, pt3).invert();
+    const matrix2 = rotation_matrix_from_points(end_pt1, end_pt2, end_pt3);
+
+    const quaternion = new THREE.Quaternion();
+    quaternion.setFromRotationMatrix(matrix2.multiply(matrix1));
+
+    return quaternion;
+}
+
 function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     // Flattens the 3D points with the pt2 at zero to 2D points
     // and the pt1 is aligned on x axis if horizontally is true, y axis otherwise
@@ -323,21 +333,19 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     const dist_2_pt3 = dist(pt2, pt3);
 
     // Define end points depends on horizontally variable
-    const zero = [0, 0, 0];
     const end_pt1 = (horizontally)
         ? [dist_2_pt1, 0, 0]
         : [0, dist_2_pt1, 0];
+    const end_pt2 = [0, 0, 0];
     const end_pt3 = (horizontally)
         ? rotate_point_around_z_axis([dist_2_pt3, 0, 0], -theta)
         : rotate_point_around_z_axis([0, dist_2_pt3, 0], theta);
 
-    // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
-    const matrix1 = rotation_matrix_from_points(pt1, pt2, pt3).invert();
-    const matrix2 = rotation_matrix_from_points(end_pt1, zero, end_pt3);
-
-    // Space to ground Quaternion
-    const quaternion = new THREE.Quaternion();
-    quaternion.setFromRotationMatrix(matrix2.multiply(matrix1));
+    // Compute quaternion
+    const quaternion = quaternion_from_points(
+        pt1, pt2, pt3,
+        end_pt1, end_pt2, end_pt3
+    );
 
     // Apply quaternion and sub translation vec to planar the face
     const flattened_points = new Array(points.length);
@@ -348,7 +356,7 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
             .toArray();
     });
 
-    return [flattened_points, quaternion, translation];
+    return flattened_points;
 }
 
 function check_is_coplanar(points) {
@@ -385,6 +393,51 @@ function circle_path(cx, cy, r) {
 // --------------------------
 // ====== CANVAS/WEBGL ======
 // --------------------------
+
+
+function color_rgb_buffer(num, r, g, b) {
+    const num_rgb = 3 * num;
+    const colors = new Float32Array(num_rgb);
+    for (let i = 0; i < num_rgb; i += 3) {
+        colors[i] = r;
+        colors[i + 1] = g;
+        colors[i + 2] = b;
+    }
+    return new THREE.Float32BufferAttribute(colors, 3);
+}
+
+function clone_and_color_mesh(other_mesh, color) {
+    if (other_mesh instanceof THREE.Group || other_mesh instanceof THREE.Mesh) {
+        const mesh = other_mesh.clone();
+        return color_mesh(mesh, color);
+    }
+}
+
+function color_mesh(mesh, color) {
+    if (mesh instanceof THREE.Group) {
+        _.forEach(mesh.children, child => {
+            child.material.color.set(color.hex);
+        });
+    } else if (mesh instanceof THREE.Mesh) {
+        mesh.material.color.set(color.hex);
+    }
+    return mesh;
+}
+
+
+function name_mesh(mesh, label) {
+    if (mesh instanceof THREE.Mesh) {
+        mesh.name = label;
+    }
+
+    if (mesh instanceof THREE.Group) {
+        _.forEach(mesh.children, child => {
+            child.name = label;
+        });
+    }
+    return mesh;
+}
+
 
 function create_label_mesh(
     text,
@@ -423,8 +476,8 @@ function create_label_mesh(
     ctx.strokeText(text, text_x_position, text_y_position);
 
     const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.MeshLambertMaterial({
-        side: THREE.FrontSide,
+    const material = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
         map: texture,
         transparent: true
     });
@@ -575,7 +628,7 @@ function humanize_distance(d, num_digits = FLOAT_2_STR_PRECISION) {
     if (isNaN(d)) {
         return "";
     }
-    // Distance are in milimeters
+    // Distance are in millimeters
     if (d >= 1e7) {
         return to_decimal(d / 1e6, num_digits) + "km";
     } else if (d >= 1e4) {
@@ -694,8 +747,8 @@ const COLOR_BASE = Color.from_angles(0, 0);
 class LabeledObject {
     constructor(label, color) {
         // With color and label it's more fun
-        this.label = label || "";
-        this.color = color || COLOR_BASE;
+        this._label = label || "";
+        this._color = color || COLOR_BASE;
     }
 }
 
@@ -711,12 +764,8 @@ class Base3DGeometry extends LabeledObject {
         }
 
         // Store points
+        this.num_points = points.length;
         this.points = points;
-        this.num_points = this.points.length;
-
-        // Take first point as Origin
-        this.origin = this.points[0];
-        this.centroid = get_centroid(points);
 
         // Compute boundaries
         const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = get_boundaries(this.points);
@@ -730,43 +779,127 @@ class Base3DGeometry extends LabeledObject {
         this.height = height;   // Y Axis
         this.depth = depth;     // Z Axis
 
-        // Compute the slope based on normal vector and vertical axis
-        const norm_vec = cross_product(sub(this.points[1], this.points[0]), sub(this.points[2], this.points[0]));
-        const slope = angle_between_vectors(norm_vec, [0, 1, 0])
-        this.slope = (slope > TAU_Q) ? Math.PI - slope : slope;
+        // Declare private variables use by getters for dynamic computing
+        this._points_2D = null;
+        this._flattened_points = null;
 
-        // Declare flattened points parameters
-        this.flattened_points = null;
-        this.quaternion = null;
-        this.translation_vec = null
+        this._mesh = null;
+        this._edges = null;
+
+        this._area = null;
+        this._perimeter = null;
+        this._angles = null;
+        this._edge_distances = null;
+
+        this._slope = null;
+        this._centroid = null;
+
+        this._hash = null;
     }
+
+
+    get points_2D(){
+        if (this._points_2D === null){
+            // Points without the z axis for 2D drawing
+            this._points_2D = convert_3D_to_2D(this.points);
+        }
+        return this._points_2D;
+    }
+
+    get area() {
+        if (this._area === null) this.compute_geometry_parameters();
+        return this._area;
+    }
+
+    get perimeter() {
+        if (this._perimeter === null) this.compute_geometry_parameters();
+        return this._perimeter;
+    }
+
+    get angles() {
+        if (this._angles === null) this.compute_geometry_parameters();
+        return this._angles;
+    }
+
+    get edge_distances() {
+        if (this._edge_distances === null) this.compute_geometry_parameters();
+        return this._edge_distances;
+    }
+
+    get hash() {
+        if (this._hash === null) {
+            // Compute hash to compare polygons
+            this._hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
+        }
+        return this._hash;
+    }
+
+    get slope() {
+        if (this._slope === null) {
+            // Compute the slope based on normal vector and vertical axis
+            const norm_vec = cross_product(sub(this.points[1], this.points[0]), sub(this.points[2], this.points[0]));
+            const slope = angle_between_vectors(norm_vec, [0, 1, 0])
+            this._slope = (slope > TAU_Q) ? Math.PI - slope : slope;
+        }
+        return this._slope;
+    }
+
+    get centroid() {
+        if (this._centroid === null) {
+            this._centroid = get_centroid(this.points);
+        }
+        return this._centroid;
+    }
+
+    get mesh() {
+        if (this._mesh === null) this.compute_meshes();
+        return this._mesh;
+    }
+
+    get edges() {
+        if (this._edges === null) this.compute_meshes();
+        return this._edges;
+    }
+
+    get color() {
+        return this._color;
+    }
+
+    set color(color) {
+        this._color = color;
+        this._mesh = color_mesh(this.mesh, color);
+    }
+
+    get label() {
+        return this._label;
+    }
+
+    set label(label) {
+        this._label = label;
+        this._mesh = name_mesh(this.mesh, label);
+    }
+
+    get flattened_points() {
+        return this._flattened_points;
+    }
+
+    // Computing interfaces
+    compute_geometry_parameters() {}
+    compute_meshes() {}
 
     fit_points() {
         // Adjust the points so the minimum values end up at zero
         return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2] - this.z_min]);
     }
 
+    filter_points_by_side(side, points) {
+        // Filter side points
+        return points || this.points;
+    }
+
     get_face(side = "top") {
         // return a Polygon 3D of a specific side
         return this;
-    }
-}
-
-class Polygon2D extends Base3DGeometry {
-    // Call by flatten method from Polygon3D
-    // Points are distributed counterclockwise
-
-    constructor(points, label, color) {
-        // Call parent constructor
-        super(points, label, color);
-
-        // Points without the z axis
-        this.points_2D = convert_3D_to_2D(this.points);
-    }
-
-    fit_points() {
-        // Adjust the points so the minimum values end up at zero on X and Y axis
-        return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2]]);
     }
 
     resize_points_2D(size = null) {
@@ -803,62 +936,85 @@ class Polygon3D extends Base3DGeometry {
 
         // TODO : remove from the class and compute distance outside
         this.diameter = 2 * dist(this.points[1], [0, this.points[1][1], 0]);
+    }
 
-        // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
-        this.num_triangles = this.num_points - 2;
-        this.num_triangle_points = 3 * this.num_triangles;
+    get flattened_points() {
+        if (this._flattened_points === null) {
+            // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
+            this._flattened_points = flatten_3D_points(this.points, this.centroid, this.points[0], this.points[1], false);
+        }
+        return this._flattened_points;
+    }
 
-        // Arrays of THREE.Vector3 for 3D visualization
-        this.triangle_points = new Array(this.num_triangle_points);
-        this.edge_points = new Array(this.num_points * 2);
-
-        // Geometry parameters
-        this.area = 0;
-        this.perimeter = 0;
-        this.angles = [];               // Array of angles in radians
-        this.edge_distances = [];       // Edges distances
+    compute_geometry_parameters() {
+        this._area = 0;
+        this._perimeter = 0;
+        this._angles = [];               // Array of angles in radians
+        this._edge_distances = [];       // Edges distances
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
-        let face_index = 0;
         _.forEach(this.points, (cur_point, i) => {
             const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
             const next_point = this.points[(i + 1) % this.num_points];
             const next_next_point = this.points[(i + 2) % this.num_points];
 
             // Compute angle in radians
-            this.angles.push(angle(prev_point, cur_point, next_point));
+            this._angles.push(angle(prev_point, cur_point, next_point));
 
             // Compute edges distances, and perimeter
             const d = dist(cur_point, next_point)
-            this.edge_distances.push(d);
-            this.perimeter += d;
+            this._edge_distances.push(d);
+            this._perimeter += d;
 
             // Compute area of the triangle
-            this.area += triangle_area_from_points(this.origin, next_point, next_next_point);
+            this._area += triangle_area_from_points(this.points[0], next_point, next_next_point);
+        });
+    }
 
-            // Prepare line segments points
-            this.edge_points[i * 2] = new THREE.Vector3(...cur_point);
-            this.edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
+    compute_meshes() {
+        if (this._mesh !== null) return;
 
-            // Compute face triangle
-            if (face_index < this.num_triangle_points) {
+        // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
+        const num_triangles = this.num_points - 2;
+        const num_triangle_points = 3 * num_triangles;
+
+        // Arrays of THREE.Vector3 for 3D visualization
+        const triangle_points = new Array(num_triangle_points);
+        const edge_points = new Array(this.num_points * 2);
+
+        let face_index = 0;
+        _.forEach(this.points, (cur_point, i) => {
+            const next_point = this.points[(i + 1) % this.num_points];
+            const next_next_point = this.points[(i + 2) % this.num_points];
+
+            // Compute line segments points
+            edge_points[i * 2] = new THREE.Vector3(...cur_point);
+            edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
+
+            // Compute face triangles
+            if (face_index < num_triangle_points) {
                 // Faces points for 3D display
-                this.triangle_points[face_index] = new THREE.Vector3(...this.origin)
-                this.triangle_points[face_index + 1] = new THREE.Vector3(...next_point)
-                this.triangle_points[face_index + 2] = new THREE.Vector3(...next_next_point)
+                triangle_points[face_index] = new THREE.Vector3(...this.points[0])
+                triangle_points[face_index + 1] = new THREE.Vector3(...next_point)
+                triangle_points[face_index + 2] = new THREE.Vector3(...next_next_point)
                 face_index += 3;
             }
         });
 
-        // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, this.centroid, this.origin, this.points[1], false);
+        // Compute geometry for THREE JS display
+        const geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
+        const material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex});
+        this._mesh = new THREE.Mesh(geometry, material);
+        this._mesh.name = this._label;
 
-        // Compute hash to compare polygons
-        this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
+        this._edges = new THREE.LineSegments(
+            new THREE.BufferGeometry().setFromPoints(edge_points),
+            new THREE.LineBasicMaterial({color: 0x333333}),
+        );
     }
 
-    flatten_2D(side = "top") {
-        return new Polygon2D(this.flattened_points, this.label, this.color);
+    flatten_side(side = "top") {
+        return new Polygon3D(this.flattened_points, this.label, this.color);
     }
 
     divide(horizontally = true) {
@@ -874,35 +1030,35 @@ class Polygon3D extends Base3DGeometry {
             case 4:
                 if (horizontally) {
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[3]], this.label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[3]], this._label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3]], this.label, this.color)
+                        new Polygon3D([this.points[1], this.points[2], this.points[3]], this._label, this.color)
                     );
                 } else {
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2]], this.label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[2]], this._label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([this.points[2], this.points[3], this.points[0]], this.label, this.color)
+                        new Polygon3D([this.points[2], this.points[3], this.points[0]], this._label, this.color)
                     );
                 }
                 break;
             case 5:
                 if (horizontally) {
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[4]], this.label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[4]], this._label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]], this.label, this.color)
+                        new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]], this._label, this.color)
                     );
                 } else {
                     const mid_pt = midpoint(this.points[2], this.points[3]);
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt], this.label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt], this._label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]], this.label, this.color)
+                        new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]], this._label, this.color)
                     );
                 }
                 break;
@@ -922,20 +1078,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         // Call parent constructor
         super(points, label, color);
 
-        // Flattens point with the front side at zero
-        const [A, B, C, D, E, F, G, H] = this.points;
-        [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, D, B, A, true);
-
-        // Arrays of THREE.Vector3 for 3D visualization
-        this.triangle_points = [];
-        this.edge_points = []
-
-        // Geometry parameters
-        this.area = 0;
-        this.angles = [];
-        this.edge_distances = [];
-
-        const polygons = [
+        this.polygons = [
             this.get_face("top"),
             this.get_face("bottom"),
             this.get_face("left"),
@@ -943,19 +1086,43 @@ class TrapezoidalPrism extends Base3DGeometry {
             this.get_face("front"),
             this.get_face("back"),
         ];
-        _.forEach(polygons, (fig) => {
-            this.triangle_points.push(...fig.triangle_points);
-            this.edge_points.push(...fig.edge_points);
+    }
 
-            this.angles.push(...fig.angles);
-            this.edge_distances.push(...fig.edge_distances);
-            this.area += fig.area; // recompute area
+    get flattened_points() {
+        if (this._flattened_points === null) {
+            // Flattens point with the bottom side at zero
+            const [A, B, D] = [this.points[0], this.points[1], this.points[3]];
+            this._flattened_points = flatten_3D_points(this.points, D, B, A, true);
+        }
+        return this._flattened_points;
+    }
 
+    compute_geometry_parameters() {
+        this._area = 0;
+        this._perimeter = 0;
+        this._angles = [];               // Array of angles in radians
+        this._edge_distances = [];       // Edges distances
+
+        _.forEach(this.polygons, item => {
+            this._angles.push(...item.angles);
+            this._edge_distances.push(...item.edge_distances);
+            this._area += item.area; // recompute area
+            this._perimeter += item.perimeter; // recompute area
         });
-        this.num_triangle_points = this.triangle_points.length
+    }
 
-        // Compute hash to compare prims
-        this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
+    compute_meshes() {
+        if (this._mesh !== null) return;
+
+        // Group of geometries
+        this._mesh = new THREE.Group();
+        this._mesh.name = this._label;
+        this._edges = new THREE.Group();
+
+        _.forEach(this.polygons, item => {
+            this._mesh.add(item.mesh);
+            this._edges.add(item.edges);
+        });
     }
 
     get_face(side = "top") {
@@ -1004,8 +1171,8 @@ class TrapezoidalPrism extends Base3DGeometry {
         return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
     }
 
-    flatten_2D(side = "top", add_opposite_side = false, rotation_angle = null) {
-        // flatten side (or pair of sides if add_opposite_side is true)
+    flatten_side(side = "top", add_opposite_side = false, rotation_angle = null) {
+        // Flatten side (or pair of sides if add_opposite_side is true)
         // with three choices "front", "bottom" and "left";
         // Because svg display is different than three.js display, we reverse some axes.
         let flattened_points;
@@ -1037,7 +1204,7 @@ class TrapezoidalPrism extends Base3DGeometry {
             ]
             : this.filter_points_by_side(side, flattened_points);
 
-        return new Polygon2D(filtered_points, this.label, this.color);
+        return new Polygon3D(filtered_points, this.label, this.color);
     }
 }
 
