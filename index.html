@@ -1874,7 +1874,6 @@
                             const num_items = timbers_3D.length;
                             if (num_items) {
                                 _.forEach(timbers_3D, item => {
-                                    item.compute_mesh();
                                     meshes.obj.add(item.mesh)
                                     meshes.edges.add(item.edges);
 
@@ -1909,7 +1908,6 @@
                                 const num_items = spiral.length;
                                 if (num_items) {
                                     _.forEach(spiral, item => {
-                                        item.compute_mesh();
                                         for (let i = 0; i < ZOME.num; i++) {
                                             const mesh = clone_and_color_mesh(item.mesh, item.color);
                                             mesh.rotateY(ZOME.rotation_angles[i]);
@@ -2876,7 +2874,7 @@
                         // Apply labels to items
                         _.forEach(obj_3D_to_label[i], item => {
                             const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
-                            item.set_label(obj_hash_collections[collection_item_index].item.label);
+                            item.label = obj_hash_collections[collection_item_index].item.label;
                         });
                     });
 
@@ -2898,7 +2896,7 @@
 
                         // Paint rotated_colors if you decide to paint spiral colors
                         _.forEach(obj_3D_to_label[i], item => {
-                            item.set_color(hash_to_color[item.hash]);
+                            item.color = hash_to_color[item.hash];
                             if (!rotated_colors.hasOwnProperty(item.color.hex)) {
                                 rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a, item.slope));
                             }
