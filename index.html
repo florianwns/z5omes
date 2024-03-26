@@ -458,36 +458,36 @@
                                     <!-- Export to -->
                                     <div class="ps-2 exports-container" style="top:0px;">
                                         <div class="vstack">
-                                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'STL')"
-                                              @click="download_stl()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">STL</span>
-                                        </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'PLY')"
-                                                  @click="download_ply()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">PLY</span>
-                                        </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'GLTF')"
-                                                  @click="download_gltf()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">GLTF</span>
-                                        </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
                                                   :title="i18n('tooltip_export_2_format', 'OBJ')"
                                                   @click="download_obj()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">OBJ</span>
-                                        </span>
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">OBJ</span>
+                                            </span>
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'STL')"
+                                                  @click="download_stl()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">STL</span>
+                                            </span>
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'GLTF')"
+                                                  @click="download_gltf()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">GLTF</span>
+                                            </span>
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'PLY')"
+                                                  @click="download_ply()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">PLY</span>
+                                            </span>
                                         </div>
                                     </div>
-
 
                                     <div class="mb-2">
                                         <!-- Draw Zome Env/ Zome Skeleton/ Mandala -->
@@ -973,7 +973,7 @@
 
                         // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
-                            const side = prism.flatten_2D(side_name, true, (i === 1) ? TAU_Q : null);
+                            const side = prism.flatten_side(side_name, true, (i === 1) ? TAU_Q : null);
                             switch (i) {
                                 case 0:
                                 case 1:
@@ -1346,7 +1346,7 @@
                 get table_rows() {
                     const rows = new Array(this.faces.length);
                     _.forEach(this.faces, (face, i) => {
-                        const flattened_face = face.flatten_2D();
+                        const flattened_face = face.flatten_side();
                         rows[i] = [flattened_face, [
                             flattened_face.label, // i + 1
                             humanize_distance(flattened_face.width),
@@ -1582,7 +1582,7 @@
                     for (let i = 0; i < ZOME.num; i++) {
                         _.forEach(mandala_3D, (face) => {
                             mandala_faces.push(
-                                new Polygon2D(
+                                new Polygon3D(
                                     swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
                                     face.label,
                                     ZOME.rotated_colors[face.color.hex][i],
@@ -1603,7 +1603,7 @@
                         const colored_spiral_faces = [];
                         _.forEach(mandala_3D, (face) => {
                             colored_spiral_faces.push(
-                                new Polygon2D(
+                                new Polygon3D(
                                     swap_axes(face.points, "XZY"),
                                     face.label,
                                     ZOME.rotated_colors[face.color.hex][i],
@@ -1655,7 +1655,7 @@
             let scene, camera, renderer, controls, canvas;              // Three JS Parameters
             const meshes = {
                 "axes": null,
-                "zome": null,
+                "obj": null,
                 "labels": null,
                 "edges": null,
                 "vertices": null,
@@ -1788,7 +1788,7 @@
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
-                    const str = exporter.parse(meshes.zome);
+                    const str = exporter.parse(meshes.obj);
                     const blob = new Blob([str], {type: 'text/plain'});
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
@@ -1801,10 +1801,10 @@
                     }
                     meshes.vanishing_lines = new THREE.Group();
 
-                    if (meshes.zome instanceof THREE.Group) {
-                        scene.remove(meshes.zome)
+                    if (meshes.obj instanceof THREE.Group) {
+                        scene.remove(meshes.obj)
                     }
-                    meshes.zome = new THREE.Group();
+                    meshes.obj = new THREE.Group();
 
                     if (meshes.edges instanceof THREE.Group) {
                         scene.remove(meshes.edges)
@@ -1823,8 +1823,8 @@
                 },
 
                 process() {
-                    const zome_rotation = (meshes.zome instanceof THREE.Group)
-                        ? meshes.zome.rotation.y
+                    const zome_rotation = (meshes.obj instanceof THREE.Group)
+                        ? meshes.obj.rotation.y
                         : 0;
 
                     this.clear();
@@ -1864,10 +1864,6 @@
                     scene.add(meshes.vertices);
                     this.set_visibility("vertices", this.show_vertices_switch && this.draw_vertices);
 
-                    // Use same material for all faces
-                    const material = new THREE.MeshLambertMaterial({side: THREE.DoubleSide, vertexColors: true});
-                    const edge_material = new THREE.LineBasicMaterial({color: 0x333333});
-
                     // Build 3D faces and edges
                     switch (this.type_of_3D_objects) {
                         case "timber_profiles_3D" :
@@ -1875,19 +1871,13 @@
                             const num_items = timbers_3D.length;
                             if (num_items) {
                                 _.forEach(timbers_3D, item => {
-                                    const timbers_geometry = new THREE.BufferGeometry().setFromPoints(item.triangle_points)
-                                    timbers_geometry.computeVertexNormals()
-
-                                    const face_colors = _.times(item.num_triangle_points, _.constant(item.color.rgb));
-                                    timbers_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                    meshes.zome.add(new THREE.Mesh(timbers_geometry, material))
-
-                                    const edge_geometry = new THREE.BufferGeometry().setFromPoints(item.edge_points)
-                                    const timbers_lines = new THREE.LineSegments(edge_geometry, edge_material);
-                                    meshes.edges.add(timbers_lines);
+                                    item.compute_mesh();
+                                    meshes.obj.add(item.mesh)
+                                    meshes.edges.add(item.edges);
 
                                     // Get top face and compute label positions
                                     const label_face = item.get_face("top");
+
                                     const label_mesh = create_label_mesh(
                                         item.label,
                                         label_face.depth * 0.9, // font_face
@@ -1913,59 +1903,29 @@
                             // Same as above but for spirals with geometry cloning for more efficiency
                             const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
                             if (spiral) {
-                                // Pre-Compute spiral geometry, before cloning
-                                let triangle_points = [], edge_points = [];
-
                                 const num_items = spiral.length;
                                 if (num_items) {
-                                    const crown_item_colors = new Array(num_items),
-                                        num_triangle_points = new Array(num_items);
+                                    _.forEach(spiral, item => {
+                                        item.compute_mesh();
+                                        for (let i = 0; i < ZOME.num; i++) {
+                                            const color = ZOME.rotated_colors[item.color.hex][i];
+                                            const mesh = clone_and_color_mesh(item.mesh, color);
+                                            mesh.rotateY(ZOME.rotation_angles[i]);
+                                            meshes.obj.add(mesh);
 
-                                    _.forEach(spiral, (item, j) => {
-                                        triangle_points.push(...item.triangle_points);
-                                        edge_points.push(...item.edge_points);
-
-                                        num_triangle_points[j] = item.num_triangle_points;
-                                        crown_item_colors[j] = ZOME.rotated_colors[item.color.hex];
+                                            const edges = item.edges.clone();
+                                            edges.rotateY(ZOME.rotation_angles[i]);
+                                            meshes.edges.add(edges);
+                                        };
                                     });
-
-                                    // Build geometry of first outer_faces_3D
-                                    const spiral_geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
-                                    spiral_geometry.computeVertexNormals()
-
-                                    const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points)
-
-                                    // Compute all faces geometries and colors
-                                    const face_colors = new Array(num_items);
-                                    for (let i = 0; i < ZOME.num; i++) {
-                                        const rotated_spiral_geometry = spiral_geometry.clone()
-                                        rotated_spiral_geometry.points
-                                        // Rotate the new geometry
-                                        const theta = ZOME.rotation_angles[i];
-                                        rotated_spiral_geometry.rotateY(theta);
-
-                                        // Compute colors, and add labels
-                                        for (let j = 0; j < num_items; j++) {
-                                            face_colors[j] = _.times(num_triangle_points[j], _.constant(crown_item_colors[j][i].rgb));
-                                        }
-
-                                        rotated_spiral_geometry.setAttribute('color', new THREE.Float32BufferAttribute(_.flattenDeep(face_colors), 3));
-                                        meshes.zome.add(new THREE.Mesh(rotated_spiral_geometry, material))
-
-                                        const rotated_edge_geometry = edge_geometry.clone()
-                                        rotated_edge_geometry.rotateY(theta);
-
-                                        const spiral_lines = new THREE.LineSegments(rotated_edge_geometry, edge_material);
-                                        meshes.edges.add(spiral_lines);
-                                    }
                                 }
                             }
                             break;
                     }
 
                     // Add the final obj mesh to the scene
-                    meshes.zome.rotation.y = zome_rotation;
-                    scene.add(meshes.zome);
+                    meshes.obj.rotation.y = zome_rotation;
+                    scene.add(meshes.obj);
 
                     meshes.edges.rotation.y = zome_rotation;
                     scene.add(meshes.edges);
@@ -2006,8 +1966,12 @@
                         if (meshes.vanishing_lines instanceof THREE.Group) {
                             meshes.vanishing_lines.rotation.y -= this.speed
                         }
-                        if (meshes.zome instanceof THREE.Group) {
-                            meshes.zome.rotation.y -= this.speed
+                        if (meshes.obj instanceof THREE.Group) {
+                            meshes.obj.rotation.y -= this.speed
+                        }
+
+                        if (meshes.labels instanceof THREE.Group) {
+                            meshes.labels.rotation.y -= this.speed
                         }
                     }
                 },
@@ -2931,7 +2895,7 @@
                         // Apply labels to items
                         _.forEach(obj_3D_to_label[i], item => {
                             const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
-                            item.label = obj_hash_collections[collection_item_index].item.label;
+                            item.set_label(obj_hash_collections[collection_item_index].item.label);
                         });
                     });
 
@@ -2953,13 +2917,13 @@
                             });
 
                             _.forEach(obj_3D_to_label[i], item => {
-                                item.color = hash_to_color[item.hash]
+                                item.set_color(hash_to_color[item.hash]);
                             });
                         } else {
                             // Paint colored spirals
                             _.forEach(obj_3D_to_label[i], item => {
                                 const color = Color.from_angles(0, item.slope);
-                                item.color = color;
+                                item.set_color(color);
                                 if (!rotated_colors.hasOwnProperty(color.hex)) {
                                     rotated_colors[color.hex] = _.map(rotation_angles, a => {
                                         return Color.from_angles(a, item.slope)
@@ -2986,7 +2950,7 @@
                         let O = [0, 0, 0];
                         let rotated_A;
                         _.forEach(obj_3D, (face, i) => {
-                            let flattened_face = face.flatten_2D();
+                            let flattened_face = face.flatten_side();
 
                             // Move to Origin and rotate to match with previous piece
                             let rotated_points = flattened_face.points.map(p => add(p, O));

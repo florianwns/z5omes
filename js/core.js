@@ -19,7 +19,6 @@ const FLOAT_2_STR_PRECISION = 1;
 
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
-
 check_is_mobile = function () {
     let check = false;
     (function (a) {
@@ -312,6 +311,17 @@ function rotation_matrix_from_points(a, b, c) {
     return new THREE.Matrix4().makeBasis(axis1, axis2, axis3);
 }
 
+function quaternion_from_points(pt1, pt2, pt3, end_pt1, end_pt2, end_pt3) {
+    // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
+    const matrix1 = rotation_matrix_from_points(pt1, pt2, pt3).invert();
+    const matrix2 = rotation_matrix_from_points(end_pt1, end_pt2, end_pt3);
+
+    const quaternion = new THREE.Quaternion();
+    quaternion.setFromRotationMatrix(matrix2.multiply(matrix1));
+
+    return quaternion;
+}
+
 function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     // Flattens the 3D points with the pt2 at zero to 2D points
     // and the pt1 is aligned on x axis if horizontally is true, y axis otherwise
@@ -323,21 +333,19 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     const dist_2_pt3 = dist(pt2, pt3);
 
     // Define end points depends on horizontally variable
-    const zero = [0, 0, 0];
     const end_pt1 = (horizontally)
         ? [dist_2_pt1, 0, 0]
         : [0, dist_2_pt1, 0];
+    const end_pt2 = [0, 0, 0];
     const end_pt3 = (horizontally)
         ? rotate_point_around_z_axis([dist_2_pt3, 0, 0], -theta)
         : rotate_point_around_z_axis([0, dist_2_pt3, 0], theta);
 
-    // Compute quaternion : source from https://jsfiddle.net/v6bkg4wf/2/
-    const matrix1 = rotation_matrix_from_points(pt1, pt2, pt3).invert();
-    const matrix2 = rotation_matrix_from_points(end_pt1, zero, end_pt3);
-
-    // Space to ground Quaternion
-    const quaternion = new THREE.Quaternion();
-    quaternion.setFromRotationMatrix(matrix2.multiply(matrix1));
+    // Compute quaternion
+    const quaternion = quaternion_from_points(
+        pt1, pt2, pt3,
+        end_pt1, end_pt2, end_pt3
+    );
 
     // Apply quaternion and sub translation vec to planar the face
     const flattened_points = new Array(points.length);
@@ -386,6 +394,51 @@ function circle_path(cx, cy, r) {
 // ====== CANVAS/WEBGL ======
 // --------------------------
 
+
+function color_rgb_buffer(num, r, g, b) {
+    const num_rgb = 3 * num;
+    const colors = new Float32Array(num_rgb);
+    for (let i = 0; i < num_rgb; i += 3) {
+        colors[i] = r;
+        colors[i + 1] = g;
+        colors[i + 2] = b;
+    }
+    return new THREE.Float32BufferAttribute(colors, 3);
+}
+
+function clone_and_color_mesh(other_mesh, color) {
+    if (other_mesh instanceof THREE.Group || other_mesh instanceof THREE.Mesh) {
+        const mesh = other_mesh.clone();
+        return color_mesh(mesh, color);
+    }
+}
+
+function color_mesh(mesh, color) {
+    if (mesh instanceof THREE.Group) {
+        _.forEach(mesh.children, child => {
+            child.material.color.set(color.hex);
+        });
+    } else if (mesh instanceof THREE.Mesh) {
+        mesh.material.color.set(color.hex);
+    }
+    return mesh;
+}
+
+
+function name_mesh(mesh, label) {
+    if (mesh instanceof THREE.Mesh) {
+        mesh.name = label;
+    }
+
+    if (mesh instanceof THREE.Group) {
+        _.forEach(mesh.children, child => {
+            child.name = label;
+        });
+    }
+    return mesh;
+}
+
+
 function create_label_mesh(
     text,
     font_size = 26,
@@ -423,8 +476,8 @@ function create_label_mesh(
     ctx.strokeText(text, text_x_position, text_y_position);
 
     const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.MeshLambertMaterial({
-        side: THREE.FrontSide,
+    const material = new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
         map: texture,
         transparent: true
     });
@@ -711,8 +764,11 @@ class Base3DGeometry extends LabeledObject {
         }
 
         // Store points
+        this.num_points = points.length;
         this.points = points;
-        this.num_points = this.points.length;
+
+        // Points without the z axis for 2D drawing
+        this.points_2D = convert_3D_to_2D(this.points);
 
         // Take first point as Origin
         this.origin = this.points[0];
@@ -738,7 +794,20 @@ class Base3DGeometry extends LabeledObject {
         // Declare flattened points parameters
         this.flattened_points = null;
         this.quaternion = null;
-        this.translation_vec = null
+        this.translation = null;
+
+        this.mesh = null;
+        this.edges = null;
+    }
+
+    set_color(color) {
+        this.color = color;
+        this.mesh = color_mesh(this.mesh, color);
+    }
+
+    set_label(label) {
+        this.label = label;
+        this.mesh = name_mesh(this.mesh, label);
     }
 
     fit_points() {
@@ -746,27 +815,14 @@ class Base3DGeometry extends LabeledObject {
         return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2] - this.z_min]);
     }
 
+    filter_points_by_side(side, points) {
+        // Filter side points
+        return points || this.points;
+    }
+
     get_face(side = "top") {
         // return a Polygon 3D of a specific side
         return this;
-    }
-}
-
-class Polygon2D extends Base3DGeometry {
-    // Call by flatten method from Polygon3D
-    // Points are distributed counterclockwise
-
-    constructor(points, label, color) {
-        // Call parent constructor
-        super(points, label, color);
-
-        // Points without the z axis
-        this.points_2D = convert_3D_to_2D(this.points);
-    }
-
-    fit_points() {
-        // Adjust the points so the minimum values end up at zero on X and Y axis
-        return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2]]);
     }
 
     resize_points_2D(size = null) {
@@ -804,14 +860,6 @@ class Polygon3D extends Base3DGeometry {
         // TODO : remove from the class and compute distance outside
         this.diameter = 2 * dist(this.points[1], [0, this.points[1][1], 0]);
 
-        // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
-        this.num_triangles = this.num_points - 2;
-        this.num_triangle_points = 3 * this.num_triangles;
-
-        // Arrays of THREE.Vector3 for 3D visualization
-        this.triangle_points = new Array(this.num_triangle_points);
-        this.edge_points = new Array(this.num_points * 2);
-
         // Geometry parameters
         this.area = 0;
         this.perimeter = 0;
@@ -819,7 +867,6 @@ class Polygon3D extends Base3DGeometry {
         this.edge_distances = [];       // Edges distances
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
-        let face_index = 0;
         _.forEach(this.points, (cur_point, i) => {
             const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
             const next_point = this.points[(i + 1) % this.num_points];
@@ -835,19 +882,6 @@ class Polygon3D extends Base3DGeometry {
 
             // Compute area of the triangle
             this.area += triangle_area_from_points(this.origin, next_point, next_next_point);
-
-            // Prepare line segments points
-            this.edge_points[i * 2] = new THREE.Vector3(...cur_point);
-            this.edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
-
-            // Compute face triangle
-            if (face_index < this.num_triangle_points) {
-                // Faces points for 3D display
-                this.triangle_points[face_index] = new THREE.Vector3(...this.origin)
-                this.triangle_points[face_index + 1] = new THREE.Vector3(...next_point)
-                this.triangle_points[face_index + 2] = new THREE.Vector3(...next_next_point)
-                face_index += 3;
-            }
         });
 
         // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
@@ -857,8 +891,58 @@ class Polygon3D extends Base3DGeometry {
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
     }
 
-    flatten_2D(side = "top") {
-        return new Polygon2D(this.flattened_points, this.label, this.color);
+    compute_mesh(){
+        // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
+        const num_triangles = this.num_points - 2;
+        const num_triangle_points = 3 * num_triangles;
+
+        // Arrays of THREE.Vector3 for 3D visualization
+        const triangle_points = new Array(num_triangle_points);
+        const edge_points = new Array(this.num_points * 2);
+
+        let face_index = 0;
+        _.forEach(this.points, (cur_point, i) => {
+            const next_point = this.points[(i + 1) % this.num_points];
+            const next_next_point = this.points[(i + 2) % this.num_points];
+
+            // Compute line segments points
+            edge_points[i * 2] = new THREE.Vector3(...cur_point);
+            edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
+
+            // Compute face triangles
+            if (face_index < num_triangle_points) {
+                // Faces points for 3D display
+                triangle_points[face_index] = new THREE.Vector3(...this.origin)
+                triangle_points[face_index + 1] = new THREE.Vector3(...next_point)
+                triangle_points[face_index + 2] = new THREE.Vector3(...next_next_point)
+                face_index += 3;
+            }
+        });
+
+        // Compute geometry for THREE JS display
+        const geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
+        // this.geometry.computeVertexNormals()
+
+        // Ensure the bounding box is computed for its geometry
+        // This should be done only once (assuming static geometries)
+        // this.geometry.computeBoundingBox();
+
+        const material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex});
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.mesh.name = this.label;
+
+        this.edges = new THREE.LineSegments(
+            new THREE.BufferGeometry().setFromPoints(edge_points),
+            new THREE.LineBasicMaterial({color: 0x333333}),
+        );
+
+        // Compute the bounding box
+        // this.bounding_box = new THREE.Box3();
+        // this.bounding_box.copy(this.geometry.boundingBox);
+    }
+
+    flatten_side(side = "top") {
+        return new Polygon3D(this.flattened_points, this.label, this.color);
     }
 
     divide(horizontally = true) {
@@ -922,20 +1006,16 @@ class TrapezoidalPrism extends Base3DGeometry {
         // Call parent constructor
         super(points, label, color);
 
-        // Flattens point with the front side at zero
+        // Flattens point with the bottom side at zero
         const [A, B, C, D, E, F, G, H] = this.points;
         [this.flattened_points, this.quaternion, this.translation] = flatten_3D_points(this.points, D, B, A, true);
-
-        // Arrays of THREE.Vector3 for 3D visualization
-        this.triangle_points = [];
-        this.edge_points = []
 
         // Geometry parameters
         this.area = 0;
         this.angles = [];
         this.edge_distances = [];
 
-        const polygons = [
+        this.polygons = [
             this.get_face("top"),
             this.get_face("bottom"),
             this.get_face("left"),
@@ -943,20 +1023,29 @@ class TrapezoidalPrism extends Base3DGeometry {
             this.get_face("front"),
             this.get_face("back"),
         ];
-        _.forEach(polygons, (fig) => {
-            this.triangle_points.push(...fig.triangle_points);
-            this.edge_points.push(...fig.edge_points);
-
-            this.angles.push(...fig.angles);
-            this.edge_distances.push(...fig.edge_distances);
-            this.area += fig.area; // recompute area
-
+        _.forEach(this.polygons, item => {
+            this.angles.push(...item.angles);
+            this.edge_distances.push(...item.edge_distances);
+            this.area += item.area; // recompute area
         });
-        this.num_triangle_points = this.triangle_points.length
 
         // Compute hash to compare prims
         this.hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
     }
+
+    compute_mesh(){
+        // Group of geometries
+        this.mesh = new THREE.Group();
+        this.mesh.name = this.label;
+        this.edges = new THREE.Group();
+
+        _.forEach(this.polygons, item => {
+            item.compute_mesh();
+            this.mesh.add(item.mesh);
+            this.edges.add(item.edges);
+        });
+    }
+
 
     get_face(side = "top") {
         // return a Polygon 3D of a specific side
@@ -1004,7 +1093,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
     }
 
-    flatten_2D(side = "top", add_opposite_side = false, rotation_angle = null) {
+    flatten_side(side = "top", add_opposite_side = false, rotation_angle = null) {
         // flatten side (or pair of sides if add_opposite_side is true)
         // with three choices "front", "bottom" and "left";
         // Because svg display is different than three.js display, we reverse some axes.
@@ -1037,7 +1126,7 @@ class TrapezoidalPrism extends Base3DGeometry {
             ]
             : this.filter_points_by_side(side, flattened_points);
 
-        return new Polygon2D(filtered_points, this.label, this.color);
+        return new Polygon3D(filtered_points, this.label, this.color);
     }
 }
 
