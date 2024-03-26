@@ -1,7 +1,7 @@
 # TODO-LIST
 
-* [ ] Compute mesh only for 3D
-
+* [x] Compute mesh only for 3D
+  
 * [ ] Compute parameters only if needed
 
 * [ ] supprimer les rotated colors car trop lourd a gérer 

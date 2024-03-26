@@ -209,17 +209,10 @@
             <hr>
 
             <div class="d-flex align-items-center mb-3">
-                <h5 class="text-secondary my-1 me-3">
+                <h5 class="text-secondary my-1 me-auto">
                     <i class="fa-solid fa-frame rotate-45 me-1"></i>
                     <span x-text="i18n('framework')" class="up-first"></span>
                 </h5>
-
-                <!-- Paint Button -->
-                <button @click="params.paint_similar_pieces = !params.paint_similar_pieces"
-                        class="btn btn-primary btn-sm p-2 me-auto"
-                        data-bs-toggle="tooltip" :title="i18n('help_painting_param')">
-                    <i class="fa-solid" :class="(params.paint_similar_pieces)? `fa-paintbrush` : `fa-paint-roller`"></i>
-                </button>
 
                 <select class="form-select form-select-sm unit-select"
                         aria-label="Measuring unit" x-model="params.measuring_unit">
@@ -719,6 +712,16 @@
                                                 :class="draw_color ? '' : 'btn-secondary'"
                                                 @click="draw_color = !draw_color">
                                             <i class="fa-regular fa-droplet fa-fw"></i>
+                                        </button>
+
+                                        <!-- Paint Button -->
+                                        <button @click="paint_similar_pieces = !paint_similar_pieces"
+                                                class="btn btn-primary"
+                                                x-show="draw_color"
+                                                data-bs-toggle="tooltip" :title="i18n('help_painting_param')">
+                                            <i class="fa-solid"
+                                               :class="(paint_similar_pieces)? `fa-paintbrush` : `fa-paint-roller`">
+                                            </i>
                                         </button>
 
                                         <!-- Draw centroid -->
@@ -1383,15 +1386,17 @@
                 kind_of_drawing: "mandala_faces",
                 draw_color: true,
                 draw_centroid: false,
+                paint_similar_pieces: true,
 
                 // 2D Rendering Parameters
                 init() {
                     this.A4_sheet = this.$refs.A4_sheet;
 
                     // Add listeners
-                    this.$watch("kind_of_drawing", () => {
-                        this.process();
-                    });
+                    _.forEach(["kind_of_drawing", "paint_similar_pieces"], key => this.$watch(key, () => {
+                            this.process();
+                        })
+                    );
 
                     this.$watch("page_index", () => {
                         this.draw();
@@ -1585,7 +1590,9 @@
                                 new Polygon3D(
                                     swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
                                     face.label,
-                                    ZOME.rotated_colors[face.color.hex][i],
+                                    (this.paint_similar_pieces)
+                                        ? face.color
+                                        :  ZOME.rotated_colors[face.color.hex][i],
                                 )
                             );
                         });
@@ -1606,7 +1613,9 @@
                                 new Polygon3D(
                                     swap_axes(face.points, "XZY"),
                                     face.label,
-                                    ZOME.rotated_colors[face.color.hex][i],
+                                    (this.paint_similar_pieces)
+                                        ? face.color
+                                        :  ZOME.rotated_colors[face.color.hex][i],
                                 )
                             );
                         });
@@ -1823,10 +1832,6 @@
                 },
 
                 process() {
-                    const zome_rotation = (meshes.obj instanceof THREE.Group)
-                        ? meshes.obj.rotation.y
-                        : 0;
-
                     this.clear();
 
                     // Display switch buttons
@@ -1848,7 +1853,6 @@
                         });
                     }
 
-                    meshes.vanishing_lines.rotation.y = zome_rotation;
                     scene.add(meshes.vanishing_lines);
                     this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
 
@@ -1860,7 +1864,6 @@
                         const material = new THREE.PointsMaterial({color: 0x888888, size: 20});
                         meshes.vertices.add(new THREE.Points(geometry, material))
                     }
-                    meshes.vertices.rotation.y = zome_rotation;
                     scene.add(meshes.vertices);
                     this.set_visibility("vertices", this.show_vertices_switch && this.draw_vertices);
 
@@ -1871,7 +1874,8 @@
                             const num_items = timbers_3D.length;
                             if (num_items) {
                                 _.forEach(timbers_3D, item => {
-                                    item.compute_mesh();
+                                    if(item.mesh === null) item.compute_mesh();
+
                                     meshes.obj.add(item.mesh)
                                     meshes.edges.add(item.edges);
 
@@ -1906,10 +1910,10 @@
                                 const num_items = spiral.length;
                                 if (num_items) {
                                     _.forEach(spiral, item => {
-                                        item.compute_mesh();
+                                        if(item.mesh === null) item.compute_mesh();
+
                                         for (let i = 0; i < ZOME.num; i++) {
-                                            const color = ZOME.rotated_colors[item.color.hex][i];
-                                            const mesh = clone_and_color_mesh(item.mesh, color);
+                                            const mesh = clone_and_color_mesh(item.mesh, item.color);
                                             mesh.rotateY(ZOME.rotation_angles[i]);
                                             meshes.obj.add(mesh);
 
@@ -1924,13 +1928,13 @@
                     }
 
                     // Add the final obj mesh to the scene
-                    meshes.obj.rotation.y = zome_rotation;
+                    // meshes.obj.rotation.y = zome_rotation;
                     scene.add(meshes.obj);
 
-                    meshes.edges.rotation.y = zome_rotation;
+                    // meshes.edges.rotation.y = zome_rotation;
                     scene.add(meshes.edges);
 
-                    meshes.labels.rotation.y = zome_rotation;
+                    // meshes.labels.rotation.y = zome_rotation;
                     scene.add(meshes.labels);
                 },
                 get right() {
@@ -1957,22 +1961,7 @@
                 },
                 update() {
                     if (this.is_spinning) {
-                        if (meshes.vertices instanceof THREE.Group) {
-                            meshes.vertices.rotation.y -= this.speed
-                        }
-                        if (meshes.edges instanceof THREE.Group) {
-                            meshes.edges.rotation.y -= this.speed
-                        }
-                        if (meshes.vanishing_lines instanceof THREE.Group) {
-                            meshes.vanishing_lines.rotation.y -= this.speed
-                        }
-                        if (meshes.obj instanceof THREE.Group) {
-                            meshes.obj.rotation.y -= this.speed
-                        }
-
-                        if (meshes.labels instanceof THREE.Group) {
-                            meshes.labels.rotation.y -= this.speed
-                        }
+                        scene.rotation.y -= this.speed;
                     }
                 },
                 render() {
@@ -2084,7 +2073,6 @@
 
                     // Commons parameters
                     help_is_displayed: false,
-                    paint_similar_pieces: true,
                 },
                 params_backup: null,
 
@@ -2867,10 +2855,6 @@
                         });
                     }
 
-                    // 🎨 Build rotated colors
-                    let rotated_colors = {};
-                    const PAINT_SIMILAR_PIECES = this.params.paint_similar_pieces;
-
                     const obj_3D_to_label = [
                         skeleton_3D,
                         outer_faces_3D,
@@ -2878,7 +2862,7 @@
                         zome_faces_3D,
                     ];
 
-                    // Group items by hash and sort them by Y position
+                    // Group items by hash
                     const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
                         // Compute hash to compare objects
                         const grouped_by_hash = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
@@ -2886,7 +2870,6 @@
                         });
 
                         // Sort collection by an average of vertical position
-                        //_.sortBy(grouped_by_hash, group => average(group.item.points)[1]);
                         return grouped_by_hash;
                     });
 
@@ -2899,38 +2882,29 @@
                         });
                     });
 
-                    // Add colors to items
+                    // 🎨 Add colors to items and build rotated colors
+                    let rotated_colors = {};
                     _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
                         // Get hash group
                         const hashes = obj_hash_collections.map(collection => collection.hash);
                         const num_hashes = hashes.length;
 
-                        if (PAINT_SIMILAR_PIECES) {
-                            // Associates a hash to a color
-                            const hash_to_color = {};
-                            _.forIn(hashes, (hash, j) => {
-                                if (!hash_to_color.hasOwnProperty(hash)) {
-                                    const color = Color.from_index(j, num_hashes);
-                                    hash_to_color[hash] = color;
-                                    rotated_colors[color.hex] = _.times(rotation_angles.length, _.constant(color));
-                                }
-                            });
+                        // Associates a hash to a color
+                        const hash_to_color = {};
+                        _.forIn(hashes, (hash, j) => {
+                            if (!hash_to_color.hasOwnProperty(hash)) {
+                                const color = Color.from_index(j, num_hashes);
+                                hash_to_color[hash] = color;
+                            }
+                        });
 
-                            _.forEach(obj_3D_to_label[i], item => {
-                                item.set_color(hash_to_color[item.hash]);
-                            });
-                        } else {
-                            // Paint colored spirals
-                            _.forEach(obj_3D_to_label[i], item => {
-                                const color = Color.from_angles(0, item.slope);
-                                item.set_color(color);
-                                if (!rotated_colors.hasOwnProperty(color.hex)) {
-                                    rotated_colors[color.hex] = _.map(rotation_angles, a => {
-                                        return Color.from_angles(a, item.slope)
-                                    });
-                                }
-                            });
-                        }
+                        // Paint rotated_colors if you decide to paint spiral colors
+                        _.forEach(obj_3D_to_label[i], item => {
+                            item.set_color(hash_to_color[item.hash]);
+                            if (!rotated_colors.hasOwnProperty(item.color.hex)) {
+                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a, item.slope));
+                            }
+                        });
                     });
 
                     // Unpack variables
