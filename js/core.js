@@ -11,6 +11,7 @@
 // ------------------------------------
 // ========== Constants ==========
 // ------------------------------------
+const DEBUG = false;
 
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
@@ -767,39 +768,41 @@ class Base3DGeometry extends LabeledObject {
         this.num_points = points.length;
         this.points = points;
 
-        // Compute boundaries
-        const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = get_boundaries(this.points);
-        this.x_min = x_min;
-        this.x_max = x_max
-        this.y_min = y_min;
-        this.y_max = y_max;
-        this.z_min = z_min;
-        this.z_max = z_max;
-        this.width = width;     // X Axis
-        this.height = height;   // Y Axis
-        this.depth = depth;     // Z Axis
-
         // Declare private variables use by getters for dynamic computing
         this._points_2D = null;
         this._flattened_points = null;
 
+        // THREE JS objects
         this._mesh = null;
         this._edges = null;
+        this._bounding_box = null;
 
+        // Geometry Params to compute hash
         this._area = null;
         this._perimeter = null;
         this._angles = null;
         this._edge_distances = null;
 
+        this._hash = null;
+
+        // Boundaries
+        this._x_min = null;
+        this._x_max = null;
+        this._y_min = null;
+        this._y_max = null;
+        this._z_min = null;
+        this._z_max = null;
+        this._width = null;
+        this._height = null;
+        this._depth = null;
+
         this._slope = null;
         this._centroid = null;
-
-        this._hash = null;
     }
 
 
-    get points_2D(){
-        if (this._points_2D === null){
+    get points_2D() {
+        if (this._points_2D === null) {
             // Points without the z axis for 2D drawing
             this._points_2D = convert_3D_to_2D(this.points);
         }
@@ -861,6 +864,61 @@ class Base3DGeometry extends LabeledObject {
         return this._edges;
     }
 
+    get bounding_box() {
+        if (this._bounding_box === null) {
+            this.compute_bounding_box();
+        }
+        return this._bounding_box;
+    }
+
+    get x_min() {
+        if (this._x_min === null) this.compute_boundaries();
+        return this._x_min;
+    }
+
+    get x_max() {
+        if (this._x_max === null) this.compute_boundaries();
+        return this._x_max;
+    }
+
+    get y_min() {
+        if (this._y_min === null) this.compute_boundaries();
+        return this._y_min;
+    }
+
+    get y_max() {
+        if (this._y_max === null) this.compute_boundaries();
+        return this._y_max;
+    }
+
+    get z_min() {
+        if (this._z_min === null) this.compute_boundaries();
+        return this._z_min;
+    }
+
+    get z_max() {
+        if (this._z_max === null) this.compute_boundaries();
+        return this._z_max;
+    }
+
+    get width() {
+        // X Axis
+        if (this._width === null) this.compute_boundaries();
+        return this._width;
+    }
+
+    get height() {
+        // Y Axis
+        if (this._height === null) this.compute_boundaries();
+        return this._height;
+    }
+
+    get depth() {
+        // Z Axis 
+        if (this._depth === null) this.compute_boundaries();
+        return this._depth;
+    }
+
     get color() {
         return this._color;
     }
@@ -883,9 +941,39 @@ class Base3DGeometry extends LabeledObject {
         return this._flattened_points;
     }
 
+    compute_boundaries() {
+        // Compute boundaries
+        const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = get_boundaries(this.points);
+        this._x_min = x_min;
+        this._x_max = x_max
+        this._y_min = y_min;
+        this._y_max = y_max;
+        this._z_min = z_min;
+        this._z_max = z_max;
+        this._width = width;     // X Axis
+        this._height = height;   // Y Axis
+        this._depth = depth;     // Z Axis
+    }
+
     // Computing interfaces
-    compute_geometry_parameters() {}
-    compute_meshes() {}
+    compute_geometry_parameters() {
+    }
+
+    compute_meshes() {
+    }
+
+    compute_bounding_box() {
+        if (this._mesh === null) this.compute_meshes();
+        if (this._mesh instanceof THREE.Mesh) {
+            // Ensure the bounding box is computed for its geometry
+            // This should be done only once (assuming static geometries)
+            this._mesh.geometry.computeBoundingBox();
+
+            // Compute the bounding box
+            this._bounding_box = new THREE.Box3();
+            this._bounding_box.copy(this._mesh.geometry.boundingBox);
+        }
+    }
 
     fit_points() {
         // Adjust the points so the minimum values end up at zero
@@ -926,9 +1014,11 @@ class Polygon3D extends Base3DGeometry {
         super(points, label, color);
 
         // Check coplanarity
-        this.is_coplanar = this.num_points == 3 || check_is_coplanar(this.points);
-        if (!this.is_coplanar) {
-            console.error(`The polygon is not coplanar`);
+        if (DEBUG) {
+            this.is_coplanar = this.num_points == 3 || check_is_coplanar(this.points);
+            if (!this.is_coplanar) {
+                console.error(`The polygon ${this.label || ''} is not coplanar`, this.points);
+            }
         }
 
         // Because we consider this polygon coplanar, we make a plane with 3 points
