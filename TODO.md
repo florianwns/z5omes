@@ -1,19 +1,8 @@
 # TODO-LIST
 
-* [x] Compute mesh only for 3D
-  
-* [ ] Compute parameters only if needed
-
-* [ ] supprimer les rotated colors car trop lourd a gérer 
-  pour la 3D et incohérent avec les hash de pieces
-  
-* [ ] Re-Set 3D label for same hash
-  
-* [ ] Faire tourner toute la scène car sinon c'est relou à coder
-
 * [ ] Inverser le quaternion et l'appliquer au mesh du timber profile ...impeccable
 
-* [ ] essayer de faire un zome bindu
+* [ ] Essayer de faire un zome bindu
 
 * [ ] Ajouter le zomandala (Différent du mandala)
   https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
