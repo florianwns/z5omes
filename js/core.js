@@ -972,8 +972,6 @@ class Polygon3D extends Base3DGeometry {
     }
 
     compute_meshes() {
-        if (this._mesh !== null) return;
-
         // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
         const num_triangles = this.num_points - 2;
         const num_triangle_points = 3 * num_triangles;
@@ -1112,8 +1110,6 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 
     compute_meshes() {
-        if (this._mesh !== null) return;
-
         // Group of geometries
         this._mesh = new THREE.Group();
         this._mesh.name = this._label;
