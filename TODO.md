@@ -1,5 +1,7 @@
 # TODO-LIST
-
+ 
+* [ ] Ajouter la notion de couronne
+  
 * [ ] ne pas renvoyer une polygone avec la face opposé pour éviter de lever l'exception de coplanarité
   
 * [ ] Inverser le quaternion et l'appliquer au mesh du timber profile ...impeccable

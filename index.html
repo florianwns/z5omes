@@ -619,6 +619,14 @@
                                     </div>
 
                                     <div class="d-flex flex-wrap justify-content-evenly">
+                                        <!-- Draw Labels -->
+                                        <div class="form-check form-switch me-2 mb-3">
+                                            <label class="form-check-label" for="draw-labels-switch"
+                                                   x-text="i18n('labels')"></label>
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="draw-labels-switch" x-model="draw_labels">
+                                        </div>
+
                                         <!-- Draw Vanishing Lines -->
                                         <div class="form-check form-switch me-2 mb-3"
                                              x-show="show_vanishing_lines_switch">
@@ -975,7 +983,7 @@
 
                         // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
-                            const side = prism.flatten_side(side_name, true, (i === 1) ? TAU_Q : null);
+                            const side = prism.flatten_face(side_name, true, (i === 1) ? TAU_Q : null);
                             switch (i) {
                                 case 0:
                                 case 1:
@@ -1172,8 +1180,8 @@
                                 }
 
                                 const real_pt = fitted_points[j];
-                                const rounded_x = to_int(real_pt[0]);
-                                // const rounded_x = j;
+                                // const rounded_x = to_int(real_pt[0]);
+                                const rounded_x = j;
                                 if (!rounded_xs.includes(rounded_x)) {
                                     const is_boundary = rounded_x == 0 || rounded_x == to_int(side.width);
 
@@ -1348,7 +1356,7 @@
                 get table_rows() {
                     const rows = new Array(this.faces.length);
                     _.forEach(this.faces, (face, i) => {
-                        const flattened_face = face.flatten_side();
+                        const flattened_face = face.flatten_face();
                         rows[i] = [flattened_face, [
                             flattened_face.label, // i + 1
                             humanize_distance(flattened_face.width),
@@ -1591,7 +1599,7 @@
                                     face.label,
                                     (this.paint_similar_pieces)
                                         ? face.color
-                                        :  ZOME.rotated_colors[face.color.hex][i],
+                                        : ZOME.rotated_colors[face.color.hex][i],
                                 )
                             );
                         });
@@ -1614,7 +1622,7 @@
                                     face.label,
                                     (this.paint_similar_pieces)
                                         ? face.color
-                                        :  ZOME.rotated_colors[face.color.hex][i],
+                                        : ZOME.rotated_colors[face.color.hex][i],
                                 )
                             );
                         });
@@ -1675,6 +1683,7 @@
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
 
+                draw_labels: true,
                 draw_axes: true,
                 draw_vanishing_lines: true,
                 draw_vertices: false,
@@ -1691,7 +1700,7 @@
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["axes", "vanishing_lines", "vertices"].forEach(
+                    ["labels", "axes", "vanishing_lines", "vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
@@ -1875,28 +1884,7 @@
                                 _.forEach(timbers_3D, item => {
                                     meshes.obj.add(item.mesh)
                                     meshes.edges.add(item.edges);
-
-                                    // Get top face and compute label positions
-                                    const label_face = item.get_face("top");
-
-                                    const label_mesh = create_label_mesh(
-                                        item.label,
-                                        label_face.depth * 0.9, // font_face
-                                        (label_face.depth * 0.1) / 2, // padding
-                                    );
-
-                                    // Rotate then center label text on top face
-                                    const rotation_angle = Math.PI - angle_between_planes(
-                                        plane_on_axis("Z", label_face.z_max),
-                                        label_face.plane
-                                    );
-                                    label_mesh.rotateX(-rotation_angle);
-                                    const [x, y, z] = add(label_face.centroid, [0, 2, 0]);
-                                    label_mesh.position.x = x;
-                                    label_mesh.position.y = y;
-                                    label_mesh.position.z = z;
-
-                                    meshes.labels.add(label_mesh);
+                                    meshes.labels.add(item.label_mesh);
                                 });
                             }
                             break;
@@ -1906,7 +1894,7 @@
                             if (spiral) {
                                 const num_items = spiral.length;
                                 if (num_items) {
-                                    _.forEach(spiral, item => {
+                                    _.forEach(spiral, (item, j) => {
                                         for (let i = 0; i < ZOME.num; i++) {
                                             const mesh = clone_and_color_mesh(item.mesh, item.color);
                                             mesh.rotateY(ZOME.rotation_angles[i]);
@@ -1915,7 +1903,13 @@
                                             const edges = item.edges.clone();
                                             edges.rotateY(ZOME.rotation_angles[i]);
                                             meshes.edges.add(edges);
-                                        };
+
+                                            // Add label once
+                                            if (i == 0) {
+                                                const label_mesh = item.label_mesh;
+                                                meshes.labels.add(label_mesh);
+                                            }
+                                        }
                                     });
                                 }
                             }
@@ -1923,14 +1917,10 @@
                     }
 
                     // Add the final obj mesh to the scene
-                    // meshes.obj.rotation.y = zome_rotation;
                     scene.add(meshes.obj);
-
-                    // meshes.edges.rotation.y = zome_rotation;
                     scene.add(meshes.edges);
-
-                    // meshes.labels.rotation.y = zome_rotation;
                     scene.add(meshes.labels);
+                    this.set_visibility("labels", this.draw_labels);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -2919,7 +2909,7 @@
                         let O = [0, 0, 0];
                         let rotated_A;
                         _.forEach(obj_3D, (face, i) => {
-                            let flattened_face = face.flatten_side();
+                            let flattened_face = face.flatten_face();
 
                             // Move to Origin and rotate to match with previous piece
                             let rotated_points = flattened_face.points.map(p => add(p, O));
