@@ -1,5 +1,11 @@
 # TODO-LIST
- 
+
+* [ ] Ajouter les boutons de navigation dans la 3D (home, <-, ->, etc....)
+
+* [ ] Ajouter les boutons d'increment vitesse de la vitesse
+
+* [ ] Ajouter l'export SVG et PDF 
+  
 * [ ] Ajouter la notion de couronne
   
 * [ ] ne pas renvoyer une polygone avec la face opposé pour éviter de lever l'exception de coplanarité
