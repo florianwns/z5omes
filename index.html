@@ -26,8 +26,20 @@
 <body class="bg-light">
 
 <div x-data="settings" @zome-renderer-is-ready.window="__make_zome">
-    <div class="loading-bar" x-show="is_computing">
+    <div class="loading-bar" x-show="is_computing" style="z-index: 9999;">
         <div></div>
+    </div>
+    <div x-show="show_splash_screen"
+         class="bg-white position-fixed top-0 start-0"
+         style="height:100%;width:100%;z-index: 9998;">
+        <div class=" d-flex align-items-center" style="height:100%;width:100%;">
+            <div class="d-flex align-items-center text-decoration-none m-auto position-relative d-flex">
+                <img src="img/logo_zome.svg" width="80" title="Z5omes" class="me-2">
+                <h1 class="text-primary mb-0 ">
+                    Z<span class="fs-4">o</span>oOo<span class="fs-4">o</span>mes
+                </h1>
+            </div>
+        </div>
     </div>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false"
@@ -388,7 +400,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.9b02</span>
+                              style="font-size: 10px; top:0px">v1.0.9b03</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -445,11 +457,11 @@
                     <div class="tab-content h-100 mt-3">
                         <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                              tabindex="0" x-data="renderer_3D" @resize.window="__auto_size"
-                             @zome-is-made.window="process">
+                             @zome-is-made.window="__process">
                             <div class="d-flex justify-content-center">
                                 <div style="width:calc(100% - 72px); max-width: 800px;" class="position-relative">
                                     <!-- Export to -->
-                                    <div class="ps-2 exports-container" style="top:0px;">
+                                    <div x-show="draw_obj" class="ps-2 absolute-top-right-48">
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
@@ -499,13 +511,75 @@
                                                     x-text="i18n('mandala_3D_of_inner_faces')"></option>
                                         </select>
                                     </div>
+
                                     <!-- Canvas for Zome 3D rendering -->
                                     <div x-ref="canvas_3D_container" class="position-relative">
                                         <div x-ref="canvas_3D" style="min-height:500px; cursor: move;"
                                              :style="(is_fullscreen)? `height:100%;` : `height:500px;`"
                                              class="shadow bg-dark rounded mb-2 overflow-hidden">
                                         </div>
-                                        <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-2">
+
+                                        <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-3">
+                                            <!-- Num Spiral Rotations -->
+                                            <div class="vstack">
+                                                <button class="btn btn-primary"
+                                                        @click="draw_obj = !draw_obj"
+                                                        data-bs-toggle="tooltip" :title="i18n('draw_obj')">
+                                                    <i class="fa"
+                                                       :class="(draw_obj) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
+                                                </button>
+                                                <div class="mt-1" x-show="draw_obj && clone_and_rotate_mode">
+                                                    <button class="btn btn-sm btn-small-padding line-height-1px"
+                                                            @click="num_spiral_rotations = Math.max(num_spiral_rotations - 1, 1)"
+                                                            :class="(num_spiral_rotations <= 1) ? `btn-secondary` : `btn-primary`"
+                                                            data-bs-toggle="tooltip" :title="i18n('decrease_spiral_rotations')">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-small-padding line-height-1px"
+                                                            @click="num_spiral_rotations = Math.min(num_spiral_rotations + 1, params.num)"
+                                                            :class="(num_spiral_rotations >= params.num) ? `btn-secondary` : `btn-primary`"
+                                                            data-bs-toggle="tooltip" :title="i18n('increase_spiral_rotations')">
+                                                        <i class="fa fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Draw Labels -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_labels = !draw_labels"
+                                                    :class="(draw_labels) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('draw_labels')">
+                                                <i class="fa fa-tag"></i>
+                                            </button>
+
+                                            <!-- Draw Vanishing Lines -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_vanishing_lines = !draw_vanishing_lines"
+                                                    :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('draw_vanishing_lines')">
+                                                <i class="fa fa-arrows-to-circle"></i>
+                                            </button>
+
+                                            <!-- Draw Axes -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_axes = !draw_axes"
+                                                    :class="(draw_axes) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('draw_axes')">
+                                                <i class="fa fa-chart-scatter-3d"></i>
+                                            </button>
+
+                                            <!-- Spin on/off -->
+                                            <button class="btn btn-primary"
+                                                    @click="is_spinning = !is_spinning"
+                                                    :class="(is_spinning) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('spin')">
+                                                <i class="fa "
+                                                   :class="(speed < 0) ? `fa-rotate-left` : `fa-rotate-right`"
+                                                ></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
                                             <!-- Keyboard shortcuts -->
                                             <button class="btn btn-primary"
                                                     data-bs-toggle="modal"
@@ -525,7 +599,7 @@
                                         <!-- Keyboard shortcuts Modal -->
                                         <div class="modal fade" id="shortcuts-modal" tabindex="-1"
                                              aria-labelledby="shortcuts-modal-title" aria-hidden="true">
-                                            <div class="modal-dialog modal-sm mt-2 me-2">
+                                            <div class="modal-dialog modal-sm mt-2 ms-2">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="text-secondary my-1 me-3" id="shortcuts-modal-title">
@@ -669,7 +743,7 @@
                             <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
                                 <div class="position-relative">
                                     <!-- Export to -->
-                                    <div class="ps-2 exports-container" style="top:48px;">
+                                    <div class="ps-2 absolute-top-right-48" style="top:48px;">
                                         <div class="vstack">
                                         <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
                                               data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'SVG')"
@@ -1679,10 +1753,13 @@
 
             return {
                 // 3D Rendering Parameters
+                num_spiral_rotations: 1,
+                last_zome_num: 1,
                 is_spinning: false,
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
 
+                draw_obj: true,
                 draw_labels: true,
                 draw_axes: true,
                 draw_vanishing_lines: true,
@@ -1693,23 +1770,29 @@
 
                 is_fullscreen: false,
                 __auto_size: null,
+                __process: null,
 
                 init() {
                     this.__auto_size = _.debounce(this.auto_size, 1);
+                    this.__process = _.debounce(this.process, 1);
 
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["labels", "axes", "vanishing_lines", "vertices"].forEach(
+                    ["obj", "labels", "axes", "vanishing_lines", "vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
                     );
 
-                    this.$watch("type_of_3D_objects", () => {
-                        this.process();
-                    });
+                    this.num_spiral_rotations = this.params.num;
+                    this.last_zome_num = this.params.num;
 
+                    ["num_spiral_rotations", "type_of_3D_objects"].forEach(
+                        (key) => this.$watch(key, () => {
+                            this.__process();
+                        })
+                    );
 
                     // Screenfull lister
                     if (this.can_use_screenfull) {
@@ -1766,6 +1849,16 @@
                         this.$dispatch('zome-renderer-is-ready');
                     });
                 },
+
+                get clone_and_rotate_mode() {
+                    switch (this.type_of_3D_objects) {
+                        case "timber_profiles_3D" :
+                            return false;
+                        default:
+                            return true;
+                    }
+                },
+
                 auto_size() {
                     const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
                     if (width > 0 && height > 0) {
@@ -1839,9 +1932,13 @@
                     meshes.vertices = new THREE.Group();
                 },
 
+
                 process() {
                     this.clear();
 
+                    if (this.last_zome_num != ZOME.num) {
+                        this.num_spiral_rotations = this.last_zome_num = ZOME.num;
+                    }
                     // Display switch buttons
                     this.show_vanishing_lines_switch = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
@@ -1876,49 +1973,42 @@
                     this.set_visibility("vertices", this.show_vertices_switch && this.draw_vertices);
 
                     // Build 3D faces and edges
-                    switch (this.type_of_3D_objects) {
-                        case "timber_profiles_3D" :
-                            const timbers_3D = ZOME.timber_profiles_3D;
-                            const num_items = timbers_3D.length;
-                            if (num_items) {
-                                _.forEach(timbers_3D, item => {
-                                    meshes.obj.add(item.mesh)
-                                    meshes.edges.add(item.edges);
-                                    meshes.labels.add(item.label_mesh);
-                                });
-                            }
-                            break;
-                        default:
-                            // Same as above but for spirals with geometry cloning for more efficiency
-                            const spiral = eval(`ZOME.${this.type_of_3D_objects}`);
-                            if (spiral) {
-                                const num_items = spiral.length;
-                                if (num_items) {
-                                    _.forEach(spiral, (item, j) => {
-                                        for (let i = 0; i < ZOME.num; i++) {
-                                            const mesh = clone_and_color_mesh(item.mesh, item.color);
-                                            mesh.rotateY(ZOME.rotation_angles[i]);
-                                            meshes.obj.add(mesh);
+                    const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
+                    if (!this.clone_and_rotate_mode) {
+                        _.forEach(items_3D, item => {
+                            if (this.draw_obj) meshes.obj.add(item.mesh);
+                            meshes.edges.add(item.edges);
+                            meshes.labels.add(item.label_mesh);
+                        });
+                    } else {
+                        // Same as above but for spirals with geometry cloning for more efficiency
+                        _.forEach(items_3D, (item, j) => {
+                            for (let i = 0; i < ZOME.num; i++) {
+                                if (i < this.num_spiral_rotations) {
+                                    const mesh = clone_and_color_mesh(item.mesh, item.color);
+                                    mesh.rotateY(ZOME.rotation_angles[i]);
+                                    meshes.obj.add(mesh);
+                                }
 
-                                            const edges = item.edges.clone();
-                                            edges.rotateY(ZOME.rotation_angles[i]);
-                                            meshes.edges.add(edges);
+                                const edges = item.edges.clone();
+                                edges.rotateY(ZOME.rotation_angles[i]);
+                                meshes.edges.add(edges);
 
-                                            // Add label once
-                                            if (i == 0) {
-                                                const label_mesh = item.label_mesh;
-                                                meshes.labels.add(label_mesh);
-                                            }
-                                        }
-                                    });
+                                // Add label once
+                                if (i == 0) {
+                                    const label_mesh = item.label_mesh;
+                                    meshes.labels.add(label_mesh);
                                 }
                             }
-                            break;
+                        });
                     }
 
                     // Add the final obj mesh to the scene
                     scene.add(meshes.obj);
+                    this.set_visibility("obj", this.draw_obj);
+
                     scene.add(meshes.edges);
+
                     scene.add(meshes.labels);
                     this.set_visibility("labels", this.draw_labels);
                 },
@@ -2061,6 +2151,7 @@
                 },
                 params_backup: null,
 
+                show_splash_screen: true,
                 is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
@@ -2987,6 +3078,7 @@
                     sync_url_from_params(this.params);
 
                     this.is_computing = false;
+                    this.show_splash_screen = false;
                 },
             };
         });
