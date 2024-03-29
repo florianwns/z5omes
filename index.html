@@ -461,7 +461,7 @@
                             <div class="d-flex justify-content-center">
                                 <div style="width:calc(100% - 72px); max-width: 800px;" class="position-relative">
                                     <!-- Export to -->
-                                    <div x-show="illuminates_zome" class="ps-2 absolute-top-right-48">
+                                    <div x-show="draw_obj" class="ps-2 absolute-top-right-48">
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
@@ -523,19 +523,19 @@
                                             <!-- Num Spiral Rotations -->
                                             <div class="vstack">
                                                 <button class="btn btn-primary"
-                                                        @click="illuminates_zome = !illuminates_zome"
-                                                        data-bs-toggle="tooltip" :title="i18n('illuminates_zome')">
+                                                        @click="draw_obj = !draw_obj"
+                                                        data-bs-toggle="tooltip" :title="i18n('draw_obj')">
                                                     <i class="fa"
-                                                       :class="(illuminates_zome) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
+                                                       :class="(draw_obj) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
                                                 </button>
-                                                <div class="mt-1" x-show="illuminates_zome && clone_and_rotate_mode">
+                                                <div class="mt-1" x-show="draw_obj && clone_and_rotate_mode">
                                                     <button class="btn btn-sm btn-small-padding line-height-1px"
                                                             @click="num_spiral_rotations = Math.max(num_spiral_rotations - 1, 1)"
                                                             :class="(num_spiral_rotations <= 1) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip" :title="i18n('decrease_spiral_rotations')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
-                                                    <button class="btn btn-sm btn-small-padding line-height-1px btn-primary"
+                                                    <button class="btn btn-sm btn-small-padding line-height-1px"
                                                             @click="num_spiral_rotations = Math.min(num_spiral_rotations + 1, params.num)"
                                                             :class="(num_spiral_rotations >= params.num) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip" :title="i18n('increase_spiral_rotations')">
@@ -544,6 +544,42 @@
                                                 </div>
                                             </div>
 
+                                            <!-- Draw Labels -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_labels = !draw_labels"
+                                                    :class="(draw_labels) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('draw_labels')">
+                                                <i class="fa fa-tag"></i>
+                                            </button>
+
+                                            <!-- Draw Vanishing Lines -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_vanishing_lines = !draw_vanishing_lines"
+                                                    :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('draw_vanishing_lines')">
+                                                <i class="fa fa-arrows-to-circle"></i>
+                                            </button>
+
+                                            <!-- Draw Axes -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_axes = !draw_axes"
+                                                    :class="(draw_axes) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('draw_axes')">
+                                                <i class="fa fa-chart-scatter-3d"></i>
+                                            </button>
+
+                                            <!-- Spin on/off -->
+                                            <button class="btn btn-primary"
+                                                    @click="is_spinning = !is_spinning"
+                                                    :class="(is_spinning) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('spin')">
+                                                <i class="fa "
+                                                   :class="(speed < 0) ? `fa-rotate-left` : `fa-rotate-right`"
+                                                ></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
                                             <!-- Keyboard shortcuts -->
                                             <button class="btn btn-primary"
                                                     data-bs-toggle="modal"
@@ -563,7 +599,7 @@
                                         <!-- Keyboard shortcuts Modal -->
                                         <div class="modal fade" id="shortcuts-modal" tabindex="-1"
                                              aria-labelledby="shortcuts-modal-title" aria-hidden="true">
-                                            <div class="modal-dialog modal-sm mt-2 me-2">
+                                            <div class="modal-dialog modal-sm mt-2 ms-2">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="text-secondary my-1 me-3" id="shortcuts-modal-title">
@@ -1718,12 +1754,12 @@
             return {
                 // 3D Rendering Parameters
                 num_spiral_rotations: 1,
-                illuminates_zome: true,
                 last_zome_num: 1,
                 is_spinning: false,
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
 
+                draw_obj: true,
                 draw_labels: true,
                 draw_axes: true,
                 draw_vanishing_lines: true,
@@ -1743,7 +1779,7 @@
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["labels", "axes", "vanishing_lines", "vertices"].forEach(
+                    ["obj", "labels", "axes", "vanishing_lines", "vertices"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
@@ -1752,7 +1788,7 @@
                     this.num_spiral_rotations = this.params.num;
                     this.last_zome_num = this.params.num;
 
-                    ["num_spiral_rotations", "illuminates_zome", "type_of_3D_objects"].forEach(
+                    ["num_spiral_rotations", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -1940,7 +1976,7 @@
                     const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
                     if (!this.clone_and_rotate_mode) {
                         _.forEach(items_3D, item => {
-                            if (this.illuminates_zome) meshes.obj.add(item.mesh);
+                            if (this.draw_obj) meshes.obj.add(item.mesh);
                             meshes.edges.add(item.edges);
                             meshes.labels.add(item.label_mesh);
                         });
@@ -1948,7 +1984,7 @@
                         // Same as above but for spirals with geometry cloning for more efficiency
                         _.forEach(items_3D, (item, j) => {
                             for (let i = 0; i < ZOME.num; i++) {
-                                if (this.illuminates_zome && i < this.num_spiral_rotations) {
+                                if (i < this.num_spiral_rotations) {
                                     const mesh = clone_and_color_mesh(item.mesh, item.color);
                                     mesh.rotateY(ZOME.rotation_angles[i]);
                                     meshes.obj.add(mesh);
@@ -1969,7 +2005,10 @@
 
                     // Add the final obj mesh to the scene
                     scene.add(meshes.obj);
+                    this.set_visibility("obj", this.draw_obj);
+
                     scene.add(meshes.edges);
+
                     scene.add(meshes.labels);
                     this.set_visibility("labels", this.draw_labels);
                 },
