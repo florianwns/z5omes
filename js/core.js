@@ -705,6 +705,11 @@ function get_boundaries(points) {
     return [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth];
 }
 
+
+function save_as(blob, filename){
+    download(filename, window.URL.createObjectURL(blob));
+}
+
 function download(filename, href) {
     const element = document.createElement("a");
     element.download = filename;

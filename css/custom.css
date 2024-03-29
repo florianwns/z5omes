@@ -1,4 +1,4 @@
-body:after{
+body:after {
     content: "beta";
     position: absolute;
     width: 70px;
@@ -12,7 +12,7 @@ body:after{
     font-weight: bold;
     color: #fff;
     line-height: 18px;
-    transform:rotate(-45deg);
+    transform: rotate(-45deg);
 }
 
 #title img {
@@ -104,6 +104,12 @@ body:after{
     line-height: 1px;
 }
 
+.btn-small-padding {
+    line-height: 1px;
+    --bs-btn-padding-y: 0.2rem;
+    --bs-btn-padding-x: 0.2rem;
+}
+
 .unit-select, .input-group .form-select {
     padding-right: 1rem;
 }
@@ -112,10 +118,16 @@ body:after{
     max-width: 70px;
 }
 
-.exports-container {
+.absolute-top-right-48 {
     position: absolute;
     top: 0px;
     right: -48px;
+}
+
+.absolute-top-left-48 {
+    position: absolute;
+    top: 0px;
+    left: -48px;
 }
 
 
