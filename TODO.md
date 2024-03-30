@@ -1,5 +1,10 @@
 # TODO-LIST
 
+* [x] Finir les trads manquantes de l'anglais
+
+* [ ] Corriger les points de la semelle de la méthode goodkarma
+  * Sans doute dû aux inner/outer faces qui sont mal calculées pour le goodkarma
+    
 * [ ] Ajouter les boutons de navigation dans la 3D (home, <-, ->, etc....)
 
 * [ ] Ajouter les boutons d'increment vitesse de la vitesse
@@ -32,17 +37,6 @@
 
 * [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
 
-* [ ] Ajouter les labels et angles sur la 3D grace au canvastexture
-
-  https://threejs.org/docs/#api/en/textures/CanvasTexture
-
-  const cv = document.createElement( 'canvas' ); cv.width = 1536 // 3 * 512 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-  cv.height = 512;// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-  const ctx = cv.getContext( '2d' );
-
-  const txtGeometry = new THREE.BoxGeometry( 2.4, 0.8, 0.1 ); // w 3 : h 1 // <<<<<<<<<
-  const cvTexture = new THREE.Texture( cv );
-
 * [ ] Mettre à jour les autres traductions avec les termes manquants
 
     * Commencer à dessiner la premier polygone (vue de dessus)
@@ -55,18 +49,11 @@
 
 * [ ] Changer l'aide de ZH "visible part of zome" ???
 
-* [ ] Coller la base du zome au sol => vanishing pt is 0 for last part
-
 * [ ] Rajouter les essences de bois pour calculer le poids total du zome
 
     * https://www.warmaths.fr/SCIENCES/densiteCatalogue..htm
     * https://www.cndb.org/site/wp-content/uploads/2019/01/Le_Guide_des_Essences_de_Bois_Yves_Benoit_FCBA_Eyrolles.pdf
-
-
-* [ ] S'inspirer des nommages de l'application acidome
-
-    * base => platform / floor
-
+  
 * [ ] Sur le renforcement des tasseaux, pouvoir avec un multiselect choisir les niveaux auquel les ajouter.
 
 * [ ] Rajouter une semelle pour mettre de niveau à la base.

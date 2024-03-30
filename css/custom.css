@@ -118,6 +118,10 @@ body:after {
     max-width: 70px;
 }
 
+#face-measurement-select {
+    max-width: 100px;
+}
+
 .absolute-top-right-48 {
     position: absolute;
     top: 0px;

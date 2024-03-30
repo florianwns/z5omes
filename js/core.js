@@ -115,6 +115,17 @@ function mul(p1, k) {
     return [p1[0] * k, p1[1] * k, p1[2] * k];
 }
 
+function are_points_equal(p1, p2) {
+    const [x1, y1, z1] = round_values(p1);
+    const [x2, y2, z2] = round_values(p2);
+    return x1 == x2 && y1 == y2 && z1 == z2;
+}
+
+
+function round_values(pt, num_digits = FLOAT_PRECISION) {
+    return pt.map(value => to_decimal(value, num_digits));
+}
+
 function swap_axes(points, axes_order = "XYZ") {
     return points.map(p => {
         const reordered_point = [p[0], p[1], p[2]];
@@ -169,6 +180,10 @@ function len(vec) {
 function dist(p1, p2) {
     // Compute the distance between two 3D points
     return len(sub(p2, p1));
+}
+
+function dist_on_xz_axes(p1) {
+    return dist(p1, [0, p1[1], 0]);
 }
 
 function norm(vec) {
@@ -288,6 +303,20 @@ function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
         delta[0] * cos_theta - delta[1] * sin_theta + origin[0],
         delta[0] * sin_theta + delta[1] * cos_theta + origin[1],
         vec[2],
+    ];
+}
+
+
+function rotate_point_around_y_axis(vec, theta, origin = [0, 0, 0]) {
+    const sin_theta = Math.sin(theta);
+    const cos_theta = Math.cos(theta);
+
+    // Rotate an 2D vector around z axis with an origin
+    let delta = sub(vec, origin);
+    return [
+        delta[0] * cos_theta + delta[2] * sin_theta + origin[0],
+        vec[1],
+        -delta[0] * sin_theta + delta[2] * cos_theta + origin[2],
     ];
 }
 
@@ -706,7 +735,7 @@ function get_boundaries(points) {
 }
 
 
-function save_as(blob, filename){
+function save_as(blob, filename) {
     download(filename, window.URL.createObjectURL(blob));
 }
 
@@ -837,7 +866,9 @@ class Base3DGeometry extends LabeledObject {
     }
 
     get centroid() {
-        if (this._centroid === null) this.compute_geometry_parameters();
+        if (this._centroid === null) {
+            this._centroid = get_centroid(this.points);
+        }
         return this._centroid;
     }
 
@@ -957,36 +988,37 @@ class Base3DGeometry extends LabeledObject {
             // Get top face
             const side = "front";
             const flattened_face = this.flatten_face(side);
-            // const min_size = _.reduce(flattened_face.mid_points, (res, p) => {
-            //     return Math.min(res, dist(flattened_face.centroid, p))
-            // }, Number.MAX_VALUE);
+            if (flattened_face.label) {
+                const min_size = _.reduce(flattened_face.mid_points, (res, p) => {
+                    return Math.min(res, dist(flattened_face.centroid, p))
+                }, Number.MAX_VALUE) * 1.2;
 
-            const min_size = Math.min(flattened_face.height, flattened_face.width);
+                // const min_size = Math.min(flattened_face.height, flattened_face.width);
+                // const min_size = Math.min(flattened_face.height, flattened_face.width) / 2;
+                this._label_mesh = create_text_mesh(
+                    flattened_face.label,
+                    min_size * 0.9, // font_face
+                    min_size * 0.05, // padding
+                );
 
-            // const min_size = Math.min(flattened_face.height, flattened_face.width) / 2;
-            this._label_mesh = create_text_mesh(
-                flattened_face.label,
-                min_size * 0.9, // font_face
-                min_size * 0.05, // padding
-            );
+                const face = this.get_face(side);
 
-            const face = this.get_face(side);
+                // Trick to have good orientation
+                this._label_mesh.rotateZ(Math.PI);
+                this._label_mesh.rotateY(Math.PI);
 
-            // Trick to have good orientation
-            this._label_mesh.rotateZ(Math.PI);
-            this._label_mesh.rotateY(Math.PI);
+                const translation = sub(face.centroid, flattened_face.centroid);
+                const [x, y, z] = add(flattened_face.centroid, translation);
 
-            const translation = sub(face.centroid, flattened_face.centroid);
-            const [x, y, z] = add(flattened_face.centroid, translation);
-
-            this._label_mesh.position.x = x;
-            this._label_mesh.position.y = y;
-            this._label_mesh.position.z = z;
-            const quaternion = quaternion_from_points(
-                ...flattened_face.points.slice(0, 3),
-                ...face.points.slice(0, 3)
-            )
-            this._label_mesh.applyQuaternion(quaternion);
+                this._label_mesh.position.x = x;
+                this._label_mesh.position.y = y;
+                this._label_mesh.position.z = z;
+                const quaternion = quaternion_from_points(
+                    ...flattened_face.points.slice(0, 3),
+                    ...face.points.slice(0, 3)
+                )
+                this._label_mesh.applyQuaternion(quaternion);
+            }
 
         }
         return this._label_mesh;
@@ -1076,7 +1108,7 @@ class Polygon3D extends Base3DGeometry {
         this.plane = points_2_plane(this.points[0], this.points[1], this.points[this.num_points - 1]);
 
         // TODO : remove from the class and compute distance outside
-        this.diameter = 2 * dist(this.points[1], [0, this.points[1][1], 0]);
+        this.diameter = 2 * dist_on_xz_axes(this.points[1]);
     }
 
     get flattened_points() {
@@ -1093,7 +1125,6 @@ class Polygon3D extends Base3DGeometry {
         this._angles = new Array(this.num_points);               // In radians
         this._edge_distances = new Array(this.num_points);
         this._mid_points = new Array(this.num_points);
-        this._centroid = [0, 0, 0];
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
         _.forEach(this.points, (cur_point, i) => {
@@ -1109,18 +1140,15 @@ class Polygon3D extends Base3DGeometry {
             this._edge_distances[i] = d;
             this._mid_points[i] = midpoint(cur_point, next_point);
             this._perimeter += d;
-            this._centroid = add(this._centroid, cur_point);
 
             // Compute area of the triangle
             this._area += triangle_area_from_points(this.points[0], next_point, next_next_point);
         });
-
-        this._centroid = mul(this._centroid, 1 / this.num_points);
     }
 
     compute_meshes() {
         // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
-        const num_triangles = this.num_points - 2;
+        const num_triangles = this.num_points;
         const num_triangle_points = 3 * num_triangles;
 
         // Arrays of THREE.Vector3 for 3D visualization
@@ -1130,7 +1158,6 @@ class Polygon3D extends Base3DGeometry {
         let face_index = 0;
         _.forEach(this.points, (cur_point, i) => {
             const next_point = this.points[(i + 1) % this.num_points];
-            const next_next_point = this.points[(i + 2) % this.num_points];
 
             // Compute line segments points
             edge_points[i * 2] = new THREE.Vector3(...cur_point);
@@ -1139,9 +1166,9 @@ class Polygon3D extends Base3DGeometry {
             // Compute face triangles
             if (face_index < num_triangle_points) {
                 // Faces points for 3D display
-                triangle_points[face_index] = new THREE.Vector3(...this.points[0])
-                triangle_points[face_index + 1] = new THREE.Vector3(...next_point)
-                triangle_points[face_index + 2] = new THREE.Vector3(...next_next_point)
+                triangle_points[face_index] = new THREE.Vector3(...cur_point);
+                triangle_points[face_index + 1] = new THREE.Vector3(...next_point);
+                triangle_points[face_index + 2] = new THREE.Vector3(...this.centroid);
                 face_index += 3;
             }
         });
@@ -1373,9 +1400,11 @@ class Zome {
             skeleton_3D_hash_collections = null,
 
             outer_faces_3D = null,
+            outer_floor_3D = null,
             outer_faces_3D_hash_collections = null,
 
             inner_faces_3D = null,
+            inner_floor_3D = null,
             inner_faces_3D_hash_collections = null,
 
             timber_profiles_3D = null,
@@ -1397,9 +1426,11 @@ class Zome {
         this.skeleton_3D_hash_collections = skeleton_3D_hash_collections || [];
 
         this.outer_faces_3D = outer_faces_3D || [];
+        this.outer_floor_3D = outer_floor_3D || null;
         this.outer_faces_3D_hash_collections = outer_faces_3D_hash_collections || [];
 
         this.inner_faces_3D = inner_faces_3D || [];
+        this.inner_floor_3D = inner_floor_3D || null;
         this.inner_faces_3D_hash_collections = inner_faces_3D_hash_collections || [];
 
         this.timber_profiles_3D = timber_profiles_3D || [];
