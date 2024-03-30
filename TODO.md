@@ -1,7 +1,5 @@
 # TODO-LIST
 
-* [x] Finir les trads manquantes de l'anglais
-
 * [ ] Corriger les points de la semelle de la méthode goodkarma
   * Sans doute dû aux inner/outer faces qui sont mal calculées pour le goodkarma
     
