@@ -16,7 +16,7 @@ const DEBUG = false;
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
 const FLOAT_PRECISION = 7;
-const FLOAT_2_STR_PRECISION = 1;
+const FLOAT_2_STR_PRECISION = 2;
 
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
@@ -536,8 +536,8 @@ function rad2deg(rad) {
     return 180.0 * rad / Math.PI;
 }
 
-function to_decimal(x, num_digits = FLOAT_PRECISION) {
-    return parseFloat(x.toFixed(num_digits));
+function to_decimal(val, num_digits = FLOAT_PRECISION) {
+    return parseFloat(val.toFixed(num_digits));
 }
 
 function to_int(x) {
@@ -1130,7 +1130,6 @@ class Polygon3D extends Base3DGeometry {
         _.forEach(this.points, (cur_point, i) => {
             const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
             const next_point = this.points[(i + 1) % this.num_points];
-            const next_next_point = this.points[(i + 2) % this.num_points];
 
             // Compute angle in radians
             this._angles[i] = angle(prev_point, cur_point, next_point);
@@ -1142,7 +1141,7 @@ class Polygon3D extends Base3DGeometry {
             this._perimeter += d;
 
             // Compute area of the triangle
-            this._area += triangle_area_from_points(this.points[0], next_point, next_next_point);
+            this._area += triangle_area_from_points(cur_point, next_point, this.centroid);
         });
     }
 

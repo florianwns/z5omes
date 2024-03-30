@@ -1247,9 +1247,8 @@
 
                                 const real_pt = fitted_points[j];
                                 const rounded_x = to_int(real_pt[0]);
-                                // const rounded_x = j;
                                 if (!rounded_xs.includes(rounded_x)) {
-                                    const is_boundary = rounded_x == 0 || rounded_x == to_int(side.width);
+                                    const is_boundary = rounded_x === 0 || rounded_x === to_int(side.width);
 
                                     const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                                     measurement_text.setAttribute('x', p[0]);
@@ -1474,7 +1473,7 @@
                     }
 
                     // Add faces
-                    this.faces = eval(`ZOME.${this.type_of_3D_objects}`);;
+                    this.faces = eval(`ZOME.${this.type_of_3D_objects}`);
                 },
             };
         });
@@ -1521,8 +1520,8 @@
 
                     // Add swipe
                     const hammer = new Hammer(this.A4_sheet.parentNode);
-                    hammer.on('swiperight', (e) => this.prev_page());
-                    hammer.on('swipeleft', (e) => this.next_page());
+                    hammer.on('swiperight', () => this.prev_page());
+                    hammer.on('swipeleft', () => this.next_page());
                 },
                 get grid_pct() {
                     // Compute Grid size in percent for css drawing
@@ -1965,13 +1964,13 @@
                 process() {
                     this.clear();
 
-                    if (this.last_zome_num != ZOME.num) {
+                    if (this.last_zome_num !== ZOME.num) {
                         this.num_spiral_rotations = this.last_zome_num = ZOME.num;
                     }
                     // Display switch buttons
                     this.show_vanishing_lines_switch = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
-                        && this.type_of_3D_objects == "skeleton_3D";
+                        && this.type_of_3D_objects === "skeleton_3D";
 
                     this.show_vertices_switch = DEBUG
                         && ZOME.vertices
@@ -2011,7 +2010,7 @@
                         });
                     } else {
                         // Same as above but for spirals with geometry cloning for more efficiency
-                        _.forEach(items_3D, (item, j) => {
+                        _.forEach(items_3D, item => {
                             for (let i = 0; i < ZOME.num; i++) {
                                 if (i < this.num_spiral_rotations) {
                                     const mesh = clone_and_color_mesh(item.mesh, item.color);
@@ -2024,7 +2023,7 @@
                                 meshes.edges.add(edges);
 
                                 // Add label once
-                                if (i == 0) {
+                                if (i === 0) {
                                     if(item.label_mesh) meshes.labels.add(item.label_mesh);
                                 }
                             }
@@ -2211,7 +2210,7 @@
                     this.params.z_vanishing_point_in_mm = this.zome_centroid;
 
                     // Update translated texts
-                    this.$watch(`i18n_dictionary`, (value) => {
+                    this.$watch(`i18n_dictionary`, () => {
                         // remove old tooltips
                         const old_tooltips = document.getElementsByClassName('tooltip');
                         if (old_tooltips) {
@@ -2228,7 +2227,7 @@
                     });
 
                     // Change language listener
-                    this.$watch(`params.language`, (value) => {
+                    this.$watch(`params.language`, () => {
                         this.set_language(this.params.language);
                     });
 
@@ -2250,39 +2249,39 @@
                     });
 
                     // Constrains the assembly direction depending on assembly method
-                    this.$watch("params.assembly_method", (value) => {
+                    this.$watch("params.assembly_method", () => {
                         this.params.assembly_direction = this.constrained_assembly_direction;
                     });
 
                     // Refresh the height_ratio if you change the zome params.num
-                    this.$watch("params.num", (value) => {
+                    this.$watch("params.num", () => {
                         this.clamp("height_ratio", this.params.height_ratio);
                     });
 
                     // Refresh data related to the height
                     // if you change the zome height
-                    this.$watch("params.zome_height_in_mm", (value) => {
+                    this.$watch("params.zome_height_in_mm", () => {
                         this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
                     });
 
                     _.forEach(["height_ratio", "zome_height_in_mm"], key => {
-                        this.$watch(`params.${key}`, (value) => {
+                        this.$watch(`params.${key}`, () => {
                             this.clamp("z_vanishing_point_in_mm", this.zome_centroid);
                         });
                     });
 
                     // Use ClipboardJS to copy URL
                     const clipboard = new ClipboardJS("#copy-url-btn", {
-                        text: function (trigger) {
+                        text: function () {
                             return document.location.href;
                         }
                     });
 
                     const self = this;
-                    clipboard.on('success', function (e) {
+                    clipboard.on('success', function () {
                         self.show_toast(self.i18n('toast_link_copied'), "link");
                     });
-                    clipboard.on('error', function (e) {
+                    clipboard.on('error', function () {
                         self.show_error();
                     });
                 },
@@ -2327,7 +2326,7 @@
 
                     return I18N_LANGUAGES[I18_DEFAULT_LANGUAGE].dictionary;
                 },
-                show_error(error = null) {
+                show_error() {
                     self.show_toast(this.i18n('toast_error'), "triangle-exclamation", true);
                 },
                 get theta() {
@@ -2532,7 +2531,6 @@
                     // Config Parameters
                     const N = this.params.num;
                     const K = this.params.kite_ratio;
-                    const IS_RHOMBUS = this.is_rhombus;
                     const ZOME_HEIGHT = this.params.zome_height_in_mm;
                     const TIMBER_WIDTH = this.params.timber_width_in_mm;
                     const TIMBER_THICKNESS = this.params.timber_thickness_in_mm;
@@ -2590,7 +2588,7 @@
                         for (let i = 0; i < N; i++) {
                             k = (i + 1) % N
 
-                            iA = (iCrown == 0) ? 0 : fipc + k;      // Index of A point          A
+                            iA = (iCrown === 0) ? 0 : fipc + k;      // Index of A point          A
                             iB = ficc + i;                      // Index of B point        B ◇ C
                             iC = ficc + k;                      // Index of C point          D
 
@@ -2610,13 +2608,13 @@
                                 iD = this.add_vertex(vertices, D);
 
                                 // Add only the first piece
-                                if (i == 0) {
+                                if (i === 0) {
                                     face = new Polygon3D([A, B, D, C], face_label);
                                     zome_faces_3D.push(face);
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
-                                hit_ground = to_decimal(y, 2) == 0;
+                                hit_ground = to_decimal(y, 2) === 0;
                                 if (hit_ground) {
                                     last_triangle_indexes.push(iD, iD, iC);
                                 }
@@ -2677,7 +2675,7 @@
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
                     _.forEach(zome_faces_3D, (face, iCrown) => {
-                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown == zome_faces_3D.length - 1) {
+                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown === zome_faces_3D.length - 1) {
                             framework_faces.push(face);
                             framework_crowns.push(iCrown);
                         } else {
@@ -2715,7 +2713,7 @@
 
                         // Get the crown index then reset the timber label index
                         const iCrown = framework_crowns[iFace];
-                        if (iCrown != last_iCrown) {
+                        if (iCrown !== last_iCrown) {
                             timber_label_index = 0;
                         }
 
@@ -2768,7 +2766,7 @@
                                     thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
                                     horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
 
-                                    if (to_decimal(theta) == to_decimal(TAU_Q)) {
+                                    if (to_decimal(theta) === to_decimal(TAU_Q)) {
                                         // Add Hack to avoid issues with bad cross_products on 90° angles
                                         vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
                                     } else if (theta > TAU_Q) {
@@ -2780,7 +2778,7 @@
                                         vertical_proj_vec = cross_product(horizontal_proj_vec, mul(cur_2_prev_vec, -1));
                                     }
 
-                                    if (ASSEMBLY_METHOD == 1) {
+                                    if (ASSEMBLY_METHOD === 1) {
                                         vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
 
                                         wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
@@ -2987,7 +2985,7 @@
 
                     // Rotate picked floor points
                     let outer_floor_points = [], inner_floor_points = [];
-                    _.forEach(rotation_angles, (theta, i) => {
+                    _.forEach(rotation_angles, theta => {
                         inner_floor_points.push(...picked_inner_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
                         outer_floor_points.push(...picked_outer_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
                     });
@@ -3008,19 +3006,16 @@
                     // Group items by hash
                     const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
                         // Compute hash to compare objects
-                        const grouped_by_hash = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                        return _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
                             return new ItemHashCollection(group[0], hash, group.length * N);
                         });
-
-                        // Sort collection by an average of vertical position
-                        return grouped_by_hash;
                     });
 
                     // Label all items with the first item label of the group
                     _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
                         // Apply labels to items
                         _.forEach(obj_3D_to_label[i], item => {
-                            const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
+                            const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash === item.hash);
                             item.label = obj_hash_collections[collection_item_index].item.label;
                         });
                     });
@@ -3036,8 +3031,7 @@
                         const hash_to_color = {};
                         _.forIn(hashes, (hash, j) => {
                             if (!hash_to_color.hasOwnProperty(hash)) {
-                                const color = Color.from_index(j, num_hashes);
-                                hash_to_color[hash] = color;
+                                hash_to_color[hash] = Color.from_index(j, num_hashes);
                             }
                         });
 
@@ -3076,7 +3070,7 @@
                                 rotated_A = rotate_point_around_z_axis(rotated_points[1], theta, O);
 
                                 // Rotate the other way if rotatedA is not too close to A
-                                if (to_decimal(dist(rotated_A, A)) != 0) {
+                                if (to_decimal(dist(rotated_A, A)) !== 0) {
                                     theta = -theta;
                                 }
                                 rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, theta, O));
