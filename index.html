@@ -400,7 +400,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.9b03</span>
+                              style="font-size: 10px; top:0px">v1.0.9b04</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -499,16 +499,16 @@
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
                                             <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
-                                            <option selected value="timber_profiles_3D"
+                                            <option value="timber_profiles_3D"
                                                     x-text="i18n('timber_profiles_3D')"></option>
-                                            <option value="outer_faces_3D"
-                                                    x-text="i18n('outer_faces_3D')"></option>
                                             <option value="inner_faces_3D"
                                                     x-text="i18n('inner_faces_3D')"></option>
-                                            <option value="mandala_3D_of_outer_faces"
-                                                    x-text="i18n('mandala_3D_of_outer_faces')"></option>
+                                            <option value="outer_faces_3D"
+                                                    x-text="i18n('outer_faces_3D')"></option>
                                             <option value="mandala_3D_of_inner_faces"
                                                     x-text="i18n('mandala_3D_of_inner_faces')"></option>
+                                            <option value="mandala_3D_of_outer_faces"
+                                                    x-text="i18n('mandala_3D_of_outer_faces')"></option>
                                         </select>
                                     </div>
 
@@ -520,11 +520,20 @@
                                         </div>
 
                                         <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-3">
+                                            <!-- Draw Labels -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_labels = !draw_labels"
+                                                    :class="(draw_labels) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_labels')">
+                                                <i class="fa fa-tag"></i>
+                                            </button>
+
                                             <!-- Num Spiral Rotations -->
                                             <div class="vstack">
                                                 <button class="btn btn-primary"
                                                         @click="draw_obj = !draw_obj"
-                                                        data-bs-toggle="tooltip" :title="i18n('draw_obj')">
+                                                        :class="(draw_obj) ? `btn-primary` : `btn-secondary`"
+                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_illuminate_object')">
                                                     <i class="fa"
                                                        :class="(draw_obj) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
                                                 </button>
@@ -532,31 +541,33 @@
                                                     <button class="btn btn-sm btn-small-padding line-height-1px"
                                                             @click="num_spiral_rotations = Math.max(num_spiral_rotations - 1, 1)"
                                                             :class="(num_spiral_rotations <= 1) ? `btn-secondary` : `btn-primary`"
-                                                            data-bs-toggle="tooltip" :title="i18n('decrease_spiral_rotations')">
+                                                            data-bs-toggle="tooltip"
+                                                            :title="i18n('tooltip_decrease_spiral_rotations')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
                                                     <button class="btn btn-sm btn-small-padding line-height-1px"
                                                             @click="num_spiral_rotations = Math.min(num_spiral_rotations + 1, params.num)"
                                                             :class="(num_spiral_rotations >= params.num) ? `btn-secondary` : `btn-primary`"
-                                                            data-bs-toggle="tooltip" :title="i18n('increase_spiral_rotations')">
+                                                            data-bs-toggle="tooltip"
+                                                            :title="i18n('tooltip_increase_spiral_rotations')">
                                                         <i class="fa fa-plus"></i>
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            <!-- Draw Labels -->
+                                            <!-- Add floor -->
                                             <button class="btn btn-primary"
-                                                    @click="draw_labels = !draw_labels"
-                                                    :class="(draw_labels) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('draw_labels')">
-                                                <i class="fa fa-tag"></i>
+                                                    @click="add_floor = !add_floor"
+                                                    :class="(add_floor) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_add_floor')">
+                                                <i class="fa fa-hexagon"></i>
                                             </button>
 
                                             <!-- Draw Vanishing Lines -->
                                             <button class="btn btn-primary"
                                                     @click="draw_vanishing_lines = !draw_vanishing_lines"
                                                     :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('draw_vanishing_lines')">
+                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_vanishing_lines')">
                                                 <i class="fa fa-arrows-to-circle"></i>
                                             </button>
 
@@ -564,7 +575,7 @@
                                             <button class="btn btn-primary"
                                                     @click="draw_axes = !draw_axes"
                                                     :class="(draw_axes) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('draw_axes')">
+                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_axes')">
                                                 <i class="fa fa-chart-scatter-3d"></i>
                                             </button>
 
@@ -572,7 +583,7 @@
                                             <button class="btn btn-primary"
                                                     @click="is_spinning = !is_spinning"
                                                     :class="(is_spinning) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('spin')">
+                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_spin')">
                                                 <i class="fa "
                                                    :class="(speed < 0) ? `fa-rotate-left` : `fa-rotate-right`"
                                                 ></i>
@@ -610,7 +621,7 @@
                                                                 aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <ul class="keyboard-shorcut-list small text-muted">
+                                                        <ul class="keyboard-shortcut-list small text-muted">
                                                             <!-- Object selection -->
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('S')">S
@@ -689,49 +700,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex flex-wrap justify-content-evenly">
-                                        <!-- Draw Labels -->
-                                        <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-labels-switch"
-                                                   x-text="i18n('labels')"></label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-labels-switch" x-model="draw_labels">
-                                        </div>
-
-                                        <!-- Draw Vanishing Lines -->
-                                        <div class="form-check form-switch me-2 mb-3"
-                                             x-show="show_vanishing_lines_switch">
-                                            <label class="form-check-label" for="draw-vanishing-lines"
-                                                   x-text="i18n('vanishing_lines')"></label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-vanishing-lines" x-model="draw_vanishing_lines">
-                                        </div>
-
-                                        <!-- Draw Axes -->
-                                        <div class="form-check form-switch me-2 mb-3">
-                                            <label class="form-check-label" for="draw-axes-switch"
-                                                   x-text="i18n('axes')"></label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-axes-switch" x-model="draw_axes">
-                                        </div>
-
-                                        <!-- Draw Zome Vertices -->
-                                        <div class="form-check form-switch me-2 mb-3" x-show="show_vertices_switch">
-                                            <label class="form-check-label" for="draw-zome-vertices-switch"
-                                                   x-text="i18n('vertices')"></label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="draw-zome-vertices-switch" x-model="draw_vertices">
-                                        </div>
-
-                                        <!-- Spin -->
-                                        <div class="form-check form-switch mb-3">
-                                            <label class="form-check-label" for="spin-switch"
-                                                   x-text="i18n('spin')"></label>
-                                            <input class="form-check-input" type="checkbox" role="switch"
-                                                   id="spin-switch" x-model="is_spinning">
                                         </div>
                                     </div>
                                 </div>
@@ -850,11 +818,21 @@
             <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
                 <hr>
 
-                <div class="d-flex align-items-center">
-                    <h5 class="text-secondary mt-4 mb-4 me-auto">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="text-secondary mt-4 mb-4 me-2">
                         <i class="fa-solid fa-ruler-triangle me-1"></i>
                         <span x-text="i18n('measurements')"></span>
                     </h5>
+
+                    <!-- Select inner or outer faces -->
+                    <select id="face-measurement-select" class="form-select mx-2" aria-label="Type of 3D objects"
+                            x-model="type_of_3D_objects">
+                        <option selected value="inner_faces_3D"
+                                x-text="i18n('inner')"></option>
+                        <option value="outer_faces_3D"
+                                x-text="i18n('outer')"></option>
+                    </select>
+
                     <!-- CSV Button -->
                     <div>
                         <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
@@ -863,8 +841,6 @@
                             <i class="fa-solid fa-file"></i>
                             <span class="fa-icon-file-type">TSV</span>
                         </span>
-                    </div>
-                    <div>
                         <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
                               title="Export to CSV format"
                               :title="i18n('tooltip_export_2_format', 'CSV')"
@@ -889,6 +865,22 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span x-text="i18n('total_area_of_faces')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="total_area_of_faces"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_floor">
+                        <ul class="list-group small">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('floor_perimeter')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_perimeter"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('floor_diameter')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_diameter"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('floor_area')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
                             </li>
                         </ul>
                     </div>
@@ -947,7 +939,7 @@
     <div class="toast-container position-fixed bottom-0 start-0 p-3">
         <div id="live_toast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body" id="toast_msg" class="me-auto">
+                <div class="toast-body me-auto" id="toast_msg">
                 </div>
                 <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
                         aria-label="Close"></button>
@@ -1255,9 +1247,8 @@
 
                                 const real_pt = fitted_points[j];
                                 const rounded_x = to_int(real_pt[0]);
-                                // const rounded_x = j;
                                 if (!rounded_xs.includes(rounded_x)) {
-                                    const is_boundary = rounded_x == 0 || rounded_x == to_int(side.width);
+                                    const is_boundary = rounded_x === 0 || rounded_x === to_int(side.width);
 
                                     const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                                     measurement_text.setAttribute('x', p[0]);
@@ -1286,7 +1277,7 @@
 
                             // Compute angles
                             //    [0, 1, 2, 3, 4, 5, 6, 7]
-                            const [a, b, c, d, e, f, g, h] = drawing_points; // with z axis equals to 0
+                            const [a, b, c, d] = drawing_points;                // with z axis equals to 0
                             const [A, B, C, D, E, F, G, H] = fitted_points;
 
                             const base_plane = points_2_plane(A, B, C);
@@ -1365,24 +1356,46 @@
 
         Alpine.data('face_measurements', () => {
             return {
-                outer_faces: [],
+                faces: [],
+                floor: null,
+                type_of_3D_objects: "inner_faces_3D",
 
                 async init() {
+                    ["type_of_3D_objects"].forEach(
+                        (key) => this.$watch(key, () => {
+                            this.process();
+                        })
+                    );
                 },
-                get faces() {
-                    return this.outer_faces;
+
+                get has_floor() {
+                    return this.floor !== null;
                 },
                 get widest_diameter_of_faces() {
-                    const value = _.reduce(this.outer_faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                    const value = _.reduce(this.faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
                 get total_area_of_faces() {
-                    const value = _.reduce(this.outer_faces, (res, p) => res + p.area * ZOME.num, 0);
+                    const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num, 0);
                     return humanize_area(value);
                 },
                 get total_number_of_faces() {
-                    return ZOME.num * this.outer_faces.length;
+                    return ZOME.num * this.faces.length;
                 },
+
+                get floor_diameter() {
+                    const value = this.floor ? this.floor.diameter : 0;
+                    return humanize_distance(value);
+                },
+                get floor_area() {
+                    const value = this.floor ? this.floor.area : 0
+                    return humanize_area(value);
+                },
+                get floor_perimeter() {
+                    const value = this.floor ? this.floor.perimeter : 0
+                    return humanize_distance(value);
+                },
+
                 format(key, value) {
                     return to_decimal(value, FLOAT_2_STR_PRECISION);
                 },
@@ -1428,8 +1441,11 @@
                     ]
                 },
                 get table_rows() {
-                    const rows = new Array(this.faces.length);
-                    _.forEach(this.faces, (face, i) => {
+                    const row_faces = this.has_floor
+                        ? [...this.faces, this.floor]
+                        : this.faces
+                    const rows = new Array(row_faces.length);
+                    _.forEach(row_faces, (face, i) => {
                         const flattened_face = face.flatten_face();
                         rows[i] = [flattened_face, [
                             flattened_face.label, // i + 1
@@ -1444,9 +1460,20 @@
                     });
                     return rows;
                 },
+
                 process() {
-                    // Clone structure
-                    this.outer_faces = ZOME.outer_faces_3D;
+                    // Add floor
+                    switch(this.type_of_3D_objects){
+                        case "inner_faces_3D":
+                            this.floor = ZOME.inner_floor_3D;
+                            break;
+                        case "outer_faces_3D":
+                            this.floor = ZOME.outer_floor_3D;
+                            break;
+                    }
+
+                    // Add faces
+                    this.faces = eval(`ZOME.${this.type_of_3D_objects}`);
                 },
             };
         });
@@ -1493,8 +1520,8 @@
 
                     // Add swipe
                     const hammer = new Hammer(this.A4_sheet.parentNode);
-                    hammer.on('swiperight', (e) => this.prev_page());
-                    hammer.on('swipeleft', (e) => this.next_page());
+                    hammer.on('swiperight', () => this.prev_page());
+                    hammer.on('swipeleft', () => this.next_page());
                 },
                 get grid_pct() {
                     // Compute Grid size in percent for css drawing
@@ -1761,10 +1788,11 @@
 
                 draw_obj: true,
                 draw_labels: true,
-                draw_axes: true,
-                draw_vanishing_lines: true,
+                draw_axes: false,
+                draw_vanishing_lines: false,
                 draw_vertices: false,
 
+                add_floor: true,
                 show_vanishing_lines_switch: false,
                 show_vertices_switch: false,
 
@@ -1788,7 +1816,7 @@
                     this.num_spiral_rotations = this.params.num;
                     this.last_zome_num = this.params.num;
 
-                    ["num_spiral_rotations", "type_of_3D_objects"].forEach(
+                    ["num_spiral_rotations", "add_floor", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -1936,13 +1964,13 @@
                 process() {
                     this.clear();
 
-                    if (this.last_zome_num != ZOME.num) {
+                    if (this.last_zome_num !== ZOME.num) {
                         this.num_spiral_rotations = this.last_zome_num = ZOME.num;
                     }
                     // Display switch buttons
                     this.show_vanishing_lines_switch = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
-                        && this.type_of_3D_objects == "skeleton_3D";
+                        && this.type_of_3D_objects === "skeleton_3D";
 
                     this.show_vertices_switch = DEBUG
                         && ZOME.vertices
@@ -1978,11 +2006,11 @@
                         _.forEach(items_3D, item => {
                             if (this.draw_obj) meshes.obj.add(item.mesh);
                             meshes.edges.add(item.edges);
-                            meshes.labels.add(item.label_mesh);
+                            if(item.label_mesh) meshes.labels.add(item.label_mesh);
                         });
                     } else {
                         // Same as above but for spirals with geometry cloning for more efficiency
-                        _.forEach(items_3D, (item, j) => {
+                        _.forEach(items_3D, item => {
                             for (let i = 0; i < ZOME.num; i++) {
                                 if (i < this.num_spiral_rotations) {
                                     const mesh = clone_and_color_mesh(item.mesh, item.color);
@@ -1995,12 +2023,27 @@
                                 meshes.edges.add(edges);
 
                                 // Add label once
-                                if (i == 0) {
-                                    const label_mesh = item.label_mesh;
-                                    meshes.labels.add(label_mesh);
+                                if (i === 0) {
+                                    if(item.label_mesh) meshes.labels.add(item.label_mesh);
                                 }
                             }
                         });
+
+                        // Add floor
+                        let floor_3D = null;
+                        switch(this.type_of_3D_objects){
+                            case "inner_faces_3D":
+                                floor_3D = ZOME.inner_floor_3D;
+                                break;
+                            case "outer_faces_3D":
+                            case "skeleton_3D":
+                                floor_3D = ZOME.outer_floor_3D;
+                                break;
+                        }
+                        if(this.add_floor && floor_3D != null && floor_3D.mesh != null){
+                            if (this.draw_obj) meshes.obj.add(floor_3D.mesh);
+                            meshes.edges.add(floor_3D.edges);
+                        }
                     }
 
                     // Add the final obj mesh to the scene
@@ -2167,7 +2210,7 @@
                     this.params.z_vanishing_point_in_mm = this.zome_centroid;
 
                     // Update translated texts
-                    this.$watch(`i18n_dictionary`, (value) => {
+                    this.$watch(`i18n_dictionary`, () => {
                         // remove old tooltips
                         const old_tooltips = document.getElementsByClassName('tooltip');
                         if (old_tooltips) {
@@ -2184,7 +2227,7 @@
                     });
 
                     // Change language listener
-                    this.$watch(`params.language`, (value) => {
+                    this.$watch(`params.language`, () => {
                         this.set_language(this.params.language);
                     });
 
@@ -2206,39 +2249,39 @@
                     });
 
                     // Constrains the assembly direction depending on assembly method
-                    this.$watch("params.assembly_method", (value) => {
+                    this.$watch("params.assembly_method", () => {
                         this.params.assembly_direction = this.constrained_assembly_direction;
                     });
 
                     // Refresh the height_ratio if you change the zome params.num
-                    this.$watch("params.num", (value) => {
+                    this.$watch("params.num", () => {
                         this.clamp("height_ratio", this.params.height_ratio);
                     });
 
                     // Refresh data related to the height
                     // if you change the zome height
-                    this.$watch("params.zome_height_in_mm", (value) => {
+                    this.$watch("params.zome_height_in_mm", () => {
                         this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
                     });
 
                     _.forEach(["height_ratio", "zome_height_in_mm"], key => {
-                        this.$watch(`params.${key}`, (value) => {
+                        this.$watch(`params.${key}`, () => {
                             this.clamp("z_vanishing_point_in_mm", this.zome_centroid);
                         });
                     });
 
                     // Use ClipboardJS to copy URL
                     const clipboard = new ClipboardJS("#copy-url-btn", {
-                        text: function (trigger) {
+                        text: function () {
                             return document.location.href;
                         }
                     });
 
                     const self = this;
-                    clipboard.on('success', function (e) {
-                        self.show_toast(this.i18n('toast_link_copied'), "link");
+                    clipboard.on('success', function () {
+                        self.show_toast(self.i18n('toast_link_copied'), "link");
                     });
-                    clipboard.on('error', function (e) {
+                    clipboard.on('error', function () {
                         self.show_error();
                     });
                 },
@@ -2283,7 +2326,7 @@
 
                     return I18N_LANGUAGES[I18_DEFAULT_LANGUAGE].dictionary;
                 },
-                show_error(error = null) {
+                show_error() {
                     self.show_toast(this.i18n('toast_error'), "triangle-exclamation", true);
                 },
                 get theta() {
@@ -2488,7 +2531,6 @@
                     // Config Parameters
                     const N = this.params.num;
                     const K = this.params.kite_ratio;
-                    const IS_RHOMBUS = this.is_rhombus;
                     const ZOME_HEIGHT = this.params.zome_height_in_mm;
                     const TIMBER_WIDTH = this.params.timber_width_in_mm;
                     const TIMBER_THICKNESS = this.params.timber_thickness_in_mm;
@@ -2546,7 +2588,7 @@
                         for (let i = 0; i < N; i++) {
                             k = (i + 1) % N
 
-                            iA = (iCrown == 0) ? 0 : fipc + k;      // Index of A point          A
+                            iA = (iCrown === 0) ? 0 : fipc + k;      // Index of A point          A
                             iB = ficc + i;                      // Index of B point        B ◇ C
                             iC = ficc + k;                      // Index of C point          D
 
@@ -2566,13 +2608,13 @@
                                 iD = this.add_vertex(vertices, D);
 
                                 // Add only the first piece
-                                if (i == 0) {
+                                if (i === 0) {
                                     face = new Polygon3D([A, B, D, C], face_label);
                                     zome_faces_3D.push(face);
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
-                                hit_ground = to_decimal(y, 2) == 0;
+                                hit_ground = to_decimal(y, 2) === 0;
                                 if (hit_ground) {
                                     last_triangle_indexes.push(iD, iD, iC);
                                 }
@@ -2633,7 +2675,7 @@
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
                     _.forEach(zome_faces_3D, (face, iCrown) => {
-                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown == zome_faces_3D.length - 1) {
+                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown === zome_faces_3D.length - 1) {
                             framework_faces.push(face);
                             framework_crowns.push(iCrown);
                         } else {
@@ -2671,7 +2713,7 @@
 
                         // Get the crown index then reset the timber label index
                         const iCrown = framework_crowns[iFace];
-                        if (iCrown != last_iCrown) {
+                        if (iCrown !== last_iCrown) {
                             timber_label_index = 0;
                         }
 
@@ -2724,7 +2766,7 @@
                                     thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
                                     horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
 
-                                    if (to_decimal(theta) == to_decimal(TAU_Q)) {
+                                    if (to_decimal(theta) === to_decimal(TAU_Q)) {
                                         // Add Hack to avoid issues with bad cross_products on 90° angles
                                         vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
                                     } else if (theta > TAU_Q) {
@@ -2736,7 +2778,7 @@
                                         vertical_proj_vec = cross_product(horizontal_proj_vec, mul(cur_2_prev_vec, -1));
                                     }
 
-                                    if (ASSEMBLY_METHOD == 1) {
+                                    if (ASSEMBLY_METHOD === 1) {
                                         vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
 
                                         wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
@@ -2876,7 +2918,7 @@
                                     // Footing parameters computing
                                     // On the two last crown, check if points are far enough
                                     // Take vectors and points from outer/inner faces to build a Footing timber
-                                    if (this.params.add_footing && [3, 5].includes(crown_face.num_points)) {
+                                    if ([3, 5].includes(crown_face.num_points)) {
                                         const start_index = (crown_face.num_points === 5) ? 1 : 0;
                                         [B, D, F, H] = [
                                             outer_face_points[start_index + 1], // outer top left corner
@@ -2907,29 +2949,52 @@
                     });
 
                     // Build Footing timbers
-                    if (this.params.add_footing === 1) {
-                        const floor_vertical_position = lowest_vertical_position - TIMBER_THICKNESS / 2;
-                        const floor_plane = plane_on_axis("Y", floor_vertical_position);
+                    const footing_thickness = (this.params.add_footing === 1) ? TIMBER_THICKNESS : 0
+                    const floor_vertical_position = lowest_vertical_position - footing_thickness;
+                    const floor_plane = plane_on_axis("Y", floor_vertical_position);
+                    let picked_outer_floor_points = [], picked_inner_floor_points = [];
+                    const go_to_ground_vec = [0, -1, 0];
 
-                        const go_to_ground_vec = [0, -1, 0];
-                        _.forEach(footing_params, (params, footing_index) => {
-                            const [B, D, F, H] = params;
+                    _.forEach(footing_params, (params, footing_index) => {
+                        const [B, D, F, H] = params;
 
-                            const [A, C, E, G] = [
-                                plan_intersection(B, go_to_ground_vec, floor_plane),
-                                plan_intersection(D, go_to_ground_vec, floor_plane),
-                                plan_intersection(F, go_to_ground_vec, floor_plane),
-                                plan_intersection(H, go_to_ground_vec, floor_plane),
-                            ]
+                        const [A, C, E, G] = [
+                            plan_intersection(B, go_to_ground_vec, floor_plane),
+                            plan_intersection(D, go_to_ground_vec, floor_plane),
+                            plan_intersection(F, go_to_ground_vec, floor_plane),
+                            plan_intersection(H, go_to_ground_vec, floor_plane),
+                        ]
 
+                        if (this.params.add_footing === 1) {
                             // Add a tilde to the Footing label
                             const timber_label = `~${footing_index + 1}`;
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
 
                             // Add Footing timber to the global skeleton
                             skeleton_3D.push(timber_prism);
-                        });
-                    }
+                        }
+
+                        // Add points for outer floor
+                        picked_outer_floor_points.push(A);
+                        picked_outer_floor_points.push(C);
+
+
+                        picked_inner_floor_points.push(E);
+                        picked_inner_floor_points.push(G);
+                    });
+
+                    // Rotate picked floor points
+                    let outer_floor_points = [], inner_floor_points = [];
+                    _.forEach(rotation_angles, theta => {
+                        inner_floor_points.push(...picked_inner_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
+                        outer_floor_points.push(...picked_outer_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
+                    });
+
+                    // Remove duplicates and create floors ⬢
+                    outer_floor_points = _.uniqWith(outer_floor_points, are_points_equal);
+                    inner_floor_points = _.uniqWith(inner_floor_points, are_points_equal);
+                    const outer_floor_3D = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, '⬢') : null;
+                    const inner_floor_3D = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, '⬢') : null;
 
                     const obj_3D_to_label = [
                         skeleton_3D,
@@ -2941,19 +3006,16 @@
                     // Group items by hash
                     const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
                         // Compute hash to compare objects
-                        const grouped_by_hash = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                        return _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
                             return new ItemHashCollection(group[0], hash, group.length * N);
                         });
-
-                        // Sort collection by an average of vertical position
-                        return grouped_by_hash;
                     });
 
                     // Label all items with the first item label of the group
                     _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
                         // Apply labels to items
                         _.forEach(obj_3D_to_label[i], item => {
-                            const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash == item.hash);
+                            const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash === item.hash);
                             item.label = obj_hash_collections[collection_item_index].item.label;
                         });
                     });
@@ -2969,8 +3031,7 @@
                         const hash_to_color = {};
                         _.forIn(hashes, (hash, j) => {
                             if (!hash_to_color.hasOwnProperty(hash)) {
-                                const color = Color.from_index(j, num_hashes);
-                                hash_to_color[hash] = color;
+                                hash_to_color[hash] = Color.from_index(j, num_hashes);
                             }
                         });
 
@@ -3009,7 +3070,7 @@
                                 rotated_A = rotate_point_around_z_axis(rotated_points[1], theta, O);
 
                                 // Rotate the other way if rotatedA is not too close to A
-                                if (to_decimal(dist(rotated_A, A)) != 0) {
+                                if (to_decimal(dist(rotated_A, A)) !== 0) {
                                     theta = -theta;
                                 }
                                 rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, theta, O));
@@ -3059,9 +3120,11 @@
                         skeleton_3D_hash_collections: skeleton_3D_hash_collections,
 
                         outer_faces_3D: outer_faces_3D,
+                        outer_floor_3D: outer_floor_3D,
                         outer_faces_3D_hash_collections: outer_faces_3D_hash_collections,
 
                         inner_faces_3D: inner_faces_3D,
+                        inner_floor_3D: inner_floor_3D,
                         inner_faces_3D_hash_collections: inner_faces_3D_hash_collections,
 
                         timber_profiles_3D: timber_profiles_3D,

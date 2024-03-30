@@ -16,6 +16,8 @@ const I18N_EN = {
         skeleton_3D: "3D Skeleton",
         outer_faces_3D: "3D Outer faces",
         inner_faces_3D: "3D Inner faces",
+        outer: "Outer",
+        inner: "Inner",
         mandala_3D_of_outer_faces: "3D Mandala of outer faces",
         mandala_3D_of_inner_faces: "3D Mandala of inner faces",
         timber_profiles_3D: "3D Timber profiles",
@@ -39,6 +41,25 @@ const I18N_EN = {
         tooltip_draw_face_colors: "Draw face colors",
         tooltip_draw_face_centroids: "Draw face centroids",
         tooltip_split_drawing: "Split the drawing into multiple A4 sheets for export to PDF",
+
+        // Keyboard shortcuts
+        key_H_3D_view: "Reset camera view",
+        key_left_3D_view: "Left side view",
+        key_up_3D_view: "Top view",
+        key_right_3D_view: "Right side view",
+        key_down_3D_view: "Bottom view",
+        key_space_3D_view: "Spin on/off",
+        key_mul_3D_view: "Increase rotation speed",
+        key_div_3D_view: "Decrease rotation speed",
+
+        tooltip_illuminate_object: "Illuminate 3D Object",
+        tooltip_decrease_spiral_rotations: "Decrease spiral rotations",
+        tooltip_increase_spiral_rotations: "Increase spiral rotations",
+        tooltip_add_floor: "Add floor",
+        tooltip_draw_vanishing_lines: "Draw vanishing lines",
+        tooltip_draw_axes: "Draw 3D axes",
+        tooltip_draw_labels: "Draw labels",
+        tooltip_spin: "Spin on/off",
 
         // Options
         opt_none: "None",
@@ -67,16 +88,6 @@ const I18N_EN = {
         help_vp_param: "Height of vanishing point (used to build 'GoodKarma' and 'Beveled' methods)",
         help_zc_param: "Place the vanishing point at the centroid of the entire zome",
         help_ft_param: "Add a footing based on the half of timber width",
-
-        // Keyboard shortcuts
-        key_H_3D_view: "Reset camera view",
-        key_left_3D_view: "Left side view",
-        key_up_3D_view: "Top view",
-        key_right_3D_view: "Right side view",
-        key_down_3D_view: "Bottom view",
-        key_space_3D_view: "Spin on/off",
-        key_mul_3D_view: "Increase rotation speed",
-        key_div_3D_view: "Decrease rotation speed",
 
         // Measurements table
         measurements: "Measurements",

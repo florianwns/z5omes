@@ -118,15 +118,19 @@ body:after {
     max-width: 70px;
 }
 
+#face-measurement-select {
+    max-width: 100px;
+}
+
 .absolute-top-right-48 {
     position: absolute;
-    top: 0px;
+    top: 0;
     right: -48px;
 }
 
 .absolute-top-left-48 {
     position: absolute;
-    top: 0px;
+    top: 0;
     left: -48px;
 }
 
@@ -167,9 +171,9 @@ body:after {
 .loading-bar div:before {
     content: "";
     position: absolute;
-    top: 0px;
-    left: 0px;
-    bottom: 0px;
+    top: 0;
+    left: 0;
+    bottom: 0;
     background: #813FEF;
     animation: loading-bar-start 2100ms cubic-bezier(0.65, 0.81, 0.73, 0.4) infinite;
 }
@@ -177,9 +181,9 @@ body:after {
 .loading-bar div:after {
     content: "";
     position: absolute;
-    top: 0px;
-    left: 0px;
-    bottom: 0px;
+    top: 0;
+    left: 0;
+    bottom: 0;
     background: #813FEF;
     animation: loading-bar-end 2100ms cubic-bezier(0.16, 0.84, 0.44, 1) infinite;
     animation-delay: 1150ms;
@@ -219,12 +223,12 @@ body:after {
 }
 
 
-ul.keyboard-shorcut-list {
+ul.keyboard-shortcut-list {
     margin: 0;
     padding: 0;
 }
 
-ul.keyboard-shorcut-list .key {
+ul.keyboard-shortcut-list .key {
     display: inline-block;
     background: #ffffff;
     background: -moz-linear-gradient(top, #ffffff 0%, #f0f0f0 100%);
@@ -247,11 +251,11 @@ ul.keyboard-shorcut-list .key {
     text-align: center;
 }
 
-ul.keyboard-shorcut-list .key-space {
+ul.keyboard-shortcut-list .key-space {
     width: 96px;
 }
 
-ul.keyboard-shorcut-list .key:hover {
+ul.keyboard-shortcut-list .key:hover {
     background: -moz-linear-gradient(top, #f2f2f2 0%, #efefef 100%);
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f2f2f2), color-stop(100%, #efefef));
     background: -webkit-linear-gradient(top, #f2f2f2 0%, #efefef 100%);
