@@ -939,7 +939,7 @@
     <div class="toast-container position-fixed bottom-0 start-0 p-3">
         <div id="live_toast" class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body" id="toast_msg" class="me-auto">
+                <div class="toast-body me-auto" id="toast_msg">
                 </div>
                 <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
                         aria-label="Close"></button>
@@ -1278,7 +1278,7 @@
 
                             // Compute angles
                             //    [0, 1, 2, 3, 4, 5, 6, 7]
-                            const [a, b, c, d, e, f, g, h] = drawing_points; // with z axis equals to 0
+                            const [a, b, c, d] = drawing_points;                // with z axis equals to 0
                             const [A, B, C, D, E, F, G, H] = fitted_points;
 
                             const base_plane = points_2_plane(A, B, C);
@@ -2280,7 +2280,7 @@
 
                     const self = this;
                     clipboard.on('success', function (e) {
-                        self.show_toast(this.i18n('toast_link_copied'), "link");
+                        self.show_toast(self.i18n('toast_link_copied'), "link");
                     });
                     clipboard.on('error', function (e) {
                         self.show_error();
