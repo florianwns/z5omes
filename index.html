@@ -1947,7 +1947,7 @@
                 download_gltf() {
                     const exporter = new THREE.GLTFExporter();
                     exporter.parse(
-                        scene,
+                        meshes.obj,
                         (res) => {
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});

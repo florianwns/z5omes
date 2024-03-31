@@ -1,5 +1,10 @@
 # TODO-LIST
 
+* [ ] Utiliser le clic droit Three js pour cacher des faces
+  https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_cubes.html
+  
+* [x] Soucis avec l'export gltf à résoudre
+ 
 * [ ] Ajouter les paramètres de diamètre et de surface au sol ???
   
 * [ ] Corriger les points de la semelle de la méthode goodkarma
