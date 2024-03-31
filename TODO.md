@@ -1,5 +1,7 @@
 # TODO-LIST
 
+* [ ] Ajouter les paramètres de diamètre et de surface au sol ???
+  
 * [ ] Corriger les points de la semelle de la méthode goodkarma
   * Sans doute dû aux inner/outer faces qui sont mal calculées pour le goodkarma
     

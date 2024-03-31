@@ -387,7 +387,7 @@
     </div>
 
     <div class="auto-shift position-relative">
-        <div class="container-xl row m-auto">
+        <div class="container-xl row m-auto" style="max-width: 980px;">
             <div class="col mb-3 mt-3">
                 <div class="d-flex align-items-center">
                     <a href="https://florianwns.github.io/z5omes/"
@@ -833,7 +833,7 @@
                                 x-text="i18n('outer')"></option>
                     </select>
 
-                    <!-- CSV Button -->
+                    <!-- TSV and CSV Button -->
                     <div>
                         <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
                               :title="i18n('tooltip_export_2_format', 'TSV')"
@@ -920,14 +920,29 @@
 
             <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
                 <hr>
-                <h5 class="text-secondary mt-4 mb-4 me-auto">
-                    <i class="fa-solid fa-frame rotate-45 me-1"></i>
-                    <span x-text="i18n('framework')" class="up-first"></span>
-                </h5>
-                <div class="overflow-scroll">
-                    <div class="mx-auto" style="width:800px;">
-                        <div class="bg-white rounded border position-relative"
-                             x-ref="timber_profile_container">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="text-secondary mt-4 mb-4 me-auto">
+                        <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                        <span x-text="i18n('framework')" class="up-first"></span>
+                    </h5>
+
+                    <!-- ZIP Button -->
+                    <div>
+                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                              :title="i18n('tooltip_export_2_format', 'ZIP')"
+                              @click="download_zip()">
+                            <i class="fa-solid fa-file"></i>
+                            <span class="fa-icon-file-type">ZIP</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="overflow-scroll">
+                        <div class="mx-auto" style="width:800px;">
+                            <div class="bg-white rounded border position-relative"
+                                 x-ref="timber_profile_container">
+                            </div>
                         </div>
                     </div>
                 </div>
