@@ -387,7 +387,7 @@
     </div>
 
     <div class="auto-shift position-relative">
-        <div class="container-xl row m-auto">
+        <div class="container-xl row m-auto" style="max-width: 980px;">
             <div class="col mb-3 mt-3">
                 <div class="d-flex align-items-center">
                     <a href="https://florianwns.github.io/z5omes/"
@@ -533,7 +533,8 @@
                                                 <button class="btn btn-primary"
                                                         @click="draw_obj = !draw_obj"
                                                         :class="(draw_obj) ? `btn-primary` : `btn-secondary`"
-                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_illuminate_object')">
+                                                        data-bs-toggle="tooltip"
+                                                        :title="i18n('tooltip_illuminate_object')">
                                                     <i class="fa"
                                                        :class="(draw_obj) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
                                                 </button>
@@ -567,7 +568,8 @@
                                             <button class="btn btn-primary"
                                                     @click="draw_vanishing_lines = !draw_vanishing_lines"
                                                     :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_vanishing_lines')">
+                                                    data-bs-toggle="tooltip"
+                                                    :title="i18n('tooltip_draw_vanishing_lines')">
                                                 <i class="fa fa-arrows-to-circle"></i>
                                             </button>
 
@@ -580,14 +582,32 @@
                                             </button>
 
                                             <!-- Spin on/off -->
-                                            <button class="btn btn-primary"
-                                                    @click="is_spinning = !is_spinning"
-                                                    :class="(is_spinning) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_spin')">
-                                                <i class="fa "
-                                                   :class="(speed < 0) ? `fa-rotate-left` : `fa-rotate-right`"
-                                                ></i>
-                                            </button>
+                                            <div class="vstack">
+                                                <button class="btn btn-primary"
+                                                        @click="is_spinning = !is_spinning"
+                                                        :class="(is_spinning) ? `btn-primary` : `btn-secondary`"
+                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_spin')">
+                                                    <i class="fa "
+                                                       :class="(speed < 0) ? `fa-rotate-left` : `fa-rotate-right`"
+                                                    ></i>
+                                                </button>
+
+                                                <!-- Rotation Speed -->
+                                                <div class="mt-1" x-show="is_spinning">
+                                                    <button class="btn btn-sm btn-primary btn-small-padding line-height-1px"
+                                                            @click="decrease_speed"
+                                                            data-bs-toggle="tooltip"
+                                                            :title="i18n('key_div_3D_view')">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-primary btn-small-padding line-height-1px"
+                                                            @click="increase_speed"
+                                                            data-bs-toggle="tooltip"
+                                                            :title="i18n('key_mul_3D_view')">
+                                                        <i class="fa fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
@@ -833,7 +853,7 @@
                                 x-text="i18n('outer')"></option>
                     </select>
 
-                    <!-- CSV Button -->
+                    <!-- TSV and CSV Button -->
                     <div>
                         <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
                               :title="i18n('tooltip_export_2_format', 'TSV')"
@@ -920,14 +940,29 @@
 
             <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
                 <hr>
-                <h5 class="text-secondary mt-4 mb-4 me-auto">
-                    <i class="fa-solid fa-frame rotate-45 me-1"></i>
-                    <span x-text="i18n('framework')" class="up-first"></span>
-                </h5>
-                <div class="overflow-scroll">
-                    <div class="mx-auto" style="width:800px;">
-                        <div class="bg-white rounded border position-relative"
-                             x-ref="timber_profile_container">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="text-secondary mt-4 mb-4 me-auto">
+                        <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                        <span x-text="i18n('framework')" class="up-first"></span>
+                    </h5>
+
+                    <!-- ZIP Button -->
+                    <div>
+                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                              :title="i18n('tooltip_export_2_format', 'ZIP')"
+                              @click="download_zip()">
+                            <i class="fa-solid fa-file"></i>
+                            <span class="fa-icon-file-type">ZIP</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="overflow-scroll">
+                        <div class="mx-auto" style="width:800px;">
+                            <div class="bg-white rounded border position-relative"
+                                 x-ref="timber_profile_container">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1463,7 +1498,7 @@
 
                 process() {
                     // Add floor
-                    switch(this.type_of_3D_objects){
+                    switch (this.type_of_3D_objects) {
                         case "inner_faces_3D":
                             this.floor = ZOME.inner_floor_3D;
                             break;
@@ -1912,7 +1947,7 @@
                 download_gltf() {
                     const exporter = new THREE.GLTFExporter();
                     exporter.parse(
-                        scene,
+                        meshes.obj,
                         (res) => {
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});
@@ -2006,7 +2041,7 @@
                         _.forEach(items_3D, item => {
                             if (this.draw_obj) meshes.obj.add(item.mesh);
                             meshes.edges.add(item.edges);
-                            if(item.label_mesh) meshes.labels.add(item.label_mesh);
+                            if (item.label_mesh) meshes.labels.add(item.label_mesh);
                         });
                     } else {
                         // Same as above but for spirals with geometry cloning for more efficiency
@@ -2024,14 +2059,14 @@
 
                                 // Add label once
                                 if (i === 0) {
-                                    if(item.label_mesh) meshes.labels.add(item.label_mesh);
+                                    if (item.label_mesh) meshes.labels.add(item.label_mesh);
                                 }
                             }
                         });
 
                         // Add floor
                         let floor_3D = null;
-                        switch(this.type_of_3D_objects){
+                        switch (this.type_of_3D_objects) {
                             case "inner_faces_3D":
                                 floor_3D = ZOME.inner_floor_3D;
                                 break;
@@ -2040,7 +2075,7 @@
                                 floor_3D = ZOME.outer_floor_3D;
                                 break;
                         }
-                        if(this.add_floor && floor_3D != null && floor_3D.mesh != null){
+                        if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
                             if (this.draw_obj) meshes.obj.add(floor_3D.mesh);
                             meshes.edges.add(floor_3D.edges);
                         }
@@ -2100,13 +2135,19 @@
                     controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
                     controls.update();
                 },
+                increase_speed() {
+                    this.speed += 0.001;
+                },
+                decrease_speed() {
+                    this.speed -= 0.001;
+                },
                 keydown(key) {
                     switch (key) {
                         case "*":
-                            this.speed += 0.001;
+                            this.increase_speed()
                             break;
                         case "/":
-                            this.speed -= 0.001;
+                            this.decrease_speed()
                             break;
                         case " ":
                             this.is_spinning = !this.is_spinning;
