@@ -1906,11 +1906,7 @@
                     this.auto_size()
                     this.animate()
 
-                    const loader = new THREE.FontLoader();
-                    loader.load('webfonts/helvetiker_regular.typeface.json', (font) => {
-                        this.font = font;
-                        this.$dispatch('zome-renderer-is-ready');
-                    });
+                    this.$dispatch('zome-renderer-is-ready');
                 },
 
                 get clone_and_rotate_mode() {
