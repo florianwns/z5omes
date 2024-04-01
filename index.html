@@ -465,28 +465,28 @@
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'OBJ')"
+                                                  :title="i18n('tooltip_export_2_format', 'OBJ (Millimeters)')"
                                                   @click="download_obj()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">OBJ</span>
                                             </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'STL')"
+                                                  :title="i18n('tooltip_export_2_format', 'STL (Millimeters)')"
                                                   @click="download_stl()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">STL</span>
                                             </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'GLTF')"
+                                                  :title="i18n('tooltip_export_2_format', 'GLTF (Meters)')"
                                                   @click="download_gltf()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">GLTF</span>
                                             </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'PLY')"
+                                                  :title="i18n('tooltip_export_2_format', 'PLY (Millimeters)')"
                                                   @click="download_ply()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">PLY</span>
@@ -1965,7 +1965,7 @@
                     this.$dispatch('zome-renderer-is-ready');
                 },
 
-                update_pointer_from_event(event){
+                update_pointer_from_event(event) {
                     // calculate pointer position in normalized device coordinates
                     // source : https://stackoverflow.com/a/69971471
                     const rect = renderer.domElement.getBoundingClientRect();
@@ -2007,8 +2007,13 @@
                 },
                 download_gltf() {
                     const exporter = new THREE.GLTFExporter();
+
+                    // Because GLTF is in meters, convert millimeters to meters
+                    const resized_obj = meshes.obj.clone();
+                    resized_obj.scale.set(0.001, 0.001, 0.001);
+
                     exporter.parse(
-                        meshes.obj,
+                        resized_obj,
                         (res) => {
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});
@@ -2019,6 +2024,7 @@
                         (error) => console.error(error),
                         {binary: false},
                     );
+                    meshes.obj.scale.setScalar(1)
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
