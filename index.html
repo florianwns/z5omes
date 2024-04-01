@@ -1804,7 +1804,10 @@
         });
 
         Alpine.data('renderer_3D', () => {
-            let scene, camera, renderer, controls, canvas;              // Three JS Parameters
+            // Three JS Objects
+            let scene, camera, renderer, controls,
+                canvas, raycaster, pointer;
+
             const meshes = {
                 "axes": null,
                 "obj": null,
@@ -1896,6 +1899,59 @@
                     // Add controls
                     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+                    // Add pointer handler
+                    raycaster = new THREE.Raycaster();
+                    pointer = new THREE.Vector2();
+
+                    renderer.domElement.onmousemove = (event) => {
+                        if (event.button === 0 && event.ctrlKey) {
+                            this.update_pointer_from_event(event);
+
+                            console.log("canvas", canvas.offsetWidth, canvas.offsetHeight)
+                            console.log("event", event);
+                            console.log(renderer.domElement.clientWidth)
+                            console.log("pointer", pointer)
+                            raycaster.setFromCamera(pointer, camera);
+
+                            console.log(scene.children)
+                            const obj_group = scene.getObjectByName("obj");
+                            console.log(obj_group)
+                            const intersects = raycaster.intersectObjects(obj_group.children, true);
+                            console.log(intersects)
+                            if (intersects.length > 0) {
+                                const objectName = intersects[0].object.name;
+                                const obj = scene.getObjectByName(objectName);
+                                obj.visible = false;
+                                // scene.remove(obj.parent);
+                            }
+                        }
+                    };
+                    //
+                    // renderer.domElement.onpointerdown = (event) => {
+                    //     if (event.button === 0 && event.ctrlKey) {
+                    //         // calculate pointer position in normalized device coordinates
+                    //         // (-1 to +1) for both components
+                    //         pointer.x = event.offsetX - 1;
+                    //         pointer.y = -event.offsetY + 1;
+                    //         console.log("canvas", canvas.offsetWidth, canvas.offsetHeight)
+                    //         console.log("event", event)
+                    //         console.log("pointer", pointer)
+                    //         raycaster.setFromCamera(pointer, camera);
+                    //
+                    //         console.log(scene.children)
+                    //         const obj_group = scene.getObjectByName("obj");
+                    //         console.log(obj_group)
+                    //         const intersects = raycaster.intersectObjects(obj_group.children, true  );
+                    //         console.log(intersects)
+                    //         if (intersects.length > 0) {
+                    //             const objectName = intersects[0].object.name;
+                    //             const obj = scene.getObjectByName(objectName);
+                    //             obj.visible = false;
+                    //             // scene.remove(obj.parent);
+                    //         }
+                    //     }
+                    // };
+
                     // Add (x, y, z) Axes
                     meshes.axes = new THREE.AxesHelper(WORLD_HEIGHT);
                     meshes.axes.visible = this.draw_axes;
@@ -1907,6 +1963,15 @@
                     this.animate()
 
                     this.$dispatch('zome-renderer-is-ready');
+                },
+
+                update_pointer_from_event(event){
+                    // calculate pointer position in normalized device coordinates
+                    // source : https://stackoverflow.com/a/69971471
+                    const rect = renderer.domElement.getBoundingClientRect();
+                    pointer.x = ((event.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
+                    pointer.y = -((event.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
+                    return pointer;
                 },
 
                 get clone_and_rotate_mode() {
@@ -1964,31 +2029,37 @@
                     download(filename, window.URL.createObjectURL(blob));
                 },
                 clear() {
-                    // Clean old meshes
+                    // Create and clean old old meshes
+
                     if (meshes.vanishing_lines instanceof THREE.Group) {
                         scene.remove(meshes.vanishing_lines)
                     }
                     meshes.vanishing_lines = new THREE.Group();
+                    meshes.vanishing_lines.name = "vanishing_lines";
 
                     if (meshes.obj instanceof THREE.Group) {
                         scene.remove(meshes.obj)
                     }
                     meshes.obj = new THREE.Group();
+                    meshes.obj.name = "obj";
 
                     if (meshes.edges instanceof THREE.Group) {
                         scene.remove(meshes.edges)
                     }
                     meshes.edges = new THREE.Group();
+                    meshes.edges.name = "edges";
 
                     if (meshes.labels instanceof THREE.Group) {
                         scene.remove(meshes.labels)
                     }
                     meshes.labels = new THREE.Group();
+                    meshes.labels.name = "labels";
 
                     if (meshes.vertices instanceof THREE.Group) {
                         scene.remove(meshes.vertices)
                     }
                     meshes.vertices = new THREE.Group();
+                    meshes.vertices.name = "vertices";
                 },
 
 
@@ -2041,20 +2112,22 @@
                         });
                     } else {
                         // Same as above but for spirals with geometry cloning for more efficiency
-                        _.forEach(items_3D, item => {
-                            for (let i = 0; i < ZOME.num; i++) {
-                                if (i < this.num_spiral_rotations) {
+                        _.forEach(items_3D, (item, i) => {
+                            for (let j = 0; j < ZOME.num; j++) {
+                                if (j < this.num_spiral_rotations) {
                                     const mesh = clone_and_color_mesh(item.mesh, item.color);
-                                    mesh.rotateY(ZOME.rotation_angles[i]);
+                                    mesh.rotateY(ZOME.rotation_angles[j]);
+                                    mesh.userData.item_index = i;
+                                    mesh.userData.rotation_index = j;
                                     meshes.obj.add(mesh);
                                 }
 
                                 const edges = item.edges.clone();
-                                edges.rotateY(ZOME.rotation_angles[i]);
+                                edges.rotateY(ZOME.rotation_angles[j]);
                                 meshes.edges.add(edges);
 
                                 // Add label once
-                                if (i === 0) {
+                                if (j === 0) {
                                     if (item.label_mesh) meshes.labels.add(item.label_mesh);
                                 }
                             }

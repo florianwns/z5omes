@@ -3,8 +3,22 @@
 * [ ] Utiliser le clic droit Three js pour cacher des faces
   https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_cubes.html
   
-* [x] Soucis avec l'export gltf à résoudre
- 
+  Le raycasting ne marche pas bien sur les meshs clonés,
+    il faut donc ne pas cloner les mesh, mais le polygon/prism qui aura son propre mesh
+    la rotation ne se fait plus au niveau de la 3D et du mandala, 
+    mais au niveau de la création du zome, 
+    le polygon prendra aussi un uuid afin d'être identifié, via son mesh dans le userData.uuid
+    le compte des pièce ne sera plus multiplié par N puisque les pièce existeront bel et bien
+    pour cela il vaut mieux créer une branche.
+    
+  
+* [ ] Renommer origami en 2D View
+  * Mandala => All
+  * Spiral => 
+  * Zomandala ?? à Ajouter 
+  
+* [ ] Renommed mandala par flattened
+  
 * [ ] Ajouter les paramètres de diamètre et de surface au sol ???
   
 * [ ] Corriger les points de la semelle de la méthode goodkarma
