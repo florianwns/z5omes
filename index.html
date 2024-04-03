@@ -520,6 +520,15 @@
                                         </div>
 
                                         <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-3">
+                                            <!-- Customize Framework -->
+                                            <div class="btn btn-primary p-0"
+                                                 data-bs-toggle="modal"
+                                                 data-bs-target="#framework-customization-modal">
+                                                <div class="btn btn-primary" data-bs-toggle="tooltip" :title="i18n('tooltip_customize_framework')">
+                                                    <i class="fa-solid fa-frame rotate-45"></i>
+                                                </div>
+                                            </div>
+
                                             <!-- Draw Labels -->
                                             <button class="btn btn-primary"
                                                     @click="draw_labels = !draw_labels"
@@ -610,13 +619,35 @@
                                             </div>
                                         </div>
 
+                                        <!-- Customize framework shortcuts Modal -->
+                                        <div class="modal fade" id="framework-customization-modal" tabindex="-1"
+                                             aria-labelledby="framework-customization-modal-title" aria-hidden="true">
+                                            <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="text-secondary my-1 me-3" id="framework-customization-modal-title">
+                                                            <i class="fa-solid fa-keyboard me-1"></i>
+                                                            <span x-text="i18n('framework_customization')"></span>
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        pouet
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
                                             <!-- Keyboard shortcuts -->
-                                            <button class="btn btn-primary"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#shortcuts-modal">
-                                                <i class="fa-solid fa-keyboard"></i>
-                                            </button>
+                                            <div class="btn btn-primary p-0"
+                                                 data-bs-toggle="modal"
+                                                 data-bs-target="#shortcuts-modal">
+                                                 <div class="btn btn-primary" data-bs-toggle="tooltip" :title="i18n('tooltip_show_keyboard_shortcuts')">
+                                                    <i class="fa-solid fa-keyboard"></i>
+                                                 </div>
+                                            </div>
 
                                             <!-- Fullscreen Toggle btn -->
                                             <button class="btn btn-primary"

@@ -24,6 +24,7 @@ const I18N_EN = {
         profile: "profile",
         mandala: 'Mandala',
         spirals: 'Spirals',
+        framework_customization: "Framework customization",
         zome_made_with: "This zome was made with",
 
         // Tooltips
@@ -41,6 +42,8 @@ const I18N_EN = {
         tooltip_draw_face_colors: "Draw face colors",
         tooltip_draw_face_centroids: "Draw face centroids",
         tooltip_split_drawing: "Split the drawing into multiple A4 sheets for export to PDF",
+        tooltip_customize_framework: "Customize framework",
+        tooltip_show_keyboard_shortcuts: "Show keyboard shortcuts",
 
         // Keyboard shortcuts
         key_H_3D_view: "Reset camera view",
