@@ -1,6 +1,6 @@
 # TODO-LIST
 
-* [ ] Utiliser le clic droit Three js pour cacher des faces
+* [ ] Utiliser le clic droit Three js pour modifier des faces
   https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_cubes.html
   
   Le raycasting ne marche pas bien sur les meshs clonés,
@@ -11,6 +11,17 @@
     le compte des pièce ne sera plus multiplié par N puisque les pièce existeront bel et bien
     pour cela il vaut mieux créer une branche.
     
+* [ ] Au clic souris sur un element, à partir de sa position (i, j)
+  sélectionne le type de l'element de la face au sein de la matrice
+  
+  Ajouter un bouding box autour de tout les elements portant le même couple i, j
+  
+  Commencer avec les losanges plein, faire les moitiés de losanges plus tard
+  Sauvegarder la matrice dans les paramètres.
+  
+
+* [ ] Corriger bug sur les vues de côtés haut bas quand on se déplace dans la caméra.
+  -> resetter avant de faire les vue de côté 
   
 * [ ] Renommer origami en 2D View
   * Mandala => All
