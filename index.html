@@ -520,15 +520,6 @@
                                         </div>
 
                                         <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-3">
-                                            <!-- Customize Framework -->
-                                            <div class="btn btn-primary p-0"
-                                                 data-bs-toggle="modal"
-                                                 data-bs-target="#framework-customization-modal">
-                                                <div class="btn btn-primary" data-bs-toggle="tooltip" :title="i18n('tooltip_customize_framework')">
-                                                    <i class="fa-solid fa-frame rotate-45"></i>
-                                                </div>
-                                            </div>
-
                                             <!-- Draw Labels -->
                                             <button class="btn btn-primary"
                                                     @click="draw_labels = !draw_labels"
@@ -548,14 +539,14 @@
                                                        :class="(draw_obj) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
                                                 </button>
                                                 <div class="mt-1" x-show="draw_obj && clone_and_rotate_mode">
-                                                    <button class="btn btn-sm btn-small-padding line-height-1px"
+                                                    <button class="btn btn-sm btn-small-padding"
                                                             @click="num_spiral_rotations = Math.max(num_spiral_rotations - 1, 1)"
                                                             :class="(num_spiral_rotations <= 1) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('tooltip_decrease_spiral_rotations')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
-                                                    <button class="btn btn-sm btn-small-padding line-height-1px"
+                                                    <button class="btn btn-sm btn-small-padding"
                                                             @click="num_spiral_rotations = Math.min(num_spiral_rotations + 1, params.num)"
                                                             :class="(num_spiral_rotations >= params.num) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
@@ -603,13 +594,13 @@
 
                                                 <!-- Rotation Speed -->
                                                 <div class="mt-1" x-show="is_spinning">
-                                                    <button class="btn btn-sm btn-primary btn-small-padding line-height-1px"
+                                                    <button class="btn btn-sm btn-primary btn-small-padding"
                                                             @click="decrease_speed"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('key_div_3D_view')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
-                                                    <button class="btn btn-sm btn-primary btn-small-padding line-height-1px"
+                                                    <button class="btn btn-sm btn-primary btn-small-padding"
                                                             @click="increase_speed"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('key_mul_3D_view')">
@@ -619,34 +610,15 @@
                                             </div>
                                         </div>
 
-                                        <!-- Customize framework shortcuts Modal -->
-                                        <div class="modal fade" id="framework-customization-modal" tabindex="-1"
-                                             aria-labelledby="framework-customization-modal-title" aria-hidden="true">
-                                            <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="text-secondary my-1 me-3" id="framework-customization-modal-title">
-                                                            <i class="fa-solid fa-keyboard me-1"></i>
-                                                            <span x-text="i18n('framework_customization')"></span>
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        pouet
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
                                             <!-- Keyboard shortcuts -->
                                             <div class="btn btn-primary p-0"
                                                  data-bs-toggle="modal"
                                                  data-bs-target="#shortcuts-modal">
-                                                 <div class="btn btn-primary" data-bs-toggle="tooltip" :title="i18n('tooltip_show_keyboard_shortcuts')">
+                                                <div class="btn btn-primary" data-bs-toggle="tooltip"
+                                                     :title="i18n('tooltip_show_keyboard_shortcuts')">
                                                     <i class="fa-solid fa-keyboard"></i>
-                                                 </div>
+                                                </div>
                                             </div>
 
                                             <!-- Fullscreen Toggle btn -->
@@ -753,6 +725,204 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="table-responsive top-0 p-2 d-flex flex-column gap-3">
+                                        <div class="d-none">
+                                            <!-- Set ids to SVG symbols -->
+                                            <svg xmlns="http://www.w3.org/2000/svg">
+                                                <symbol id="svg_horizontal_bar" width="26"
+                                                        height="26" viewBox="0 0 26 26">
+                                                    <line stroke-width="2" y2="13" x2="24" y1="13"
+                                                          x1="2" stroke="#0B5ED7" fill="none"/>
+                                                </symbol>
+                                                <symbol id="svg_vertical_bar" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line stroke-width="2" y2="24" x2="13" y1="2"
+                                                          x1="13" stroke="#0B5ED7" fill="none"/>
+                                                </symbol>
+                                                <symbol id="svg_v_bars" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="12.64023" x2="13.64504" y1="6.8349"
+                                                          x1="7.94721" stroke-width="2"
+                                                          stroke="#0B5ED7"
+                                                          fill="none"/>
+                                                    <line y2="12.15645" x2="13.21501" y1="6.56613"
+                                                          x1="17.51526" stroke-width="2"
+                                                          stroke="#0B5ED7"
+                                                          fill="none"/>
+                                                </symbol>
+
+                                                <!-- Rhombus -->
+                                                <symbol id="svg_empty_rhombus" width="26"
+                                                        height="26"
+                                                        viewBox="0 0 26 26">
+                                                </symbol>
+
+                                                <!-- Rhombus -->
+                                                <symbol id="svg_rhombus" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <polygon points="13 2, 2 13, 13 24, 24 13"
+                                                             fill="#FFF" stroke="#0B5ED7"
+                                                             stroke-width="2"/>
+                                                </symbol>
+
+                                                <!-- Rhombus with horizontal bar -->
+                                                <symbol id="svg_rhombus_with_horizontal_bar"
+                                                        width="26" height="26" viewBox="0 0 26 26">
+                                                    <use href="#svg_rhombus"></use>
+                                                    <use href="#svg_horizontal_bar"></use>
+                                                </symbol>
+
+                                                <!-- Rhombus with horizontal bar -->
+                                                <symbol id="svg_rhombus_with_vertical_bar"
+                                                        width="26" height="26" viewBox="0 0 26 26">
+                                                    <use href="#svg_rhombus"></use>
+                                                    <use href="#svg_vertical_bar"></use>
+                                                </symbol>
+
+                                                <!-- Rhombus with mini rhombus-->
+                                                <symbol id="svg_rhombus_with_mini_rhombus"
+                                                        width="26"
+                                                        height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <use href="#svg_rhombus"></use>
+                                                    <use href="#svg_horizontal_bar"></use>
+                                                    <use href="#svg_v_bars"></use>
+                                                </symbol>
+
+                                                <!-- Top half rhombus -->
+                                                <symbol id="svg_top_half_rhombus" width="26"
+                                                        height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <polygon points="13 2, 2 13, 24 13"
+                                                             fill="#FFF" stroke="#0B5ED7"
+                                                             stroke-width="2"/>
+                                                </symbol>
+
+                                                <!-- Right half rhombus -->
+                                                <symbol id="svg_right_half_rhombus" width="26"
+                                                        height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <polygon points="13 2, 24 13, 13 24"
+                                                             fill="#FFF" stroke="#0B5ED7"
+                                                             stroke-width="2"/>
+                                                </symbol>
+
+                                                <!-- Bottom half rhombus -->
+                                                <symbol id="svg_bottom_half_rhombus" width="26"
+                                                        height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <polygon points="2 13, 24 13, 13 24"
+                                                             fill="#FFF" stroke="#0B5ED7"
+                                                             stroke-width="2"/>
+                                                </symbol>
+
+                                                <!-- Left half rhombus -->
+                                                <symbol id="svg_left_half_rhombus" width="26"
+                                                        height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <polygon points="13 2, 2 13, 13 24"
+                                                             fill="#FFF" stroke="#0B5ED7"
+                                                             stroke-width="2"/>
+                                                </symbol>
+                                            </svg>
+                                        </div>
+                                        <div class="d-flex justify-content-center m-auto">
+                                            <div id="btn-rhombus-types-group"
+                                                 class="btn-group bg-white" role="group"
+                                                 aria-label="Toggle button group">
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-1" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-1">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(1)"></use>
+                                                    </svg>
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-2" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-2">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(2)"></use>
+                                                    </svg>
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-3" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-3">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(3)"></use>
+                                                    </svg>
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-4" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-4">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(4)"></use>
+                                                    </svg>
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-5" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-5">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(5)"></use>
+                                                    </svg>
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-6" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-6">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(6)"></use>
+                                                    </svg>
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-7" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-7">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(7)"></use>
+                                                    </svg>
+                                                </label>
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-8" autocomplete="off">
+                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-8">
+                                                    <svg width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use :href="get_svg_rhombus_id(8)"></use>
+                                                    </svg>
+                                                </label>
+
+
+                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
+                                                       value=0 id="btn-rhombus-type-0" autocomplete="off" checked>
+                                                <label class="btn btn-outline-danger d-flex align-items-center justify-content-center"
+                                                       for="btn-rhombus-type-0">
+                                                    <i class="fa fa-trash"></i>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -764,19 +934,19 @@
                                     <!-- Export to -->
                                     <div class="ps-2 absolute-top-right-48" style="top:48px;">
                                         <div class="vstack">
-                                        <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'SVG')"
-                                              @click="download_svg()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">SVG</span>
-                                        </span>
                                             <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'PDF')"
-                                                  @click="download_pdf()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">PDF</span>
-                                        </span>
+                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'SVG')"
+                                                  @click="download_svg()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">SVG</span>
+                                            </span>
+                                                <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                                      data-bs-toggle="tooltip"
+                                                      :title="i18n('tooltip_export_2_format', 'PDF')"
+                                                      @click="download_pdf()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">PDF</span>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -1065,6 +1235,16 @@
     // const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
+
+    const SVG_RHOMBUSES = [
+        "svg_empty_rhombus", "svg_rhombus",
+        "svg_rhombus_with_horizontal_bar", "svg_rhombus_with_vertical_bar",
+        "svg_rhombus_with_mini_rhombus",
+        "svg_top_half_rhombus",
+        "svg_right_half_rhombus",
+        "svg_bottom_half_rhombus",
+        "svg_left_half_rhombus",
+    ];
 
     const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -2595,6 +2775,24 @@
                 get constrained_assembly_direction() {
                     return this.params.assembly_direction % this.num_assembly_directions;
                 },
+                get framework_rhombus_types() {
+                    // return [[4, 4, 4, 4, 4], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [2, 2, 2, 2, 2],  [5, 5, 5, 5, 5]];
+
+                    return [
+                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    ]
+                },
+
+                get_svg_rhombus_id(type_id) {
+                    return `#${SVG_RHOMBUSES[type_id % SVG_RHOMBUSES.length]}`;
+                },
+
                 set constrained_assembly_direction(value) {
                     this.params.assembly_direction = value % this.num_assembly_directions;
                 },
