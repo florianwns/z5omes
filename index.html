@@ -2119,32 +2119,23 @@
                     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
                     // Add pointer handler
-                    raycaster = new THREE.Raycaster();
-                    pointer = new THREE.Vector2();
+                    // raycaster = new THREE.Raycaster();
+                    // pointer = new THREE.Vector2();
 
-                    renderer.domElement.onmousemove = (event) => {
-                        if (event.button === 0 && event.ctrlKey) {
-                            this.update_pointer_from_event(event);
-
-                            console.log("canvas", canvas.offsetWidth, canvas.offsetHeight)
-                            console.log("event", event);
-                            console.log(renderer.domElement.clientWidth)
-                            console.log("pointer", pointer)
-                            raycaster.setFromCamera(pointer, camera);
-
-                            console.log(scene.children)
-                            const obj_group = scene.getObjectByName("obj");
-                            console.log(obj_group)
-                            const intersects = raycaster.intersectObjects(obj_group.children, true);
-                            console.log(intersects)
-                            if (intersects.length > 0) {
-                                const objectName = intersects[0].object.name;
-                                const obj = scene.getObjectByName(objectName);
-                                obj.visible = false;
-                                // scene.remove(obj.parent);
-                            }
-                        }
-                    };
+                    // renderer.domElement.onmousemove = (event) => {
+                    //     if (event.button === 0 && event.ctrlKey) {
+                    //         this.update_pointer_from_event(event);
+                    //         raycaster.setFromCamera(pointer, camera);
+                    //         const obj_group = scene.getObjectByName("obj");
+                    //         const intersects = raycaster.intersectObjects(obj_group.children, true);
+                    //         if (intersects.length > 0) {
+                    //             const objectName = intersects[0].object.name;
+                    //             const obj = scene.getObjectByName(objectName);
+                    //             obj.visible = false;
+                    //             // scene.remove(obj.parent);
+                    //         }
+                    //     }
+                    // };
                     //
                     // renderer.domElement.onpointerdown = (event) => {
                     //     if (event.button === 0 && event.ctrlKey) {
@@ -2330,14 +2321,16 @@
                     // Build 3D faces and edges
                     const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
                     if (!this.clone_and_rotate_mode) {
-                        _.forEach(items_3D, item => {
+                        for (let i = 0; i < items_3D.length; i++) {
+                            const item = items_3D[i];
                             if (this.draw_obj) meshes.obj.add(item.mesh);
                             meshes.edges.add(item.edges);
                             if (item.label_mesh) meshes.labels.add(item.label_mesh);
-                        });
+                        }
                     } else {
                         // Same as above but for spirals with geometry cloning for more efficiency
-                        _.forEach(items_3D, (item, i) => {
+                        for (let i = 0; i < items_3D.length; i++) {
+                            const item = items_3D[i];
                             for (let j = 0; j < ZOME.num; j++) {
                                 if (j < this.num_spiral_rotations) {
                                     const mesh = clone_and_color_mesh(item.mesh, item.color);
@@ -2356,7 +2349,8 @@
                                     if (item.label_mesh) meshes.labels.add(item.label_mesh);
                                 }
                             }
-                        });
+                        }
+                        ;
 
                         // Add floor
                         let floor_3D = null;
@@ -2784,19 +2778,6 @@
                 get constrained_assembly_direction() {
                     return this.params.assembly_direction % this.num_assembly_directions;
                 },
-                get framework_rhombus_types() {
-                    // return [[4, 4, 4, 4, 4], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [2, 2, 2, 2, 2],  [5, 5, 5, 5, 5]];
-
-                    return [
-                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    ]
-                },
 
                 get_svg_rhombus_id(type_id) {
                     return `#${SVG_RHOMBUSES[type_id % SVG_RHOMBUSES.length]}`;
@@ -2830,7 +2811,7 @@
                     toast.show()
                 },
                 magnetize() {
-                    if (this.suggested_height_ratio && this.suggested_height_ratio != this.params.height_ratio) {
+                    if (this.suggested_height_ratio && this.suggested_height_ratio !== this.params.height_ratio) {
                         this.params.height_ratio = this.suggested_height_ratio;
                     }
                 },
@@ -2893,7 +2874,7 @@
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
-                    const OUTWARD_EXPANSION = ASSEMBLY_METHOD == 2 || XPANSION_DIRECTION === -1;
+                    const OUTWARD_EXPANSION = ASSEMBLY_METHOD === 2 || XPANSION_DIRECTION === -1;
 
                     // Constants
                     const M = N - 1;
@@ -3026,17 +3007,20 @@
                     let framework_faces = [], framework_crowns = [];
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
-                    _.forEach(zome_faces_3D, (face, iCrown) => {
-                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown === zome_faces_3D.length - 1) {
+
+                    for (let iCrown = 0; iCrown < zome_faces_3D.length; iCrown++) {
+                        const face = zome_faces_3D[iCrown];
+                        if (!divide_faces_into_two_parts || iCrown === 0 || iCrown === zome_faces_3D.length - 1) {
                             framework_faces.push(face);
                             framework_crowns.push(iCrown);
                         } else {
-                            _.forEach(face.divide(divide_horizontally), part_of_face => {
-                                framework_faces.push(part_of_face);
+                            const face_parts = face.divide(divide_horizontally);
+                            for (let j = 0; j < face_parts.length; j++) {
+                                framework_faces.push(face_parts);
                                 framework_crowns.push(iCrown);
-                            });
+                            }
                         }
-                    });
+                    }
 
                     // Build Outer/Inner faces
                     const num_faces = zome_faces_3D.length
@@ -3060,7 +3044,8 @@
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     // Loop over the faces of the framework to build timbers
-                    _.forEach(framework_faces, (face, iFace) => {
+                    for (let iFace = 0; iFace < framework_faces.length; iFace++) {
+                        const face = framework_faces[iFace];
                         const num_points = face.num_points;
 
                         // Get the crown index then reset the timber label index
@@ -3082,7 +3067,8 @@
                             next_indexes = new Array(num_points);
 
                         // Calculate vectors and projected points to avoid multiple calculations
-                        _.forEach(face.points, (cur_pt, i) => {
+                        for (let i = 0; i < face.num_points; i++) {
+                            const cur_pt = face.points[i];
                             const next_index = (i + 1) % num_points;
                             const prev_index = (num_points + i - 1) % num_points;
 
@@ -3183,10 +3169,11 @@
                                 thickness_offset_pt,
                                 width_offset_pt,
                             );
-                        });
+                        }
 
                         // Build the prism and outer/inner faces
-                        _.forEach(face.points, (cur_pt, i) => {
+                        for (let i = 0; i < face.num_points; i++) {
+                            const cur_pt = face.points[i];
                             const prev_index = prev_indexes[i];    // previous index
                             const next_index = next_indexes[i];        // next index
 
@@ -3297,8 +3284,8 @@
                             }
 
                             vanishing_lines.push([vanishing_pt, cur_pt]);
-                        });
-                    });
+                        }
+                    }
 
                     // Build Footing timbers
                     const footing_thickness = (this.params.add_footing === 1) ? TIMBER_THICKNESS : 0

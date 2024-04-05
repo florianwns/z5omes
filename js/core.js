@@ -233,10 +233,9 @@ function plane_on_axis(axis = "X", value = 0) {
         [0, 1, 0],
         [0, 0, 1],
     ];
-
-    _.forEach(points, pt => {
-        pt[axis_index] = value;
-    });
+    for (let i = 0; i < points.length; i++) {
+        points[i][axis_index] = value;
+    }
 
     return points_2_plane(...points);
 }
@@ -391,11 +390,11 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     // Apply quaternion and sub translation vec to planar the face
     const flattened_points = new Array(points.length);
     const translation = new THREE.Vector3(...points[0]).applyQuaternion(quaternion);
-    _.forEach(points, (point, i) => {
-        flattened_points[i] = new THREE.Vector3(...point)
+    for (let i = 0; i < points.length; i++) {
+        flattened_points[i] = new THREE.Vector3(...points[i])
             .applyQuaternion(quaternion).sub(translation)
             .toArray();
-    });
+    }
 
     return flattened_points;
 }
@@ -456,9 +455,9 @@ function clone_and_color_mesh(other_mesh, color) {
 
 function color_mesh(mesh, color) {
     if (mesh instanceof THREE.Group) {
-        _.forEach(mesh.children, child => {
-            child.material.color.set(color.hex);
-        });
+        for (let i = 0; i < mesh.children.length; i++) {
+            mesh.children[i].material.color.set(color.hex);
+        }
     } else if (mesh instanceof THREE.Mesh) {
         mesh.material.color.set(color.hex);
     }
@@ -472,9 +471,9 @@ function name_mesh(mesh, label) {
     }
 
     if (mesh instanceof THREE.Group) {
-        _.forEach(mesh.children, child => {
-            child.name = label;
-        });
+        for (let i = 0; i < mesh.children.length; i++) {
+            mesh.children[i].name = label;
+        }
     }
     return mesh;
 }
@@ -601,11 +600,12 @@ function average(points) {
     // compute average positions of 3D points
     const num_points = points.length;
     let [x_sum, y_sum, z_sum] = [0, 0, 0];
-    _.forEach(points, (point) => {
+    for (let i = 0; i < points.length; i++) {
+        const point = points[i];
         x_sum += point[0];
         y_sum += point[1];
         z_sum += point[2];
-    });
+    }
     return [x_sum / num_points, y_sum / num_points, z_sum / num_points];
 }
 
@@ -828,13 +828,7 @@ class Base3DGeometry extends LabeledObject {
     }
 
     get mid_points() {
-        if (this._mid_points === null) {
-            this._mid_points = new Array(this.num_points);
-            _.forEach(this.points, (cur_point, i) => {
-                const next_point = this.points[(i + 1) % this.num_points];
-                this._mid_points[i] = midpoint(cur_point, next_point);
-            });
-        }
+        if (this._mid_points === null) this.compute_boundaries();
         return this._mid_points;
     }
 
@@ -1035,7 +1029,8 @@ class Base3DGeometry extends LabeledObject {
         this._mid_points = new Array(this.num_points);
         this._centroid = [0, 0, 0];
 
-        _.forEach(this.points, (cur_point, i) => {
+        for (let i = 0; i < this.num_points; i++) {
+            const cur_point = this.points[i];
             const next_point = this.points[(i + 1) % this.num_points];
             const [x, y, z] = cur_point;
 
@@ -1052,7 +1047,7 @@ class Base3DGeometry extends LabeledObject {
             if (z > this._z_max) this._z_max = z;
 
             this._mid_points[i] = midpoint(cur_point, next_point);
-        });
+        }
 
         // Compute width and height from 2D boundaries
         this._width = Math.abs(this._x_max - this._x_min);      // X Axis
@@ -1149,7 +1144,8 @@ class Polygon3D extends Base3DGeometry {
         this._edge_distances = new Array(this.num_points);
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
-        _.forEach(this.points, (cur_point, i) => {
+        for (let i = 0; i < this.num_points; i++) {
+            const cur_point = this.points[i];
             const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
             const next_point = this.points[(i + 1) % this.num_points];
 
@@ -1157,13 +1153,13 @@ class Polygon3D extends Base3DGeometry {
             this._angles[i] = angle(prev_point, cur_point, next_point);
 
             // Compute edges distances, mid points and perimeter
-            const d = dist(cur_point, next_point)
+            const d = dist(cur_point, next_point);
             this._edge_distances[i] = d;
             this._perimeter += d;
 
             // Compute area of the triangle
             this._area += triangle_area_from_points(cur_point, next_point, this.centroid);
-        });
+        }
     }
 
     compute_meshes() {
@@ -1176,7 +1172,8 @@ class Polygon3D extends Base3DGeometry {
         const edge_points = new Array(this.num_points * 2);
 
         let face_index = 0;
-        _.forEach(this.points, (cur_point, i) => {
+        for (let i = 0; i < this.num_points; i++) {
+            const cur_point = this.points[i];
             const next_point = this.points[(i + 1) % this.num_points];
 
             // Compute line segments points
@@ -1191,7 +1188,7 @@ class Polygon3D extends Base3DGeometry {
                 triangle_points[face_index + 2] = new THREE.Vector3(...this.centroid);
                 face_index += 3;
             }
-        });
+        };
 
         // Compute geometry for THREE JS display
         const geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
@@ -1291,7 +1288,9 @@ class TrapezoidalPrism extends Base3DGeometry {
 
     clone_and_rotate_around_y_axis(angle) {
         const cloned_obj = super.clone_and_rotate_around_y_axis();
-        cloned_obj.polygons = _.forEach(cloned_obj.polygons, face => face.clone_and_rotate_around_y_axis(angle));
+        for (let i = 0; i < cloned_obj.polygons.length; i++) {
+            cloned_obj.polygons[i] = cloned_obj.polygons[i].clone_and_rotate_around_y_axis(angle);
+        }
         return cloned_obj;
     }
 
@@ -1301,12 +1300,13 @@ class TrapezoidalPrism extends Base3DGeometry {
         this._angles = [];               // Array of angles in radians
         this._edge_distances = [];       // Edges distances
 
-        _.forEach(this.polygons, item => {
+        for (let i = 0; i < this.polygons.length; i++) {
+            const item = this.polygons[i];
             this._angles.push(...item.angles);
             this._edge_distances.push(...item.edge_distances);
             this._area += item.area; // recompute area
             this._perimeter += item.perimeter; // recompute area
-        });
+        }
     }
 
     compute_meshes() {
@@ -1315,10 +1315,11 @@ class TrapezoidalPrism extends Base3DGeometry {
         this._mesh.name = this._label;
         this._edges = new THREE.Group();
 
-        _.forEach(this.polygons, item => {
+        for (let i = 0; i < this.polygons.length; i++) {
+            const item = this.polygons[i];
             this._mesh.add(item.mesh);
             this._edges.add(item.edges);
-        });
+        }
     }
 
     get_face(side = "top") {
