@@ -1,5 +1,13 @@
 # TODO-LIST
 
+* [x] HR devient un boutton de switch avec M pour éviter de perturber les gens
+
+* [ ] Btn 3D pour swapes les Axes pour la visu, pratique le wizzdome
+  Faire un simple switch 
+
+* [ ] supprimer les rotations par rotation_angles et créer des pièces uniques
+à la création du framework faces, appliquer la division framework  types
+
 * [ ] Utiliser le clic droit Three js pour modifier des faces
   https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_cubes.html
   
@@ -90,16 +98,11 @@
 
 * [ ] Rajouter un paramètre d'aire qui switche la hauteur
 
-* [ ] HR devient un boutton de switch avec M pour éviter de perturber les gens
 
 * [ ] L'aide switche avec le click bouton si plusieurs params
 
 * [ ] Ajouter une page wikipedia avec des vidéos pour l'apprentissage de la construction zome
 
 * [ ] Et une page community pour les gens qui n'auraient pas facebook
-
-* [ ] Rajouter une option pour surelever le zome. avec des murs
-
-* [ ] Wizzdome HR => WR width ratio::: plus compliqué mais faisable
 
 * [ ] Attention aux exports, verifier que les axes ou vanishing lines ne soient pas exportés
