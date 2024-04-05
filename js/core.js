@@ -293,9 +293,9 @@ function angle(p1, p2, p3) {
     return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
 }
 
-function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
-    const sin_theta = Math.sin(theta);
-    const cos_theta = Math.cos(theta);
+function rotate_point_around_z_axis(vec, angle, origin = [0, 0, 0]) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
     // Rotate an 2D vector around z axis with an origin
     let delta = sub(vec, origin);
@@ -306,19 +306,30 @@ function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
     ];
 }
 
-
-function rotate_point_around_y_axis(vec, theta, origin = [0, 0, 0]) {
-    const sin_theta = Math.sin(theta);
-    const cos_theta = Math.cos(theta);
+function rotate_point_around_y_axis(vec, angle) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
     // Rotate an 2D vector around z axis with an origin
-    let delta = sub(vec, origin);
     return [
-        delta[0] * cos_theta + delta[2] * sin_theta + origin[0],
+        vec[0] * cos_theta + vec[2] * sin_theta,
         vec[1],
-        -delta[0] * sin_theta + delta[2] * cos_theta + origin[2],
+        -vec[0] * sin_theta + vec[2] * cos_theta,
     ];
 }
+
+function rotate_points_around_y_axis(points, angle) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
+
+    // Rotate an 2D vector around z axis with an origin
+    return _.map(points, p => [
+        p[0] * cos_theta + p[2] * sin_theta,
+        p[1],
+        -p[0] * sin_theta + p[2] * cos_theta,
+    ]);
+}
+
 
 function dihedral_angle(a, b, c) {
     // Compute the dihedral angle from 3 angles
@@ -690,6 +701,7 @@ function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
 
 function humanize_angle(a, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display angle in degrees
+
     return !isNaN(a) ? a.toFixed(num_digits) + "°" : "";
 }
 
@@ -703,35 +715,6 @@ function unique_arr(arr) {
     // Set retains list order
     const s = new Set(arr);
     return [...s];
-}
-
-
-function get_boundaries(points) {
-    // Compute Boundaries
-    let x_max = Number.MIN_VALUE,
-        y_max = Number.MIN_VALUE,
-        z_max = Number.MIN_VALUE,
-        x_min = Number.MAX_VALUE,
-        y_min = Number.MAX_VALUE,
-        z_min = Number.MAX_VALUE;
-
-    for (let i = 0; i < points.length; i++) {
-        const [x, y, z] = points[i];
-
-        // Save Boundaries
-        if (x < x_min) x_min = x;
-        if (x > x_max) x_max = x;
-        if (y < y_min) y_min = y;
-        if (y > y_max) y_max = y;
-        if (z < z_min) z_min = z;
-        if (z > z_max) z_max = z;
-    }
-
-    // Compute width and height from 2D boundaries
-    const width = Math.abs(x_max - x_min);      // X Axis
-    const height = Math.abs(y_max - y_min);     // Y Axis
-    const depth = Math.abs(z_max - z_min);      // Z AXis
-    return [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth];
 }
 
 
@@ -806,35 +789,9 @@ class Base3DGeometry extends LabeledObject {
         this._points_2D = null;
         this._flattened_points = null;
 
-        // THREE JS objects
-        this._mesh = null;
-        this._edges = null;
-        this._label_mesh = null;
-        this._bounding_box = null;
-
-        // Geometry Params to compute hash
-        this._area = null;
-        this._perimeter = null;
-        this._angles = null;
-        this._edge_distances = null;
-        this._mid_points = null;
-        this._centroid = null;
-
-        this._slope = null;
-
-        this._hash = null;
-
-        // Boundaries
-        this._x_min = null;
-        this._x_max = null;
-        this._y_min = null;
-        this._y_max = null;
-        this._z_min = null;
-        this._z_max = null;
-        this._width = null;
-        this._height = null;
-        this._depth = null;
-
+        this.reset_3D_objects();
+        this.reset_geometry_params();
+        this.reset_boundaries();
     }
 
     get points_2D() {
@@ -866,14 +823,18 @@ class Base3DGeometry extends LabeledObject {
     }
 
     get centroid() {
-        if (this._centroid === null) {
-            this._centroid = get_centroid(this.points);
-        }
+        if (this._centroid === null) this.compute_boundaries();
         return this._centroid;
     }
 
     get mid_points() {
-        if (this._mid_points === null) this.compute_geometry_parameters();
+        if (this._mid_points === null) {
+            this._mid_points = new Array(this.num_points);
+            _.forEach(this.points, (cur_point, i) => {
+                const next_point = this.points[(i + 1) % this.num_points];
+                this._mid_points[i] = midpoint(cur_point, next_point);
+            });
+        }
         return this._mid_points;
     }
 
@@ -955,7 +916,7 @@ class Base3DGeometry extends LabeledObject {
     }
 
     get depth() {
-        // Z Axis 
+        // Z Axis
         if (this._depth === null) this.compute_boundaries();
         return this._depth;
     }
@@ -1024,18 +985,80 @@ class Base3DGeometry extends LabeledObject {
         return this._label_mesh;
     }
 
+    reset_3D_objects() {
+        this._mesh = null;
+        this._edges = null;
+        this._label_mesh = null;
+        this._bounding_box = null;
+    }
+
+    reset_geometry_params() {
+        // Geometry Params to compute hash
+        this._area = null;
+        this._perimeter = null;
+        this._angles = null;
+        this._edge_distances = null;
+        this._slope = null;
+        this._hash = null;
+    }
+
+    reset_boundaries() {
+        this._x_min = null;
+        this._x_max = null;
+        this._y_min = null;
+        this._y_max = null;
+        this._z_min = null;
+        this._z_max = null;
+        this._width = null;
+        this._height = null;
+        this._depth = null;
+        this._mid_points = null;
+        this._centroid = null;
+    }
+
+    clone_and_rotate_around_y_axis(angle) {
+        const cloned_obj = _.clone(this);
+        cloned_obj.reset_3D_objects();
+        cloned_obj.reset_boundaries();
+        cloned_obj.points = rotate_points_around_y_axis(cloned_obj.points, angle);
+        return cloned_obj;
+    }
+
     compute_boundaries() {
         // Compute boundaries
-        const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = get_boundaries(this.points);
-        this._x_min = x_min;
-        this._x_max = x_max
-        this._y_min = y_min;
-        this._y_max = y_max;
-        this._z_min = z_min;
-        this._z_max = z_max;
-        this._width = width;     // X Axis
-        this._height = height;   // Y Axis
-        this._depth = depth;     // Z Axis
+        this._x_max = Number.MIN_VALUE;
+        this._y_max = Number.MIN_VALUE;
+        this._z_max = Number.MIN_VALUE;
+        this._x_min = Number.MAX_VALUE;
+        this._y_min = Number.MAX_VALUE;
+        this._z_min = Number.MAX_VALUE;
+        this._mid_points = new Array(this.num_points);
+        this._centroid = [0, 0, 0];
+
+        _.forEach(this.points, (cur_point, i) => {
+            const next_point = this.points[(i + 1) % this.num_points];
+            const [x, y, z] = cur_point;
+
+            this._centroid[0] += x;
+            this._centroid[1] += y;
+            this._centroid[2] += z;
+
+            // Save Boundaries
+            if (x < this._x_min) this._x_min = x;
+            if (x > this._x_max) this._x_max = x;
+            if (y < this._y_min) this._y_min = y;
+            if (y > this._y_max) this._y_max = y;
+            if (z < this._z_min) this._z_min = z;
+            if (z > this._z_max) this._z_max = z;
+
+            this._mid_points[i] = midpoint(cur_point, next_point);
+        });
+
+        // Compute width and height from 2D boundaries
+        this._width = Math.abs(this._x_max - this._x_min);      // X Axis
+        this._height = Math.abs(this._y_max - this._y_min);     // Y Axis
+        this._depth = Math.abs(this._z_max - this._z_min);      // Z AXis
+        this._centroid = mul(this._centroid, 1 / this.num_points);
     }
 
     // Computing interfaces
@@ -1124,7 +1147,6 @@ class Polygon3D extends Base3DGeometry {
         this._perimeter = 0;
         this._angles = new Array(this.num_points);               // In radians
         this._edge_distances = new Array(this.num_points);
-        this._mid_points = new Array(this.num_points);
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
         _.forEach(this.points, (cur_point, i) => {
@@ -1137,7 +1159,6 @@ class Polygon3D extends Base3DGeometry {
             // Compute edges distances, mid points and perimeter
             const d = dist(cur_point, next_point)
             this._edge_distances[i] = d;
-            this._mid_points[i] = midpoint(cur_point, next_point);
             this._perimeter += d;
 
             // Compute area of the triangle
@@ -1268,6 +1289,12 @@ class TrapezoidalPrism extends Base3DGeometry {
         return this._flattened_points;
     }
 
+    clone_and_rotate_around_y_axis(angle) {
+        const cloned_obj = super.clone_and_rotate_around_y_axis();
+        cloned_obj.polygons = _.forEach(cloned_obj.polygons, face => face.clone_and_rotate_around_y_axis(angle));
+        return cloned_obj;
+    }
+
     compute_geometry_parameters() {
         this._area = 0;
         this._perimeter = 0;
@@ -1374,6 +1401,41 @@ class TrapezoidalPrism extends Base3DGeometry {
             : this.filter_points_by_side(side, flattened_points);
 
         return new Polygon3D(filtered_points, this.label, this.color);
+    }
+}
+
+
+class Angle {
+    // Simple object to avoid multiple calculations of sinus, cosinus, and degree values
+    constructor(theta) {
+        this.rad = theta;
+        this.deg = rad2deg(theta);
+        this.cos = Math.cos(theta);
+        this.sin = Math.sin(theta);
+        this.tan = Math.tan(theta);
+    }
+
+    static from_3_points(p1, p2, p3) {
+        // Compute the angle of 3 points in radians
+        const a = dist(p2, p3);
+        const b = dist(p1, p2);
+        const c = dist(p1, p3);
+        const theta = Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
+        return new Angle(theta);
+    }
+
+    static from_2_planes(plane1, plane2) {
+        const dot = dot_product(plane1, plane2);
+        const theta = Math.acos(dot / (len(plane1) * len(plane2)));
+        return new Angle(theta);
+    }
+
+    toString() {
+        return `${this.deg}°`;
+    };
+
+    reverse() {
+        return new Angle(-this.rad);
     }
 }
 

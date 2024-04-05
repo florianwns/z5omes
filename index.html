@@ -942,15 +942,16 @@
                                     <div class="ps-2 absolute-top-right-48" style="top:48px;">
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                                  data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'SVG')"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'SVG')"
                                                   @click="download_svg()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">SVG</span>
                                             </span>
-                                                <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                                      data-bs-toggle="tooltip"
-                                                      :title="i18n('tooltip_export_2_format', 'PDF')"
-                                                      @click="download_pdf()">
+                                            <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'PDF')"
+                                                  @click="download_pdf()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">PDF</span>
                                             </span>
@@ -1949,7 +1950,7 @@
                         _.forEach(mandala_3D, (face) => {
                             mandala_faces.push(
                                 new Polygon3D(
-                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
+                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i].rad, O)),
                                     face.label,
                                     (this.paint_similar_pieces)
                                         ? face.color
@@ -2340,14 +2341,14 @@
                             for (let j = 0; j < ZOME.num; j++) {
                                 if (j < this.num_spiral_rotations) {
                                     const mesh = clone_and_color_mesh(item.mesh, item.color);
-                                    mesh.rotateY(ZOME.rotation_angles[j]);
+                                    mesh.rotateY(ZOME.rotation_angles[j].rad);
                                     mesh.userData.item_index = i;
                                     mesh.userData.rotation_index = j;
                                     meshes.obj.add(mesh);
                                 }
 
                                 const edges = item.edges.clone();
-                                edges.rotateY(ZOME.rotation_angles[j]);
+                                edges.rotateY(ZOME.rotation_angles[j].rad);
                                 meshes.edges.add(edges);
 
                                 // Add label once
@@ -2918,13 +2919,11 @@
                     const INCR_RAD = TAU / N;
                     const rotation_angles = new Array(N);
                     for (let i = 0; i < N; i++) {
-                        theta = i * INCR_RAD;
-                        rotation_angles[i] = theta;
-
+                        rotation_angles[i] = new Angle(i * INCR_RAD);
                         A = [
-                            first_crown_radius * Math.sin(theta),
+                            first_crown_radius * rotation_angles[i].sin,
                             Math.max(0, ZOME_HEIGHT - first_crown_height),
-                            first_crown_radius * Math.cos(theta)
+                            first_crown_radius * rotation_angles[i].cos
                         ];
                         this.add_vertex(vertices, A);
                     }
@@ -2942,8 +2941,8 @@
                             k = (i + 1) % N
 
                             iA = (iCrown === 0) ? 0 : fipc + k;      // Index of A point          A
-                            iB = ficc + i;                      // Index of B point        B ◇ C
-                            iC = ficc + k;                      // Index of C point          D
+                            iB = ficc + i;                           // Index of B point        B ◇ C
+                            iC = ficc + k;                           // Index of C point          D
 
                             A = vertices[iA];
                             B = vertices[iB];
@@ -2982,7 +2981,7 @@
                                 iF = this.add_vertex(vertices, F);
 
                                 // Add Truncated Kite to faces
-                                if (i == 0) {
+                                if (i === 0) {
                                     face = new Polygon3D([A, B, E, F, C], face_label)
                                     zome_faces_3D.push(face);
                                 }
@@ -3338,9 +3337,9 @@
 
                     // Rotate picked floor points
                     let outer_floor_points = [], inner_floor_points = [];
-                    _.forEach(rotation_angles, theta => {
-                        inner_floor_points.push(...picked_inner_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
-                        outer_floor_points.push(...picked_outer_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
+                    _.forEach(rotation_angles, angle => {
+                        inner_floor_points.push(...picked_inner_floor_points.map(p => rotate_point_around_y_axis(p, angle)));
+                        outer_floor_points.push(...picked_outer_floor_points.map(p => rotate_point_around_y_axis(p, angle)));
                     });
 
                     // Remove duplicates and create floors ⬢
@@ -3392,7 +3391,7 @@
                         _.forEach(obj_3D_to_label[i], item => {
                             item.color = hash_to_color[item.hash];
                             if (!rotated_colors.hasOwnProperty(item.color.hex)) {
-                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a, item.slope));
+                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.slope));
                             }
                         });
                     });
@@ -3419,14 +3418,14 @@
                             // Move to Origin and rotate to match with previous piece
                             let rotated_points = flattened_face.points.map(p => add(p, O));
                             if (i > 0) {
-                                theta = angle(A, O, rotated_points[1]);
-                                rotated_A = rotate_point_around_z_axis(rotated_points[1], theta, O);
+                                let angle = Angle.from_3_points(A, O, rotated_points[1]);
+                                rotated_A = rotate_point_around_z_axis(rotated_points[1], angle, O);
 
-                                // Rotate the other way if rotatedA is not too close to A
+                                // Rotate the other way if rotated A is not too close to A
                                 if (to_decimal(dist(rotated_A, A)) !== 0) {
-                                    theta = -theta;
+                                    angle = angle.reverse();
                                 }
-                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, theta, O));
+                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, angle, O));
                             }
                             O = rotated_points[rotated_points.length - 1];
                             A = rotated_points[rotated_points.length - 2];

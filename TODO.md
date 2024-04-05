@@ -2,6 +2,9 @@
 
 * [x] HR devient un boutton de switch avec M pour éviter de perturber les gens
 
+* [ ] les rotations sont couteuse, appliquaient les rotations 
+  avec cos et sin theta déjà précalculé;
+
 * [ ] Btn 3D pour swapes les Axes pour la visu, pratique le wizzdome
   Faire un simple switch 
 
