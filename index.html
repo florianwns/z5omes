@@ -131,20 +131,51 @@
                            x-model.lazy.number="params.num">
                 </div>
 
-                <!-- Num of rhombus from the top -->
-                <div x-show="params.help_is_displayed">
-                    <b>M</b> :
-                    <span x-text="i18n('help_m_param')"></span>
+                <!-- Num of rhombuses vertically (from the top) -->
+                <div x-show="!params.use_hr_mode">
+                    <div x-show="params.help_is_displayed">
+                        <b>M</b> :
+                        <span x-text="i18n('help_m_param')"></span>
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <button class="btn btn-primary text-start" type="button"
+                                data-bs-toggle="tooltip" :title="i18n('help_m_param')"
+                                @click="params.use_hr_mode = !params.use_hr_mode">
+                            M
+                        </button>
+                        </span>
+                        <input class="form-control form-range" min="1" :max="params.num - 1" step="1" type="range"
+                               x-model.number="num_rhombuses_vertically" x-ref="num_rhombuses_vertically_slider">
+                        <input class="form-control" step="1" type="number"
+                               x-model.lazy.number="num_rhombuses_vertically">
+                    </div>
                 </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text"
-                          data-bs-toggle="tooltip" :title="i18n('help_m_param')">
-                        M
-                    </span>
-                    <input class="form-control form-range" min="1" :max="params.num - 1" step="1" type="range"
-                           x-model.number="num_rhombus" x-ref="num_rhombus_slider">
-                    <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="num_rhombus">
+
+                <!-- Height Ratio of Zome -->
+                <div x-show="params.use_hr_mode">
+                    <div x-show="params.help_is_displayed">
+                        <b>HR</b> :
+                        <span x-text="i18n('help_hr_param')"></span>
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <button class="btn btn-primary text-start" type="button"
+                                data-bs-toggle="tooltip" :title="i18n('help_hr_param')"
+                                @click="params.use_hr_mode = !params.use_hr_mode">
+                            HR
+                        </button>
+                        <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
+                               :min="to_decimal(2 / params.num)"
+                               x-model.number="params.height_ratio" x-ref="height_ratio_slider">
+                        <input class="form-control" step="0.01" type="number"
+                               x-model.lazy.number="params.height_ratio">
+                        <button class="btn btn-primary"
+                                data-bs-toggle="tooltip" :title="i18n('help_magnetize_param')"
+                                type="button"
+                                :class="(params.height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
+                                @click="magnetize">
+                            <i class="fa-solid fa-magnet fa-fw"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!--  Shape angle of Zome -->
@@ -169,30 +200,6 @@
                         <option value="rad">rad</option>
                         <option hidden value="tan">tan</option>
                     </select>
-                </div>
-
-                <!-- Height Ratio of Zome -->
-                <div x-show="params.help_is_displayed">
-                    <b>HR</b> :
-                    <span x-text="i18n('help_hr_param')"></span>
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text"
-                      data-bs-toggle="tooltip" :title="i18n('help_hr_param')">
-                      HR
-                </span>
-                    <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                           :min="to_decimal(2 / params.num)"
-                           x-model.number="params.height_ratio" x-ref="height_ratio_slider">
-                    <input class="form-control" step="0.01" type="number"
-                           x-model.lazy.number="params.height_ratio">
-                    <button class="btn btn-primary"
-                            data-bs-toggle="tooltip" :title="i18n('help_magnetize_param')"
-                            type="button"
-                            :class="(params.height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
-                            @click="magnetize">
-                        <i class="fa-solid fa-magnet fa-fw"></i>
-                    </button>
                 </div>
 
                 <!-- Kite Ratio of Zome -->
@@ -2518,6 +2525,7 @@
 
                     // Commons parameters
                     help_is_displayed: false,
+                    use_hr_mode: false,
                 },
                 params_backup: null,
 
@@ -2681,10 +2689,10 @@
                     }
                 },
 
-                get num_rhombus() {
+                get num_rhombuses_vertically() {
                     return to_decimal(this.params.num * this.params.height_ratio - 1, 0);
                 },
-                set num_rhombus(value) {
+                set num_rhombuses_vertically(value) {
                     this.params.kite_ratio = 1;
                     this.params.height_ratio = to_decimal((value + 1) / this.params.num);
                 },
@@ -2835,7 +2843,7 @@
                     }
                 },
                 randomize_shape() {
-                    _.forEach(["num", "theta_deg", "num_rhombus"], (key) => {
+                    _.forEach(["num", "theta_deg", "num_rhombuses_vertically"], (key) => {
                             const slider = this.get_slider(key);
                             this.params[key] = _.random(slider.min, slider.max)
                         },
