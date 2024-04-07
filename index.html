@@ -3056,7 +3056,6 @@
                         // Declare multiple arrays
                         const ccw_vecs = new Array(num_points),
                             cw_vecs = new Array(num_points),
-                            mid_pts = new Array(num_points),
                             thickness_offset_pts = new Array(num_points),
                             width_offset_pts = new Array(num_points),
                             horizontal_proj_vecs = new Array(num_points),
@@ -3075,7 +3074,7 @@
                             const cur_2_sec_vec = sub(sec_pt, cur_pt);
                             const cur_2_prev_vec = sub(prev_pt, cur_pt);
 
-                            const mid_pt = midpoint(cur_pt, sec_pt);
+                            const mid_pt = face.mid_points[i];
                             const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
 
                             switch (ASSEMBLY_METHOD) {
@@ -3136,7 +3135,6 @@
                             horizontal_proj_vecs[i] = horizontal_proj_vec;
 
                             // Push points
-                            mid_pts[i] = mid_pt;
                             thickness_offset_pts[i] = thickness_offset_pt;
                             width_offset_pts[i] = width_offset_pt;
 
@@ -3175,7 +3173,7 @@
                             width_offset_pt = width_offset_pts[i];
 
                             // Get vectors
-                            const mid_pt = mid_pts[i];
+                            const mid_pt = face.mid_points[i];
                             const cur_2_sec_vec = ccw_vecs[i];
                             const sec_2_cur_vec = cw_vecs[next_index];
 
@@ -3337,21 +3335,17 @@
                     ];
 
                     // Group items by hash
-                    const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
-                        // Compute hash to compare objects
-                        return _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                    const arr_of_obj_hash_collections = new Array(obj_3D_to_label.length);
+                    for (let i = 0; i < obj_3D_to_label.length; i++) {
+                        const obj_3D = obj_3D_to_label[i];
+                        arr_of_obj_hash_collections[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                            // Update label of each member
+                            for (let j = 1; j < group.length; j++) {
+                                group[j].label = group[0].label;
+                            }
                             return new ItemHashCollection(group[0], hash, group.length * N);
                         });
-                    });
-
-                    // Label all items with the first item label of the group
-                    _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
-                        // Apply labels to items
-                        _.forEach(obj_3D_to_label[i], item => {
-                            const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash === item.hash);
-                            item.label = obj_hash_collections[collection_item_index].item.label;
-                        });
-                    });
+                    }
 
                     // 🎨 Add colors to items and build rotated colors
                     let rotated_colors = {};
@@ -3420,7 +3414,6 @@
                         });
                         return mandala_3D;
                     });
-
 
                     // Build timber_profiles_3D
                     const timber_profiles_3D = [];

@@ -472,21 +472,6 @@ function color_mesh(mesh, color) {
     return mesh;
 }
 
-
-function name_mesh(mesh, label) {
-    if (mesh instanceof THREE.Mesh) {
-        mesh.name = label;
-    }
-
-    if (mesh instanceof THREE.Group) {
-        for (let i = 0; i < mesh.children.length; i++) {
-            mesh.children[i].name = label;
-        }
-    }
-    return mesh;
-}
-
-
 function create_text_mesh(
     text,
     font_size = 26,
@@ -971,7 +956,6 @@ class Base3DGeometry extends LabeledObject {
 
     set color(color) {
         this._color = color;
-        this._mesh = color_mesh(this.mesh, color);
     }
 
     get label() {
@@ -980,7 +964,6 @@ class Base3DGeometry extends LabeledObject {
 
     set label(label) {
         this._label = label;
-        this._mesh = name_mesh(this.mesh, label);
     }
 
     get flattened_points() {
@@ -1207,11 +1190,12 @@ class Polygon3D extends Base3DGeometry {
             }
 
             // Compute area of the triangle
-            this._area += triangle_area_from_distances(
-                this._edge_distances[i],
-                this._centroid_distances[this.next_indexes[i]],
-                this._centroid_distances[i],
-            );
+            // this._area += triangle_area_from_distances(
+            //     this._edge_distances[i],
+            //     this._centroid_distances[this.next_indexes[i]],
+            //     this._centroid_distances[i],
+            // );
+            this._area = 0;
         }
     }
 
