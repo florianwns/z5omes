@@ -829,12 +829,31 @@ class Base3DGeometry extends LabeledObject {
     }
 
     get centroid() {
-        if (this._centroid === null) this.compute_centroid();
+        if (this._centroid === null) {
+            // Compute centroid
+            this._centroid = [0, 0, 0];
+            for (let i = 0; i < this.num_points; i++) {
+                const [x, y, z] = this.points[i];
+                this._centroid[0] += x;
+                this._centroid[1] += y;
+                this._centroid[2] += z;
+            }
+            this._centroid = mul(this._centroid, 1 / this.num_points);
+        }
         return this._centroid;
     }
 
     get mid_points() {
-        if (this._mid_points === null) this.compute_mid_points();
+        if (this._mid_points === null) {
+            // Compute mid points
+            this._mid_points = new Array(this.num_points);
+            for (let i = 0; i < this.num_points; i++) {
+                this._mid_points[i] = midpoint(
+                    this.points[i],
+                    this.points[this.next_indexes[i]]
+                );
+            }
+        }
         return this._mid_points;
     }
 
@@ -1055,29 +1074,6 @@ class Base3DGeometry extends LabeledObject {
         return cloned_obj;
     }
 
-    compute_centroid() {
-        // Compute centroid
-        this._centroid = [0, 0, 0];
-        for (let i = 0; i < this.num_points; i++) {
-            const [x, y, z] = this.points[i];
-            this._centroid[0] += x;
-            this._centroid[1] += y;
-            this._centroid[2] += z;
-        }
-        this._centroid = mul(this._centroid, 1 / this.num_points);
-    }
-
-    compute_mid_points() {
-        // Compute centroid
-        this._mid_points = new Array(this.num_points);
-        for (let i = 0; i < this.num_points; i++) {
-            this._mid_points[i] = dist(
-                this.points[i],
-                this.points[this.next_indexes[i]]
-            );
-        }
-    }
-
     compute_boundaries() {
         // Compute boundaries
         this._x_max = Number.MIN_VALUE;
@@ -1106,12 +1102,9 @@ class Base3DGeometry extends LabeledObject {
         this._depth = Math.abs(this._z_max - this._z_min);      // Z AXis
     }
 
-    // Computing interfaces
-    compute_geometry_parameters() {
-    }
-
     compute_meshes() {
     }
+
 
     compute_bounding_box() {
         if (this._mesh === null) this.compute_meshes();
@@ -1209,7 +1202,7 @@ class Polygon3D extends Base3DGeometry {
             this._perimeter += d;
 
             this._centroid_distances[i] = dist(cur_point, this.centroid);
-            if(!this._centroid_distances[this.next_indexes[i]]){
+            if (!this._centroid_distances[this.next_indexes[i]]) {
                 this._centroid_distances[this.next_indexes[i]] = dist(next_point, this.centroid);
             }
 
