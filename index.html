@@ -919,7 +919,6 @@
                                                     </svg>
                                                 </label>
 
-
                                                 <input type="radio" class="btn-check" name="btn-rhombus-type"
                                                        value=0 id="btn-rhombus-type-0" autocomplete="off" checked>
                                                 <label class="btn btn-outline-danger d-flex align-items-center justify-content-center"
@@ -3062,18 +3061,13 @@
                             width_offset_pts = new Array(num_points),
                             horizontal_proj_vecs = new Array(num_points),
                             wall_planes = new Array(num_points),
-                            shifted_wall_planes = new Array(num_points),
-                            prev_indexes = new Array(num_points),
-                            next_indexes = new Array(num_points);
+                            shifted_wall_planes = new Array(num_points);
 
                         // Calculate vectors and projected points to avoid multiple calculations
                         for (let i = 0; i < face.num_points; i++) {
                             const cur_pt = face.points[i];
-                            const next_index = (i + 1) % num_points;
-                            const prev_index = (num_points + i - 1) % num_points;
-
-                            prev_indexes[i] = prev_index;
-                            next_indexes[i] = next_index;
+                            const next_index = face.next_indexes[i];
+                            const prev_index = face.prev_indexes[i];
 
                             const prev_pt = face.points[prev_index];
                             const sec_pt = face.points[next_index];
@@ -3174,8 +3168,8 @@
                         // Build the prism and outer/inner faces
                         for (let i = 0; i < face.num_points; i++) {
                             const cur_pt = face.points[i];
-                            const prev_index = prev_indexes[i];    // previous index
-                            const next_index = next_indexes[i];        // next index
+                            const next_index = face.next_indexes[i];
+                            const prev_index = face.prev_indexes[i];
 
                             thickness_offset_pt = thickness_offset_pts[i];
                             width_offset_pt = width_offset_pts[i];

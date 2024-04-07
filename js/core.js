@@ -51,7 +51,7 @@ function small_hash(params) {
     const param_values = _.map(params, value => {
         switch (typeof value) {
             case 'number':
-                return to_decimal(value);    // Trunc number
+                return to_decimal_str(value);           // Trunc number
             case 'boolean':
                 return +value;                          // Convert to int
             default:
@@ -245,6 +245,14 @@ function triangle_area_from_points(A, B, C) {
     const ab = dist(A, B);
     const bc = dist(B, C);
     const ca = dist(C, A);
+    const s = (ab + bc + ca) / 2;
+    const area = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
+    return area;
+}
+
+
+function triangle_area_from_distances(ab, bc, ca) {
+    // Heron formula to compute area of the triangle
     const s = (ab + bc + ca) / 2;
     const area = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
     return area;
@@ -550,9 +558,18 @@ function to_decimal(val, num_digits = FLOAT_PRECISION) {
     return parseFloat(val.toFixed(num_digits));
 }
 
+function to_decimal_str(val, num_digits = FLOAT_PRECISION) {
+    return val.toFixed(num_digits);
+}
+
 function to_int(x) {
     return to_decimal(x, 0);
 }
+
+function to_int_str(x) {
+    return to_decimal_str(x, 0);
+}
+
 
 function to_mm(v, unit) {
     // Helper to convert value to mm
@@ -617,12 +634,12 @@ function get_centroid(points) {
 function compute_hash_from_geometry(area, angles, edge_distances) {
     // Sort parameters to compare symmetric geometry
     const hash_parameters = {
-        area: to_decimal(area, FLOAT_2_STR_PRECISION),
+        area: to_decimal_str(area, FLOAT_2_STR_PRECISION),
         angles: _.sortBy(
-            _.map(angles, (a) => to_decimal(a, FLOAT_2_STR_PRECISION))
+            _.map(angles, (a) => to_decimal_str(a, FLOAT_2_STR_PRECISION))
         ),
         edge_distances: _.sortBy(
-            _.map(edge_distances, (d) => to_decimal(d, FLOAT_2_STR_PRECISION))
+            _.map(edge_distances, (d) => to_decimal_str(d, FLOAT_2_STR_PRECISION))
         ),
     };
 
@@ -671,13 +688,13 @@ function humanize_distance(d, num_digits = FLOAT_2_STR_PRECISION) {
     }
     // Distance are in millimeters
     if (d >= 1e7) {
-        return to_decimal(d / 1e6, num_digits) + "km";
+        return to_decimal_str(d / 1e6, num_digits) + "km";
     } else if (d >= 1e4) {
-        return to_decimal(d / 1e3, num_digits) + "m";
+        return to_decimal_str(d / 1e3, num_digits) + "m";
     } else if (d >= 1e2) {
-        return to_decimal(d / 10, num_digits) + "cm";
+        return to_decimal_str(d / 10, num_digits) + "cm";
     } else {
-        return to_decimal(d, num_digits) + "mm";
+        return to_decimal_str(d, num_digits) + "mm";
     }
 }
 
@@ -689,13 +706,13 @@ function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
 
     // Area are in mm²
     if (d >= 1e12) {
-        return to_decimal(d / 1e12, num_digits) + "km²";
+        return to_decimal_str(d / 1e12, num_digits) + "km²";
     } else if (d >= 1e6) {
-        return to_decimal(d / 1e6, num_digits) + "m²";
+        return to_decimal_str(d / 1e6, num_digits) + "m²";
     } else if (d >= 100) {
-        return to_decimal(d / 100, num_digits) + "cm²";
+        return to_decimal_str(d / 100, num_digits) + "cm²";
     } else {
-        return to_decimal(d, num_digits) + "mm²";
+        return to_decimal_str(d, num_digits) + "mm²";
     }
 }
 
@@ -783,15 +800,24 @@ class Base3DGeometry extends LabeledObject {
 
         // Store points
         this.num_points = points.length;
+
+        // Compute previous and next indexes to optimize performances
+        this.prev_indexes = new Array(this.num_points);
+        this.next_indexes = new Array(this.num_points);
+        for (let i = 0; i < this.num_points; i++) {
+            this.prev_indexes[i] = (this.num_points + i - 1) % this.num_points;
+            this.next_indexes[i] = (i + 1) % this.num_points;
+        }
         this.points = points;
 
         // Declare private variables use by getters for dynamic computing
-        this._points_2D = null;
         this._flattened_points = null;
 
-        this.reset_3D_objects();
-        this.reset_geometry_params();
+        this.reset_other_points();
         this.reset_boundaries();
+        this.reset_3D_objects();
+
+        this.reset_geometry_params();
     }
 
     get points_2D() {
@@ -800,6 +826,16 @@ class Base3DGeometry extends LabeledObject {
             this._points_2D = convert_3D_to_2D(this.points);
         }
         return this._points_2D;
+    }
+
+    get centroid() {
+        if (this._centroid === null) this.compute_centroid();
+        return this._centroid;
+    }
+
+    get mid_points() {
+        if (this._mid_points === null) this.compute_mid_points();
+        return this._mid_points;
     }
 
     get area() {
@@ -822,14 +858,9 @@ class Base3DGeometry extends LabeledObject {
         return this._edge_distances;
     }
 
-    get centroid() {
-        if (this._centroid === null) this.compute_boundaries();
-        return this._centroid;
-    }
-
-    get mid_points() {
-        if (this._mid_points === null) this.compute_boundaries();
-        return this._mid_points;
+    get centroid_distances() {
+        if (this._centroid_distances === null) this.compute_geometry_parameters();
+        return this._centroid_distances;
     }
 
     get hash() {
@@ -986,12 +1017,19 @@ class Base3DGeometry extends LabeledObject {
         this._bounding_box = null;
     }
 
+    reset_other_points() {
+        this._points_2D = null;
+        this._mid_points = null;
+        this._centroid = null;
+    }
+
     reset_geometry_params() {
         // Geometry Params to compute hash
         this._area = null;
         this._perimeter = null;
         this._angles = null;
         this._edge_distances = null;
+        this._centroid_distances = null;
         this._slope = null;
         this._hash = null;
     }
@@ -1006,16 +1044,38 @@ class Base3DGeometry extends LabeledObject {
         this._width = null;
         this._height = null;
         this._depth = null;
-        this._mid_points = null;
-        this._centroid = null;
     }
 
     clone_and_rotate_around_y_axis(angle) {
         const cloned_obj = _.clone(this);
-        cloned_obj.reset_3D_objects();
+        cloned_obj.reset_other_points();
         cloned_obj.reset_boundaries();
+        cloned_obj.reset_3D_objects();
         cloned_obj.points = rotate_points_around_y_axis(cloned_obj.points, angle);
         return cloned_obj;
+    }
+
+    compute_centroid() {
+        // Compute centroid
+        this._centroid = [0, 0, 0];
+        for (let i = 0; i < this.num_points; i++) {
+            const [x, y, z] = this.points[i];
+            this._centroid[0] += x;
+            this._centroid[1] += y;
+            this._centroid[2] += z;
+        }
+        this._centroid = mul(this._centroid, 1 / this.num_points);
+    }
+
+    compute_mid_points() {
+        // Compute centroid
+        this._mid_points = new Array(this.num_points);
+        for (let i = 0; i < this.num_points; i++) {
+            this._mid_points[i] = dist(
+                this.points[i],
+                this.points[this.next_indexes[i]]
+            );
+        }
     }
 
     compute_boundaries() {
@@ -1026,17 +1086,10 @@ class Base3DGeometry extends LabeledObject {
         this._x_min = Number.MAX_VALUE;
         this._y_min = Number.MAX_VALUE;
         this._z_min = Number.MAX_VALUE;
-        this._mid_points = new Array(this.num_points);
-        this._centroid = [0, 0, 0];
 
         for (let i = 0; i < this.num_points; i++) {
             const cur_point = this.points[i];
-            const next_point = this.points[(i + 1) % this.num_points];
             const [x, y, z] = cur_point;
-
-            this._centroid[0] += x;
-            this._centroid[1] += y;
-            this._centroid[2] += z;
 
             // Save Boundaries
             if (x < this._x_min) this._x_min = x;
@@ -1045,15 +1098,12 @@ class Base3DGeometry extends LabeledObject {
             if (y > this._y_max) this._y_max = y;
             if (z < this._z_min) this._z_min = z;
             if (z > this._z_max) this._z_max = z;
-
-            this._mid_points[i] = midpoint(cur_point, next_point);
         }
 
         // Compute width and height from 2D boundaries
         this._width = Math.abs(this._x_max - this._x_min);      // X Axis
         this._height = Math.abs(this._y_max - this._y_min);     // Y Axis
         this._depth = Math.abs(this._z_max - this._z_min);      // Z AXis
-        this._centroid = mul(this._centroid, 1 / this.num_points);
     }
 
     // Computing interfaces
@@ -1118,7 +1168,7 @@ class Polygon3D extends Base3DGeometry {
         if (DEBUG) {
             this.is_coplanar = this.num_points == 3 || check_is_coplanar(this.points);
             if (!this.is_coplanar) {
-                console.error(`The polygon ${this.label || ''} is not coplanar`, this.points);
+                console.warn(`The polygon ${this.label || ''} is not coplanar`, this.points);
             }
         }
 
@@ -1142,23 +1192,33 @@ class Polygon3D extends Base3DGeometry {
         this._perimeter = 0;
         this._angles = new Array(this.num_points);               // In radians
         this._edge_distances = new Array(this.num_points);
+        this._centroid_distances = new Array(this.num_points);
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
         for (let i = 0; i < this.num_points; i++) {
             const cur_point = this.points[i];
-            const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
-            const next_point = this.points[(i + 1) % this.num_points];
+            const prev_point = this.points[this.prev_indexes[i]];
+            const next_point = this.points[this.next_indexes[i]];
 
             // Compute angle in radians
             this._angles[i] = angle(prev_point, cur_point, next_point);
 
-            // Compute edges distances, mid points and perimeter
+            // Compute edges distances and perimeter
             const d = dist(cur_point, next_point);
             this._edge_distances[i] = d;
             this._perimeter += d;
 
+            this._centroid_distances[i] = dist(cur_point, this.centroid);
+            if(!this._centroid_distances[this.next_indexes[i]]){
+                this._centroid_distances[this.next_indexes[i]] = dist(next_point, this.centroid);
+            }
+
             // Compute area of the triangle
-            this._area += triangle_area_from_points(cur_point, next_point, this.centroid);
+            this._area += triangle_area_from_distances(
+                this._edge_distances[i],
+                this._centroid_distances[this.next_indexes[i]],
+                this._centroid_distances[i],
+            );
         }
     }
 
@@ -1174,7 +1234,7 @@ class Polygon3D extends Base3DGeometry {
         let face_index = 0;
         for (let i = 0; i < this.num_points; i++) {
             const cur_point = this.points[i];
-            const next_point = this.points[(i + 1) % this.num_points];
+            const next_point = this.points[this.next_indexes[i]];
 
             // Compute line segments points
             edge_points[i * 2] = new THREE.Vector3(...cur_point);
@@ -1188,7 +1248,7 @@ class Polygon3D extends Base3DGeometry {
                 triangle_points[face_index + 2] = new THREE.Vector3(...this.centroid);
                 face_index += 3;
             }
-        };
+        }
 
         // Compute geometry for THREE JS display
         const geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
