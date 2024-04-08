@@ -20,6 +20,9 @@ const FLOAT_2_STR_PRECISION = 2;
 
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
+const THREE_EDGES_MATERIAL = new THREE.LineBasicMaterial({color: 0x333333})
+const THREE_VANISHING_LINES_MATERIAL = new THREE.LineBasicMaterial({color: 0x00ffff});
+
 check_is_mobile = function () {
     let check = false;
     (function (a) {
@@ -1103,11 +1106,31 @@ class Polygon3D extends Base3DGeometry {
             }
         }
 
-        // Because we consider this polygon coplanar, we make a plane with 3 points
-        this.plane = points_2_plane(this.points[0], this.points[1], this.points[this.num_points - 1]);
+        this._plane = null;
+        this._radius = null;
+        this._diameter = null;
+    }
 
-        // TODO : remove from the class and compute distance outside
-        this.diameter = 2 * dist_on_xz_axes(this.points[1]);
+    get plane() {
+        if (this._plane === null) {
+            // Because we consider this polygon coplanar, we make a plane with 3 points
+            this._plane = points_2_plane(this.points[0], this.points[1], this.points[this.num_points - 1]);
+        }
+        return this._plane;
+    }
+
+    get diameter() {
+        if (this._diameter === null) {
+            this._diameter = 2 * this.radius;
+        }
+        return this._diameter;
+    }
+
+    get radius() {
+        if (this._radius === null) {
+            this._radius = dist_on_xz_axes(this.points[1]);
+        }
+        return this._radius;
     }
 
     get flattened_points() {
@@ -1179,7 +1202,7 @@ class Polygon3D extends Base3DGeometry {
 
         this._edges = new THREE.LineSegments(
             new THREE.BufferGeometry().setFromPoints(edge_points),
-            new THREE.LineBasicMaterial({color: 0x333333}),
+            THREE_EDGES_MATERIAL,
         );
     }
 
@@ -1434,7 +1457,6 @@ class Zome {
             assembly_method = null,
             rotation_angles = null,
             rotated_colors = null,
-            vertices = null,
 
             skeleton_3D = null,
             skeleton_3D_hash_collections = null,
@@ -1459,7 +1481,6 @@ class Zome {
         this.assembly_method = assembly_method || 0;
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
-        this.vertices = vertices || [];
 
         this.skeleton_3D = skeleton_3D || [];
         this.skeleton_3D_hash_collections = skeleton_3D_hash_collections || [];

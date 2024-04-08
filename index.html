@@ -2031,7 +2031,6 @@
                 "obj": null,
                 "labels": null,
                 "edges": null,
-                "vertices": null,
             }
 
             return {
@@ -2046,11 +2045,9 @@
                 draw_labels: true,
                 draw_axes: false,
                 draw_vanishing_lines: false,
-                draw_vertices: false,
 
                 add_floor: true,
                 show_vanishing_lines_switch: false,
-                show_vertices_switch: false,
 
                 is_fullscreen: false,
                 __auto_size: null,
@@ -2063,7 +2060,7 @@
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["obj", "labels", "axes", "vanishing_lines", "vertices"].forEach(
+                    ["obj", "labels", "axes", "vanishing_lines"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
@@ -2269,12 +2266,6 @@
                     }
                     meshes.labels = new THREE.Group();
                     meshes.labels.name = "labels";
-
-                    if (meshes.vertices instanceof THREE.Group) {
-                        scene.remove(meshes.vertices)
-                    }
-                    meshes.vertices = new THREE.Group();
-                    meshes.vertices.name = "vertices";
                 },
 
 
@@ -2289,33 +2280,21 @@
                         && ZOME.vanishing_lines.length > 0
                         && this.type_of_3D_objects === "skeleton_3D";
 
-                    this.show_vertices_switch = DEBUG
-                        && ZOME.vertices
-                        && ZOME.vertices.length > 0;
-
                     // Display vanishing lines
                     {
-                        const material = new THREE.LineBasicMaterial({color: 0x00ffff});
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
-                            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                            meshes.vanishing_lines.add(new THREE.Line(geometry, material))
+                            meshes.vanishing_lines.add(
+                                new THREE.Line(
+                                    new THREE.BufferGeometry().setFromPoints(points),
+                                    THREE_VANISHING_LINES_MATERIAL
+                                )
+                            )
                         });
                     }
 
                     scene.add(meshes.vanishing_lines);
                     this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
-
-                    // Display zome vertices
-                    {
-                        const geometry = new THREE.BufferGeometry();
-                        geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
-
-                        const material = new THREE.PointsMaterial({color: 0x888888, size: 20});
-                        meshes.vertices.add(new THREE.Points(geometry, material))
-                    }
-                    scene.add(meshes.vertices);
-                    this.set_visibility("vertices", this.show_vertices_switch && this.draw_vertices);
 
                     // Build 3D faces and edges
                     const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -2349,7 +2328,6 @@
                                 }
                             }
                         }
-                        ;
 
                         // Add floor
                         let floor_3D = null;
@@ -3440,7 +3418,6 @@
 
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
-                        vertices: vertices,
 
                         skeleton_3D: skeleton_3D,
                         skeleton_3D_hash_collections: skeleton_3D_hash_collections,
