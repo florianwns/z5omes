@@ -885,6 +885,16 @@ class Base3DGeometry extends LabeledObject {
         return this._slope;
     }
 
+    get vectors() {
+        if (this._vectors === null) {
+            this._vectors = new Array(this.num_points);
+            for (let i = 0; i < this.num_points; i++) {
+                this._vectors[i] = new THREE.Vector3(...this.points[i]);
+            }
+        }
+        return this._vectors;
+    }
+
     get mesh() {
         if (this._mesh === null) this.compute_meshes();
         return this._mesh;
@@ -1020,6 +1030,7 @@ class Base3DGeometry extends LabeledObject {
     }
 
     reset_other_points() {
+        this._vectors = null;
         this._points_2D = null;
         this._mid_points = null;
         this._centroid = null;
@@ -1200,38 +1211,28 @@ class Polygon3D extends Base3DGeometry {
     }
 
     compute_meshes() {
-        // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
-        const num_triangles = this.num_points;
-        const num_triangle_points = 3 * num_triangles;
+        const centroid_vector = new THREE.Vector3(...this.centroid);
 
-        // Arrays of THREE.Vector3 for 3D visualization
-        const triangle_points = new Array(num_triangle_points);
-        const edge_points = new Array(this.num_points * 2);
-
-        let face_index = 0;
-        for (let i = 0; i < this.num_points; i++) {
-            const cur_point = this.points[i];
-            const next_point = this.points[this.next_indexes[i]];
-
+        // Compute triangle and edges points of a polygon for 3D visualization
+        const triangle_points = new Array(3 * this.num_points);
+        const edge_points = new Array(2 * this.num_points);
+        for (let i = 0, j = 0, k = 0; i < this.num_points; i++, j += 2, k += 3) {
             // Compute line segments points
-            edge_points[i * 2] = new THREE.Vector3(...cur_point);
-            edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
+            edge_points[j] = this.vectors[i];
+            edge_points[j + 1] = this.vectors[this.next_indexes[i]];
 
-            // Compute face triangles
-            if (face_index < num_triangle_points) {
-                // Faces points for 3D display
-                triangle_points[face_index] = new THREE.Vector3(...cur_point);
-                triangle_points[face_index + 1] = new THREE.Vector3(...next_point);
-                triangle_points[face_index + 2] = new THREE.Vector3(...this.centroid);
-                face_index += 3;
-            }
+            // Triangle points for 3D display
+            triangle_points[k] = this.vectors[i];
+            triangle_points[k + 1] = this.vectors[this.next_indexes[i]];
+            triangle_points[k + 2] = centroid_vector;
         }
 
         // Compute geometry for THREE JS display
-        const geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
-        const material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex});
-        this._mesh = new THREE.Mesh(geometry, material);
-        this._mesh.name = this._label;
+        this._mesh = new THREE.Mesh(
+            new THREE.BufferGeometry().setFromPoints(triangle_points),
+            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex})
+        );
+        this._mesh.name = this._label;          // Add a mesh name (use for 3D export)
 
         this._edges = new THREE.LineSegments(
             new THREE.BufferGeometry().setFromPoints(edge_points),
