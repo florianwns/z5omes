@@ -1499,9 +1499,9 @@
                                 }
 
                                 const real_pt = fitted_points[j];
-                                const rounded_x = to_int(real_pt[0]);
+                                const rounded_x = Math.round(real_pt[0]);
                                 if (!rounded_xs.includes(rounded_x)) {
-                                    const is_boundary = rounded_x === 0 || rounded_x === to_int(side.width);
+                                    const is_boundary = rounded_x === 0 || rounded_x === Math.round(side.width);
 
                                     const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                                     measurement_text.setAttribute('x', p[0]);

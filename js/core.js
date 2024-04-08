@@ -38,8 +38,7 @@ const IS_MOBILE = check_is_mobile();
 function decode_url_params(key) {
     const url = new URLSearchParams(window.location.search);
     const query_param = url.get(key)
-    const decoded_params = (query_param) ? JSON.parse(atob(query_param)) : {};
-    return decoded_params;
+    return (query_param) ? JSON.parse(atob(query_param)) : {};
 }
 
 
@@ -65,8 +64,7 @@ function small_hash(params) {
         .replaceAll('', '')
 
     param_str = _.reduce(`${param_str}`, (res, c) => res += c.charCodeAt(0), 0)
-    const hash = btoa(param_str).replaceAll('=', '');
-    return hash;
+    return btoa(param_str).replaceAll('=', '');
 }
 
 function sync_params_from_url(params, key = "q") {
@@ -118,7 +116,7 @@ function mul(p1, k) {
 function are_points_equal(p1, p2) {
     const [x1, y1, z1] = round_values(p1);
     const [x2, y2, z2] = round_values(p2);
-    return x1 == x2 && y1 == y2 && z1 == z2;
+    return x1 === x2 && y1 === y2 && z1 === z2;
 }
 
 
@@ -138,7 +136,6 @@ function swap_axes(points, axes_order = "XYZ") {
             }
             reordered_point[axis_index] = p[i];
         }
-        ;
         return reordered_point;
     });
 }
@@ -207,13 +204,11 @@ function point_between(p1, p2, d) {
 function point_to(p1, vec, d) {
     // Find point at distance d from origin p1 to direction vec
     const normalized_vec = norm(vec);
-    const point = add(p1, mul(normalized_vec, d))
-    return point;
+    return add(p1, mul(normalized_vec, d));
 }
 
 function angle_between_vectors(vec1, vec2) {
-    const theta = Math.acos(dot_product(vec1, vec2) / (len(vec1) * len(vec2)));
-    return theta;
+    return Math.acos(dot_product(vec1, vec2) / (len(vec1) * len(vec2)));
 }
 
 function points_2_plane(p1, p2, p3) {
@@ -227,7 +222,7 @@ function points_2_plane(p1, p2, p3) {
 }
 
 function plane_on_axis(axis = "X", value = 0) {
-    const axis_index = _.findIndex(["X", "Y", "Z"], item => item == axis.toUpperCase());
+    const axis_index = _.findIndex(["X", "Y", "Z"], item => item === axis.toUpperCase());
     const points = [
         [1, 0, 0],
         [0, 1, 0],
@@ -240,22 +235,10 @@ function plane_on_axis(axis = "X", value = 0) {
     return points_2_plane(...points);
 }
 
-function triangle_area_from_points(A, B, C) {
-    // Heron formula to compute area of the triangle
-    const ab = dist(A, B);
-    const bc = dist(B, C);
-    const ca = dist(C, A);
-    const s = (ab + bc + ca) / 2;
-    const area = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
-    return area;
-}
-
-
 function triangle_area_from_distances(ab, bc, ca) {
     // Heron formula to compute area of the triangle
     const s = (ab + bc + ca) / 2;
-    const area = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
-    return area;
+    return Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
 }
 
 function plan_intersection(p1, vec1, plane1) {
@@ -266,8 +249,7 @@ function plan_intersection(p1, vec1, plane1) {
         (a * vec1[0] + b * vec1[1] + c * vec1[2]);
 
     // Calculation of intersection point coordinates
-    const intersection_point = add(p1, mul(vec1, t))
-    return intersection_point;
+    return add(p1, mul(vec1, t));
 }
 
 function intersect(p, v, q, u) {
@@ -288,8 +270,7 @@ function intersect(p, v, q, u) {
     const t = dot_product(b, a) / dot;
 
     // find intersection point by substituting t to the line1 eq
-    const point = add(p, mul(v, t))
-    return point;
+    return add(p, mul(v, t));
 }
 
 function angle(p1, p2, p3) {
@@ -348,8 +329,7 @@ function dihedral_angle(a, b, c) {
 
 function angle_between_planes(plane1, plane2) {
     const dot = dot_product(plane1, plane2);
-    const theta = Math.acos(dot / (len(plane1) * len(plane2)));
-    return theta;
+    return Math.acos(dot / (len(plane1) * len(plane2)));
 }
 
 function rotation_matrix_from_points(a, b, c) {
@@ -443,17 +423,6 @@ function circle_path(cx, cy, r) {
 // --------------------------
 
 
-function color_rgb_buffer(num, r, g, b) {
-    const num_rgb = 3 * num;
-    const colors = new Float32Array(num_rgb);
-    for (let i = 0; i < num_rgb; i += 3) {
-        colors[i] = r;
-        colors[i + 1] = g;
-        colors[i + 2] = b;
-    }
-    return new THREE.Float32BufferAttribute(colors, 3);
-}
-
 function clone_and_color_mesh(other_mesh, color) {
     if (other_mesh instanceof THREE.Group || other_mesh instanceof THREE.Mesh) {
         const mesh = other_mesh.clone();
@@ -509,14 +478,14 @@ function create_text_mesh(
     ctx.strokeText(text, text_x_position, text_y_position);
 
     const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        map: texture,
-        transparent: true
-    });
-    const geometry = new THREE.PlaneGeometry(canvas.width, canvas.height);
-    const mesh = new THREE.Mesh(geometry, material);
-    return mesh;
+    return new THREE.Mesh(
+        new THREE.PlaneGeometry(canvas.width, canvas.height),
+        new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            map: texture,
+            transparent: true
+        }),
+    );
 }
 
 // ---------------------------------
@@ -546,15 +515,6 @@ function to_decimal(val, num_digits = FLOAT_PRECISION) {
 function to_decimal_str(val, num_digits = FLOAT_PRECISION) {
     return val.toFixed(num_digits);
 }
-
-function to_int(x) {
-    return to_decimal(x, 0);
-}
-
-function to_int_str(x) {
-    return to_decimal_str(x, 0);
-}
-
 
 function to_mm(v, unit) {
     // Helper to convert value to mm
@@ -595,7 +555,7 @@ function hsl2rgb(h, s, l) {
 
 function rgb2hex(rgb) {
     // Convert RGB color to HSL color
-    return `#${_.reduce(rgb, (res, v) => res + parseInt(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
+    return `#${_.reduce(rgb || [1, 1, 1], (res, v) => res + Math.round(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
 }
 
 function average(points) {
@@ -629,8 +589,7 @@ function compute_hash_from_geometry(area, angles, edge_distances) {
     };
 
     // Sort parameters to compare geometries
-    const hash = encode_params(hash_parameters);
-    return hash;
+    return encode_params(hash_parameters);
 }
 
 // -----------------------------
@@ -764,27 +723,23 @@ class Color {
 
 const COLOR_BASE = Color.from_angles(0, 0);
 
-class LabeledObject {
-    constructor(label, color) {
-        // With color and label it's more fun
-        this._label = label || "";
-        this._color = color || COLOR_BASE;
-    }
-}
-
-class Base3DGeometry extends LabeledObject {
-    constructor(points, label, color) {
-        // Call parent constructor
-        super(label, color);
-
+class Base3DGeometry {
+    constructor(points, label, color, visible) {
+        // Check point number
         const num_points = points.length;
         if (num_points < 3) {
             console.error("Not enough points to make a simple geometry");
             return;
         }
 
-        // Store points
+        // With color, label and visible flag it's more fun
+        this.label = label || "";
+        this.color = color || COLOR_BASE;
+        this.visible = visible || true;
+
+        // Get num points and store points
         this.num_points = points.length;
+        this.points = points;
 
         // Compute previous and next indexes to optimize performances
         this.prev_indexes = new Array(this.num_points);
@@ -793,7 +748,6 @@ class Base3DGeometry extends LabeledObject {
             this.prev_indexes[i] = (this.num_points + i - 1) % this.num_points;
             this.next_indexes[i] = (i + 1) % this.num_points;
         }
-        this.points = points;
 
         // Declare private variables use by getters for dynamic computing
         this._flattened_points = null;
@@ -960,22 +914,6 @@ class Base3DGeometry extends LabeledObject {
         return this._depth;
     }
 
-    get color() {
-        return this._color;
-    }
-
-    set color(color) {
-        this._color = color;
-    }
-
-    get label() {
-        return this._label;
-    }
-
-    set label(label) {
-        this._label = label;
-    }
-
     get flattened_points() {
         return this._flattened_points;
     }
@@ -1099,6 +1037,8 @@ class Base3DGeometry extends LabeledObject {
     compute_meshes() {
     }
 
+    compute_geometry_parameters() {
+    }
 
     compute_bounding_box() {
         if (this._mesh === null) this.compute_meshes();
@@ -1111,6 +1051,10 @@ class Base3DGeometry extends LabeledObject {
             this._bounding_box = new THREE.Box3();
             this._bounding_box.copy(this._mesh.geometry.boundingBox);
         }
+    }
+
+    flatten_face(side = "top") {
+        return new Polygon3D(this.flattened_points, this.label, this.color);
     }
 
     fit_points() {
@@ -1153,7 +1097,7 @@ class Polygon3D extends Base3DGeometry {
 
         // Check coplanarity
         if (DEBUG) {
-            this.is_coplanar = this.num_points == 3 || check_is_coplanar(this.points);
+            this.is_coplanar = this.num_points === 3 || check_is_coplanar(this.points);
             if (!this.is_coplanar) {
                 console.warn(`The polygon ${this.label || ''} is not coplanar`, this.points);
             }
@@ -1201,12 +1145,11 @@ class Polygon3D extends Base3DGeometry {
             }
 
             // Compute area of the triangle
-            // this._area += triangle_area_from_distances(
-            //     this._edge_distances[i],
-            //     this._centroid_distances[this.next_indexes[i]],
-            //     this._centroid_distances[i],
-            // );
-            this._area = 0;
+            this._area += triangle_area_from_distances(
+                this._edge_distances[i],
+                this._centroid_distances[this.next_indexes[i]],
+                this._centroid_distances[i],
+            );
         }
     }
 
@@ -1232,16 +1175,12 @@ class Polygon3D extends Base3DGeometry {
             new THREE.BufferGeometry().setFromPoints(triangle_points),
             new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex})
         );
-        this._mesh.name = this._label;          // Add a mesh name (use for 3D export)
+        this._mesh.name = this.label;          // Add a mesh name (use for 3D export)
 
         this._edges = new THREE.LineSegments(
             new THREE.BufferGeometry().setFromPoints(edge_points),
             new THREE.LineBasicMaterial({color: 0x333333}),
         );
-    }
-
-    flatten_face(side = "top") {
-        return new Polygon3D(this.flattened_points, this.label, this.color);
     }
 
     divide(horizontally = true) {
@@ -1258,35 +1197,35 @@ class Polygon3D extends Base3DGeometry {
             case 4:
                 if (horizontally) {
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[3]], this._label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[3]], this.label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3]], this._label, this.color)
+                        new Polygon3D([this.points[1], this.points[2], this.points[3]], this.label, this.color)
                     );
                 } else {
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2]], this._label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[2]], this.label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([this.points[2], this.points[3], this.points[0]], this._label, this.color)
+                        new Polygon3D([this.points[2], this.points[3], this.points[0]], this.label, this.color)
                     );
                 }
                 break;
             case 5:
                 if (horizontally) {
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[4]], this._label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[4]], this.label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]], this._label, this.color)
+                        new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]], this.label, this.color)
                     );
                 } else {
                     const mid_pt = midpoint(this.points[2], this.points[3]);
                     parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt], this._label, this.color)
+                        new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt], this.label, this.color)
                     );
                     parts.push(
-                        new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]], this._label, this.color)
+                        new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]], this.label, this.color)
                     );
                 }
                 break;
@@ -1351,7 +1290,7 @@ class TrapezoidalPrism extends Base3DGeometry {
     compute_meshes() {
         // Group of geometries
         this._mesh = new THREE.Group();
-        this._mesh.name = this._label;
+        this._mesh.name = this.label;
         this._edges = new THREE.Group();
 
         for (let i = 0; i < this.polygons.length; i++) {
@@ -1518,7 +1457,6 @@ class Zome {
     ) {
         this.num = num || 0;
         this.assembly_method = assembly_method || 0;
-
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
         this.vertices = vertices || [];
