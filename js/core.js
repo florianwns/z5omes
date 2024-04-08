@@ -1254,6 +1254,7 @@ class Polygon3D extends Base3DGeometry {
         switch (this.num_points) {
             case 3:
                 parts.push(new Polygon3D(this.points), this.label, this.color);
+                break;
             case 4:
                 if (horizontally) {
                     parts.push(
