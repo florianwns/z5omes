@@ -2,10 +2,7 @@
 
 * [ ] pour le flattened mandala avec le bindu zome, 
   pas de rotate sur le même iCrown
-  
-* [ ] précompute vectors for meshes to optimize code
-  
-* [x] HR devient un boutton de switch avec M pour éviter de perturber les gens
+ 
 
 * [ ] les rotations sont couteuse, appliquaient les rotations 
   avec cos et sin theta déjà précalculé;
