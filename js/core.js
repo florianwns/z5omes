@@ -28,6 +28,10 @@ const THREE_LABELS_MATERIAL = new THREE.MeshBasicMaterial({
     transparent: true
 });
 
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const FOOTING_CHAR = '~';
+const FLOOR_CHAR = '⬢';
+
 check_is_mobile = function () {
     let check = false;
     (function (a) {
@@ -685,7 +689,7 @@ class Color {
 const COLOR_BASE = Color.from_angles(0, 0);
 
 class Base3DGeometry {
-    constructor(points, label, color, visible) {
+    constructor(points, label, color, crown_index) {
         // Check point number
         const num_points = points.length;
         if (num_points < 3) {
@@ -693,14 +697,25 @@ class Base3DGeometry {
             return;
         }
 
-        // With color, label and visible flag it's more fun
-        this.label = label || "";
-        this.color = color || COLOR_BASE;
-        this.visible = visible || true;
+        // With color, label flag it's more fun
+        this._label = label || "";
+        this._color = color || COLOR_BASE;
 
-        // Get num points and store points
-        this.num_points = points.length;
+        // Add crown and spiral index to retrieve the object
+        this.crown_index = crown_index || 0;
+
+        // Store points
         this.points = points;
+        this.reset_geometry_params();
+    }
+
+    get points() {
+        return this._points;
+    }
+
+    set points(value) {
+        this._points = value;
+        this.num_points = value.length;
 
         // Compute previous and next indexes to optimize performances
         this.prev_indexes = new Array(this.num_points);
@@ -716,8 +731,22 @@ class Base3DGeometry {
         this.reset_other_points();
         this.reset_boundaries();
         this.reset_3D_objects();
+    }
 
-        this.reset_geometry_params();
+    get label() {
+        return this._label;
+    }
+
+    set label(value) {
+        this._label = value || "";
+    }
+
+    get color() {
+        return this._color;
+    }
+
+    set color(value) {
+        this._color = value || COLOR_BASE;
     }
 
     get points_2D() {
@@ -963,11 +992,21 @@ class Base3DGeometry {
         this._depth = null;
     }
 
-    clone_and_rotate_around_y_axis(angle) {
+    clone() {
         const cloned_obj = _.clone(this);
-        cloned_obj.reset_other_points();
-        cloned_obj.reset_boundaries();
-        cloned_obj.reset_3D_objects();
+        return cloned_obj;
+    }
+
+    clone_with_points(points) {
+        const cloned_obj = this.clone();
+        cloned_obj.reset_geometry_params();
+        cloned_obj.points = points;
+        return cloned_obj;
+    }
+
+    clone_and_rotate_around_y_axis(angle) {
+        const cloned_obj = this.clone();
+        // We keep geometry params to avoid multiple calculation
         cloned_obj.points = rotate_points_around_y_axis(cloned_obj.points, angle);
         return cloned_obj;
     }
@@ -1020,7 +1059,7 @@ class Base3DGeometry {
     }
 
     flatten_face(side = "top") {
-        return new Polygon3D(this.flattened_points, this.label, this.color);
+        return Polygon3D.copy(this, this.flattened_points);
     }
 
     fit_points() {
@@ -1047,6 +1086,7 @@ class Base3DGeometry {
             (p[1] - this.y_min - this.height / 2) * pixel_ratio + center,
         ]);
     }
+
 }
 
 
@@ -1057,9 +1097,9 @@ class Polygon3D extends Base3DGeometry {
     //
     // points are distributed counterclockwise
 
-    constructor(points, label, color) {
+    constructor(points, label, color, crown_index) {
         // Call parent constructor
-        super(points, label, color);
+        super(points, label, color, crown_index);
 
         // Check coplanarity
         if (DEBUG) {
@@ -1102,6 +1142,12 @@ class Polygon3D extends Base3DGeometry {
             this._flattened_points = flatten_3D_points(this.points, this.centroid, this.points[0], this.points[1], false);
         }
         return this._flattened_points;
+    }
+
+    static copy(obj, points) {
+        return new Polygon3D(
+            points || obj.points, obj.label, obj.color, obj.crown_index
+        );
     }
 
     compute_geometry_parameters() {
@@ -1179,41 +1225,25 @@ class Polygon3D extends Base3DGeometry {
         let parts = []
         switch (this.num_points) {
             case 3:
-                parts.push(new Polygon3D(this.points), this.label, this.color);
+                parts.push(Polygon3D.copy(this));
                 break;
             case 4:
                 if (horizontally) {
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[3]], this.label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3]], this.label, this.color)
-                    );
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[3]]));
+                    parts.push(Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3]]));
                 } else {
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2]], this.label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([this.points[2], this.points[3], this.points[0]], this.label, this.color)
-                    );
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2]]));
+                    parts.push(Polygon3D.copy(this, [this.points[2], this.points[3], this.points[0]]));
                 }
                 break;
             case 5:
                 if (horizontally) {
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[4]], this.label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]], this.label, this.color)
-                    );
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[4]]));
+                    parts.push(Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3], this.points[4]]));
                 } else {
                     const mid_pt = midpoint(this.points[2], this.points[3]);
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt], this.label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]], this.label, this.color)
-                    );
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2], mid_pt]));
+                    parts.push(Polygon3D.copy(this, [mid_pt, this.points[3], this.points[4], this.points[0]]));
                 }
                 break;
         }
@@ -1222,7 +1252,7 @@ class Polygon3D extends Base3DGeometry {
 }
 
 class TrapezoidalPrism extends Base3DGeometry {
-    constructor(points, label, color) {
+    constructor(points, label, color, crown_index) {
         const num_points = points.length;
         if (num_points !== 8) {
             console.error("TrapezoidalPrism must have 8 point");
@@ -1230,9 +1260,9 @@ class TrapezoidalPrism extends Base3DGeometry {
         }
 
         // Call parent constructor
-        super(points, label, color);
+        super(points, label, color, crown_index);
 
-        this.polygons = [
+        this.children = [
             this.get_face("top"),
             this.get_face("bottom"),
             this.get_face("left"),
@@ -1253,8 +1283,8 @@ class TrapezoidalPrism extends Base3DGeometry {
 
     clone_and_rotate_around_y_axis(angle) {
         const cloned_obj = super.clone_and_rotate_around_y_axis();
-        for (let i = 0; i < cloned_obj.polygons.length; i++) {
-            cloned_obj.polygons[i] = cloned_obj.polygons[i].clone_and_rotate_around_y_axis(angle);
+        for (let i = 0; i < cloned_obj.children.length; i++) {
+            cloned_obj.children[i] = cloned_obj.children[i].clone_and_rotate_around_y_axis(angle);
         }
         return cloned_obj;
     }
@@ -1265,8 +1295,8 @@ class TrapezoidalPrism extends Base3DGeometry {
         this._angles = [];               // Array of angles in radians
         this._edge_distances = [];       // Edges distances
 
-        for (let i = 0; i < this.polygons.length; i++) {
-            const item = this.polygons[i];
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
             this._angles.push(...item.angles);
             this._edge_distances.push(...item.edge_distances);
             this._area += item.area; // recompute area
@@ -1280,8 +1310,10 @@ class TrapezoidalPrism extends Base3DGeometry {
         this._mesh.name = this.label;
         this._edges = new THREE.Group();
 
-        for (let i = 0; i < this.polygons.length; i++) {
-            const item = this.polygons[i];
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
+            item.color = this.color;
+            item.label = this.label;
             this._mesh.add(item.mesh);
             this._edges.add(item.edges);
         }
@@ -1289,7 +1321,7 @@ class TrapezoidalPrism extends Base3DGeometry {
 
     get_face(side = "top") {
         // return a Polygon 3D of a specific side
-        return new Polygon3D(this.filter_points_by_side(side), this.label, this.color);
+        return Polygon3D.copy(this, this.filter_points_by_side(side));
     }
 
     filter_points_by_side(side, points) {
@@ -1330,7 +1362,11 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 
     flatten() {
-        return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
+        return new TrapezoidalPrism(
+            this.flattened_points,
+            this.label, this.color,
+            this.crown_index
+        );
     }
 
     flatten_face(side = "top", add_opposite_side = false, rotation_angle = null) {
@@ -1366,7 +1402,7 @@ class TrapezoidalPrism extends Base3DGeometry {
             ]
             : this.filter_points_by_side(side, flattened_points);
 
-        return new Polygon3D(filtered_points, this.label, this.color);
+        return Polygon3D.copy(this, filtered_points);
     }
 }
 

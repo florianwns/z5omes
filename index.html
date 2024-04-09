@@ -547,15 +547,15 @@
                                                 </button>
                                                 <div class="mt-1" x-show="draw_obj && clone_and_rotate_mode">
                                                     <button class="btn btn-sm btn-small-padding"
-                                                            @click="num_spiral_rotations = Math.max(num_spiral_rotations - 1, 1)"
-                                                            :class="(num_spiral_rotations <= 1) ? `btn-secondary` : `btn-primary`"
+                                                            @click="num_spirals = Math.max(num_spirals - 1, 1)"
+                                                            :class="(num_spirals <= 1) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('tooltip_decrease_spiral_rotations')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
                                                     <button class="btn btn-sm btn-small-padding"
-                                                            @click="num_spiral_rotations = Math.min(num_spiral_rotations + 1, params.num)"
-                                                            :class="(num_spiral_rotations >= params.num) ? `btn-secondary` : `btn-primary`"
+                                                            @click="num_spirals = Math.min(num_spirals + 1, params.num)"
+                                                            :class="(num_spirals >= params.num) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('tooltip_increase_spiral_rotations')">
                                                         <i class="fa fa-plus"></i>
@@ -1253,8 +1253,6 @@
         "svg_bottom_half_rhombus",
         "svg_left_half_rhombus",
     ];
-
-    const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
@@ -2036,7 +2034,7 @@
 
             return {
                 // 3D Rendering Parameters
-                num_spiral_rotations: 1,
+                num_spirals: 1,
                 last_zome_num: 1,
                 is_spinning: false,
                 speed: 0.001,
@@ -2044,7 +2042,7 @@
 
                 draw_obj: true,
                 draw_labels: true,
-                draw_axes: false,
+                draw_axes: true,
                 draw_vanishing_lines: false,
 
                 add_floor: true,
@@ -2067,10 +2065,10 @@
                         })
                     );
 
-                    this.num_spiral_rotations = this.params.num;
+                    this.num_spirals = this.params.num;
                     this.last_zome_num = this.params.num;
 
-                    ["num_spiral_rotations", "add_floor", "type_of_3D_objects"].forEach(
+                    ["num_spirals", "add_floor", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -2280,7 +2278,7 @@
                     this.clear();
 
                     if (this.last_zome_num !== ZOME.num) {
-                        this.num_spiral_rotations = this.last_zome_num = ZOME.num;
+                        this.num_spirals = this.last_zome_num = ZOME.num;
                     }
                     // Display switch buttons
                     this.show_vanishing_lines_switch = ZOME.vanishing_lines
@@ -2319,7 +2317,7 @@
                         for (let i = 0; i < items_3D.length; i++) {
                             const item = items_3D[i];
                             for (let j = 0; j < ZOME.num; j++) {
-                                if (j < this.num_spiral_rotations) {
+                                if (j < this.num_spirals) {
                                     const mesh = clone_and_color_mesh(item.mesh, item.color);
                                     mesh.rotateY(ZOME.rotation_angles[j].rad);
                                     mesh.userData.item_index = i;
@@ -2899,18 +2897,19 @@
                     // Loop over crowns (M = N - 1), while zome does not hit ground
                     let hit_ground = false;
                     const last_triangle_indexes = [];
-                    for (let iCrown = 0; iCrown < M && !hit_ground; iCrown++) {         // iR => Crown index
-                        ficc = iCrown * N + 1;                  // First Index on current crown
+                    let crown_index = 0;
+                    for (; crown_index < M && !hit_ground; crown_index++) {
+                        ficc = crown_index * N + 1;                  // First Index on current crown
                         fipc = ficc - N;                        // First index on previous crown
-                        face_label = ALPHABET[iCrown];          // Alphabet letter distribution
+                        face_label = ALPHABET[crown_index];          // Alphabet letter distribution
 
                         // On current crown, Loop over points from left to right
-                        for (let i = 0; i < N; i++) {
-                            k = (i + 1) % N
+                        for (let spiral_index = 0; spiral_index < N; spiral_index++) {
+                            k = (spiral_index + 1) % N
 
-                            iA = (iCrown === 0) ? 0 : fipc + k;      // Index of A point          A
-                            iB = ficc + i;                           // Index of B point        B ◇ C
-                            iC = ficc + k;                           // Index of C point          D
+                            iA = (crown_index === 0) ? 0 : fipc + k;            // Index of A point          A
+                            iB = ficc + spiral_index;                           // Index of B point        B ◇ C
+                            iC = ficc + k;                                      // Index of C point          D
 
                             A = vertices[iA];
                             B = vertices[iB];
@@ -2928,8 +2927,8 @@
                                 iD = this.add_vertex(vertices, D);
 
                                 // Add only the first piece
-                                if (i === 0) {
-                                    face = new Polygon3D([A, B, D, C], face_label);
+                                if(spiral_index === 0){
+                                    face = new Polygon3D([A, B, D, C], face_label, null, crown_index);
                                     zome_faces_3D.push(face);
                                 }
 
@@ -2948,12 +2947,11 @@
                                 iE = this.add_vertex(vertices, E);
                                 iF = this.add_vertex(vertices, F);
 
-                                // Add Truncated Kite to faces
-                                if (i === 0) {
-                                    face = new Polygon3D([A, B, E, F, C], face_label)
+                                // Add Truncated Kite
+                                if(spiral_index === 0) {
+                                    face = new Polygon3D([A, B, E, F, C], face_label, null, crown_index);
                                     zome_faces_3D.push(face);
                                 }
-
                                 // Add last triangles to close it after if needed
                                 last_triangle_indexes.push(iE, iF, iC);
                                 hit_ground = true;
@@ -2972,39 +2970,32 @@
                     // Close The Zome
                     const num_triangles = last_triangle_indexes.length;
                     if (num_triangles > 0) {
-                        iA = last_triangle_indexes[2 % num_triangles]
-                        iB = last_triangle_indexes[1 % num_triangles]
-                        iC = last_triangle_indexes[3 % num_triangles]
-
-                        A = vertices[iA];
-                        B = vertices[iB];
-                        C = vertices[iC];
+                        A = vertices[last_triangle_indexes[2 % num_triangles]];
+                        B = vertices[last_triangle_indexes[1 % num_triangles]];
+                        C = vertices[last_triangle_indexes[3 % num_triangles]];
 
                         // Deal with case where B and C are too close, so we don't add them
                         const far_enough = to_decimal(dist(B, C), 2) !== 0;
                         if (far_enough) {
                             // Add triangle to faces
-                            face_label = ALPHABET[zome_faces_3D.length];
-                            face = new Polygon3D([A, B, C], face_label);
+                            face = new Polygon3D([A, B, C], ALPHABET[crown_index], null, crown_index);
                             zome_faces_3D.push(face);
                         }
                     }
 
                     // Divide zome faces into two parts to add strengthening of timbers
-                    let framework_faces = [], framework_crowns = [];
+                    let framework_faces = [];
                     const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
                     const divide_horizontally = this.params.strengthening_of_timbers === 1;
 
-                    for (let iCrown = 0; iCrown < zome_faces_3D.length; iCrown++) {
-                        const face = zome_faces_3D[iCrown];
-                        if (!divide_faces_into_two_parts || iCrown === 0 || iCrown === zome_faces_3D.length - 1) {
+                    for (let crown_index = 0; crown_index < zome_faces_3D.length; crown_index++) {
+                        const face = zome_faces_3D[crown_index];
+                        if (!divide_faces_into_two_parts || crown_index === 0 || crown_index === zome_faces_3D.length - 1) {
                             framework_faces.push(face);
-                            framework_crowns.push(iCrown);
                         } else {
                             const face_parts = face.divide(divide_horizontally);
                             for (let j = 0; j < face_parts.length; j++) {
                                 framework_faces.push(face_parts[j]);
-                                framework_crowns.push(iCrown);
                             }
                         }
                     }
@@ -3027,7 +3018,7 @@
                         footing_params = [];
 
                     // Build Timbers using the assembly method
-                    let hypotenuse, adjacent_side, pivot_pt, last_iCrown, timber_label_index,
+                    let hypotenuse, adjacent_side, pivot_pt, last_crown_index, timber_label_index,
                         thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
 
                     // Loop over the faces of the framework to build timbers
@@ -3036,9 +3027,10 @@
                         const num_points = face.num_points;
 
                         // Get the crown index then reset the timber label index
-                        const iCrown = framework_crowns[iFace];
-                        if (iCrown !== last_iCrown) {
+                        const crown_index = face.crown_index;
+                        if (crown_index !== last_crown_index) {
                             timber_label_index = 0;
+                            last_crown_index = crown_index;
                         }
 
                         // Declare multiple arrays
@@ -3212,14 +3204,14 @@
                             }
 
                             // Build a TrapezoidalPrism with a label prefixed from the crown face label
-                            const crown_face = zome_faces_3D[iCrown]
+                            const crown_face = zome_faces_3D[crown_index]
                             timber_label_index += 1;
                             const timber_label = `${crown_face.label}${timber_label_index}`;
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label, face.color);
                             skeleton_3D.push(timber_prism);
 
                             // Until the exterior/interior face has been built
-                            if (outer_faces_3D[iCrown] === undefined) {
+                            if (outer_faces_3D[crown_index] === undefined) {
                                 // If at least one is undefined
                                 if (_.some(outer_face_points, p => p === undefined)) {
                                     const crown_face_point_index = _.findIndex(crown_face.points, p => _.isEqual(p, cur_pt));
@@ -3231,8 +3223,8 @@
 
                                 // If every points are defined
                                 if (_.every(outer_face_points, p => p !== undefined)) {
-                                    inner_faces_3D[iCrown] = new Polygon3D(inner_face_points, crown_face.label, crown_face.color);
-                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points, crown_face.label, crown_face.color);
+                                    inner_faces_3D[crown_index] = Polygon3D.copy(crown_face, inner_face_points);
+                                    outer_faces_3D[crown_index] = Polygon3D.copy(crown_face, outer_face_points);
 
                                     // Footing parameters computing
                                     // On the two last crown, check if points are far enough
@@ -3255,10 +3247,10 @@
                                     }
 
                                     // Create next array as long as possible
-                                    const next_iCrown = iCrown + 1;
-                                    if (next_iCrown < zome_faces_3D.length) {
-                                        inner_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
-                                        outer_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
+                                    const next_crown_index = crown_index + 1;
+                                    if (next_crown_index < zome_faces_3D.length) {
+                                        inner_face_points = new Array(zome_faces_3D[next_crown_index].num_points);
+                                        outer_face_points = new Array(zome_faces_3D[next_crown_index].num_points);
                                     }
                                 }
                             }
@@ -3297,7 +3289,6 @@
                         picked_outer_floor_points.push(A);
                         picked_outer_floor_points.push(C);
 
-
                         picked_inner_floor_points.push(E);
                         picked_inner_floor_points.push(G);
                     });
@@ -3312,8 +3303,8 @@
                     // Remove duplicates and create floors ⬢
                     outer_floor_points = _.uniqWith(outer_floor_points, are_points_equal);
                     inner_floor_points = _.uniqWith(inner_floor_points, are_points_equal);
-                    const outer_floor_3D = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, '⬢') : null;
-                    const inner_floor_3D = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, '⬢') : null;
+                    const outer_floor_3D = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, FLOOR_CHAR) : null;
+                    const inner_floor_3D = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, FLOOR_CHAR) : null;
 
                     const obj_3D_to_label = [
                         skeleton_3D,
@@ -3394,11 +3385,7 @@
                             A = rotated_points[rotated_points.length - 2];
 
                             // Swap y axis with z axis for 3D display
-                            mandala_3D[i] = new Polygon3D(
-                                swap_axes(rotated_points, "XZY"),
-                                face.label,
-                                face.color
-                            )
+                            mandala_3D[i] = Polygon3D.copy(face, swap_axes(rotated_points, "XZY"));
                         });
                         return mandala_3D;
                     });
@@ -3415,7 +3402,7 @@
                         });
 
                         // Add space between timbers
-                        z_origin += prism.depth + 50;
+                        z_origin += prism.depth * 2;
                         timber_profiles_3D.push(
                             new TrapezoidalPrism(translated_points, prism.label, prism.color)
                         );
