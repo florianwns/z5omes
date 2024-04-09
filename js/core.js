@@ -322,12 +322,17 @@ function rotate_points_around_y_axis(points, angle) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
-    // Rotate an 2D vector around z axis with an origin
-    return _.map(points, p => [
-        p[0] * cos_theta + p[2] * sin_theta,
-        p[1],
-        -p[0] * sin_theta + p[2] * cos_theta,
-    ]);
+    // Rotate an 2D vector around y axis with an origin
+    const rotated_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        const [x, y, z] = points[i];
+        rotated_points[i] = [
+            x * cos_theta + z * sin_theta,
+            y,
+            -x * sin_theta + z * cos_theta,
+        ];
+    }
+    return rotated_points;
 }
 
 
@@ -997,20 +1002,6 @@ class Base3DGeometry {
         return cloned_obj;
     }
 
-    clone_with_points(points) {
-        const cloned_obj = this.clone();
-        cloned_obj.reset_geometry_params();
-        cloned_obj.points = points;
-        return cloned_obj;
-    }
-
-    clone_and_rotate_around_y_axis(angle) {
-        const cloned_obj = this.clone();
-        // We keep geometry params to avoid multiple calculation
-        cloned_obj.points = rotate_points_around_y_axis(cloned_obj.points, angle);
-        return cloned_obj;
-    }
-
     compute_boundaries() {
         // Compute boundaries
         this._x_max = Number.MIN_VALUE;
@@ -1281,12 +1272,10 @@ class TrapezoidalPrism extends Base3DGeometry {
         return this._flattened_points;
     }
 
-    clone_and_rotate_around_y_axis(angle) {
-        const cloned_obj = super.clone_and_rotate_around_y_axis();
-        for (let i = 0; i < cloned_obj.children.length; i++) {
-            cloned_obj.children[i] = cloned_obj.children[i].clone_and_rotate_around_y_axis(angle);
-        }
-        return cloned_obj;
+    static copy(obj, points) {
+        return new TrapezoidalPrism(
+            points || obj.points, obj.label, obj.color, obj.crown_index
+        );
     }
 
     compute_geometry_parameters() {

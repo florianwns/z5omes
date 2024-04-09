@@ -468,7 +468,7 @@
                             <div class="d-flex justify-content-center">
                                 <div style="width:calc(100% - 72px); max-width: 800px;" class="position-relative">
                                     <!-- Export to -->
-                                    <div x-show="draw_obj" class="ps-2 absolute-top-right-48">
+                                    <div x-show="draw_zome" class="ps-2 absolute-top-right-48">
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
@@ -538,14 +538,14 @@
                                             <!-- Num Spiral Rotations -->
                                             <div class="vstack">
                                                 <button class="btn btn-primary"
-                                                        @click="draw_obj = !draw_obj"
-                                                        :class="(draw_obj) ? `btn-primary` : `btn-secondary`"
+                                                        @click="draw_zome = !draw_zome"
+                                                        :class="(draw_zome) ? `btn-primary` : `btn-secondary`"
                                                         data-bs-toggle="tooltip"
                                                         :title="i18n('tooltip_illuminate_object')">
                                                     <i class="fa"
-                                                       :class="(draw_obj) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
+                                                       :class="(draw_zome) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
                                                 </button>
-                                                <div class="mt-1" x-show="draw_obj && clone_and_rotate_mode">
+                                                <div class="mt-1" x-show="draw_zome && clone_and_rotate_mode">
                                                     <button class="btn btn-sm btn-small-padding"
                                                             @click="num_spirals = Math.max(num_spirals - 1, 1)"
                                                             :class="(num_spirals <= 1) ? `btn-secondary` : `btn-primary`"
@@ -2027,9 +2027,8 @@
 
             const meshes = {
                 "axes": null,
-                "obj": null,
-                "labels": null,
-                "edges": null,
+                "zome": null,
+                "vanishing_lines": null,
             }
 
             return {
@@ -2040,7 +2039,7 @@
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
 
-                draw_obj: true,
+                draw_zome: true,
                 draw_labels: true,
                 draw_axes: true,
                 draw_vanishing_lines: false,
@@ -2058,17 +2057,14 @@
 
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
-
-                    ["obj", "labels", "axes", "vanishing_lines"].forEach(
-                        (key) => this.$watch(`draw_${key}`, (value) => {
-                            this.set_visibility(key, value);
-                        })
-                    );
+                    this.$watch("draw_axes", (value) => {
+                        this.set_visibility(key, value);
+                    });
 
                     this.num_spirals = this.params.num;
                     this.last_zome_num = this.params.num;
 
-                    ["num_spirals", "add_floor", "type_of_3D_objects"].forEach(
+                    ["num_spirals", "add_floor", "draw_vanishing_lines", "draw_labels", "draw_zome", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -2235,7 +2231,7 @@
                         (error) => console.error(error),
                         {binary: false},
                     );
-                    meshes.obj.scale.setScalar(1)
+                    meshes.zome.scale.setScalar(1)
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
@@ -2247,30 +2243,17 @@
                 },
                 clear() {
                     // Create and clean old old meshes
-
                     if (meshes.vanishing_lines instanceof THREE.Group) {
                         scene.remove(meshes.vanishing_lines)
                     }
                     meshes.vanishing_lines = new THREE.Group();
                     meshes.vanishing_lines.name = "vanishing_lines";
 
-                    if (meshes.obj instanceof THREE.Group) {
-                        scene.remove(meshes.obj)
+                    if (meshes.zome instanceof THREE.Group) {
+                        scene.remove(meshes.zome)
                     }
-                    meshes.obj = new THREE.Group();
-                    meshes.obj.name = "obj";
-
-                    if (meshes.edges instanceof THREE.Group) {
-                        scene.remove(meshes.edges)
-                    }
-                    meshes.edges = new THREE.Group();
-                    meshes.edges.name = "edges";
-
-                    if (meshes.labels instanceof THREE.Group) {
-                        scene.remove(meshes.labels)
-                    }
-                    meshes.labels = new THREE.Group();
-                    meshes.labels.name = "labels";
+                    meshes.zome = new THREE.Group();
+                    meshes.zome.name = "zome";
                 },
 
 
@@ -2286,7 +2269,7 @@
                         && this.type_of_3D_objects === "skeleton_3D";
 
                     // Display vanishing lines
-                    {
+                    if (this.show_vanishing_lines_switch && this.draw_vanishing_lines) {
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
                             meshes.vanishing_lines.add(
@@ -2296,72 +2279,55 @@
                                 )
                             )
                         });
+                        scene.add(meshes.vanishing_lines);
                     }
-
-                    scene.add(meshes.vanishing_lines);
-                    this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
 
                     // Build 3D faces and edges
                     const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
-                    if (!this.clone_and_rotate_mode) {
-                        for (let i = 0; i < items_3D.length; i++) {
-                            const item = items_3D[i];
-                            if (this.draw_obj) meshes.obj.add(item.mesh);
-                            meshes.edges.add(item.edges);
 
+                    // Same as above but for spirals with geometry cloning for more efficiency
+                    let item_meshes = new THREE.Group();
+                    for (let i = 0; i < items_3D.length; i++) {
+                        const item = items_3D[i];
+                        if (this.draw_zome) item_meshes.add(item.mesh);
+                        item_meshes.add(item.edgs);
+                        if (this.draw_labels) {
                             item.compute_label_mesh(font);
-                            if (item.label_mesh) meshes.labels.add(item.label_mesh);
+                            if (item.label_mesh) item_meshes.add(item.label_mesh);
                         }
-                    } else {
-                        // Same as above but for spirals with geometry cloning for more efficiency
-                        for (let i = 0; i < items_3D.length; i++) {
-                            const item = items_3D[i];
-                            for (let j = 0; j < ZOME.num; j++) {
-                                if (j < this.num_spirals) {
-                                    const mesh = clone_and_color_mesh(item.mesh, item.color);
-                                    mesh.rotateY(ZOME.rotation_angles[j].rad);
-                                    mesh.userData.item_index = i;
-                                    mesh.userData.rotation_index = j;
-                                    meshes.obj.add(mesh);
-                                }
+                    }
+                    meshes.zome.add(item_meshes);
 
-                                const edges = item.edges.clone();
-                                edges.rotateY(ZOME.rotation_angles[j].rad);
-                                meshes.edges.add(edges);
-
-                                // Add label once
-                                if (j === 0) {
-                                    item.compute_label_mesh(font);
-                                    if (item.label_mesh) meshes.labels.add(item.label_mesh);
-                                }
-                            }
-                        }
-
-                        // Add floor
-                        let floor_3D = null;
-                        switch (this.type_of_3D_objects) {
-                            case "inner_faces_3D":
-                                floor_3D = ZOME.inner_floor_3D;
-                                break;
-                            case "outer_faces_3D":
-                            case "skeleton_3D":
-                                floor_3D = ZOME.outer_floor_3D;
-                                break;
-                        }
-                        if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                            if (this.draw_obj) meshes.obj.add(floor_3D.mesh);
-                            meshes.edges.add(floor_3D.edges);
+                    if (this.clone_and_rotate_mode) {
+                        for (let spiral_index = 1; spiral_index < this.num_spirals; spiral_index++) {
+                            const cloned_meshes = item_meshes.clone();
+                            const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+                            cloned_meshes.rotateY(rotation_angle);
+                            meshes.zome.add(cloned_meshes);
                         }
                     }
 
+                    // Add floor
+                    let floor_3D = null;
+                    switch (this.type_of_3D_objects) {
+                        case "inner_faces_3D":
+                            floor_3D = ZOME.inner_floor_3D;
+                            break;
+                        case "outer_faces_3D":
+                        case "skeleton_3D":
+                            floor_3D = ZOME.outer_floor_3D;
+                            break;
+                    }
+                    if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
+                        const floor_meshes = new THREE.Group();
+                        floor_meshes.name = floor_meshes.label;
+                        if (this.draw_zome) floor_meshes.add(floor_3D.mesh);
+                        floor_meshes.add(floor_3D.edges);
+                        meshes.zome.add(floor_meshes);
+                    }
+
                     // Add the final obj mesh to the scene
-                    scene.add(meshes.obj);
-                    this.set_visibility("obj", this.draw_obj);
-
-                    scene.add(meshes.edges);
-
-                    scene.add(meshes.labels);
-                    this.set_visibility("labels", this.draw_labels);
+                    scene.add(meshes.zome);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -2927,7 +2893,7 @@
                                 iD = this.add_vertex(vertices, D);
 
                                 // Add only the first piece
-                                if(spiral_index === 0){
+                                if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, D, C], face_label, null, crown_index);
                                     zome_faces_3D.push(face);
                                 }
@@ -2948,7 +2914,7 @@
                                 iF = this.add_vertex(vertices, F);
 
                                 // Add Truncated Kite
-                                if(spiral_index === 0) {
+                                if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, E, F, C], face_label, null, crown_index);
                                     zome_faces_3D.push(face);
                                 }
@@ -3296,8 +3262,8 @@
                     // Rotate picked floor points
                     let outer_floor_points = [], inner_floor_points = [];
                     _.forEach(rotation_angles, angle => {
-                        inner_floor_points.push(...picked_inner_floor_points.map(p => rotate_point_around_y_axis(p, angle)));
-                        outer_floor_points.push(...picked_outer_floor_points.map(p => rotate_point_around_y_axis(p, angle)));
+                        inner_floor_points.push(...rotate_points_around_y_axis(picked_inner_floor_points, angle));
+                        outer_floor_points.push(...rotate_points_around_y_axis(picked_outer_floor_points, angle));
                     });
 
                     // Remove duplicates and create floors ⬢
@@ -3449,3 +3415,4 @@
 </script>
 </body>
 </html>
+
