@@ -22,6 +22,11 @@ const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", 
 
 const THREE_EDGES_MATERIAL = new THREE.LineBasicMaterial({color: 0x333333})
 const THREE_VANISHING_LINES_MATERIAL = new THREE.LineBasicMaterial({color: 0x00ffff});
+const THREE_LABELS_MATERIAL = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.FrontSide,
+    transparent: true
+});
 
 check_is_mobile = function () {
     let check = false;
@@ -442,53 +447,6 @@ function color_mesh(mesh, color) {
         mesh.material.color.set(color.hex);
     }
     return mesh;
-}
-
-function create_text_mesh(
-    text,
-    font_size = 26,
-    padding = 4,
-    text_color = 'white',
-    background_color = null,
-) {
-    const canvas = document.createElement("canvas");
-    const has_background = background_color !== null;
-    let ctx = canvas.getContext("2d", {antialias: true, alpha: !has_background});
-
-    // Trick to adapt the canvas size to the text
-    ctx.font = font_size + "px Roboto, sans-serif";
-    const text_width = ctx.measureText(text).width;
-    canvas.width = text_width + 2 * padding;
-    canvas.height = font_size + 2 * padding;
-    ctx = canvas.getContext("2d");
-    ctx.font = font_size + "px Arial";
-
-    // Set the background color
-    if (has_background) {
-        ctx.fillStyle = background_color;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = text_color;
-
-    // Add an offset to the vertical position to center the text
-    // (i don't know why, maybe a little shift due of the font style)
-    const text_x_position = canvas.width * 0.5,
-        text_y_position = canvas.height * 0.55;
-    ctx.fillText(text, text_x_position, text_y_position);
-    ctx.strokeText(text, text_x_position, text_y_position);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    return new THREE.Mesh(
-        new THREE.PlaneGeometry(canvas.width, canvas.height),
-        new THREE.MeshBasicMaterial({
-            side: THREE.DoubleSide,
-            map: texture,
-            transparent: true
-        }),
-    );
 }
 
 // ---------------------------------
@@ -922,45 +880,50 @@ class Base3DGeometry {
     }
 
     get label_mesh() {
-        if (this._mesh === null) this.compute_meshes();
-        if (this._label_mesh === null) {
-            // Get top face
-            const side = "front";
-            const flattened_face = this.flatten_face(side);
-            if (flattened_face.label) {
-                const min_size = _.reduce(flattened_face.mid_points, (res, p) => {
-                    return Math.min(res, dist(flattened_face.centroid, p))
-                }, Number.MAX_VALUE) * 1.2;
-
-                // const min_size = Math.min(flattened_face.height, flattened_face.width);
-                // const min_size = Math.min(flattened_face.height, flattened_face.width) / 2;
-                this._label_mesh = create_text_mesh(
-                    flattened_face.label,
-                    min_size * 0.9, // font_face
-                    min_size * 0.05, // padding
-                );
-
-                const face = this.get_face(side);
-
-                // Trick to have good orientation
-                this._label_mesh.rotateZ(Math.PI);
-                this._label_mesh.rotateY(Math.PI);
-
-                const translation = sub(face.centroid, flattened_face.centroid);
-                const [x, y, z] = add(flattened_face.centroid, translation);
-
-                this._label_mesh.position.x = x;
-                this._label_mesh.position.y = y;
-                this._label_mesh.position.z = z;
-                const quaternion = quaternion_from_points(
-                    ...flattened_face.points.slice(0, 3),
-                    ...face.points.slice(0, 3)
-                )
-                this._label_mesh.applyQuaternion(quaternion);
-            }
-
-        }
         return this._label_mesh;
+    }
+
+    compute_label_mesh(font) {
+        if (this._label_mesh !== null || font === null) {
+            return;
+        }
+
+        // Get top face
+        const side = "front";
+        const flattened_face = this.flatten_face(side);
+
+        if (flattened_face.label) {
+            const mid_points_item = new Polygon3D(flattened_face.mid_points);
+            const font_size = Math.min(mid_points_item.width, mid_points_item.height) * 0.7;
+            const shapes = font.generateShapes(flattened_face.label, font_size);
+
+            const geometry = new THREE.ShapeGeometry(shapes);
+            geometry.computeBoundingBox();
+            const xMid = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+            const yMid = -0.5 * (geometry.boundingBox.max.y - geometry.boundingBox.min.y);
+
+            geometry.translate(xMid, yMid, 2);
+            this._label_mesh = new THREE.Mesh(geometry, THREE_LABELS_MATERIAL);
+            this._label_mesh.name = flattened_face.label;
+
+            const face = this.get_face(side);
+
+            // Trick to have good orientation
+            this._label_mesh.rotateZ(Math.PI);
+            this._label_mesh.rotateY(Math.PI);
+
+            const translation = sub(face.centroid, flattened_face.centroid);
+            const [x, y, z] = add(flattened_face.centroid, translation);
+
+            this._label_mesh.position.x = x;
+            this._label_mesh.position.y = y;
+            this._label_mesh.position.z = z;
+            const quaternion = quaternion_from_points(
+                ...flattened_face.points.slice(0, 3),
+                ...face.points.slice(0, 3)
+            )
+            this._label_mesh.applyQuaternion(quaternion);
+        }
     }
 
     reset_3D_objects() {
@@ -1204,6 +1167,7 @@ class Polygon3D extends Base3DGeometry {
             new THREE.BufferGeometry().setFromPoints(edge_points),
             THREE_EDGES_MATERIAL,
         );
+        this._edges.name = this.label;
     }
 
     divide(horizontally = true) {

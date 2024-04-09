@@ -1231,7 +1231,8 @@
 <script src="i18n/pl.js?v=1.0.9b02"></script>
 <script src="i18n/sv.js?v=1.0.9b02"></script>
 
-<!-- Core and geometry functions -->
+
+<!-- Core JS -->
 <script src="js/core.js?v=1.0.9b02"></script>
 
 <!-- Alpine JS -->
@@ -2024,7 +2025,7 @@
         Alpine.data('renderer_3D', () => {
             // Three JS Objects
             let scene, camera, renderer, controls,
-                canvas, raycaster, pointer;
+                canvas, raycaster, pointer, font;
 
             const meshes = {
                 "axes": null,
@@ -2168,7 +2169,13 @@
                     this.auto_size()
                     this.animate()
 
-                    this.$dispatch('zome-renderer-is-ready');
+
+                    const loader = new THREE.FontLoader();
+                    const self = this;
+                    loader.load('webfonts/roboto_black.typeface.json', function (loaded_font) {
+                        font = loaded_font;
+                        self.$dispatch('zome-renderer-is-ready');
+                    });
                 },
 
                 update_pointer_from_event(event) {
@@ -2215,7 +2222,7 @@
                     const exporter = new THREE.GLTFExporter();
 
                     // Because GLTF is in meters, convert millimeters to meters
-                    const resized_obj = meshes.obj.clone();
+                    const resized_obj = scene.clone();
                     resized_obj.scale.set(0.001, 0.001, 0.001);
 
                     exporter.parse(
@@ -2234,7 +2241,7 @@
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
-                    const str = exporter.parse(meshes.obj);
+                    const str = exporter.parse(scene);
                     const blob = new Blob([str], {type: 'text/plain'});
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
@@ -2303,6 +2310,8 @@
                             const item = items_3D[i];
                             if (this.draw_obj) meshes.obj.add(item.mesh);
                             meshes.edges.add(item.edges);
+
+                            item.compute_label_mesh(font);
                             if (item.label_mesh) meshes.labels.add(item.label_mesh);
                         }
                     } else {
@@ -2324,6 +2333,7 @@
 
                                 // Add label once
                                 if (j === 0) {
+                                    item.compute_label_mesh(font);
                                     if (item.label_mesh) meshes.labels.add(item.label_mesh);
                                 }
                             }
