@@ -2290,7 +2290,7 @@
                     for (let i = 0; i < items_3D.length; i++) {
                         const item = items_3D[i];
                         if (this.draw_zome) item_meshes.add(item.mesh);
-                        item_meshes.add(item.edgs);
+                        item_meshes.add(item.edges);
                         if (this.draw_labels) {
                             item.compute_label_mesh(font);
                             if (item.label_mesh) item_meshes.add(item.label_mesh);
