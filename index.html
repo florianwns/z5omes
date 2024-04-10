@@ -472,6 +472,13 @@
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'GLTF (Meters)')"
+                                                  @click="download_gltf()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">GLTF</span>
+                                            </span>
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
                                                   :title="i18n('tooltip_export_2_format', 'OBJ (Millimeters)')"
                                                   @click="download_obj()">
                                                 <i class="fa-solid fa-file"></i>
@@ -483,13 +490,6 @@
                                                   @click="download_stl()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">STL</span>
-                                            </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'GLTF (Meters)')"
-                                                  @click="download_gltf()">
-                                                <i class="fa-solid fa-file"></i>
-                                                <span class="fa-icon-file-type">GLTF</span>
                                             </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
@@ -2263,9 +2263,7 @@
                     // Same as above but for spirals with geometry cloning for more efficiency
                     for (let i = 0; i < items_3D.length; i++) {
                         const item = items_3D[i];
-                        if (this.draw_zome) {
-                            zome_meshes.add(item.mesh);
-                        }
+                        zome_meshes.add(item.mesh);
 
                         if (this.draw_labels) {
                             item.compute_label_mesh(font);
@@ -2278,7 +2276,7 @@
                             for (let spiral_index = 1; spiral_index < ZOME.num; spiral_index++) {
                                 const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
 
-                                if (this.draw_zome && spiral_index < this.num_spirals) {
+                                if (spiral_index < this.num_spirals) {
                                     const rotated_mesh = item.mesh.clone();
                                     rotated_mesh.rotateY(rotation_angle);
                                     zome_meshes.add(rotated_mesh);
@@ -2289,7 +2287,7 @@
 
                     let floor_3D = this.get_floor_3D();
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                        if (this.draw_zome) zome_meshes.add(floor_3D.mesh.clone());
+                        zome_meshes.add(floor_3D.mesh.clone());
                     }
 
                     obj_to_export.add(zome_meshes);
