@@ -564,7 +564,7 @@
                                             </div>
 
                                             <!-- Add floor -->
-                                            <button class="btn btn-primary"
+                                            <button x-show="show_add_floor_btn" class="btn btn-primary"
                                                     @click="add_floor = !add_floor"
                                                     :class="(add_floor) ? `btn-primary` : `btn-secondary`"
                                                     data-bs-toggle="tooltip" :title="i18n('tooltip_add_floor')">
@@ -572,7 +572,7 @@
                                             </button>
 
                                             <!-- Draw Vanishing Lines -->
-                                            <button class="btn btn-primary"
+                                            <button x-show="show_vanishing_lines_toggle_btn" class="btn btn-primary"
                                                     @click="draw_vanishing_lines = !draw_vanishing_lines"
                                                     :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
                                                     data-bs-toggle="tooltip"
@@ -2047,8 +2047,9 @@
                 draw_vanishing_lines: false,
 
                 add_floor: true,
-                show_vanishing_lines_switch: false,
-
+                show_vanishing_lines_toggle_btn: false,
+                show_add_floor_btn: false,
+                
                 is_fullscreen: false,
                 __auto_size: null,
                 __process: null,
@@ -2331,10 +2332,10 @@
                         this.num_spirals = this.last_zome_num = ZOME.num;
                     }
                     // Display switch buttons
-                    this.show_vanishing_lines_switch = ZOME.vanishing_lines
+                    this.show_vanishing_lines_toggle_btn = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
                         && this.type_of_3D_objects === "skeleton_3D";
-
+                    
                     // Display vanishing lines
                     {
                         _.forEach(ZOME.vanishing_lines, (line) => {
@@ -2347,7 +2348,7 @@
                             )
                         });
                         scene.add(meshes.vanishing_lines);
-                        this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
+                        this.set_visibility("vanishing_lines", this.show_vanishing_lines_toggle_btn && this.draw_vanishing_lines);
                     }
 
                     // Build 3D faces and edges
@@ -2402,7 +2403,8 @@
 
                     // Add floor
                     let floor_3D = this.get_floor_3D()
-                    if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
+                    this.show_add_floor_btn = floor_3D != null;
+                    if (this.add_floor && this.show_add_floor_btn && floor_3D.mesh != null) {
                         if (this.draw_zome) meshes.zome.add(floor_3D.mesh);
                         meshes.edges.add(floor_3D.edges);
                     }
