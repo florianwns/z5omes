@@ -2221,7 +2221,7 @@
                     const exporter = new THREE.GLTFExporter();
 
                     // Because GLTF is in meters, convert millimeters to meters
-                    const resized_obj = scene.clone();
+                    const resized_obj = this.compute_obj_to_export();
                     resized_obj.scale.set(0.001, 0.001, 0.001);
 
                     exporter.parse(
@@ -2236,16 +2236,66 @@
                         (error) => console.error(error),
                         {binary: false},
                     );
-                    meshes.zome.scale.setScalar(1)
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
-                    const str = exporter.parse(scene);
+                    const str = exporter.parse(meshes.zome);
                     const blob = new Blob([str], {type: 'text/plain'});
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
                     download(filename, window.URL.createObjectURL(blob));
                 },
+
+                compute_obj_to_export() {
+                    // Build 3D faces and edges
+                    const obj_to_export = new THREE.Group();
+                    obj_to_export.name = this.gen_filename(`_${this.type_of_3D_objects}`);
+
+                    const zome_meshes = new THREE.Group();
+                    zome_meshes.name = "zome";
+
+                    const label_meshes = new THREE.Group();
+                    label_meshes.name = "labels";
+
+                    const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
+
+                    // Same as above but for spirals with geometry cloning for more efficiency
+                    for (let i = 0; i < items_3D.length; i++) {
+                        const item = items_3D[i];
+                        if (this.draw_zome) {
+                            zome_meshes.add(item.mesh);
+                        }
+
+                        if (this.draw_labels) {
+                            item.compute_label_mesh(font);
+                            if (item.label_mesh) {
+                                label_meshes.add(item.label_mesh);
+                            }
+                        }
+
+                        if (this.clone_and_rotate_mode) {
+                            for (let spiral_index = 1; spiral_index < ZOME.num; spiral_index++) {
+                                const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+
+                                if (this.draw_zome && spiral_index < this.num_spirals) {
+                                    const rotated_mesh = item.mesh.clone();
+                                    rotated_mesh.rotateY(rotation_angle);
+                                    zome_meshes.add(rotated_mesh);
+                                }
+                            }
+                        }
+                    }
+
+                    let floor_3D = this.get_floor_3D();
+                    if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
+                        if (this.draw_zome) zome_meshes.add(floor_3D.mesh.clone());
+                    }
+
+                    obj_to_export.add(zome_meshes);
+                    obj_to_export.add(label_meshes);
+                    return obj_to_export;
+                },
+
                 clear() {
                     // Create and clean old old meshes
                     if (meshes.vanishing_lines instanceof THREE.Group) {
@@ -2271,7 +2321,6 @@
                     }
                     meshes.labels = new THREE.Group();
                     meshes.labels.name = "labels";
-
                 },
 
 
@@ -2298,51 +2347,61 @@
                             )
                         });
                         scene.add(meshes.vanishing_lines);
-                        this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines)
+                        this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
                     }
 
                     // Build 3D faces and edges
                     const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
 
-                    // Same as above but for spirals with geometry cloning for more efficiency
+                    const mesh_points = [], mesh_colors = [], edge_points = [];
                     for (let i = 0; i < items_3D.length; i++) {
                         const item = items_3D[i];
-                        if (this.draw_zome) meshes.zome.add(item.mesh);
-                        meshes.edges.add(item.edges);
+                        mesh_points.push(...item.mesh_points);
+                        mesh_colors.push(...item.mesh_colors);
+                        edge_points.push(...item.edge_points);
 
-                        if (this.draw_labels) {
-                            item.compute_label_mesh(font);
-                            if (item.label_mesh) meshes.labels.add(item.label_mesh);
-                        }
+                        item.compute_label_mesh(font);
+                        if (item.label_mesh) meshes.labels.add(item.label_mesh);
+                    }
 
-                        if (this.clone_and_rotate_mode) {
-                            for (let spiral_index = 1; spiral_index < ZOME.num; spiral_index++) {
-                                const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+                    // Build mesh and edge geometries
+                    const mesh_geometry = new THREE.BufferGeometry().setFromPoints(mesh_points);
+                    mesh_geometry.setAttribute('color', new THREE.Float32BufferAttribute(mesh_colors, 3));
+                    mesh_geometry.computeVertexNormals()
+                    let mesh = new THREE.Mesh(mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
+                    mesh.name = 'Item 1';
+                    meshes.zome.add(mesh)
 
-                                if (this.draw_zome && spiral_index < this.num_spirals){
-                                    const rotated_mesh = item.mesh.clone();
-                                    rotated_mesh.rotateY(rotation_angle);
-                                    meshes.zome.add(rotated_mesh);
-                                }
+                    const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points);
+                    const edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
+                    meshes.edges.add(edges);
 
-                                const rotated_edges = item.edges.clone();
-                                rotated_edges.rotateY(rotation_angle);
-                                meshes.edges.add(rotated_edges);
+                    // Clone meshes and rotate them around Y Axes
+                    if (this.clone_and_rotate_mode) {
+                        for (let spiral_index = 1; spiral_index < ZOME.num; spiral_index++) {
+                            const angle = ZOME.rotation_angles[spiral_index].rad;
+
+                            // Add mesh
+                            if (spiral_index < this.num_spirals) {
+                                const rotated_mesh_geometry = mesh_geometry.clone();
+                                rotated_mesh_geometry.rotateY(angle);
+
+                                const rotated_mesh = new THREE.Mesh(rotated_mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
+                                rotated_mesh.name = `Item ${spiral_index + 1}`;
+                                meshes.zome.add(rotated_mesh)
                             }
+
+                            // Add edges
+                            const rotated_edge_geometry = edge_geometry.clone()
+                            rotated_edge_geometry.rotateY(angle);
+
+                            const rotated_edges = new THREE.LineSegments(rotated_edge_geometry, THREE_EDGES_MATERIAL);
+                            meshes.edges.add(rotated_edges);
                         }
                     }
 
                     // Add floor
-                    let floor_3D = null;
-                    switch (this.type_of_3D_objects) {
-                        case "inner_faces_3D":
-                            floor_3D = ZOME.inner_floor_3D;
-                            break;
-                        case "outer_faces_3D":
-                        case "skeleton_3D":
-                            floor_3D = ZOME.outer_floor_3D;
-                            break;
-                    }
+                    let floor_3D = this.get_floor_3D()
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
                         if (this.draw_zome) meshes.zome.add(floor_3D.mesh);
                         meshes.edges.add(floor_3D.edges);
@@ -2352,6 +2411,17 @@
                     scene.add(meshes.zome);
                     scene.add(meshes.edges);
                     scene.add(meshes.labels);
+                },
+
+                get_floor_3D(){
+                    switch (this.type_of_3D_objects) {
+                        case "inner_faces_3D":
+                            return ZOME.inner_floor_3D;
+                        case "outer_faces_3D":
+                        case "skeleton_3D":
+                            return ZOME.outer_floor_3D;
+                    }
+                    return null
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);

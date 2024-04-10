@@ -27,6 +27,7 @@ const THREE_LABELS_MATERIAL = new THREE.MeshBasicMaterial({
     side: THREE.FrontSide,
     transparent: true
 });
+const THREE_VERTEX_COLOR_MATERIAL = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, vertexColors: true});
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const FOOTING_CHAR = '~';
@@ -434,29 +435,6 @@ function circle_path(cx, cy, r) {
     return 'M ' + cx + ' ' + cy + ' m -' + r + ', 0 a ' + r + ',' + r + ' 0 1,1 ' + (r * 2) + ',0 a ' + r + ',' + r + ' 0 1,1 -' + (r * 2) + ',0';
 }
 
-
-// --------------------------
-// ====== CANVAS/WEBGL ======
-// --------------------------
-
-
-function clone_and_color_mesh(other_mesh, color) {
-    if (other_mesh instanceof THREE.Group || other_mesh instanceof THREE.Mesh) {
-        const mesh = other_mesh.clone();
-        return color_mesh(mesh, color);
-    }
-}
-
-function color_mesh(mesh, color) {
-    if (mesh instanceof THREE.Group) {
-        for (let i = 0; i < mesh.children.length; i++) {
-            mesh.children[i].material.color.set(color.hex);
-        }
-    } else if (mesh instanceof THREE.Mesh) {
-        mesh.material.color.set(color.hex);
-    }
-    return mesh;
-}
 
 // ---------------------------------
 // ========== Conversions ==========
@@ -916,6 +894,21 @@ class Base3DGeometry {
         return this._mesh_material;
     }
 
+    get mesh_points() {
+        if (this._mesh_points === null) this.compute_mesh_points();
+        return this._mesh_points;
+    }
+
+    get mesh_colors() {
+        if (this._mesh_colors === null) this.compute_mesh_colors();
+        return this._mesh_colors;
+    }
+
+    get edge_points() {
+        if (this._edge_points === null) this.compute_mesh_points();
+        return this._edge_points;
+    }
+
     compute_label_mesh(font) {
         if (this._label_mesh !== null || font === null) {
             return;
@@ -960,11 +953,42 @@ class Base3DGeometry {
     }
 
     reset_3D_objects() {
+        this._mesh_points = null;
+        this._mesh_colors = null;
         this._mesh = null;
+        this._edge_points = null;
         this._edges = null;
         this._label_mesh = null;
         this._bounding_box = null;
     }
+
+    compute_mesh_points() {
+        const centroid_vec = new THREE.Vector3(...this.centroid);
+        // Compute triangle and edges points of a polygon for 3D visualization
+        this._mesh_points = new Array(3 * this.num_points);
+        this._edge_points = new Array(2 * this.num_points);
+        for (let i = 0, j = 0, k = 0; i < this.num_points; i++, j += 2, k += 3) {
+            this._mesh_points[k] = this._edge_points[j] = new THREE.Vector3(
+                ...this.points[i]
+            );
+            this._mesh_points[k + 1] = this._edge_points[j + 1] = new THREE.Vector3(
+                ...this.points[this.next_indexes[i]]
+            );
+            this._mesh_points[k + 2] = centroid_vec;
+        }
+    }
+
+    compute_mesh_colors() {
+        // Compute colors of a polygon for 3D visualization
+        this._mesh_colors = new Array(9 * this.num_points);
+        const [r, g, b] = this.color.rgb;
+        for (let i = 0, k = 0; i < this.num_points; i++, k += 9) {
+            this._mesh_colors[k] = this._mesh_colors[k + 3] = this._mesh_colors[k + 6] = r;
+            this._mesh_colors[k + 1] = this._mesh_colors[k + 4] = this._mesh_colors[k + 7] = g;
+            this._mesh_colors[k + 2] = this._mesh_colors[k + 5] = this._mesh_colors[k + 8] = b;
+        }
+    }
+
 
     reset_other_points() {
         this._points_2D = null;
@@ -997,12 +1021,6 @@ class Base3DGeometry {
 
     clone() {
         const cloned_obj = _.clone(this);
-        return cloned_obj;
-    }
-
-    clone_and_rotate_around_y_axis(angle) {
-        const cloned_obj = this.clone();
-        cloned_obj.points = rotate_points_around_y_axis(this.points, angle);
         return cloned_obj;
     }
 
@@ -1180,43 +1198,15 @@ class Polygon3D extends Base3DGeometry {
     }
 
     compute_meshes() {
-        const [cx, cy, cz] = this.centroid;
-
-        // Compute triangle and edges points of a polygon for 3D visualization
-        const mesh_points = new Float32Array(3 * 3 * this.num_points);
-        const edge_points = new Float32Array(2 * 3 * this.num_points);
-
-        for (let i = 0, j = 0, k = 0; i < this.num_points; i++, j += 6, k += 9) {
-            // Compute line segments points
-            const cur_pt = this.points[i]
-            mesh_points[k] = edge_points[j] = cur_pt[0];
-            mesh_points[k + 1] = edge_points[j + 1] = cur_pt[1];
-            mesh_points[k + 2] = edge_points[j + 2] = cur_pt[2];
-
-            const next_pt = this.points[this.next_indexes[i]]
-            mesh_points[k + 3] = edge_points[j + 3] = next_pt[0];
-            mesh_points[k + 4] = edge_points[j + 4] = next_pt[1];
-            mesh_points[k + 5] = edge_points[j + 5] = next_pt[2];
-
-            mesh_points[k + 6] = cx;
-            mesh_points[k + 7] = cy;
-            mesh_points[k + 8] = cz;
-        }
-
         // Compute geometry for THREE JS display
-        const mesh_geometry = new THREE.BufferGeometry();
-        mesh_geometry.setAttribute('position', new THREE.Float32BufferAttribute(mesh_points, 3));
-
+        const mesh_geometry = new THREE.BufferGeometry().setFromPoints(this.mesh_points);
         this._mesh = new THREE.Mesh(mesh_geometry, this.mesh_material);
 
         // Add a mesh name (use for 3D export)
         this._mesh.name = this.label;
 
-        const edge_geometry = new THREE.BufferGeometry();
-        edge_geometry.setAttribute('position', new THREE.Float32BufferAttribute(edge_points, 3));
-
+        const edge_geometry = new THREE.BufferGeometry().setFromPoints(this.edge_points);
         this._edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
-        this._edges.name = this.label;
     }
 
     divide(horizontally = true) {
@@ -1307,6 +1297,26 @@ class TrapezoidalPrism extends Base3DGeometry {
             this._edge_distances.push(...item.edge_distances);
             this._area += item.area; // recompute area
             this._perimeter += item.perimeter; // recompute area
+        }
+    }
+
+    compute_mesh_points() {
+        // Compute triangle and edges points of all polygons for 3D visualization
+        this._mesh_points = [], this._edge_points = [];
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
+            this._mesh_points.push(...item.mesh_points);
+            this._edge_points.push(...item.edge_points);
+        }
+    }
+
+    compute_mesh_colors() {
+        // Compute colors of all polygons for 3D visualization
+        this._mesh_colors = [];
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
+            item.color = this.color;
+            this._mesh_colors.push(...item.mesh_colors);
         }
     }
 
