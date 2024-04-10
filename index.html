@@ -2049,7 +2049,7 @@
                 add_floor: true,
                 show_vanishing_lines_toggle_btn: false,
                 show_add_floor_btn: false,
-                
+
                 is_fullscreen: false,
                 __auto_size: null,
                 __process: null,
@@ -2335,7 +2335,7 @@
                     this.show_vanishing_lines_toggle_btn = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
                         && this.type_of_3D_objects === "skeleton_3D";
-                    
+
                     // Display vanishing lines
                     {
                         _.forEach(ZOME.vanishing_lines, (line) => {
@@ -2411,8 +2411,12 @@
 
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome);
+                    this.set_visibility("zome", this.draw_zome);
+
                     scene.add(meshes.edges);
                     scene.add(meshes.labels);
+                    this.set_visibility("labels", this.draw_labels);
+
                 },
 
                 get_floor_3D() {
