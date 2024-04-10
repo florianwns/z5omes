@@ -1,18 +1,11 @@
 # TODO-LIST
 
 * [ ] pour le flattened mandala avec le bindu zome, 
-  pas de rotate sur le même iCrown
- 
-
-* [ ] les rotations sont couteuse, appliquaient les rotations 
-  avec cos et sin theta déjà précalculé;
-
+  pas de rotate sur le même crown_index
+  
 * [ ] Btn 3D pour swapes les Axes pour la visu, pratique le wizzdome
   Faire un simple switch 
-
-* [ ] supprimer les rotations par rotation_angles et créer des pièces uniques
-à la création du framework faces, appliquer la division framework  types
-
+  
 * [ ] Utiliser le clic droit Three js pour modifier des faces
   https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_cubes.html
   
