@@ -2287,6 +2287,7 @@
 
                     // Same as above but for spirals with geometry cloning for more efficiency
                     let item_meshes = new THREE.Group();
+                    item_meshes.name = `${this.type_of_3D_objects}_1`;
                     for (let i = 0; i < items_3D.length; i++) {
                         const item = items_3D[i];
                         if (this.draw_zome) item_meshes.add(item.mesh);
@@ -2297,10 +2298,10 @@
                         }
                     }
                     meshes.zome.add(item_meshes);
-
                     if (this.clone_and_rotate_mode) {
                         for (let spiral_index = 1; spiral_index < this.num_spirals; spiral_index++) {
                             const cloned_meshes = item_meshes.clone();
+                            cloned_meshes.name = `${this.type_of_3D_objects}_${spiral_index + 1}`;
                             const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
                             cloned_meshes.rotateY(rotation_angle);
                             meshes.zome.add(cloned_meshes);
@@ -2320,7 +2321,7 @@
                     }
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
                         const floor_meshes = new THREE.Group();
-                        floor_meshes.name = floor_meshes.label;
+                        floor_meshes.name = 'floor';
                         if (this.draw_zome) floor_meshes.add(floor_3D.mesh);
                         floor_meshes.add(floor_3D.edges);
                         meshes.zome.add(floor_meshes);
