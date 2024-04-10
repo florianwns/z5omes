@@ -44,6 +44,7 @@ const I18N_EN = {
         tooltip_split_drawing: "Split the drawing into multiple A4 sheets for export to PDF",
         tooltip_customize_framework: "Customize framework",
         tooltip_show_keyboard_shortcuts: "Show keyboard shortcuts",
+        tooltip_inversion_Y_Z_axes: "Inversion of Y and Z axes",
 
         // Keyboard shortcuts
         key_H_3D_view: "Reset camera view",

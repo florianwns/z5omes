@@ -588,6 +588,15 @@
                                                 <i class="fa fa-chart-scatter-3d"></i>
                                             </button>
 
+                                            <!-- Inversion of Z and Y axes -->
+                                            <button class="btn px-0 btn-primary"
+                                                    @click="inverse_Y_Z_axes = !inverse_Y_Z_axes"
+                                                    :class="(inverse_Y_Z_axes) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip"
+                                                    :title="i18n('tooltip_inversion_Y_Z_axes')">
+                                                <small>Y⬄Z</small>
+                                            </button>
+
                                             <!-- Spin on/off -->
                                             <div class="vstack">
                                                 <button class="btn btn-primary"
@@ -2044,11 +2053,14 @@
                 draw_zome: true,
                 draw_labels: true,
                 draw_axes: true,
+
                 draw_vanishing_lines: false,
+                show_vanishing_lines_toggle_btn: false,
 
                 add_floor: true,
-                show_vanishing_lines_toggle_btn: false,
                 show_add_floor_btn: false,
+
+                inverse_Y_Z_axes: false,
 
                 is_fullscreen: false,
                 __auto_size: null,
@@ -2070,7 +2082,7 @@
                     this.num_spirals = this.params.num;
                     this.last_zome_num = this.params.num;
 
-                    ["num_spirals", "add_floor", "type_of_3D_objects"].forEach(
+                    ["num_spirals", "inverse_Y_Z_axes", "add_floor", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -2292,6 +2304,10 @@
 
                     obj_to_export.add(zome_meshes);
                     obj_to_export.add(label_meshes);
+
+                    if (this.inverse_Y_Z_axes) {
+                        obj_to_export.rotateX(TAU_Q);
+                    }
                     return obj_to_export;
                 },
 
@@ -2407,6 +2423,14 @@
                         meshes.edges.add(floor_3D.edges);
                     }
 
+                    // Inverse Y and Z axes
+                    if (this.inverse_Y_Z_axes) {
+                        _.forEach(meshes, (value, key) => {
+                            if (key == "axes") return;
+                            value.rotateX(TAU_Q);
+                        });
+                    }
+
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome);
                     this.set_visibility("zome", this.draw_zome);
@@ -2414,7 +2438,6 @@
                     scene.add(meshes.edges);
                     scene.add(meshes.labels);
                     this.set_visibility("labels", this.draw_labels);
-
                 },
 
                 get_floor_3D() {

@@ -1,10 +1,10 @@
 # TODO-LIST
 
+* [x] Btn 3D pour swapes les Axes pour la visu, pratique le wizzdome
+  Faire un simple switch  Y⬄Z
+
 * [ ] pour le flattened mandala avec le bindu zome, 
   pas de rotate sur le même crown_index
-  
-* [ ] Btn 3D pour swapes les Axes pour la visu, pratique le wizzdome
-  Faire un simple switch 
   
 * [ ] Utiliser le clic droit Three js pour modifier des faces
   https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_cubes.html
