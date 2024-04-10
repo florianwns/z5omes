@@ -2028,6 +2028,8 @@
             const meshes = {
                 "axes": null,
                 "zome": null,
+                "edges": null,
+                "labels": null,
                 "vanishing_lines": null,
             }
 
@@ -2057,14 +2059,17 @@
 
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
-                    this.$watch("draw_axes", (value) => {
-                        this.set_visibility(key, value);
-                    });
+
+                    ["zome", "labels", "axes", "vanishing_lines"].forEach(
+                        (key) => this.$watch(`draw_${key}`, (value) => {
+                            this.set_visibility(key, value);
+                        })
+                    );
 
                     this.num_spirals = this.params.num;
                     this.last_zome_num = this.params.num;
 
-                    ["num_spirals", "add_floor", "draw_vanishing_lines", "draw_labels", "draw_zome", "type_of_3D_objects"].forEach(
+                    ["num_spirals", "add_floor", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -2254,6 +2259,19 @@
                     }
                     meshes.zome = new THREE.Group();
                     meshes.zome.name = "zome";
+
+                    if (meshes.edges instanceof THREE.Group) {
+                        scene.remove(meshes.edges)
+                    }
+                    meshes.edges = new THREE.Group();
+                    meshes.edges.name = "edges";
+
+                    if (meshes.labels instanceof THREE.Group) {
+                        scene.remove(meshes.labels)
+                    }
+                    meshes.labels = new THREE.Group();
+                    meshes.labels.name = "labels";
+
                 },
 
 
@@ -2269,7 +2287,7 @@
                         && this.type_of_3D_objects === "skeleton_3D";
 
                     // Display vanishing lines
-                    if (this.show_vanishing_lines_switch && this.draw_vanishing_lines) {
+                    {
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
                             meshes.vanishing_lines.add(
@@ -2280,31 +2298,37 @@
                             )
                         });
                         scene.add(meshes.vanishing_lines);
+                        this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines)
                     }
 
                     // Build 3D faces and edges
                     const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
 
                     // Same as above but for spirals with geometry cloning for more efficiency
-                    let item_meshes = new THREE.Group();
-                    item_meshes.name = `${this.type_of_3D_objects}_1`;
                     for (let i = 0; i < items_3D.length; i++) {
                         const item = items_3D[i];
-                        if (this.draw_zome) item_meshes.add(item.mesh);
-                        item_meshes.add(item.edges);
+                        if (this.draw_zome) meshes.zome.add(item.mesh);
+                        meshes.edges.add(item.edges);
+
                         if (this.draw_labels) {
                             item.compute_label_mesh(font);
-                            if (item.label_mesh) item_meshes.add(item.label_mesh);
+                            if (item.label_mesh) meshes.labels.add(item.label_mesh);
                         }
-                    }
-                    meshes.zome.add(item_meshes);
-                    if (this.clone_and_rotate_mode) {
-                        for (let spiral_index = 1; spiral_index < this.num_spirals; spiral_index++) {
-                            const cloned_meshes = item_meshes.clone();
-                            cloned_meshes.name = `${this.type_of_3D_objects}_${spiral_index + 1}`;
-                            const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
-                            cloned_meshes.rotateY(rotation_angle);
-                            meshes.zome.add(cloned_meshes);
+
+                        if (this.clone_and_rotate_mode) {
+                            for (let spiral_index = 1; spiral_index < ZOME.num; spiral_index++) {
+                                const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+
+                                if (this.draw_zome && spiral_index < this.num_spirals){
+                                    const rotated_mesh = item.mesh.clone();
+                                    rotated_mesh.rotateY(rotation_angle);
+                                    meshes.zome.add(rotated_mesh);
+                                }
+
+                                const rotated_edges = item.edges.clone();
+                                rotated_edges.rotateY(rotation_angle);
+                                meshes.edges.add(rotated_edges);
+                            }
                         }
                     }
 
@@ -2320,15 +2344,14 @@
                             break;
                     }
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                        const floor_meshes = new THREE.Group();
-                        floor_meshes.name = 'floor';
-                        if (this.draw_zome) floor_meshes.add(floor_3D.mesh);
-                        floor_meshes.add(floor_3D.edges);
-                        meshes.zome.add(floor_meshes);
+                        if (this.draw_zome) meshes.zome.add(floor_3D.mesh);
+                        meshes.edges.add(floor_3D.edges);
                     }
 
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome);
+                    scene.add(meshes.edges);
+                    scene.add(meshes.labels);
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);

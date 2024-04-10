@@ -732,9 +732,10 @@ class Base3DGeometry {
 
         // Declare private variables use by getters for dynamic computing
         this._flattened_points = null;
-
+        this._children = null;
         this.reset_other_points();
         this.reset_boundaries();
+        this._mesh_material = null;
         this.reset_3D_objects();
     }
 
@@ -752,6 +753,7 @@ class Base3DGeometry {
 
     set color(value) {
         this._color = value || COLOR_BASE;
+        this._mesh_material = null; // reset the mesh material
     }
 
     get points_2D() {
@@ -834,16 +836,6 @@ class Base3DGeometry {
         return this._slope;
     }
 
-    get vectors() {
-        if (this._vectors === null) {
-            this._vectors = new Array(this.num_points);
-            for (let i = 0; i < this.num_points; i++) {
-                this._vectors[i] = new THREE.Vector3(...this.points[i]);
-            }
-        }
-        return this._vectors;
-    }
-
     get mesh() {
         if (this._mesh === null) this.compute_meshes();
         return this._mesh;
@@ -917,6 +909,13 @@ class Base3DGeometry {
         return this._label_mesh;
     }
 
+    get mesh_material() {
+        if (this._mesh_material === null) {
+            this._mesh_material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex});
+        }
+        return this._mesh_material;
+    }
+
     compute_label_mesh(font) {
         if (this._label_mesh !== null || font === null) {
             return;
@@ -968,7 +967,6 @@ class Base3DGeometry {
     }
 
     reset_other_points() {
-        this._vectors = null;
         this._points_2D = null;
         this._mid_points = null;
         this._centroid = null;
@@ -999,6 +997,12 @@ class Base3DGeometry {
 
     clone() {
         const cloned_obj = _.clone(this);
+        return cloned_obj;
+    }
+
+    clone_and_rotate_around_y_axis(angle) {
+        const cloned_obj = this.clone();
+        cloned_obj.points = rotate_points_around_y_axis(this.points, angle);
         return cloned_obj;
     }
 
@@ -1037,11 +1041,10 @@ class Base3DGeometry {
     }
 
     compute_bounding_box() {
-        if (this._mesh === null) this.compute_meshes();
-        if (this._mesh instanceof THREE.Mesh) {
+        if (this.mesh instanceof THREE.Mesh) {
             // Ensure the bounding box is computed for its geometry
             // This should be done only once (assuming static geometries)
-            this._mesh.geometry.computeBoundingBox();
+            this.mesh.geometry.computeBoundingBox();
 
             // Compute the bounding box
             this._bounding_box = new THREE.Box3();
@@ -1177,33 +1180,42 @@ class Polygon3D extends Base3DGeometry {
     }
 
     compute_meshes() {
-        const centroid_vector = new THREE.Vector3(...this.centroid);
+        const [cx, cy, cz] = this.centroid;
 
         // Compute triangle and edges points of a polygon for 3D visualization
-        const triangle_points = new Array(3 * this.num_points);
-        const edge_points = new Array(2 * this.num_points);
-        for (let i = 0, j = 0, k = 0; i < this.num_points; i++, j += 2, k += 3) {
-            // Compute line segments points
-            edge_points[j] = this.vectors[i];
-            edge_points[j + 1] = this.vectors[this.next_indexes[i]];
+        const mesh_points = new Float32Array(3 * 3 * this.num_points);
+        const edge_points = new Float32Array(2 * 3 * this.num_points);
 
-            // Triangle points for 3D display
-            triangle_points[k] = this.vectors[i];
-            triangle_points[k + 1] = this.vectors[this.next_indexes[i]];
-            triangle_points[k + 2] = centroid_vector;
+        for (let i = 0, j = 0, k = 0; i < this.num_points; i++, j += 6, k += 9) {
+            // Compute line segments points
+            const cur_pt = this.points[i]
+            mesh_points[k] = edge_points[j] = cur_pt[0];
+            mesh_points[k + 1] = edge_points[j + 1] = cur_pt[1];
+            mesh_points[k + 2] = edge_points[j + 2] = cur_pt[2];
+
+            const next_pt = this.points[this.next_indexes[i]]
+            mesh_points[k + 3] = edge_points[j + 3] = next_pt[0];
+            mesh_points[k + 4] = edge_points[j + 4] = next_pt[1];
+            mesh_points[k + 5] = edge_points[j + 5] = next_pt[2];
+
+            mesh_points[k + 6] = cx;
+            mesh_points[k + 7] = cy;
+            mesh_points[k + 8] = cz;
         }
 
         // Compute geometry for THREE JS display
-        this._mesh = new THREE.Mesh(
-            new THREE.BufferGeometry().setFromPoints(triangle_points),
-            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex})
-        );
-        this._mesh.name = this.label;          // Add a mesh name (use for 3D export)
+        const mesh_geometry = new THREE.BufferGeometry();
+        mesh_geometry.setAttribute('position', new THREE.Float32BufferAttribute(mesh_points, 3));
 
-        this._edges = new THREE.LineSegments(
-            new THREE.BufferGeometry().setFromPoints(edge_points),
-            THREE_EDGES_MATERIAL,
-        );
+        this._mesh = new THREE.Mesh(mesh_geometry, this.mesh_material);
+
+        // Add a mesh name (use for 3D export)
+        this._mesh.name = this.label;
+
+        const edge_geometry = new THREE.BufferGeometry();
+        edge_geometry.setAttribute('position', new THREE.Float32BufferAttribute(edge_points, 3));
+
+        this._edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
         this._edges.name = this.label;
     }
 
@@ -1252,15 +1264,20 @@ class TrapezoidalPrism extends Base3DGeometry {
 
         // Call parent constructor
         super(points, label, color, crown_index);
+    }
 
-        this.children = [
-            this.get_face("top"),
-            this.get_face("bottom"),
-            this.get_face("left"),
-            this.get_face("right"),
-            this.get_face("front"),
-            this.get_face("back"),
-        ];
+    get children() {
+        if (this._children === null) {
+            this._children = [
+                this.get_face("top"),
+                this.get_face("bottom"),
+                this.get_face("left"),
+                this.get_face("right"),
+                this.get_face("front"),
+                this.get_face("back"),
+            ];
+        }
+        return this._children;
     }
 
     get flattened_points() {
@@ -1303,6 +1320,7 @@ class TrapezoidalPrism extends Base3DGeometry {
             const item = this.children[i];
             item.color = this.color;
             item.label = this.label;
+            item._mesh_material = this.mesh_material;
             this._mesh.add(item.mesh);
             this._edges.add(item.edges);
         }
