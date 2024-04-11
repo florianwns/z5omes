@@ -2967,7 +2967,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
-                        theta, dist_to_ground, y, face, face_label;
+                        dist_to_ground, y, face, face_label;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -3074,31 +3074,10 @@
                         }
                     }
 
-                    // Divide zome faces into two parts to add strengthening of timbers
-                    let framework_faces = [];
-                    const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
-                    const divide_horizontally = this.params.strengthening_of_timbers === 1;
-
-                    for (let crown_index = 0; crown_index < zome_faces_3D.length; crown_index++) {
-                        const face = zome_faces_3D[crown_index];
-                        if (!divide_faces_into_two_parts || crown_index === 0 || crown_index === zome_faces_3D.length - 1) {
-                            framework_faces.push(face);
-                        } else {
-                            const face_parts = face.divide(divide_horizontally);
-                            for (let j = 0; j < face_parts.length; j++) {
-                                framework_faces.push(face_parts[j]);
-                            }
-                        }
-                    }
-
                     // Build Outer/Inner faces
                     const num_faces = zome_faces_3D.length
                     const outer_faces_3D = new Array(num_faces),
                         inner_faces_3D = new Array(num_faces);
-
-                    let inner_face_points = new Array(zome_faces_3D[0].num_points),
-                        outer_face_points = new Array(zome_faces_3D[0].num_points);
-
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -3108,245 +3087,52 @@
                     let lowest_vertical_position = Number.MAX_VALUE,
                         footing_params = [];
 
-                    // Build Timbers using the assembly method
-                    let hypotenuse, adjacent_side, pivot_pt, last_crown_index, timber_label_index,
-                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
-
                     // Loop over the faces of the framework to build timbers
-                    for (let iFace = 0; iFace < framework_faces.length; iFace++) {
-                        const face = framework_faces[iFace];
-                        const num_points = face.num_points;
+                    // Divide zome faces and build framework timbers
+                    for (let crown_index = 0; crown_index < zome_faces_3D.length; crown_index++) {
+                        const face = zome_faces_3D[crown_index];
+                        face.compute_framework(
+                            this.params.strengthening_of_timbers,
+                            ASSEMBLY_METHOD,
+                            ASSEMBLY_DIRECTION,
+                            vanishing_pt,
+                            XPANSION_DIRECTION,
+                            TIMBER_THICKNESS,
+                            TIMBER_WIDTH,
+                        );
 
-                        // Get the crown index then reset the timber label index
-                        const crown_index = face.crown_index;
-                        if (crown_index !== last_crown_index) {
-                            timber_label_index = 0;
-                            last_crown_index = crown_index;
+                        // Add timbers to skeleton 3D
+                        skeleton_3D.push(...face.framework_timbers);
+
+                        // Add vanishing lines for the GoodKarma and Beveled methods
+                        if(ASSEMBLY_METHOD < 2){
+                            vanishing_lines.push([vanishing_pt, face.points[0]]);
                         }
 
-                        // Declare multiple arrays
-                        const ccw_vecs = new Array(num_points),
-                            cw_vecs = new Array(num_points),
-                            thickness_offset_pts = new Array(num_points),
-                            width_offset_pts = new Array(num_points),
-                            horizontal_proj_vecs = new Array(num_points),
-                            wall_planes = new Array(num_points),
-                            shifted_wall_planes = new Array(num_points);
+                        const outer_face_points = face.framework_outer_points;
+                        const inner_face_points = face.framework_inner_points;
 
-                        // Calculate vectors and projected points to avoid multiple calculations
-                        for (let i = 0; i < face.num_points; i++) {
-                            const cur_pt = face.points[i];
-                            const next_index = face.next_indexes[i];
-                            const prev_index = face.prev_indexes[i];
+                        inner_faces_3D[crown_index] = Polygon3D.copy(face, inner_face_points);
+                        outer_faces_3D[crown_index] = Polygon3D.copy(face, outer_face_points);
 
-                            const prev_pt = face.points[prev_index];
-                            const sec_pt = face.points[next_index];
+                        // Footing parameters computing
+                        // On the two last crown, check if points are far enough
+                        // Take vectors and points from outer/inner faces to build a Footing timber
+                        if ([3, 5].includes(face.num_points)) {
+                            const start_index = (face.num_points === 5) ? 1 : 0;
+                            [B, D, F, H] = [
+                                outer_face_points[start_index + 1], // outer top left corner
+                                outer_face_points[start_index + 2], // outer top right corner
+                                inner_face_points[start_index + 1], // inner top left corner
+                                inner_face_points[start_index + 2], // inner top right corner
+                            ]
 
-                            const cur_2_sec_vec = sub(sec_pt, cur_pt);
-                            const cur_2_prev_vec = sub(prev_pt, cur_pt);
+                            _.forEach([B, D, F, H], p => {
+                                lowest_vertical_position = Math.min(p[1], lowest_vertical_position);
+                            });
 
-                            const mid_pt = face.mid_points[i];
-                            const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
-
-                            switch (ASSEMBLY_METHOD) {
-                                case 0: // GoodKarma
-                                    horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
-                                    thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
-                                    vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
-                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-
-                                    // Multiply vertical proj by xpansion direction
-                                    vertical_proj_vec = mul(vertical_proj_vec, XPANSION_DIRECTION);
-                                    break;
-                                case 1: // Beveled
-                                case 2: // Xpansion
-                                    theta = face.angles[i];
-                                    hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                                    adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
-                                    pivot_pt = point_to(mid_pt, cur_2_sec_vec, -adjacent_side);
-
-                                    thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
-                                    horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
-
-                                    if (to_decimal(theta) === to_decimal(TAU_Q)) {
-                                        // Add Hack to avoid issues with bad cross_products on 90° angles
-                                        vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
-                                    } else if (theta > TAU_Q) {
-                                        // Change direction if theta is greater than 90°,
-                                        // Because pivot point is after mid_pt, so the direction is opposite
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_prev_vec);
-                                    } else {
-                                        // The normal way if theta is smaller than 90 °
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(cur_2_prev_vec, -1));
-                                    }
-
-                                    if (ASSEMBLY_METHOD === 1) {
-                                        vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
-
-                                        wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
-                                        width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-
-                                        const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[i])
-                                        const opposite_thickness = dist(opposite_mid_pt, width_offset_pt);
-
-                                        // If opposite width is superior than TIMBER_THICKNESS
-                                        if (opposite_thickness > TIMBER_THICKNESS) {
-                                            // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
-                                            const thickness_delta = opposite_thickness - TIMBER_THICKNESS;
-                                            thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS - thickness_delta)
-                                        }
-                                    }
-                            }
-
-                            width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-
-                            // Push vectors
-                            ccw_vecs[i] = cur_2_sec_vec;
-                            cw_vecs[i] = cur_2_prev_vec;
-                            horizontal_proj_vecs[i] = horizontal_proj_vec;
-
-                            // Push points
-                            thickness_offset_pts[i] = thickness_offset_pt;
-                            width_offset_pts[i] = width_offset_pt;
-
-                            // Push Planes
-                            switch (ASSEMBLY_METHOD) {
-                                case 0: // GoodKarma
-                                case 1: // Beveled
-                                    // Use vanishing pt for wall
-                                    wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
-                                    break;
-                                case 2: // Xpansion
-                                    // Use vertical proj rather vanishing pt
-                                    wall_planes[i] = points_2_plane(
-                                        cur_pt,
-                                        mid_pt,
-                                        point_to(mid_pt, vertical_proj_vec, 100)
-                                    );
-                                    break;
-                            }
-
-                            // Shifted wall plane
-                            shifted_wall_planes[i] = points_2_plane(
-                                point_to(thickness_offset_pt, cur_2_sec_vec, 100),
-                                thickness_offset_pt,
-                                width_offset_pt,
-                            );
-                        }
-
-                        // Build the prism and outer/inner faces
-                        for (let i = 0; i < face.num_points; i++) {
-                            const cur_pt = face.points[i];
-                            const next_index = face.next_indexes[i];
-                            const prev_index = face.prev_indexes[i];
-
-                            thickness_offset_pt = thickness_offset_pts[i];
-                            width_offset_pt = width_offset_pts[i];
-
-                            // Get vectors
-                            const mid_pt = face.mid_points[i];
-                            const cur_2_sec_vec = ccw_vecs[i];
-                            const sec_2_cur_vec = cw_vecs[next_index];
-
-                            // Compute Planes to make point intersections
-                            let planes = new Array(4);
-                            switch (ASSEMBLY_DIRECTION) {
-                                // Clockwise Rotation
-                                case 0:
-                                    planes[0] = planes[1] = shifted_wall_planes[prev_index];
-                                    planes[2] = planes[3] = wall_planes[next_index];
-                                    break;
-                                // Counterclockwise Rotation
-                                case 1:
-                                    planes[0] = planes[1] = wall_planes[prev_index];
-                                    planes[2] = planes[3] = shifted_wall_planes[next_index];
-                                    break;
-                                // Symmetry Axis
-                                case 2:
-                                    planes[0] = wall_planes[prev_index];
-                                    planes[1] = shifted_wall_planes[prev_index];
-                                    planes[2] = wall_planes[next_index];
-                                    planes[3] = shifted_wall_planes[next_index];
-                                    break;
-                            }
-
-                            // Compute planes to find intersection points
-                            horizontal_proj_vec = horizontal_proj_vecs[i];
-                            const along_plane = wall_planes[i]
-                            const mid_pt_with_vertical_proj = plan_intersection(
-                                width_offset_pt, horizontal_proj_vec, along_plane
-                            )
-
-                            // A, B, C, D is the top part (trapezoid) of the timber
-                            A = plan_intersection(mid_pt, sec_2_cur_vec, planes[0]);
-                            B = plan_intersection(thickness_offset_pt, sec_2_cur_vec, planes[1]);
-                            C = plan_intersection(mid_pt, cur_2_sec_vec, planes[2])
-                            D = plan_intersection(thickness_offset_pt, cur_2_sec_vec, planes[3])
-
-                            // E, F, G, H is the bottom part (trapezoid) of the timber
-                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_cur_vec, planes[0]);
-                            F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
-                            G = plan_intersection(mid_pt_with_vertical_proj, cur_2_sec_vec, planes[2]);
-                            H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
-
-                            // Reverse top and bottom sides depends on the xpansion direction
-                            if (OUTWARD_EXPANSION) {
-                                [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
-                            }
-
-                            // Build a TrapezoidalPrism with a label prefixed from the crown face label
-                            const crown_face = zome_faces_3D[crown_index]
-                            timber_label_index += 1;
-                            const timber_label = `${crown_face.label}${timber_label_index}`;
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label, face.color);
-                            skeleton_3D.push(timber_prism);
-
-                            // Until the exterior/interior face has been built
-                            if (outer_faces_3D[crown_index] === undefined) {
-                                // If at least one is undefined
-                                if (_.some(outer_face_points, p => p === undefined)) {
-                                    const crown_face_point_index = _.findIndex(crown_face.points, p => _.isEqual(p, cur_pt));
-                                    if (crown_face_point_index > -1) {
-                                        outer_face_points[crown_face_point_index] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
-                                        inner_face_points[crown_face_point_index] = plan_intersection(E, sec_2_cur_vec, wall_planes[prev_index]);
-                                    }
-                                }
-
-                                // If every points are defined
-                                if (_.every(outer_face_points, p => p !== undefined)) {
-                                    inner_faces_3D[crown_index] = Polygon3D.copy(crown_face, inner_face_points);
-                                    outer_faces_3D[crown_index] = Polygon3D.copy(crown_face, outer_face_points);
-
-                                    // Footing parameters computing
-                                    // On the two last crown, check if points are far enough
-                                    // Take vectors and points from outer/inner faces to build a Footing timber
-                                    if ([3, 5].includes(crown_face.num_points)) {
-                                        const start_index = (crown_face.num_points === 5) ? 1 : 0;
-                                        [B, D, F, H] = [
-                                            outer_face_points[start_index + 1], // outer top left corner
-                                            outer_face_points[start_index + 2], // outer top right corner
-                                            inner_face_points[start_index + 1], // inner top left corner
-                                            inner_face_points[start_index + 2], // inner top right corner
-                                        ]
-
-                                        _.forEach([B, D, F, H], p => {
-                                            lowest_vertical_position = Math.min(p[1], lowest_vertical_position);
-                                        });
-
-                                        // Add Footing params to build prism later with the lowest_vertical_position variable
-                                        footing_params.push([B, D, F, H]);
-                                    }
-
-                                    // Create next array as long as possible
-                                    const next_crown_index = crown_index + 1;
-                                    if (next_crown_index < zome_faces_3D.length) {
-                                        inner_face_points = new Array(zome_faces_3D[next_crown_index].num_points);
-                                        outer_face_points = new Array(zome_faces_3D[next_crown_index].num_points);
-                                    }
-                                }
-                            }
-
-                            vanishing_lines.push([vanishing_pt, cur_pt]);
+                            // Add Footing params to build prism later with the lowest_vertical_position variable
+                            footing_params.push([B, D, F, H]);
                         }
                     }
 
