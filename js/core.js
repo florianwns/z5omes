@@ -127,13 +127,15 @@ function mul(p1, k) {
 }
 
 function are_points_equal(p1, p2) {
-    return _.isEqualWith(p1, p2, round_values);
+    const [x1, y1, z1] = round_values(p1);
+    const [x2, y2, z2] = round_values(p2);
+    return x1 === x2 && y1 === y2 && z1 === z2;
 }
 
 function round_values(pt, num_digits = FLOAT_PRECISION) {
     const rounded_pt = new Array(pt.length);
-    for (let i; i < pt.length; i++) {
-        rounded_pt[i] = to_decimal(value, num_digits);
+    for (let i = 0; i < pt.length; i++) {
+        rounded_pt[i] = to_decimal(pt[i], num_digits);
     }
     return rounded_pt;
 }
