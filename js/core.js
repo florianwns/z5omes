@@ -1736,7 +1736,8 @@ class ItemHashCollection {
 class Zome {
     constructor(
         {
-            num = null,
+            num_spirals = null,
+            num_crowns = null,
             assembly_method = null,
             rotation_angles = null,
             rotated_colors = null,
@@ -1760,7 +1761,8 @@ class Zome {
             vanishing_lines = null
         }
     ) {
-        this.num = num || 0;
+        this.num_spirals = num_spirals || 0;
+        this.num_crowns = num_crowns || 0;
         this.assembly_method = assembly_method || 0;
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];

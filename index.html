@@ -116,7 +116,7 @@
                 <div x-show="params.help_is_displayed">
                     <p class="mb-1" x-text="i18n('help_shape')"></p>
 
-                    <!-- Num of Order -->
+                    <!-- Num of Spirals -->
                     <b>N</b> :
                     <span x-text="i18n('help_n_param')"></span>
                 </div>
@@ -126,9 +126,9 @@
                         N
                     </span>
                     <input class="form-control form-range" :max="ALPHABET.length" min="3" step="1" type="range"
-                           x-model.number="params.num" x-ref="num_slider">
+                           x-model.number="params.num_spirals" x-ref="num_slider">
                     <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="params.num">
+                           x-model.lazy.number="params.num_spirals">
                 </div>
 
                 <!-- Num of rhombuses vertically (from the top) -->
@@ -143,7 +143,7 @@
                                 @click="params.use_hr_mode = !params.use_hr_mode">
                             M
                         </button>
-                        <input class="form-control form-range" min="1" :max="params.num - 1" step="1" type="range"
+                        <input class="form-control form-range" min="1" :max="params.num_spirals - 1" step="1" type="range"
                                x-model.number="num_rhombuses_vertically" x-ref="num_rhombuses_vertically_slider">
                         <input class="form-control" step="1" type="number"
                                x-model.lazy.number="num_rhombuses_vertically">
@@ -163,7 +163,7 @@
                             HR
                         </button>
                         <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                               :min="to_decimal(2 / params.num)"
+                               :min="to_decimal(2 / params.num_spirals)"
                                x-model.number="params.height_ratio" x-ref="height_ratio_slider">
                         <input class="form-control" step="0.01" type="number"
                                x-model.lazy.number="params.height_ratio">
@@ -535,7 +535,7 @@
                                                 <i class="fa fa-tag"></i>
                                             </button>
 
-                                            <!-- Num Spiral Rotations -->
+                                            <!-- Num Spirals to display -->
                                             <div class="vstack">
                                                 <button class="btn btn-primary"
                                                         @click="draw_zome = !draw_zome"
@@ -547,15 +547,15 @@
                                                 </button>
                                                 <div class="mt-1" x-show="draw_zome && clone_and_rotate_mode">
                                                     <button class="btn btn-sm btn-small-padding"
-                                                            @click="num_spirals = Math.max(num_spirals - 1, 1)"
-                                                            :class="(num_spirals <= 1) ? `btn-secondary` : `btn-primary`"
+                                                            @click="num_spirals_to_display = Math.max(num_spirals_to_display - 1, 1)"
+                                                            :class="(num_spirals_to_display <= 1) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('tooltip_decrease_spiral_rotations')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
                                                     <button class="btn btn-sm btn-small-padding"
-                                                            @click="num_spirals = Math.min(num_spirals + 1, params.num)"
-                                                            :class="(num_spirals >= params.num) ? `btn-secondary` : `btn-primary`"
+                                                            @click="num_spirals_to_display = Math.min(num_spirals_to_display + 1, params.num_spirals)"
+                                                            :class="(num_spirals_to_display >= params.num_spirals) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('tooltip_increase_spiral_rotations')">
                                                         <i class="fa fa-plus"></i>
@@ -1637,11 +1637,11 @@
                     return humanize_distance(value);
                 },
                 get total_area_of_faces() {
-                    const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num, 0);
+                    const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num_spirals, 0);
                     return humanize_area(value);
                 },
                 get total_number_of_faces() {
-                    return ZOME.num * this.faces.length;
+                    return ZOME.num_spirals * this.faces.length;
                 },
 
                 get floor_diameter() {
@@ -1953,7 +1953,7 @@
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
-                    for (let i = 0; i < ZOME.num; i++) {
+                    for (let i = 0; i < ZOME.num_spirals; i++) {
                         _.forEach(mandala_3D, (face) => {
                             mandala_faces.push(
                                 new Polygon3D(
@@ -1975,7 +1975,7 @@
                     const mandala_3D = ZOME.mandala_3D;
 
                     // For each color, Add a page with outer_faces_3D faces
-                    for (let i = 0; i < ZOME.num; i++) {
+                    for (let i = 0; i < ZOME.num_spirals; i++) {
                         const colored_spiral_faces = [];
                         _.forEach(mandala_3D, (face) => {
                             colored_spiral_faces.push(
@@ -2044,8 +2044,8 @@
 
             return {
                 // 3D Rendering Parameters
-                num_spirals: 1,
-                last_zome_num: 1,
+                num_spirals_to_display: 1,
+                last_num_spirals: 1,
                 is_spinning: false,
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
@@ -2079,10 +2079,10 @@
                         })
                     );
 
-                    this.num_spirals = this.params.num;
-                    this.last_zome_num = this.params.num;
+                    this.num_spirals_to_display = this.params.num_spirals;
+                    this.last_num_spirals = this.params.num_spirals;
 
-                    ["num_spirals", "inverse_Y_Z_axes", "add_floor", "type_of_3D_objects"].forEach(
+                    ["num_spirals_to_display", "inverse_Y_Z_axes", "add_floor", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -2285,10 +2285,10 @@
                         }
 
                         if (this.clone_and_rotate_mode) {
-                            for (let spiral_index = 1; spiral_index < ZOME.num; spiral_index++) {
+                            for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
                                 const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
 
-                                if (spiral_index < this.num_spirals) {
+                                if (spiral_index < this.num_spirals_to_display) {
                                     const rotated_mesh = item.mesh.clone();
                                     rotated_mesh.rotateY(rotation_angle);
                                     zome_meshes.add(rotated_mesh);
@@ -2342,8 +2342,9 @@
                 process() {
                     this.clear();
 
-                    if (this.last_zome_num !== ZOME.num) {
-                        this.num_spirals = this.last_zome_num = ZOME.num;
+                    console.log(this.last_num_spirals, ZOME.num_spirals)
+                    if (this.last_num_spirals !== ZOME.num_spirals) {
+                        this.num_spirals_to_display = this.last_num_spirals = ZOME.num_spirals;
                     }
                     // Display switch buttons
                     this.show_vanishing_lines_toggle_btn = ZOME.vanishing_lines
@@ -2393,11 +2394,11 @@
 
                     // Clone meshes and rotate them around Y Axes
                     if (this.clone_and_rotate_mode) {
-                        for (let spiral_index = 1; spiral_index < ZOME.num; spiral_index++) {
+                        for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
                             const angle = ZOME.rotation_angles[spiral_index].rad;
 
                             // Add mesh
-                            if (spiral_index < this.num_spirals) {
+                            if (spiral_index < this.num_spirals_to_display) {
                                 const rotated_mesh_geometry = mesh_geometry.clone();
                                 rotated_mesh_geometry.rotateY(angle);
 
@@ -2572,7 +2573,7 @@
                     language: null,
 
                     // Shape Parameters
-                    num: 10,                            // number of faces (kites or diamonds)
+                    num_spirals: 10,                    // number of spirals
                     theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
                     angle_unit: "deg",                  // Degrees or Radians
                     height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
@@ -2655,13 +2656,15 @@
                         this.params.assembly_direction = this.constrained_assembly_direction;
                     });
 
-                    // Refresh the height_ratio if you change the zome params.num
-                    this.$watch("params.num", () => {
-                        this.clamp("height_ratio", this.params.height_ratio);
-                        if (!this.use_hr_mode) {
-                            this.params.kite_ratio = 1;
-                            this.params.height_ratio = to_decimal((this.num_rhombuses_vertically + 1) / this.params.num);
-                        }
+                    // Refresh the height_ratio if you change the zome params.num_spirals
+                    _.forEach(["num_spirals", "use_hr_mode"], key => {
+                        this.$watch(`params.${key}`, (value) => {
+                            this.clamp("height_ratio", this.params.height_ratio);
+                            if (!this.params.use_hr_mode) {
+                                this.params.kite_ratio = 1;
+                                this.params.height_ratio = to_decimal((this.num_rhombuses_vertically + 1) / this.params.num_spirals);
+                            }
+                        });
                     });
 
                     // Refresh data related to the height
@@ -2761,11 +2764,11 @@
                 },
 
                 get num_rhombuses_vertically() {
-                    return Math.round(this.params.num * this.params.height_ratio - 1, 0);
+                    return Math.round(this.params.num_spirals * this.params.height_ratio - 1, 0);
                 },
                 set num_rhombuses_vertically(value) {
                     this.params.kite_ratio = 1;
-                    this.params.height_ratio = to_decimal((value + 1) / this.params.num);
+                    this.params.height_ratio = to_decimal((value + 1) / this.params.num_spirals);
                 },
                 get is_rhombus() {
                     return this.params.kite_ratio === 1;
@@ -2798,7 +2801,7 @@
                     this.clamp("timber_thickness_in_mm", to_mm(value, this.params.measuring_unit));
                 },
                 get max_timber_thickness() {
-                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.params.num)), FLOAT_2_STR_PRECISION);
+                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.params.num_spirals)), FLOAT_2_STR_PRECISION);
                 },
                 set z_vanishing_point(value) {
                     this.clamp("z_vanishing_point_in_mm", to_mm(value, this.params.measuring_unit));
@@ -2828,7 +2831,7 @@
                     return this.params.zome_height_in_mm / this.params.height_ratio;
                 },
                 get k_sum() {
-                    return this.is_rhombus ? this.params.num : (1 - Math.pow(this.params.kite_ratio, this.params.num)) / (1 - this.params.kite_ratio);
+                    return this.is_rhombus ? this.params.num_spirals : (1 - Math.pow(this.params.kite_ratio, this.params.num_spirals)) / (1 - this.params.kite_ratio);
                 },
                 // First crown properties
                 get first_edge() {
@@ -2894,14 +2897,14 @@
                 format(key, value) {
                     // Format Zome parameters by pair of [key, value]
                     switch (key) {
-                        case 'params.num':
+                        case 'params.num_spirals':
                             return to_decimal(value, 0);
                         default:
                             return to_decimal(value);
                     }
                 },
                 randomize_shape() {
-                    _.forEach(["num", "theta_deg", "num_rhombuses_vertically"], (key) => {
+                    _.forEach(["num_spirals", "theta_deg", "num_rhombuses_vertically"], (key) => {
                             const slider = this.get_slider(key);
                             this.params[key] = _.random(slider.min, slider.max)
                         },
@@ -2926,7 +2929,7 @@
                         .replaceAll('T', '_')
                         .replaceAll(':', '')
                         .slice(0, 9);
-                    return `Z5omes_${date_str}N${this.params.num}${small_hash(this.params)}${suffix}`
+                    return `Z5omes_${date_str}N${this.params.num_spirals}${small_hash(this.params)}${suffix}`
                 },
                 add_vertex(vertices, p) {
                     vertices.push(p);
@@ -2940,7 +2943,7 @@
                     let zome_faces_3D = [];
 
                     // Config Parameters
-                    const N = this.params.num;
+                    const N = this.params.num_spirals;
                     const K = this.params.kite_ratio;
                     const ZOME_HEIGHT = this.params.zome_height_in_mm;
                     const TIMBER_WIDTH = this.params.timber_width_in_mm;
@@ -3075,9 +3078,9 @@
                     }
 
                     // Build Outer/Inner faces
-                    const num_faces = zome_faces_3D.length
-                    const outer_faces_3D = new Array(num_faces),
-                        inner_faces_3D = new Array(num_faces);
+                    const num_crowns = zome_faces_3D.length
+                    const outer_faces_3D = new Array(num_crowns),
+                        inner_faces_3D = new Array(num_crowns);
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -3287,7 +3290,8 @@
 
                     // Save Zome and dispatch it
                     ZOME = new Zome({
-                        num: N,
+                        num_spirals: N,
+                        num_crowns: num_crowns,
                         assembly_method: ASSEMBLY_METHOD,
 
                         rotation_angles: rotation_angles,

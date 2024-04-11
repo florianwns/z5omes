@@ -73,8 +73,8 @@ const I18N_EN = {
 
         // Help
         help_shape: "The shape of a zome is determined by :",
-        help_n_param: "Number of rhombuses rotating around the vertical axis",
-        help_m_param: "Number of rhombuses from top to bottom",
+        help_n_param: "Number of rhombuses spirals rotating around the vertical axis",
+        help_m_param: "Number of rhombuses crowns from top to bottom",
         help_f_param: "Shape angle(Θ) | Number(F) which allows to calculate the slope of zome. F = tan(Θ)",
         help_hr_param: "Ratio of the visible height of the zome to its total height (Set HR to 1 for an entire zome)",
         help_magnetize_param: "Magnetize to complete the zome with a whole rhombus",
