@@ -272,3 +272,32 @@ ul.keyboard-shortcut-list .key:hover {
 .up-first:first-letter {
     text-transform: uppercase;
 }
+
+
+svg.svg_rhombus_icon use {
+    stroke: #0B5ED7;
+    stroke-width: 2;
+    fill: none;
+}
+
+
+.btn-primary svg.svg_rhombus_icon use,
+.btn-secondary svg.svg_rhombus_icon use,
+input:checked + label svg.svg_rhombus_icon use {
+    stroke: white !important;
+}
+
+svg.svg_rhombus_big_size use {
+    stroke: #6c757d;
+    stroke-width: 0.75;
+    fill: none;
+    cursor: pointer;
+}
+
+svg.svg_rhombus_big_size use:hover {
+    stroke: #5c636a;
+}
+
+svg.svg_rhombus_big_size use.selected {
+    stroke: #0B5ED7;
+}

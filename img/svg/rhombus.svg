@@ -1,0 +1,59 @@
+<svg width="26" height="26"
+     viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Rhombus -->
+    <polygon points="13 2, 2 13, 13 24, 24 13"
+             fill="#FFF" stroke="#0B5ED7"
+             stroke-width="1"/>
+
+    <!-- Horizontal Bar at 1/2 -->
+    <line stroke-width="1" y2="13" x2="13" y1="13"
+          x1="2" stroke="#0B5ED7" fill="none"/>
+
+
+    <line stroke-width="1" y2="13" x2="24" y1="13"
+          x1="13" stroke="#0B5ED7" fill="none"/>
+
+    <!-- Double horizontal bar -->
+    <line stroke-width="a" y2="13" x2="23.5" y1="13"
+          x1="2.5" stroke="#0B5ED7" fill="none"/>
+
+    <line stroke-width="1" y2="7.5" x2="18.5" y1="7.5"
+          x1="7.5" stroke="#0B5ED7" fill="none"/>
+
+    <line stroke-width="1" y2="18.5" x2="18.5" y1="18.5"
+          x1="7.5" stroke="#0B5ED7" fill="none"/>
+
+    <!-- Vertical Bar at 1/2 -->
+    <line stroke-width="1" y2="24" x2="13" y1="2"
+          x1="13" stroke="#0B5ED7" fill="none"/>
+
+     Double vertical bar
+    <line stroke-width="a" y2="23.5" x2="13" y1="2.5"
+          x1="13" stroke="#0B5ED7" fill="none"/>
+
+    <!-- Diagonals -->
+    <line y2="13" x2="13" y1="7.5"
+          x1="7.5" stroke-width="1"
+          stroke="#0B5ED7"
+          fill="none"/>
+
+    <line y2="13" x2="13" y1="7.5"
+          x1="18.5" stroke-width="1"
+          stroke="#0B5ED7"
+          fill="none"/>
+
+<!--    <line y2="13" x2="13" y1="18.5"-->
+<!--          x1="7.5" stroke-width="1"-->
+<!--          stroke="#0B5ED7"-->
+<!--          fill="none"/>-->
+
+<!--    <line y2="13" x2="13" y1="18.5"-->
+<!--          x1="18.5" stroke-width="1"-->
+<!--          stroke="#0B5ED7"-->
+<!--          fill="none"/>-->
+
+    <!-- V Bars on top -->
+
+</svg>
+

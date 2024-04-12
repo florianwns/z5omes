@@ -2,7 +2,44 @@
 
 * [x] Sur le renforcement des tasseaux, pouvoir avec un multiselect choisir les niveaux auquel les ajouter.
   
-* [ ] faire fonctionner le multiselect en créant un tableau de type 
+* [ ] faire fonctionner le pseudo multiselect en créant une matrice de boolean
+
+  on utilise la technique des flags avec les puissances de 2 
+  <br>pour stocker les valeurs dans l'url et on les dépile dans une matrices de booleen
+  <br>(crown * svg selected value)
+  
+  - 0 pas de barre => rhombus pas divisé
+  - 1 => une barre
+  - 3 = 1 + 2 => deux barre
+  - ... etc
+
+* [ ] un fois la matrice en place, il faut pouvoir diviser le losange à partir de ça
+  <br>.... trouver l'algo pour ça
+
+
+un algorithme d'exploration peut être utilisé
+en imaginant une matrice comme suit
+de 9 x 9
+<pre>
+<code>
+[
+0 0 0 0 1 0 0 0 0
+0 0 0 1 0 1 0 0 0
+0 0 1 0 0 0 1 0 0
+0 1 0 0 0 0 0 1 0
+1 0 0 0 0 0 0 0 1
+0 1 0 0 0 0 0 1 0
+0 0 1 0 0 0 1 0 0
+0 0 0 1 0 1 0 0 0
+0 0 0 0 1 0 0 0 0
+]
+</code>
+</pre>
+.... hum pas sûr que ça marche... mais à étudier plus longuement
+
+
+* [ ] valider que les polygones sont tous convexes 
+  <br> sinon afficher un message d'erreur.
 
 * [ ] pour le flattened mandala avec le bindu zome, 
   pas de rotate sur le même crown_index

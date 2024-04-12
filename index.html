@@ -749,21 +749,90 @@
                                             <svg xmlns="http://www.w3.org/2000/svg">
                                                 <symbol id="svg_horizontal_bar" width="26"
                                                         height="26" viewBox="0 0 26 26">
-                                                    <line stroke-width="2" y2="13" x2="24" y1="13"
-                                                          x1="2" stroke="#0B5ED7" fill="none"/>
+                                                    <line y2="13" x2="24" y1="13" x1="2"/>
                                                 </symbol>
                                                 <symbol id="svg_vertical_bar" width="26" height="26"
                                                         viewBox="0 0 26 26">
-                                                    <line stroke-width="2" y2="24" x2="13" y1="2"
-                                                          x1="13" stroke="#0B5ED7" fill="none"/>
+                                                    <line y2="24" x2="13" y1="2" x1="13"/>
                                                 </symbol>
 
                                                 <!-- Rhombus -->
                                                 <symbol id="svg_rhombus" width="26" height="26"
                                                         viewBox="0 0 26 26">
-                                                    <polygon points="13 2, 2 13, 13 24, 24 13"
-                                                             fill="#FFF" stroke="#0B5ED7"
-                                                             stroke-width="2"/>
+                                                    <polygon points="13 2, 2 13, 13 24, 24 13"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at top -->
+                                                <symbol id="svg_horizontal_bar_at_top" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="7.5" x2="18.5" y1="7.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at right -->
+                                                <symbol id="svg_horizontal_bar_at_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="24" y1="13" x1="13"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at bottom -->
+                                                <symbol id="svg_horizontal_bar_at_bottom" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="18.5" x2="18.5" y1="18.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at left -->
+                                                <symbol id="svg_horizontal_bar_at_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="13" x1="2"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at top -->
+                                                <symbol id="svg_vertical_bar_at_top" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="2" x1="13"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at bottom -->
+                                                <symbol id="svg_vertical_bar_at_bottom" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="24" x2="13" y1="13" x1="13"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at left -->
+                                                <symbol id="svg_vertical_bar_at_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="18.5" x2="7.5" y1="7.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at right -->
+                                                <symbol id="svg_vertical_bar_at_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="18.5" x2="18.5" y1="7.5" x1="18.5"/>
+                                                </symbol>
+
+
+                                                <!-- Diagonal Bar at top left -->
+                                                <symbol id="svg_diagonal_bar_at_top_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="7.5" x1="7.5" />
+                                                </symbol>
+
+                                                <!-- Diagonal Bar at top right -->
+                                                <symbol id="svg_diagonal_bar_at_top_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="7.5" x1="18.5"/>
+                                                </symbol>
+
+                                                <!-- Diagonal Bar at bottom left -->
+                                                <symbol id="svg_diagonal_bar_at_bottom_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="18.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Diagonal Bar at bottom right -->
+                                                <symbol id="svg_diagonal_bar_at_bottom_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="18.5" x1="18.5"/>
                                                 </symbol>
                                             </svg>
                                         </div>
@@ -792,7 +861,7 @@
                                                        value=0 id="btn-rhombus-type-1" autocomplete="off" checked>
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
                                                        for="btn-rhombus-type-1">
-                                                    <svg width="18" height="18"
+                                                    <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_rhombus"></use>
                                                     </svg>
@@ -802,7 +871,7 @@
                                                        value=1 id="btn-rhombus-divided-horizontally" autocomplete="off">
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
                                                        for="btn-rhombus-divided-horizontally">
-                                                    <svg width="18" height="18"
+                                                    <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_rhombus"></use>
                                                         <use href="#svg_horizontal_bar"></use>
@@ -813,7 +882,7 @@
                                                        value=2 id="btn-rhombus-divided-vertically" autocomplete="off">
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
                                                        for="btn-rhombus-divided-vertically">
-                                                    <svg width="18" height="18"
+                                                    <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_rhombus"></use>
                                                         <use href="#svg_vertical_bar"></use>
@@ -823,9 +892,69 @@
                                                 <input type="radio" class="btn-check" name="btn-rhombus-type"
                                                        value=3 id="btn-custom-rhombus" autocomplete="off">
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#framework-customizer-modal"
                                                        for="btn-custom-rhombus">
                                                     <i class="fa fa-pencil"></i>
                                                 </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Keyboard shortcuts Modal -->
+                                    <div class="modal fade" id="framework-customizer-modal" tabindex="-1"
+                                         aria-labelledby="framework-customizer-modal-title" aria-hidden="true">
+                                        <div class="modal-dialog  mx-auto">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="text-secondary my-1 me-3"
+                                                        id="framework-customizer-modal-title">
+                                                        <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                                                        <span x-text="i18n('framework_customizer')"></span>
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="vstack">
+                                                        <div class="d-flex justify-content-center m-auto mb-3">
+                                                            <svg class="svg_rhombus_big_size" width="300" height="300"
+                                                                 viewBox="0 0 26 26">
+
+                                                                <use href="#svg_horizontal_bar_at_top"></use>
+                                                                <use href="#svg_horizontal_bar_at_right"></use>
+                                                                <use href="#svg_horizontal_bar_at_bottom"></use>
+                                                                <use href="#svg_horizontal_bar_at_left"></use>
+
+                                                                <use href="#svg_vertical_bar_at_top"></use>
+                                                                <use href="#svg_vertical_bar_at_right"></use>
+                                                                <use href="#svg_vertical_bar_at_bottom"></use>
+                                                                <use href="#svg_vertical_bar_at_left"></use>
+
+                                                                <use href="#svg_diagonal_bar_at_top_left"></use>
+                                                                <use href="#svg_diagonal_bar_at_top_right"></use>
+                                                                <use href="#svg_diagonal_bar_at_bottom_right"></use>
+                                                                <use href="#svg_diagonal_bar_at_bottom_left"></use>
+
+                                                                <use class="selected" href="#svg_rhombus"></use>
+                                                            </svg>
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm mx-auto w-auto">
+                                                            <span class="btn btn-secondary p-1" style="cursor:initial;"></span>
+                                                            <template x-for="(svg_name, i) in FRAMEWORK_CUSTOMIZER_SVG_IDS" :key="i">
+                                                                <button class="btn btn-secondary text-start" type="button">
+                                                                    <svg class="svg_rhombus_icon" width="18" height="18"
+                                                                         viewBox="0 0 26 26">
+                                                                        <use href="#svg_rhombus"></use>
+                                                                        <use :href="svg_name"></use>
+                                                                    </svg>
+                                                                </button>
+                                                            </template>
+                                                            <span class="btn btn-secondary p-1" style="cursor:initial;"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1145,14 +1274,19 @@
     const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
 
-    const SVG_RHOMBUSES = [
-        "svg_empty_rhombus", "svg_rhombus",
-        "svg_rhombus_with_horizontal_bar", "svg_rhombus_with_vertical_bar",
-        "svg_rhombus_with_mini_rhombus",
-        "svg_top_half_rhombus",
-        "svg_right_half_rhombus",
-        "svg_bottom_half_rhombus",
-        "svg_left_half_rhombus",
+    const FRAMEWORK_CUSTOMIZER_SVG_IDS = [
+        "#svg_horizontal_bar_at_top",
+        "#svg_horizontal_bar_at_right",
+        "#svg_horizontal_bar_at_bottom",
+        "#svg_horizontal_bar_at_left",
+        "#svg_vertical_bar_at_top",
+        "#svg_vertical_bar_at_right",
+        "#svg_vertical_bar_at_bottom",
+        "#svg_vertical_bar_at_left",
+        "#svg_diagonal_bar_at_top_left",
+        "#svg_diagonal_bar_at_top_right",
+        "#svg_diagonal_bar_at_bottom_right",
+        "#svg_diagonal_bar_at_bottom_left",
     ];
 
     // Import i18n Dictionaries
@@ -2748,10 +2882,6 @@
                     return this.params.assembly_direction % this.num_assembly_directions;
                 },
 
-                get_svg_rhombus_id(type_id) {
-                    return `#${SVG_RHOMBUSES[type_id % SVG_RHOMBUSES.length]}`;
-                },
-
                 set constrained_assembly_direction(value) {
                     this.params.assembly_direction = value % this.num_assembly_directions;
                 },
@@ -2803,7 +2933,7 @@
                     this.params.kite_ratio = 1;
                 },
                 get_slider(key) {
-                    const slider_id =`${key}_slider`;
+                    const slider_id = `${key}_slider`;
                     return eval(`this.$refs.${slider_id}`) || document.getElementById(slider_id);
                 },
                 clamp(key, value, in_params = true) {
