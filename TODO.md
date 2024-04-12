@@ -1,6 +1,8 @@
 # TODO-LIST
 
-* [ ] Sur le renforcement des tasseaux, pouvoir avec un multiselect choisir les niveaux auquel les ajouter.
+* [x] Sur le renforcement des tasseaux, pouvoir avec un multiselect choisir les niveaux auquel les ajouter.
+  
+* [ ] faire fonctionner le multiselect en créant un tableau de type 
 
 * [ ] pour le flattened mandala avec le bindu zome, 
   pas de rotate sur le même crown_index
