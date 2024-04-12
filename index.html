@@ -143,7 +143,8 @@
                                 @click="params.use_hr_mode = !params.use_hr_mode">
                             M
                         </button>
-                        <input class="form-control form-range" min="1" :max="params.num_spirals - 1" step="1" type="range"
+                        <input class="form-control form-range" min="1" :max="params.num_spirals - 1" step="1"
+                               type="range"
                                x-model.number="num_rhombuses_vertically" x-ref="num_rhombuses_vertically_slider">
                         <input class="form-control" step="1" type="number"
                                x-model.lazy.number="num_rhombuses_vertically">
@@ -1432,7 +1433,7 @@
                             draw_y_end = draw_y_start + side.height * pixel_ratio;
 
                             // fit points
-                            const fitted_points = side.fit_points();
+                            const fitted_points = side.fitted_points;
                             const drawing_points = fitted_points.map(p => [
                                 (i < 2 || p[0] < side.width / 2)
                                     ? column_x_start + p[0] * pixel_ratio
@@ -2342,7 +2343,6 @@
                 process() {
                     this.clear();
 
-                    console.log(this.last_num_spirals, ZOME.num_spirals)
                     if (this.last_num_spirals !== ZOME.num_spirals) {
                         this.num_spirals_to_display = this.last_num_spirals = ZOME.num_spirals;
                     }
@@ -3108,7 +3108,7 @@
                         skeleton_3D.push(...face.framework_timbers);
 
                         // Add vanishing lines for the GoodKarma and Beveled methods
-                        if(ASSEMBLY_METHOD < 2){
+                        if (ASSEMBLY_METHOD < 2) {
                             vanishing_lines.push([vanishing_pt, face.points[0]]);
                         }
 
@@ -3276,10 +3276,12 @@
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Retrieve the prism from collection and flatten it
                         const prism = collection.item.flatten();
+
+                        const fitted_points = prism.fitted_points;
                         const translated_points = new Array(prism.num_points);
-                        _.forEach(prism.fit_points(), (point, i) => {
-                            translated_points[i] = add(point, [0, 0, z_origin]);
-                        });
+                        for (let i = 0; i < fitted_points.length; i++) {
+                            translated_points[i] = add(fitted_points[i], [0, 0, z_origin]);
+                        }
 
                         // Add space between timbers
                         z_origin += prism.depth * 2;

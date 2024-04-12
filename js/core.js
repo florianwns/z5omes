@@ -32,6 +32,7 @@ const THREE_VERTEX_COLOR_MATERIAL = new THREE.MeshBasicMaterial({side: THREE.Dou
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const FOOTING_CHAR = '~';
 const FLOOR_CHAR = '⬢';
+const XYZ = ["X", "Y", "Z"];
 
 check_is_mobile = function () {
     let check = false;
@@ -141,19 +142,31 @@ function round_values(pt, num_digits = FLOAT_PRECISION) {
 }
 
 function swap_axes(points, axes_order = "XYZ") {
-    return points.map(p => {
-        const reordered_point = [p[0], p[1], p[2]];
-        const axis_indexes = ["X", "Y", "Z"].map(c => axes_order.indexOf(c));
-        for (let i = 0; i < 3; i++) {
-            const axis_index = axis_indexes[i];
-            if (axis_index === -1) {
-                console.error("Please use only one X, Y, Z for the axes_order");
-                return;
-            }
-            reordered_point[axis_index] = p[i];
+    const axis_indexes = new Array(3);
+    for (let i = 0; i < 3; i++) {
+        const axis_char = axes_order[i];
+        const axis_index = axis_char == "X"
+            ? 0
+            : axis_char == "Y"
+                ? 1
+                : axis_char == "Z"
+                    ? 2
+                    : -1;
+
+        if (axis_index === -1) {
+            console.error("Please use only one X, Y, Z for the axes_order");
+            return;
         }
-        return reordered_point;
-    });
+        axis_indexes[i] = axis_index;
+    }
+
+    // Reorder points
+    const [i0, i1, i2] = axis_indexes;
+    const reordered_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        reordered_points[i] = [points[i][i0], points[i][i1], points[i][i2]];
+    }
+    return reordered_points;
 }
 
 
@@ -238,7 +251,7 @@ function points_2_plane(p1, p2, p3) {
 }
 
 function plane_on_axis(axis = "X", value = 0) {
-    const axis_index = _.findIndex(["X", "Y", "Z"], item => item === axis.toUpperCase());
+    const axis_index = _.findIndex(XYZ, item => item === axis.toUpperCase());
     const points = [
         [1, 0, 0],
         [0, 1, 0],
@@ -310,23 +323,28 @@ function rotate_point_around_z_axis(vec, angle, origin = [0, 0, 0]) {
     ];
 }
 
-function rotate_point_around_y_axis(vec, angle) {
+function rotate_points_around_z_axis(points, angle) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
-    // Rotate an 2D vector around z axis with an origin
-    return [
-        vec[0] * cos_theta + vec[2] * sin_theta,
-        vec[1],
-        -vec[0] * sin_theta + vec[2] * cos_theta,
-    ];
+    // Rotate 2D points around z axis
+    const rotated_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        const [x, y, z] = points[i];
+        rotated_points[i] = [
+            x * cos_theta - y * sin_theta,
+            x * sin_theta + y * cos_theta,
+            z,
+        ];
+    }
+    return rotated_points;
 }
 
 function rotate_points_around_y_axis(points, angle) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
-    // Rotate an 2D vector around y axis with an origin
+    // Rotate 2D points around y axis
     const rotated_points = new Array(points.length);
     for (let i = 0; i < points.length; i++) {
         const [x, y, z] = points[i];
@@ -912,6 +930,22 @@ class Base3DGeometry {
         return this._edge_points;
     }
 
+    get fitted_points() {
+        // Adjust the points so the minimum values end up at zero
+        if (this._fitted_points === null) {
+            this._fitted_points = new Array(this.num_points);
+            for (let i = 0; i < this.num_points; i++) {
+                const point = this.points[i];
+                this._fitted_points[i] = [
+                    point[0] - this.x_min,
+                    point[1] - this.y_min,
+                    point[2] - this.z_min
+                ];
+            }
+        }
+        return this._fitted_points
+    }
+
     compute_label_mesh(font) {
         if (this._label_mesh !== null || font === null) {
             return;
@@ -992,9 +1026,9 @@ class Base3DGeometry {
         }
     }
 
-
     reset_other_points() {
         this._points_2D = null;
+        this._fitted_points = null;
         this._mid_points = null;
         this._centroid = null;
     }
@@ -1075,11 +1109,6 @@ class Base3DGeometry {
 
     flatten_face(side = "top") {
         return Polygon3D.copy(this, this.flattened_points);
-    }
-
-    fit_points() {
-        // Adjust the points so the minimum values end up at zero
-        return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2] - this.z_min]);
     }
 
     filter_points_by_side(side, points) {
@@ -1673,9 +1702,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         }
 
         if (rotation_angle !== null) {
-            flattened_points = flattened_points.map(p => {
-                return rotate_point_around_z_axis(p, rotation_angle);
-            });
+            flattened_points = rotate_points_around_z_axis(flattened_points, rotation_angle);
         }
 
         const filtered_points = add_opposite_side
