@@ -126,7 +126,7 @@
                         N
                     </span>
                     <input class="form-control form-range" :max="ALPHABET.length" min="3" step="1" type="range"
-                           x-model.number="params.num_spirals" x-ref="num_slider">
+                           x-model.number="params.num_spirals" x-ref="num_spirals_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="params.num_spirals">
                 </div>
@@ -757,23 +757,6 @@
                                                     <line stroke-width="2" y2="24" x2="13" y1="2"
                                                           x1="13" stroke="#0B5ED7" fill="none"/>
                                                 </symbol>
-                                                <symbol id="svg_v_bars" width="26" height="26"
-                                                        viewBox="0 0 26 26">
-                                                    <line y2="12.64023" x2="13.64504" y1="6.8349"
-                                                          x1="7.94721" stroke-width="2"
-                                                          stroke="#0B5ED7"
-                                                          fill="none"/>
-                                                    <line y2="12.15645" x2="13.21501" y1="6.56613"
-                                                          x1="17.51526" stroke-width="2"
-                                                          stroke="#0B5ED7"
-                                                          fill="none"/>
-                                                </symbol>
-
-                                                <!-- Rhombus -->
-                                                <symbol id="svg_empty_rhombus" width="26"
-                                                        height="26"
-                                                        viewBox="0 0 26 26">
-                                                </symbol>
 
                                                 <!-- Rhombus -->
                                                 <symbol id="svg_rhombus" width="26" height="26"
@@ -782,158 +765,66 @@
                                                              fill="#FFF" stroke="#0B5ED7"
                                                              stroke-width="2"/>
                                                 </symbol>
-
-                                                <!-- Rhombus with horizontal bar -->
-                                                <symbol id="svg_rhombus_with_horizontal_bar"
-                                                        width="26" height="26" viewBox="0 0 26 26">
-                                                    <use href="#svg_rhombus"></use>
-                                                    <use href="#svg_horizontal_bar"></use>
-                                                </symbol>
-
-                                                <!-- Rhombus with horizontal bar -->
-                                                <symbol id="svg_rhombus_with_vertical_bar"
-                                                        width="26" height="26" viewBox="0 0 26 26">
-                                                    <use href="#svg_rhombus"></use>
-                                                    <use href="#svg_vertical_bar"></use>
-                                                </symbol>
-
-                                                <!-- Rhombus with mini rhombus-->
-                                                <symbol id="svg_rhombus_with_mini_rhombus"
-                                                        width="26"
-                                                        height="26"
-                                                        viewBox="0 0 26 26">
-                                                    <use href="#svg_rhombus"></use>
-                                                    <use href="#svg_horizontal_bar"></use>
-                                                    <use href="#svg_v_bars"></use>
-                                                </symbol>
-
-                                                <!-- Top half rhombus -->
-                                                <symbol id="svg_top_half_rhombus" width="26"
-                                                        height="26"
-                                                        viewBox="0 0 26 26">
-                                                    <polygon points="13 2, 2 13, 24 13"
-                                                             fill="#FFF" stroke="#0B5ED7"
-                                                             stroke-width="2"/>
-                                                </symbol>
-
-                                                <!-- Right half rhombus -->
-                                                <symbol id="svg_right_half_rhombus" width="26"
-                                                        height="26"
-                                                        viewBox="0 0 26 26">
-                                                    <polygon points="13 2, 24 13, 13 24"
-                                                             fill="#FFF" stroke="#0B5ED7"
-                                                             stroke-width="2"/>
-                                                </symbol>
-
-                                                <!-- Bottom half rhombus -->
-                                                <symbol id="svg_bottom_half_rhombus" width="26"
-                                                        height="26"
-                                                        viewBox="0 0 26 26">
-                                                    <polygon points="2 13, 24 13, 13 24"
-                                                             fill="#FFF" stroke="#0B5ED7"
-                                                             stroke-width="2"/>
-                                                </symbol>
-
-                                                <!-- Left half rhombus -->
-                                                <symbol id="svg_left_half_rhombus" width="26"
-                                                        height="26"
-                                                        viewBox="0 0 26 26">
-                                                    <polygon points="13 2, 2 13, 13 24"
-                                                             fill="#FFF" stroke="#0B5ED7"
-                                                             stroke-width="2"/>
-                                                </symbol>
                                             </svg>
                                         </div>
+
                                         <div class="d-flex justify-content-center m-auto">
+                                            <div class="input-group input-group-sm me-2">
+                                                <button class="btn btn-primary text-start" type="button"
+                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_selected_crown')"
+                                                        data-bs-original-title="Selected crown">
+                                                    <i class="fa fa-crown"></i>
+                                                </button>
+                                                <input class="form-control form-range"
+                                                       min="1" :max="num_crowns" step="1" type="range"
+                                                       x-model.number="selected_crown"
+                                                       id="selected_crown_slider">
+                                                <input class="form-control" step="1" type="number"
+                                                       style="max-width: 60px"
+                                                       x-model.lazy.number="selected_crown">
+                                            </div>
+
                                             <div id="btn-rhombus-types-group"
                                                  class="btn-group bg-white" role="group"
                                                  aria-label="Toggle button group">
 
                                                 <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-1" autocomplete="off">
+                                                       value=0 id="btn-rhombus-type-1" autocomplete="off" checked>
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
                                                        for="btn-rhombus-type-1">
                                                     <svg width="18" height="18"
                                                          viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(1)"></use>
+                                                        <use href="#svg_rhombus"></use>
                                                     </svg>
                                                 </label>
 
                                                 <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-2" autocomplete="off">
+                                                       value=1 id="btn-rhombus-divided-horizontally" autocomplete="off">
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-2">
+                                                       for="btn-rhombus-divided-horizontally">
                                                     <svg width="18" height="18"
                                                          viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(2)"></use>
+                                                        <use href="#svg_rhombus"></use>
+                                                        <use href="#svg_horizontal_bar"></use>
                                                     </svg>
                                                 </label>
 
                                                 <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-3" autocomplete="off">
+                                                       value=2 id="btn-rhombus-divided-vertically" autocomplete="off">
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-3">
+                                                       for="btn-rhombus-divided-vertically">
                                                     <svg width="18" height="18"
                                                          viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(3)"></use>
+                                                        <use href="#svg_rhombus"></use>
+                                                        <use href="#svg_vertical_bar"></use>
                                                     </svg>
                                                 </label>
 
                                                 <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-4" autocomplete="off">
+                                                       value=3 id="btn-custom-rhombus" autocomplete="off">
                                                 <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-4">
-                                                    <svg width="18" height="18"
-                                                         viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(4)"></use>
-                                                    </svg>
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-5" autocomplete="off">
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-5">
-                                                    <svg width="18" height="18"
-                                                         viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(5)"></use>
-                                                    </svg>
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-6" autocomplete="off">
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-6">
-                                                    <svg width="18" height="18"
-                                                         viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(6)"></use>
-                                                    </svg>
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-7" autocomplete="off">
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-7">
-                                                    <svg width="18" height="18"
-                                                         viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(7)"></use>
-                                                    </svg>
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-8" autocomplete="off">
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-8">
-                                                    <svg width="18" height="18"
-                                                         viewBox="0 0 26 26">
-                                                        <use :href="get_svg_rhombus_id(8)"></use>
-                                                    </svg>
-                                                </label>
-
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-0" autocomplete="off" checked>
-                                                <label class="btn btn-outline-danger d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-0">
-                                                    <i class="fa fa-trash"></i>
+                                                       for="btn-custom-rhombus">
+                                                    <i class="fa fa-pencil"></i>
                                                 </label>
                                             </div>
                                         </div>
@@ -1658,16 +1549,6 @@
                     return humanize_distance(value);
                 },
 
-                format(key, value) {
-                    return to_decimal(value, FLOAT_2_STR_PRECISION);
-                },
-                get_slider(key) {
-                    return eval(`this.$refs.${key}_slider`);
-                },
-                clamp(key, value) {
-                    const slider = this.get_slider(key);
-                    this.params[key] = this.format(key, _.clamp(value, slider.min, slider.max));
-                },
                 download_tsv() {
                     this.download_csv("\t", "tsv");
                 },
@@ -2602,6 +2483,8 @@
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
                 i18n_dictionary: {},
+                num_crowns: 1,
+                selected_crown: 1,
 
                 // Debouncers
                 __make_zome: null,
@@ -2664,6 +2547,13 @@
                                 this.params.kite_ratio = 1;
                                 this.params.height_ratio = to_decimal((this.num_rhombuses_vertically + 1) / this.params.num_spirals);
                             }
+                        });
+                    });
+
+                    // Refresh selected crown
+                    _.forEach(["num_crowns", "selected_crown"], key => {
+                        this.$watch(key, () => {
+                            this.clamp("selected_crown", this.selected_crown, false);
                         });
                     });
 
@@ -2897,7 +2787,8 @@
                 format(key, value) {
                     // Format Zome parameters by pair of [key, value]
                     switch (key) {
-                        case 'params.num_spirals':
+                        case 'num_spirals':
+                        case 'selected_crown':
                             return to_decimal(value, 0);
                         default:
                             return to_decimal(value);
@@ -2912,12 +2803,18 @@
                     this.params.kite_ratio = 1;
                 },
                 get_slider(key) {
-                    return eval(`this.$refs.${key}_slider`);
+                    const slider_id =`${key}_slider`;
+                    return eval(`this.$refs.${slider_id}`) || document.getElementById(slider_id);
                 },
-                clamp(key, value) {
+                clamp(key, value, in_params = true) {
                     const slider = this.get_slider(key);
                     if (slider) {
-                        this.params[key] = this.format(key, _.clamp(value, slider.min, slider.max));
+                        const clamped_value = this.format(key, _.clamp(value, slider.min, slider.max));
+                        if (in_params) {
+                            this.params[key] = clamped_value
+                        } else {
+                            this[key] = clamped_value;
+                        }
                     }
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
@@ -3289,6 +3186,9 @@
                             new TrapezoidalPrism(translated_points, prism.label, prism.color)
                         );
                     });
+
+                    // Reset selected crown index
+                    this.num_crowns = num_crowns;
 
                     // Save Zome and dispatch it
                     ZOME = new Zome({

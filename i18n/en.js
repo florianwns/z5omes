@@ -64,6 +64,7 @@ const I18N_EN = {
         tooltip_draw_axes: "Draw 3D axes",
         tooltip_draw_labels: "Draw labels",
         tooltip_spin: "Spin on/off",
+        tooltip_selected_crown: "Selected crown",
 
         // Options
         opt_none: "None",
