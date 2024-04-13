@@ -814,7 +814,7 @@
                                                 <!-- Diagonal Bar at top left -->
                                                 <symbol id="svg_diagonal_bar_at_top_left" width="26" height="26"
                                                         viewBox="0 0 26 26">
-                                                    <line y2="13" x2="13" y1="7.5" x1="7.5" />
+                                                    <line y2="13" x2="13" y1="7.5" x1="7.5"/>
                                                 </symbol>
 
                                                 <!-- Diagonal Bar at top right -->
@@ -873,8 +873,8 @@
                                                        for="btn-rhombus-divided-horizontally">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
-                                                        <use href="#svg_rhombus"></use>
                                                         <use href="#svg_horizontal_bar"></use>
+                                                        <use href="#svg_rhombus"></use>
                                                     </svg>
                                                 </label>
 
@@ -884,8 +884,8 @@
                                                        for="btn-rhombus-divided-vertically">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
-                                                        <use href="#svg_rhombus"></use>
                                                         <use href="#svg_vertical_bar"></use>
+                                                        <use href="#svg_rhombus"></use>
                                                     </svg>
                                                 </label>
 
@@ -916,8 +916,8 @@
                                                             aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <div class="vstack">
-                                                        <div class="d-flex justify-content-center m-auto mb-3">
+                                                    <div class="vstack gap-3">
+                                                        <div class="d-flex justify-content-center m-auto">
                                                             <svg class="svg_rhombus_big_size" width="300" height="300"
                                                                  viewBox="0 0 26 26">
 
@@ -941,9 +941,14 @@
                                                         </div>
 
                                                         <div class="input-group input-group-sm mx-auto w-auto">
-                                                            <span class="btn btn-secondary p-1" style="cursor:initial;"></span>
-                                                            <template x-for="(svg_name, i) in FRAMEWORK_CUSTOMIZER_SVG_IDS" :key="i">
-                                                                <button class="btn btn-secondary text-start" type="button">
+                                                            <span class="btn btn-secondary p-1"
+                                                                  style="cursor:initial;"></span>
+                                                            <template
+                                                                    x-for="(svg_name, i) in FRAMEWORK_CUSTOMIZER_SVG_IDS"
+                                                                    :key="i">
+                                                                <button class="btn btn-primary text-start"
+                                                                        :class="(strengthening_of_timbers_by_crowns[selected_crown - 1] && strengthening_of_timbers_by_crowns[selected_crown - 1][i]) ? 'btn-primary' : 'btn-secondary'"
+                                                                        type="button">
                                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                                          viewBox="0 0 26 26">
                                                                         <use href="#svg_rhombus"></use>
@@ -951,7 +956,24 @@
                                                                     </svg>
                                                                 </button>
                                                             </template>
-                                                            <span class="btn btn-secondary p-1" style="cursor:initial;"></span>
+                                                            <span class="btn btn-secondary p-1"
+                                                                  style="cursor:initial;"></span>
+                                                        </div>
+
+
+                                                        <div class="input-group input-group-sm w-75 mx-auto">
+                                                            <button class="btn btn-primary text-start" type="button"
+                                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_selected_crown')"
+                                                                    data-bs-original-title="Selected crown">
+                                                                <i class="fa fa-crown"></i>
+                                                            </button>
+                                                            <input class="form-control form-range"
+                                                                   min="1" :max="num_crowns" step="1" type="range"
+                                                                   x-model.number="selected_crown"
+                                                                   id="selected_crown_slider">
+                                                            <input class="form-control" step="1" type="number"
+                                                                   style="max-width: 60px"
+                                                                   x-model.lazy.number="selected_crown">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1275,18 +1297,18 @@
     const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
 
     const FRAMEWORK_CUSTOMIZER_SVG_IDS = [
-        "#svg_horizontal_bar_at_top",
-        "#svg_horizontal_bar_at_right",
-        "#svg_horizontal_bar_at_bottom",
-        "#svg_horizontal_bar_at_left",
         "#svg_vertical_bar_at_top",
-        "#svg_vertical_bar_at_right",
-        "#svg_vertical_bar_at_bottom",
-        "#svg_vertical_bar_at_left",
-        "#svg_diagonal_bar_at_top_left",
         "#svg_diagonal_bar_at_top_right",
+        "#svg_horizontal_bar_at_right",
         "#svg_diagonal_bar_at_bottom_right",
+        "#svg_vertical_bar_at_bottom",
         "#svg_diagonal_bar_at_bottom_left",
+        "#svg_horizontal_bar_at_left",
+        "#svg_diagonal_bar_at_top_left",
+        "#svg_horizontal_bar_at_top",
+        "#svg_vertical_bar_at_right",
+        "#svg_horizontal_bar_at_bottom",
+        "#svg_vertical_bar_at_left",
     ];
 
     // Import i18n Dictionaries
@@ -2584,13 +2606,12 @@
             return {
                 // Group parameters
                 params: {
-                    // Language parameters
-                    language: null,
-
                     // Shape Parameters
                     num_spirals: 10,                    // number of spirals
                     theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
                     angle_unit: "deg",                  // Degrees or Radians
+
+                    use_hr_mode: false,
                     height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
                     kite_ratio: 1,                      // Kite ratio, lower half to upper half (1 => is rhombus else kites)
 
@@ -2606,19 +2627,25 @@
                     strengthening_of_timbers: 0,
                     add_footing: 1,
 
-                    // Commons parameters
+                    strengthening_of_timbers_by_crowns_str: "39,23,23,14,17",     // The values are separated by commas
+
+                    // Commons parameters, Not  zome params, but we save them
+                    language: null,
                     help_is_displayed: false,
-                    use_hr_mode: false,
                 },
                 params_backup: null,
 
+
                 show_splash_screen: true,
+                num_crowns: 1,
+                selected_crown: 1,    // If -1, select all crowns
+                strengthening_of_timbers_by_crowns: [],
+
                 is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
                 i18n_dictionary: {},
-                num_crowns: 1,
-                selected_crown: 1,
+
 
                 // Debouncers
                 __make_zome: null,
@@ -2660,7 +2687,10 @@
                     this.save_params(false);
 
                     // Add shape parameter listeners
-                    const zome_param_keys = Object.keys(this.params).filter(el => el !== 'language');
+                    const zome_param_keys = Object.keys(this.params).filter(el => {
+                        return el !== 'language';
+                    });
+
                     _.forEach(zome_param_keys, key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
@@ -2684,10 +2714,14 @@
                         });
                     });
 
-                    // Refresh selected crown
-                    _.forEach(["num_crowns", "selected_crown"], key => {
-                        this.$watch(key, () => {
+                    // selected crown listener
+                    _.forEach(["num_crowns", "params.strengthening_of_timbers_by_crowns_str"], key => {
+                        this.$watch(key, (value) => {
+                            this.init_strengthening_of_timbers();
                             this.clamp("selected_crown", this.selected_crown, false);
+                            this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(
+                                str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str)
+                            );
                         });
                     });
 
@@ -2730,6 +2764,21 @@
                     // Save params to url
                     sync_url_from_params(this.params)
                 },
+
+                init_strengthening_of_timbers() {
+                    // Get current strengthening_of_timbers and fill missing values
+                    const current_numbers = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                    const numbers = new Array(this.num_crowns);
+                    for (let i = 0; i < this.num_crowns; i++) {
+                        numbers[i] = current_numbers[i] || 0;
+                    }
+                    this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(numbers);
+                },
+                set_strengthening_of_timbers(crown_index, value) {
+
+                    // this.strengthening_of_timbers_by_crowns
+                },
+
                 i18n(key, value = null) {
                     // Translation function using JSON dictionnaries
                     // Return the key if not found in language and default language dictionaries

@@ -463,11 +463,13 @@ function circle_path(cx, cy, r) {
 
 function numbers_2_str(numbers) {
     // Convert an array of numbers to a string where the values are separated by commas
-    return numbers.toString();
+    return (numbers instanceof Array) ? numbers.toString() : "";
 }
 
 function str_to_numbers(value) {
     // Convert a string where the values are separated by commas to an array of numbers
+    if (!value) return [];
+
     const values = value.split(",");
     for (let i = 0; i < values.length; i++) {
         values[i] = parseFloat(values[i]);
