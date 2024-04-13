@@ -1,8 +1,5 @@
 # TODO-LIST
 
-* [ ] utiliser valid no valid avec une tick au lieu du text convex no convex.
-
-
 * [ ] un fois la matrice en place, il faut pouvoir diviser le losange à partir de ça
   <br>.... trouver l'algo pour ça
 
