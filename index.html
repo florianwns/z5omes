@@ -886,12 +886,22 @@
                                                     </svg>
                                                 </btn>
 
-                                                <btn class="btn btn-primary"
+                                                <btn class="btn btn-primary position-relative"
                                                      :class="(![68, 17, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
                                                      data-bs-toggle="modal"
                                                      data-bs-target="#framework-customizer-modal"
                                                      for="btn-custom-rhombus">
                                                     <i class="fa fa-pencil"></i>
+                                                    <div class="position-absolute" style="top:-10px;right:-10px">
+                                                        <div x-show="crown_of_framework_timbers_is_valid"
+                                                             class="badge bg-success rounded-pill p-1">
+                                                            <i class="fa fa-circle-check"></i>
+                                                        </div>
+                                                        <div x-show="!crown_of_framework_timbers_is_valid"
+                                                             class="badge bg-danger rounded-pill p-1">
+                                                            <i class="fa fa-ban"></i>
+                                                        </div>
+                                                    </div>
                                                 </btn>
                                             </div>
                                         </div>
@@ -2778,11 +2788,7 @@
                     _.forEach(["num_crowns", "params.strengthening_of_timbers_by_crowns_str"], key => {
                         this.$watch(key, (value) => {
                             this.init_strengthening_of_timbers();
-                            this.clamp("selected_crown", this.selected_crown, false);
-
-                            const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
-                            this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
-                            this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
+                            this.update_strengthening_of_timbers();
                         });
                     });
 
@@ -2795,10 +2801,23 @@
 
                     // Clamp selected_crown value
                     this.$watch("selected_crown", () => {
-                        this.clamp("selected_crown", this.selected_crown, false);
-                        const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
-                        this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
+                        this.update_strengthening_of_timbers();
                     });
+
+                    this.$watch("strengthening_of_timbers_by_crowns", (value) => {
+                        this.crown_of_framework_timbers_is_valid = this.is_crown_of_framework_timbers_valid(
+                            this.strengthening_of_timbers_by_crowns[this.selected_crown - 1]
+                        );
+
+                        // Save param only if crown of framework is valid
+                        if (this.crown_of_framework_timbers_is_valid) {
+                            this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(
+                                boolean_matrix_to_bitwise_flags(this.strengthening_of_timbers_by_crowns)
+                            );
+                        }
+
+                    });
+
 
                     // Refresh data related to the height
                     // if you change the zome height
@@ -2840,6 +2859,13 @@
                     sync_url_from_params(this.params)
                 },
 
+                update_strengthening_of_timbers() {
+                    this.clamp("selected_crown", this.selected_crown, false);
+                    const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                    this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
+                    this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
+                },
+
                 init_strengthening_of_timbers() {
                     // Get current strengthening_of_timbers and fill missing values
                     const current_numbers = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
@@ -2858,15 +2884,7 @@
                 toggle_framework_timber(svg_index) {
                     const framework_timber_crown = this.strengthening_of_timbers_by_crowns[this.selected_crown - 1];
                     framework_timber_crown[svg_index] = (framework_timber_crown[svg_index]) ? false : true;
-
-                    this.crown_of_framework_timbers_is_valid = this.is_crown_of_framework_timbers_valid(framework_timber_crown);
-
-                    // Save param only if crown of framework is valid
-                    if (this.crown_of_framework_timbers_is_valid) {
-                        this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(
-                            boolean_matrix_to_bitwise_flags(this.strengthening_of_timbers_by_crowns)
-                        );
-                    }
+                    this.strengthening_of_timbers_by_crowns[this.selected_crown - 1] = [...framework_timber_crown];
                 },
 
                 is_crown_of_framework_timbers_valid(framework_timber_crown) {
