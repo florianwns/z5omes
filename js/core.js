@@ -461,6 +461,19 @@ function circle_path(cx, cy, r) {
 // ========== Conversions ==========
 // ---------------------------------
 
+function numbers_2_str(numbers) {
+    // Convert an array of numbers to a string where the values are separated by commas
+    return numbers.toString();
+}
+
+function str_to_numbers(value) {
+    // Convert a string where the values are separated by commas to an array of numbers
+    const values = value.split(",");
+    for (let i = 0; i < values.length; i++) {
+        values[i] = parseFloat(values[i]);
+    }
+    return values;
+}
 
 function bitwise_flags_to_boolean_matrix(bitwise_flags) {
     // const bitwise_flags = [13, 5, 0];
@@ -477,7 +490,6 @@ function bitwise_flags_to_boolean_matrix(bitwise_flags) {
                 value -= pow_2;
             }
         }
-
     }
     return boolean_mat;
 }
