@@ -2796,6 +2796,8 @@
                     // Clamp selected_crown value
                     this.$watch("selected_crown", () => {
                         this.clamp("selected_crown", this.selected_crown, false);
+                        const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                        this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
                     });
 
                     // Refresh data related to the height
