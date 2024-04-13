@@ -461,6 +461,45 @@ function circle_path(cx, cy, r) {
 // ========== Conversions ==========
 // ---------------------------------
 
+
+function bitwise_flags_to_boolean_matrix(bitwise_flags) {
+    // const bitwise_flags = [13, 5, 0];
+    // bitwise_flags_to_boolean_matrix(bitwise_flags) => [[true, false, true, true], [true, false, true, false], []]
+    let boolean_mat = new Array(bitwise_flags.length);
+    for (let i = 0; i < bitwise_flags.length; i++) {
+        boolean_mat[i] = [];
+        let value = bitwise_flags[i];
+        for (let j = 0; value > 0; j++) {
+            const pow_2 = Math.pow(2, j);
+            const is_checked = (value & pow_2) == pow_2;
+            boolean_mat[i].push(is_checked);
+            if (is_checked) {
+                value -= pow_2;
+            }
+        }
+
+    }
+    return boolean_mat;
+}
+
+function boolean_matrix_to_bitwise_flags(boolean_mat) {
+    // const mat = [[true, false, true, true], [true, false, true, false], []];
+    // boolean_matrix_to_bitwise_flags(mat) => [13, 5, 0]
+    let bitwise_flags = new Array(boolean_mat.length);
+    for (let i = 0; i < boolean_mat.length; i++) {
+        const values = boolean_mat[i];
+        bitwise_flags[i] = 0;
+        for (let j = 0; j < values.length; j++) {
+            const is_checked = values[j];
+            if (is_checked) {
+                bitwise_flags[i] |= Math.pow(2, j);
+            }
+        }
+    }
+    return bitwise_flags;
+}
+
+
 function convert_3D_to_2D(points) {
     // Points without the z axis
     return points.map(p => [p[0], p[1]]);
