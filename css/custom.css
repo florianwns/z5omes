@@ -282,8 +282,7 @@ svg.svg_rhombus_icon use {
 
 
 .btn-primary svg.svg_rhombus_icon use,
-.btn-secondary svg.svg_rhombus_icon use,
-input:checked + label svg.svg_rhombus_icon use {
+.btn-secondary svg.svg_rhombus_icon use{
     stroke: white !important;
 }
 

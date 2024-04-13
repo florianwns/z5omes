@@ -857,46 +857,42 @@
                                                  class="btn-group bg-white" role="group"
                                                  aria-label="Toggle button group">
 
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=0 id="btn-rhombus-type-1" autocomplete="off" checked>
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-type-1">
+                                                <btn class="btn btn-primary"
+                                                     @click="strengthening_of_timbers_bitwise_flag = 0"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === 0) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_rhombus"></use>
                                                     </svg>
-                                                </label>
+                                                </btn>
 
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=1 id="btn-rhombus-divided-horizontally" autocomplete="off">
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-divided-horizontally">
+                                                <btn class="btn btn-primary"
+                                                     @click="strengthening_of_timbers_bitwise_flag = 68"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === 68) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_horizontal_bar"></use>
                                                         <use href="#svg_rhombus"></use>
                                                     </svg>
-                                                </label>
+                                                </btn>
 
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=2 id="btn-rhombus-divided-vertically" autocomplete="off">
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       for="btn-rhombus-divided-vertically">
+                                                <btn class="btn btn-primary"
+                                                     @click="strengthening_of_timbers_bitwise_flag = 17"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === 17) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_vertical_bar"></use>
                                                         <use href="#svg_rhombus"></use>
                                                     </svg>
-                                                </label>
+                                                </btn>
 
-                                                <input type="radio" class="btn-check" name="btn-rhombus-type"
-                                                       value=3 id="btn-custom-rhombus" autocomplete="off">
-                                                <label class="btn btn-outline-primary d-flex align-items-center justify-content-center"
-                                                       data-bs-toggle="modal"
-                                                       data-bs-target="#framework-customizer-modal"
-                                                       for="btn-custom-rhombus">
+                                                <btn class="btn btn-primary"
+                                                     :class="(![68, 17, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
+                                                     data-bs-toggle="modal"
+                                                     data-bs-target="#framework-customizer-modal"
+                                                     for="btn-custom-rhombus">
                                                     <i class="fa fa-pencil"></i>
-                                                </label>
+                                                </btn>
                                             </div>
                                         </div>
                                     </div>
@@ -988,11 +984,19 @@
                                                             </svg>
                                                         </div>
 
-                                                        <span class="badge bg-success rounded-pill mx-auto"
-                                                              :class="crown_of_framework_timber_has_convex_polygons ? 'bg-success' : 'bg-danger'"
-                                                              x-text="crown_of_framework_timber_has_convex_polygons ? i18n('convex') : i18n('no_convex')">
+                                                        <div class="mx-auto">
+                                                            <div x-show="crown_of_framework_timbers_is_valid"
+                                                                 class="badge bg-success rounded-pill">
+                                                                <i class="fa fa-circle-check me-1"></i>
+                                                                <span x-text="i18n('valid')"></span>
+                                                            </div>
+                                                            <div x-show="!crown_of_framework_timbers_is_valid"
+                                                                 class="badge bg-danger rounded-pill">
+                                                                <i class="fa fa-ban me-1"></i>
+                                                                <span x-text="i18n('not_allowed')"></span>
+                                                            </div>
+                                                        </div>
 
-                                                        </span>
 
                                                         <div class="input-group input-group-sm mx-auto w-auto">
                                                             <span class="btn btn-secondary p-1"
@@ -2681,7 +2685,7 @@
                     strengthening_of_timbers: 0,
                     add_footing: 1,
 
-                    strengthening_of_timbers_by_crowns_str: "39,23,23,14,17",     // The values are separated by commas
+                    strengthening_of_timbers_by_crowns_str: "",     // The values are separated by commas
 
                     // Commons parameters, Not  zome params, but we save them
                     language: null,
@@ -2694,6 +2698,8 @@
                 num_crowns: 1,
                 selected_crown: 1,    // If -1, select all crowns
                 strengthening_of_timbers_by_crowns: [],
+                strengthening_of_timbers_bitwise_flag: 0,
+                crown_of_framework_timbers_is_valid: true,
 
                 is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
@@ -2773,10 +2779,18 @@
                         this.$watch(key, (value) => {
                             this.init_strengthening_of_timbers();
                             this.clamp("selected_crown", this.selected_crown, false);
-                            this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(
-                                str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str)
-                            );
+
+                            const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                            this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
+                            this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
                         });
+                    });
+
+                    // Clamp selected_crown value
+                    this.$watch("strengthening_of_timbers_bitwise_flag", (value) => {
+                        const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                        bitwise_flags[this.selected_crown - 1] = value;
+                        this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(bitwise_flags);
                     });
 
                     // Clamp selected_crown value
@@ -2843,17 +2857,22 @@
                     const framework_timber_crown = this.strengthening_of_timbers_by_crowns[this.selected_crown - 1];
                     framework_timber_crown[svg_index] = (framework_timber_crown[svg_index]) ? false : true;
 
-                    this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(
-                        boolean_matrix_to_bitwise_flags(this.strengthening_of_timbers_by_crowns)
-                    );
+                    this.crown_of_framework_timbers_is_valid = this.is_crown_of_framework_timbers_valid(framework_timber_crown);
+
+                    // Save param only if crown of framework is valid
+                    if (this.crown_of_framework_timbers_is_valid) {
+                        this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(
+                            boolean_matrix_to_bitwise_flags(this.strengthening_of_timbers_by_crowns)
+                        );
+                    }
                 },
 
-                get crown_of_framework_timber_has_convex_polygons() {
+                is_crown_of_framework_timbers_valid(framework_timber_crown) {
+                    // Check if there is consecutive_unselected that is more and equal than 4
                     let first_selected = null,
                         last_selected = null,
                         consecutive_unselected = 0;
 
-                    const framework_timber_crown = this.strengthening_of_timbers_by_crowns[this.selected_crown - 1];
                     for (let svg_index = 0; svg_index < 8; svg_index++) {
                         const is_selected = framework_timber_crown && framework_timber_crown[svg_index];
                         if (is_selected) {
@@ -2868,12 +2887,14 @@
                         }
                     }
 
-                    if(last_selected != null && first_selected != null){
+                    if (last_selected != null && first_selected != null) {
                         const consecutive_unselected = (first_selected + 7 - last_selected);
                         if (consecutive_unselected >= 4) {
                             return false;
                         }
                     }
+
+                    // The crown is valid
                     return true;
                 },
 
