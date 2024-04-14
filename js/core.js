@@ -18,6 +18,9 @@ const TAU_Q = Math.PI / 2;  // 90° in rad
 const FLOAT_PRECISION = 7;
 const FLOAT_2_STR_PRECISION = 2;
 
+// const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
+const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
+
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
 
 const THREE_EDGES_MATERIAL = new THREE.LineBasicMaterial({color: 0x333333})
@@ -33,6 +36,23 @@ const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const FOOTING_CHAR = '~';
 const FLOOR_CHAR = '⬢';
 const XYZ = ["X", "Y", "Z"];
+
+const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
+const FRAMEWORK_CUSTOMIZER_SVG_IDS = [
+    "#svg_vertical_bar_at_top",
+    "#svg_diagonal_bar_at_top_left",
+    "#svg_horizontal_bar_at_left",
+    "#svg_diagonal_bar_at_bottom_left",
+    "#svg_vertical_bar_at_bottom",
+    "#svg_diagonal_bar_at_bottom_right",
+    "#svg_horizontal_bar_at_right",
+    "#svg_diagonal_bar_at_top_right",
+
+    "#svg_horizontal_bar_at_top",
+    "#svg_vertical_bar_at_left",
+    "#svg_horizontal_bar_at_bottom",
+    "#svg_vertical_bar_at_right",
+];
 
 check_is_mobile = function () {
     let check = false;

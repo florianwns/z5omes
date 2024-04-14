@@ -928,17 +928,18 @@
                                                                  viewBox="0 0 26 26">
 
                                                                 <use href="#svg_vertical_bar_at_top"></use>
-                                                                <use href="#svg_diagonal_bar_at_top_right"></use>
-                                                                <use href="#svg_horizontal_bar_at_right"></use>
-                                                                <use href="#svg_diagonal_bar_at_bottom_right"></use>
-                                                                <use href="#svg_vertical_bar_at_bottom"></use>
-                                                                <use href="#svg_diagonal_bar_at_bottom_left"></use>
-                                                                <use href="#svg_horizontal_bar_at_left"></use>
                                                                 <use href="#svg_diagonal_bar_at_top_left"></use>
+                                                                <use href="#svg_horizontal_bar_at_left"></use>
+                                                                <use href="#svg_diagonal_bar_at_bottom_left"></use>
+                                                                <use href="#svg_vertical_bar_at_bottom"></use>
+                                                                <use href="#svg_diagonal_bar_at_bottom_right"></use>
+                                                                <use href="#svg_horizontal_bar_at_right"></use>
+                                                                <use href="#svg_diagonal_bar_at_top_right"></use>
+
                                                                 <use href="#svg_horizontal_bar_at_top"></use>
-                                                                <use href="#svg_vertical_bar_at_right"></use>
-                                                                <use href="#svg_horizontal_bar_at_bottom"></use>
                                                                 <use href="#svg_vertical_bar_at_left"></use>
+                                                                <use href="#svg_horizontal_bar_at_bottom"></use>
+                                                                <use href="#svg_vertical_bar_at_right"></use>
 
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(0)"
@@ -947,15 +948,15 @@
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(1)"
                                                                      :class="is_framework_timber_selected(1) ? 'selected' : ''"
-                                                                     href="#svg_diagonal_bar_at_top_right"></use>
+                                                                     href="#svg_diagonal_bar_at_top_left"></use>
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(2)"
                                                                      :class="is_framework_timber_selected(2) ? 'selected' : ''"
-                                                                     href="#svg_horizontal_bar_at_right"></use>
+                                                                     href="#svg_horizontal_bar_at_left"></use>
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(3)"
                                                                      :class="is_framework_timber_selected(3) ? 'selected' : ''"
-                                                                     href="#svg_diagonal_bar_at_bottom_right"></use>
+                                                                     href="#svg_diagonal_bar_at_bottom_left"></use>
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(4)"
                                                                      :class="is_framework_timber_selected(4) ? 'selected' : ''"
@@ -963,15 +964,15 @@
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(5)"
                                                                      :class="is_framework_timber_selected(5) ? 'selected' : ''"
-                                                                     href="#svg_diagonal_bar_at_bottom_left"></use>
+                                                                     href="#svg_diagonal_bar_at_bottom_right"></use>
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(6)"
                                                                      :class="is_framework_timber_selected(6) ? 'selected' : ''"
-                                                                     href="#svg_horizontal_bar_at_left"></use>
+                                                                     href="#svg_horizontal_bar_at_right"></use>
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(7)"
                                                                      :class="is_framework_timber_selected(7) ? 'selected' : ''"
-                                                                     href="#svg_diagonal_bar_at_top_left"></use>
+                                                                     href="#svg_diagonal_bar_at_top_right"></use>
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(8)"
                                                                      :class="is_framework_timber_selected(8) ? 'selected' : ''"
@@ -979,7 +980,7 @@
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(9)"
                                                                      :class="is_framework_timber_selected(9) ? 'selected' : ''"
-                                                                     href="#svg_vertical_bar_at_right"></use>
+                                                                     href="#svg_vertical_bar_at_left"></use>
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(10)"
                                                                      :class="is_framework_timber_selected(10) ? 'selected' : ''"
@@ -987,7 +988,7 @@
                                                                 <use class="clickable"
                                                                      @click="toggle_framework_timber(11)"
                                                                      :class="is_framework_timber_selected(11) ? 'selected' : ''"
-                                                                     href="#svg_vertical_bar_at_left"></use>
+                                                                     href="#svg_vertical_bar_at_right"></use>
 
                                                                 <use class="selected" href="#svg_rhombus"></use>
                                                                 <circle cx="13" cy="13" r="0.01"/>
@@ -1351,7 +1352,6 @@
 <script src="i18n/pl.js?v=1.0.9b02"></script>
 <script src="i18n/sv.js?v=1.0.9b02"></script>
 
-
 <!-- Core JS -->
 <script src="js/core.js?v=1.0.9b02"></script>
 
@@ -1360,25 +1360,6 @@
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
-    // const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
-    const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
-    const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
-
-    const FRAMEWORK_CUSTOMIZER_SVG_IDS = [
-        "#svg_vertical_bar_at_top",
-        "#svg_diagonal_bar_at_top_right",
-        "#svg_horizontal_bar_at_right",
-        "#svg_diagonal_bar_at_bottom_right",
-        "#svg_vertical_bar_at_bottom",
-        "#svg_diagonal_bar_at_bottom_left",
-        "#svg_horizontal_bar_at_left",
-        "#svg_diagonal_bar_at_top_left",
-        "#svg_horizontal_bar_at_top",
-        "#svg_vertical_bar_at_right",
-        "#svg_horizontal_bar_at_bottom",
-        "#svg_vertical_bar_at_left",
-    ];
-
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
     const I18N_LANGUAGES = {
