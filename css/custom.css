@@ -282,31 +282,31 @@ svg.svg_rhombus_icon use {
 
 
 .btn-primary svg.svg_rhombus_icon use,
-.btn-secondary svg.svg_rhombus_icon use{
+.btn-secondary svg.svg_rhombus_icon use {
     stroke: white !important;
 }
 
-svg.svg_rhombus_big_size use {
+#svg_rhombus_customizer use {
     stroke: #bfbfbf;
     stroke-width: 0.75;
     fill: none;
 }
 
-svg.svg_rhombus_big_size circle {
+#svg_rhombus_customizer circle {
     fill: #0B5ED7;
     stroke: #0B5ED7;
 }
 
-svg.svg_rhombus_big_size use.clickable {
+#svg_rhombus_customizer use.clickable {
     stroke: transparent;
     cursor: pointer;
     pointer-events: stroke;
 }
 
-svg.svg_rhombus_big_size use.clickable:hover {
+svg.svg_rhombus_customizer use.clickable:hover {
     stroke: #5C636A;
 }
 
-svg.svg_rhombus_big_size use.selected {
+#svg_rhombus_customizer use.selected {
     stroke: #0B5ED7 !important;
 }
