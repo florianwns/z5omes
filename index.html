@@ -867,8 +867,8 @@
                                                 </btn>
 
                                                 <btn class="btn btn-primary"
-                                                     @click="strengthening_of_timbers_bitwise_flag = 68"
-                                                     :class="(strengthening_of_timbers_bitwise_flag === 68) ? 'btn-primary' : 'btn-secondary'">
+                                                     @click="strengthening_of_timbers_bitwise_flag = SVG_HORIZONTAL_BAR_BITWISE_FLAG"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_horizontal_bar"></use>
@@ -877,8 +877,8 @@
                                                 </btn>
 
                                                 <btn class="btn btn-primary"
-                                                     @click="strengthening_of_timbers_bitwise_flag = 17"
-                                                     :class="(strengthening_of_timbers_bitwise_flag === 17) ? 'btn-primary' : 'btn-secondary'">
+                                                     @click="strengthening_of_timbers_bitwise_flag = SVG_VERTICAL_BAR_BITWISE_FLAG"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_vertical_bar"></use>
@@ -887,7 +887,7 @@
                                                 </btn>
 
                                                 <btn class="btn btn-primary position-relative"
-                                                     :class="(![68, 17, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
+                                                     :class="(![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
                                                      data-bs-toggle="modal"
                                                      data-bs-target="#framework-customizer-modal"
                                                      for="btn-custom-rhombus">

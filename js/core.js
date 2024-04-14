@@ -53,6 +53,8 @@ const FRAMEWORK_CUSTOMIZER_SVG_IDS = [
     "#svg_horizontal_bar_at_bottom",
     "#svg_vertical_bar_at_right",
 ];
+const SVG_VERTICAL_BAR_BITWISE_FLAG = 1 + 16;
+const SVG_HORIZONTAL_BAR_BITWISE_FLAG = SVG_VERTICAL_BAR_BITWISE_FLAG << 2;
 
 check_is_mobile = function () {
     let check = false;
