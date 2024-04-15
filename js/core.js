@@ -258,10 +258,6 @@ function point_to(p1, vec, d) {
     return add(p1, mul(normalized_vec, d));
 }
 
-function angle_between_vectors(vec1, vec2) {
-    return Math.acos(dot_product(vec1, vec2) / (len(vec1) * len(vec2)));
-}
-
 function points_2_plane(p1, p2, p3) {
     // Create plan from 3 points
     const vec1 = sub(p2, p1)
@@ -324,13 +320,39 @@ function intersect(p, v, q, u) {
     return add(p, mul(v, t));
 }
 
-function angle(p1, p2, p3) {
-    // Compute the angle of 3 points in radians
-    const a = dist(p2, p3);
-    const b = dist(p1, p2);
-    const c = dist(p1, p3);
-    return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
+function acos(k) {
+    // Add limit to acos to avoid NaN errors
+    // See : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Math/acos
+    if (k >= 1) return 0;
+    if (k <= -1) return Math.PI;
+    return Math.acos(k);
 }
+
+function angle_between_vectors(vec1, vec2) {
+    return acos(dot_product(vec1, vec2) / (len(vec1) * len(vec2)));
+}
+
+function angle_between_planes(plane1, plane2) {
+    return angle_between_vectors(plane1, plane2);
+}
+
+function angle_between_points(p1, p2, p3) {
+    // Calculate vectors between points
+    const vec1 = sub(p2, p1);
+    const vec2 = sub(p2, p3);
+
+    // Calculate angle in radians
+    return angle_between_vectors(vec1, vec2);
+}
+
+function dihedral_angle(a, b, c) {
+    // Compute the dihedral angle from 3 angles
+    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
+    return acos(
+        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
+    )
+}
+
 
 function rotate_point_around_z_axis(vec, angle, origin = [0, 0, 0]) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
@@ -380,19 +402,6 @@ function rotate_points_around_y_axis(points, angle) {
 }
 
 
-function dihedral_angle(a, b, c) {
-    // Compute the dihedral angle from 3 angles
-    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
-    return Math.acos(
-        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
-    )
-}
-
-function angle_between_planes(plane1, plane2) {
-    const dot = dot_product(plane1, plane2);
-    return Math.acos(dot / (len(plane1) * len(plane2)));
-}
-
 function rotation_matrix_from_points(a, b, c) {
     const axis1 = new THREE.Vector3(...sub(a, b)).normalize()
     const axis2 = new THREE.Vector3(...sub(c, b)).normalize()
@@ -417,7 +426,7 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     // Use quaternion method to flat points
 
     // Compute the angle/distances with the pt2 point
-    const theta = angle(pt1, pt2, pt3);
+    const theta = angle_between_points(pt1, pt2, pt3);
     const dist_2_pt1 = dist(pt2, pt1);
     const dist_2_pt3 = dist(pt2, pt3);
 
@@ -504,18 +513,24 @@ function bitwise_flags_to_boolean_matrix(bitwise_flags) {
     // bitwise_flags_to_boolean_matrix(bitwise_flags) => [[true, false, true, true], [true, false, true, false], []]
     let boolean_mat = new Array(bitwise_flags.length);
     for (let i = 0; i < bitwise_flags.length; i++) {
-        boolean_mat[i] = [];
-        let value = bitwise_flags[i];
-        for (let j = 0; value > 0; j++) {
-            const pow_2 = Math.pow(2, j);
-            const is_checked = (value & pow_2) == pow_2;
-            boolean_mat[i].push(is_checked);
-            if (is_checked) {
-                value -= pow_2;
-            }
-        }
+        boolean_mat[i] = bitwise_flag_to_boolean_array(bitwise_flags[i]);
     }
     return boolean_mat;
+}
+
+function bitwise_flag_to_boolean_array(bitwise_flag) {
+    // const bitwise_flag = 13;
+    // bitwise_flag_to_boolean_array(bitwise_flag) => [true, false, true, true]
+    const boolean_arr = [];
+    for (let j = 0; bitwise_flag > 0; j++) {
+        const pow_2 = Math.pow(2, j);
+        const is_checked = (bitwise_flag & pow_2) == pow_2;
+        boolean_arr.push(is_checked);
+        if (is_checked) {
+            bitwise_flag -= pow_2;
+        }
+    }
+    return boolean_arr;
 }
 
 function boolean_matrix_to_bitwise_flags(boolean_mat) {
@@ -1285,7 +1300,7 @@ class Polygon3D extends Base3DGeometry {
     }
 
     compute_framework(
-        division_type,                          // 0 : None, 1 : Horizontally, 2 : Vertically, etc...
+        strengthening_of_timbers_bitwise_flag,  // A bitwise flag which let us to divide polygon
 
         // Assembly parameters
         assembly_method = 0,            // 0 : GoodKarma
@@ -1311,19 +1326,8 @@ class Polygon3D extends Base3DGeometry {
         this._framework_outer_points = new Array(this.num_points);
         this._framework_inner_points = new Array(this.num_points);
 
-        // Divide polygons into two parts to add strengthening of timbers
-        const divide_faces_into_two_parts = division_type >= 1;
-        const divide_horizontally = division_type === 1;
-
-        let framework_faces = [];
-        if (!divide_faces_into_two_parts) {
-            framework_faces.push(this);
-        } else {
-            const face_parts = this.divide(divide_horizontally);
-            for (let j = 0; j < face_parts.length; j++) {
-                framework_faces.push(face_parts[j]);
-            }
-        }
+        // Divide polygons into many parts
+        let framework_faces = [...this.split(strengthening_of_timbers_bitwise_flag)];
 
         const outward_xpansion = assembly_method === 2 || xpansion_direction === -1;
 
@@ -1546,7 +1550,7 @@ class Polygon3D extends Base3DGeometry {
             const next_point = this.points[this.next_indexes[i]];
 
             // Compute angle in radians
-            this._angles[i] = angle(prev_point, cur_point, next_point);
+            this._angles[i] = angle_between_points(prev_point, cur_point, next_point);
 
             // Compute edges distances and perimeter
             const d = dist(cur_point, next_point);
@@ -1577,6 +1581,155 @@ class Polygon3D extends Base3DGeometry {
 
         const edge_geometry = new THREE.BufferGeometry().setFromPoints(this.edge_points);
         this._edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
+    }
+
+    split(strengthening_of_timbers_bitwise_flag = 0) {
+        // Split polygon in multiple polygons
+        // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
+
+        // if 0 return this
+        if ([3, 5].includes(this.num_points) || strengthening_of_timbers_bitwise_flag === 0){
+            return [this];
+        }
+
+        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
+
+        // 0 1 2 3 4 5 6 7      bars
+        // 8   9   10  11       mini bars    8 + (i / 2)
+        let parts = [];
+
+        // Find the first selected bar
+        let first_selected_bar_index = 0;
+        for (let bar_index = 0; bar_index < 8; bar_index++) {
+            const bar_is_selected = strengthening_of_timbers[bar_index];
+            if (bar_is_selected) {
+                first_selected_bar_index = bar_index;
+                break;
+            }
+        }
+
+        // Merge points and midpoints in one array
+        const num_points = 2 * this.num_points;
+        let points_to_add = new Array(num_points);
+        for (let i = 0, j = 0; i < this.num_points; i++, j += 2) {
+            points_to_add[j] = this.points[i];
+            points_to_add[j + 1] = this.mid_points[i];
+        }
+
+        console.log("points_to_add", ...points_to_add)
+        let building_points = [];
+        let last_bar_index = first_selected_bar_index
+
+        // Loop through the bars starting from the first selected bar
+        const last_index = first_selected_bar_index + 8;
+        for (let i = first_selected_bar_index; i < last_index; i++) {
+            const bar_index = i % 8;
+
+            // not on midpoints
+            const bar_index_is_on_points = bar_index % 2 === 0;
+            const bar_is_selected = strengthening_of_timbers[bar_index];
+
+            const pt_index = bar_index;
+            const prev_pt_index = (pt_index + 7) % 8;
+            const next_pt_index = (pt_index + 1) % 8;
+
+            console.log("indexes", i, pt_index, prev_pt_index, next_pt_index);
+
+            // Add small triangles on horizontal and vertical bars if transversal bar is selected
+            if (bar_index_is_on_points) {
+                // On points get current transversal bar,
+                const transversal_bar_index = 8 + Math.floor(pt_index / 2) % 4;
+                const transversal_bar_is_selected = strengthening_of_timbers[transversal_bar_index];
+                if (transversal_bar_is_selected) {
+                    const mid_point_to_centroid = midpoint(points_to_add[pt_index], this.centroid);
+
+                    // Create one polygon or two if bar is selected
+                    if (bar_is_selected) {
+                        parts.push(
+                            Polygon3D.copy(this, [
+                                points_to_add[pt_index],
+                                mid_point_to_centroid,
+                                points_to_add[prev_pt_index]
+                            ])
+                        );
+                        parts.push(
+                            Polygon3D.copy(this, [
+                                points_to_add[pt_index],
+                                points_to_add[next_pt_index],
+                                mid_point_to_centroid
+                            ])
+                        );
+
+                        // Shift the point to add at mid_point_to_centroid
+                        points_to_add[pt_index] = mid_point_to_centroid;
+                    } else {
+                        parts.push(
+                            Polygon3D.copy(this, [
+                                points_to_add[pt_index],
+                                points_to_add[next_pt_index],
+                                points_to_add[prev_pt_index],
+                            ])
+                        );
+                    }
+                }
+            }
+
+
+        }
+
+        // Pass
+        for (let i = first_selected_bar_index; i <= last_index; i++) {
+            const bar_index = i % 8;
+
+            // not on midpoints
+            const bar_is_selected = strengthening_of_timbers[bar_index];
+
+            const pt_index = bar_index;
+            const prev_pt_index = (pt_index + 7) % 8;
+            const next_pt_index = (pt_index + 1) % 8;
+
+            if (bar_is_selected) {
+                // Close the last polygon in the process of building
+                if (building_points.length > 0) {
+                    building_points.push(points_to_add[pt_index]);
+
+                    // Add the centroid only it last bar is not directly at 180 degrees
+                    if ((last_bar_index + 4) % 8 !== bar_index) {
+                        building_points.push(this.centroid);
+                    }
+
+                    console.log("bar close", bar_index, ...building_points);
+                    console.log("######################");
+
+                    parts.push(
+                        Polygon3D.copy(this, building_points)
+                    );
+                }
+
+                // Initialize building points with a new point
+                building_points = [
+                    points_to_add[pt_index]
+                ];
+
+                // Reset the array and the last
+                last_bar_index = bar_index;
+
+                console.log("selected bar => add point", i, last_bar_index, ...building_points)
+            } else {
+                const theta = angle_between_points(
+                    points_to_add[prev_pt_index],
+                    points_to_add[pt_index],
+                    points_to_add[next_pt_index],
+                );
+
+                console.log("theta", rad2deg(theta));
+                if (theta > 0 && theta < Math.PI) {
+                    building_points.push(points_to_add[pt_index]);
+                    console.log("add point", i, last_bar_index, rad2deg(theta), ...building_points)
+                }
+            }
+        }
+        return parts
     }
 
     divide(horizontally = true) {
@@ -1803,18 +1956,11 @@ class Angle {
     }
 
     static from_3_points(p1, p2, p3) {
-        // Compute the angle of 3 points in radians
-        const a = dist(p2, p3);
-        const b = dist(p1, p2);
-        const c = dist(p1, p3);
-        const theta = Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
-        return new Angle(theta);
+        return new Angle(angle_between_points(p1, p2, p3));
     }
 
     static from_2_planes(plane1, plane2) {
-        const dot = dot_product(plane1, plane2);
-        const theta = Math.acos(dot / (len(plane1) * len(plane2)));
-        return new Angle(theta);
+        return new Angle(angle_between_planes(plane1, plane2));
     }
 
     toString() {

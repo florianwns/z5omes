@@ -1650,11 +1650,11 @@
                                     ],
                                 ] : [
                                     [
-                                        Math.abs(TAU_Q - angle(A, B, C)),
+                                        Math.abs(TAU_Q - angle_between_points(A, B, C)),
                                         point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'
                                     ],
                                     [
-                                        Math.abs(TAU_Q - angle(D, C, B)),
+                                        Math.abs(TAU_Q - angle_between_points(D, C, B)),
                                         point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'
                                     ],
                                     [
@@ -3292,10 +3292,11 @@
 
                     // Loop over the faces of the framework to build timbers
                     // Divide zome faces and build framework timbers
+                    const strengthening_of_timbers_bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
                     for (let crown_index = 0; crown_index < zome_faces_3D.length; crown_index++) {
                         const face = zome_faces_3D[crown_index];
                         face.compute_framework(
-                            this.params.strengthening_of_timbers,
+                            strengthening_of_timbers_bitwise_flags[crown_index] || 0,
                             ASSEMBLY_METHOD,
                             ASSEMBLY_DIRECTION,
                             vanishing_pt,
