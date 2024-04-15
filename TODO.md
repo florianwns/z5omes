@@ -1,73 +1,11 @@
 # TODO-LIST
 
-* [ ] Adapter le dessin 
-  fois la matrice en place, il faut pouvoir diviser le losange à partir de ça
-  <br>.... trouver l'algo pour ça
-
-https://www.inesc-id.pt/ficheiros/publicacoes/936.pdf
-
-on peut aussi utiliser la detection de contours avec opencv
-https://docs.opencv.org/3.4/dc/dcf/tutorial_js_contour_features.html
-
-la méthode Convex Hull fonctionnerait bien en effet
-
-```js
-let src = cv.imread('canvasInput');
-let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-cv.threshold(src, src, 100, 200, cv.THRESH_BINARY);
-let contours = new cv.MatVector();
-let hierarchy = new cv.Mat();
-let hull = new cv.MatVector();
-cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-// approximates each contour to convex hull
-for (let i = 0; i < contours.size(); ++i) {
-  let tmp = new cv.Mat();
-  let cnt = contours.get(i);
-  // You can try more different parameters
-  cv.convexHull(cnt, tmp, false, true);
-  hull.push_back(tmp);
-  cnt.delete(); tmp.delete();
-}
-// draw contours with random Scalar
-for (let i = 0; i < contours.size(); ++i) {
-  let colorHull = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
-          Math.round(Math.random() * 255));
-  cv.drawContours(dst, hull, i, colorHull, 1, 8, hierarchy, 0);
-}
-cv.imshow('canvasOutput', dst);
-src.delete(); dst.delete(); hierarchy.delete(); contours.delete(); hull.delete();
-```
-
-et il faudrait trouver les points les plus proches
-une fois les polygones extraits
-
-
-
-pour charger le svg dans le canvas 
-
-https://www.tutorialspoint.com/How-to-draw-an-SVG-file-on-an-HTML5-canvas
-
-```js
-var canvas = document.getElementById('myCanvas');
- var ctx = canvas.getContext('2d');
- var data = '<svg xmlns="http://www.w3.org/2000/svg" width="300"></svg>';
- var DOMURL = window.URL || window.webkitURL || window;
- var img1 = new Image();
- var svg = new Blob([data], {type: 'image/svg+xml'});
- var url = DOMURL.createObjectURL(svg);
- img1.onload = function() {
-    ctx.drawImage(img1, 25, 70);
-    DOMURL.revokeObjectURL(url);
- }
- img1.src = url;
-```
-
-
+* [ ] ma première methode de division ne fonctionne pas totalement.
+  Il faut revoir l'approche en utilisant la théorie des graphes et l'exploration par noeud.
+  en gardant l'idée que si un noeud a un angle de 180 degree on ne l'ajoute pas.
 
 * [ ] un fois la matrice en place, il faut pouvoir diviser le losange à partir de ça
   <br>.... trouver l'algo pour ça
-
   
 * [ ] pour le flattened mandala avec le bindu zome, 
   pas de rotate sur le même crown_index
