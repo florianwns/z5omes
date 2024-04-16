@@ -240,7 +240,7 @@ function norm(vec) {
     return mul(vec, 1 / len(vec));
 }
 
-function midpoint(p1, p2) {
+function get_midpoint(p1, p2) {
     // Find the midpoint of a segment/line
     return mul(add(p1, p2), 0.5);
 }
@@ -343,6 +343,39 @@ function angle_between_points(p1, p2, p3) {
 
     // Calculate angle in radians
     return angle_between_vectors(vec1, vec2);
+}
+
+function signed_angle_between_vectors(vec1, vec2, plane, right_handed_rotation = false) {
+    // Calculate Signed angle in radians between vector
+    // source : https://stackoverflow.com/questions/5188561/signed-angle-between-two-3d-vectors-with-same-origin-within-the-same-plane
+
+
+    // The right handed rotation correspond to ccw rotation
+    // and left handed rotation is clockwise rotation
+    // source : https://en.wikipedia.org/wiki/Right-hand_rule
+
+    // Normalize plane
+    const norm_plane = norm(plane)
+
+    // atan2((Va x Vb) . Vn, Va . Vb),
+    return Math.atan2(
+        dot_product(
+            (right_handed_rotation)
+                ? cross_product(vec1, vec2)
+                : cross_product(vec2, vec1),
+            norm_plane
+        ),
+        dot_product(vec1, vec2)
+    )
+}
+
+function signed_angle_between_points(p1, p2, p3, plane, right_handed_rotation = false) {
+    // Calculate vectors between points
+    const vec1 = sub(p2, p1);
+    const vec2 = sub(p2, p3);
+
+    // Calculate signed angle in radians
+    return signed_angle_between_vectors(vec1, vec2, plane, right_handed_rotation);
 }
 
 function dihedral_angle(a, b, c) {
@@ -635,6 +668,19 @@ function get_centroid(points) {
     return average(points);
 }
 
+
+function points_to_graph(points) {
+    // Convert a point list to a graph with no neighbors
+    const graph = {};
+    for (let num_nodes = 0; num_nodes < points.length; num_nodes++) {
+        graph[ALPHABET[num_nodes]] = {
+            point: points[num_nodes],
+            neighbors: [],
+        };
+    }
+    return graph;
+}
+
 function compute_hash_from_geometry(area, angles, edge_distances) {
     // Sort parameters to compare symmetric geometry
     const hash_parameters = {
@@ -868,18 +914,18 @@ class Base3DGeometry {
         return this._centroid;
     }
 
-    get mid_points() {
-        if (this._mid_points === null) {
+    get midpoints() {
+        if (this._midpoints === null) {
             // Compute mid points
-            this._mid_points = new Array(this.num_points);
+            this._midpoints = new Array(this.num_points);
             for (let i = 0; i < this.num_points; i++) {
-                this._mid_points[i] = midpoint(
+                this._midpoints[i] = get_midpoint(
                     this.points[i],
                     this.points[this.next_indexes[i]]
                 );
             }
         }
-        return this._mid_points;
+        return this._midpoints;
     }
 
     get area() {
@@ -1046,8 +1092,8 @@ class Base3DGeometry {
         const flattened_face = this.flatten_face(side);
 
         if (flattened_face.label) {
-            const mid_points_item = new Polygon3D(flattened_face.mid_points);
-            const font_size = Math.min(mid_points_item.width, mid_points_item.height) * 0.7;
+            const midpoints_item = new Polygon3D(flattened_face.midpoints);
+            const font_size = Math.min(midpoints_item.width, midpoints_item.height) * 0.7;
             const shapes = font.generateShapes(flattened_face.label, font_size);
 
             const geometry = new THREE.ShapeGeometry(shapes);
@@ -1119,7 +1165,7 @@ class Base3DGeometry {
     reset_other_points() {
         this._points_2D = null;
         this._fitted_points = null;
-        this._mid_points = null;
+        this._midpoints = null;
         this._centroid = null;
     }
 
@@ -1363,13 +1409,13 @@ class Polygon3D extends Base3DGeometry {
                 const cur_2_sec_vec = sub(sec_pt, cur_pt);
                 const cur_2_prev_vec = sub(prev_pt, cur_pt);
 
-                const mid_pt = face.mid_points[i];
-                const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
+                const midpoint = face.midpoints[i];
+                const mid_2_vanishing_vec = sub(vanishing_pt, midpoint)
 
                 switch (assembly_method) {
                     case 0: // GoodKarma
                         horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
-                        thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, timber_thickness);
+                        thickness_offset_pt = point_to(midpoint, horizontal_proj_vec, timber_thickness);
                         vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
                         width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, timber_width);
 
@@ -1381,17 +1427,17 @@ class Polygon3D extends Base3DGeometry {
                         theta = face.angles[i];
                         hypotenuse = timber_thickness / Math.sin(theta);
                         adjacent_side = timber_thickness / Math.tan(theta);
-                        pivot_pt = point_to(mid_pt, cur_2_sec_vec, -adjacent_side);
+                        pivot_pt = point_to(midpoint, cur_2_sec_vec, -adjacent_side);
 
                         thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
-                        horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
+                        horizontal_proj_vec = sub(thickness_offset_pt, midpoint);
 
                         if (to_decimal(theta) === to_decimal(TAU_Q)) {
                             // Add Hack to avoid issues with bad cross_products on 90° angles
                             vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
                         } else if (theta > TAU_Q) {
                             // Change direction if theta is greater than 90°,
-                            // Because pivot point is after mid_pt, so the direction is opposite
+                            // Because pivot point is after midpoint, so the direction is opposite
                             vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_prev_vec);
                         } else {
                             // The normal way if theta is smaller than 90 °
@@ -1401,17 +1447,17 @@ class Polygon3D extends Base3DGeometry {
                         if (assembly_method === 1) {
                             vertical_proj_vec = mul(vertical_proj_vec, -xpansion_direction);
 
-                            wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
+                            wall_planes[i] = points_2_plane(cur_pt, midpoint, vanishing_pt);
                             width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, timber_width);
 
-                            const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[i])
-                            const opposite_thickness = dist(opposite_mid_pt, width_offset_pt);
+                            const opposite_midpoint = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[i])
+                            const opposite_thickness = dist(opposite_midpoint, width_offset_pt);
 
                             // If opposite width is superior than TIMBER_THICKNESS
                             if (opposite_thickness > timber_thickness) {
                                 // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
                                 const thickness_delta = opposite_thickness - timber_thickness;
-                                thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, timber_thickness - thickness_delta)
+                                thickness_offset_pt = point_to(midpoint, horizontal_proj_vec, timber_thickness - thickness_delta)
                             }
                         }
                 }
@@ -1432,14 +1478,14 @@ class Polygon3D extends Base3DGeometry {
                     case 0: // GoodKarma
                     case 1: // Beveled
                         // Use vanishing pt for wall
-                        wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
+                        wall_planes[i] = points_2_plane(cur_pt, midpoint, vanishing_pt);
                         break;
                     case 2: // Xpansion
                         // Use vertical proj rather vanishing pt
                         wall_planes[i] = points_2_plane(
                             cur_pt,
-                            mid_pt,
-                            point_to(mid_pt, vertical_proj_vec, 100)
+                            midpoint,
+                            point_to(midpoint, vertical_proj_vec, 100)
                         );
                         break;
                 }
@@ -1462,7 +1508,7 @@ class Polygon3D extends Base3DGeometry {
 
                 // Get vectors
                 const cur_pt = face.points[i];
-                const mid_pt = face.mid_points[i];
+                const midpoint = face.midpoints[i];
                 const cur_2_sec_vec = ccw_vecs[i];
                 const sec_2_cur_vec = cw_vecs[next_index];
 
@@ -1491,20 +1537,20 @@ class Polygon3D extends Base3DGeometry {
                 // Compute planes to find intersection points
                 horizontal_proj_vec = horizontal_proj_vecs[i];
                 const along_plane = wall_planes[i]
-                const mid_pt_with_vertical_proj = plan_intersection(
+                const midpoint_with_vertical_proj = plan_intersection(
                     width_offset_pt, horizontal_proj_vec, along_plane
                 )
 
                 // A, B, C, D is the top part (trapezoid) of the timber
-                A = plan_intersection(mid_pt, sec_2_cur_vec, planes[0]);
+                A = plan_intersection(midpoint, sec_2_cur_vec, planes[0]);
                 B = plan_intersection(thickness_offset_pt, sec_2_cur_vec, planes[1]);
-                C = plan_intersection(mid_pt, cur_2_sec_vec, planes[2])
+                C = plan_intersection(midpoint, cur_2_sec_vec, planes[2])
                 D = plan_intersection(thickness_offset_pt, cur_2_sec_vec, planes[3])
 
                 // E, F, G, H is the bottom part (trapezoid) of the timber
-                E = plan_intersection(mid_pt_with_vertical_proj, sec_2_cur_vec, planes[0]);
+                E = plan_intersection(midpoint_with_vertical_proj, sec_2_cur_vec, planes[0]);
                 F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
-                G = plan_intersection(mid_pt_with_vertical_proj, cur_2_sec_vec, planes[2]);
+                G = plan_intersection(midpoint_with_vertical_proj, cur_2_sec_vec, planes[2]);
                 H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
 
                 // Reverse top and bottom sides depends on the xpansion direction
@@ -1587,8 +1633,69 @@ class Polygon3D extends Base3DGeometry {
         // Split polygon in multiple polygons
         // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
 
+        // if 0 or not a rhombus return [this]
+        if (this.num_points != 4 || strengthening_of_timbers_bitwise_flag === 0) {
+            return [this];
+        }
+
+        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
+
+        // 0 1 2 3 4 5 6 7      bars
+        // 8   9   10  11       mini bars    8 + (i / 2)
+        let parts = [];
+
+
+        // Create a graph like this one to find sub polygons
+        // With a counterclockwise spiral pattern
+        //         A
+        //       / | \
+        //     B   I   H
+        //   /   \ |    \
+        //  C- J - M - L- G
+        //   \     |    /
+        //     D   K  F
+        //       \ | /
+        //         E
+
+
+        // Order graph point in spiral, add centroid at the end
+        const graph_points = new Array(3 * this.num_points + 1);
+        for (let i = 0, j = 0; i < this.num_points; i++, j += 2) {
+            graph_points[j] = this.points[i];
+            graph_points[j + 1] = this.midpoints[i];
+            graph_points[i + 8] = get_midpoint(this.points[i], this.centroid);
+        }
+        graph_points[graph_points.length - 1] = this.centroid;
+
+        // Create an graph with no neighbors
+        const graph = points_to_graph(graph_points);
+        const nodes = Object.keys(graph);
+        const num_nodes = nodes.length;
+
+        console.log(graph);
+        // Add neighbors to each nodes
+        // Add Level 1 neighbors always in CCW
+        for (let i = 0; i < 8; i++) {
+            const node = nodes[i];
+            const next_node = nodes[(i + 1) % 8];
+            graph[node].neighbors.push(next_node);
+        }
+
+        // TODO : graph nodes exploration with signed angle calculation
+        // if num_neighbors > 2, calculate signed angle between prev node node and next neighbor nodes
+        // and take to minimum signed angle more than 0
+
+        console.log(graph);
+
+        return [this];
+    }
+
+    split_v1(strengthening_of_timbers_bitwise_flag = 0) {
+        // Split polygon in multiple polygons
+        // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
+
         // if 0 return this
-        if ([3, 5].includes(this.num_points) || strengthening_of_timbers_bitwise_flag === 0){
+        if ([3, 5].includes(this.num_points) || strengthening_of_timbers_bitwise_flag === 0) {
             return [this];
         }
 
@@ -1613,7 +1720,7 @@ class Polygon3D extends Base3DGeometry {
         let points_to_add = new Array(num_points);
         for (let i = 0, j = 0; i < this.num_points; i++, j += 2) {
             points_to_add[j] = this.points[i];
-            points_to_add[j + 1] = this.mid_points[i];
+            points_to_add[j + 1] = this.midpoints[i];
         }
 
         console.log("points_to_add", ...points_to_add)
@@ -1641,14 +1748,14 @@ class Polygon3D extends Base3DGeometry {
                 const transversal_bar_index = 8 + Math.floor(pt_index / 2) % 4;
                 const transversal_bar_is_selected = strengthening_of_timbers[transversal_bar_index];
                 if (transversal_bar_is_selected) {
-                    const mid_point_to_centroid = midpoint(points_to_add[pt_index], this.centroid);
+                    const midpoint_to_centroid = get_midpoint(points_to_add[pt_index], this.centroid);
 
                     // Create one polygon or two if bar is selected
                     if (bar_is_selected) {
                         parts.push(
                             Polygon3D.copy(this, [
                                 points_to_add[pt_index],
-                                mid_point_to_centroid,
+                                midpoint_to_centroid,
                                 points_to_add[prev_pt_index]
                             ])
                         );
@@ -1656,12 +1763,12 @@ class Polygon3D extends Base3DGeometry {
                             Polygon3D.copy(this, [
                                 points_to_add[pt_index],
                                 points_to_add[next_pt_index],
-                                mid_point_to_centroid
+                                midpoint_to_centroid
                             ])
                         );
 
-                        // Shift the point to add at mid_point_to_centroid
-                        points_to_add[pt_index] = mid_point_to_centroid;
+                        // Shift the point to add at midpoint_to_centroid
+                        points_to_add[pt_index] = midpoint_to_centroid;
                     } else {
                         parts.push(
                             Polygon3D.copy(this, [
@@ -1757,9 +1864,9 @@ class Polygon3D extends Base3DGeometry {
                     parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[4]]));
                     parts.push(Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3], this.points[4]]));
                 } else {
-                    const mid_pt = midpoint(this.points[2], this.points[3]);
-                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2], mid_pt]));
-                    parts.push(Polygon3D.copy(this, [mid_pt, this.points[3], this.points[4], this.points[0]]));
+                    const midpoint = get_midpoint(this.points[2], this.points[3]);
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2], midpoint]));
+                    parts.push(Polygon3D.copy(this, [midpoint, this.points[3], this.points[4], this.points[0]]));
                 }
                 break;
         }

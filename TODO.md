@@ -4,6 +4,115 @@
   Il faut revoir l'approche en utilisant la théorie des graphes et l'exploration par noeud.
   en gardant l'idée que si un noeud a un angle de 180 degree on ne l'ajoute pas.
 
+* [ ] 🚿 La douche portant conseil, on peut imaginer changer la couleur des montants au clic souris
+  passant du bleu au vert et devenant des renfort plutôt que des divisions.
+  cela remplirait deux tableaux distincts (un pour la disivion des polygons et l'autre pour le renfort de montants)
+  sachant qu'on ne peut avoir une division et un renfort au même endroit.
+  un seul tableau sera sans doute plus logique du coup
+
+
+
+```
+Tableau pouvant representer la division d'un losange
+1 => Point du losange
+2 => Milieu d'un segment externe du losange
+3 => Milieu d'un segment vers le centroid
+c => pour centroid 
+
+0 0 0 0 1 0 0 0 0
+0 0 0 / 0 \ 0 0 0
+0 0 2 0 3 0 2 0 0
+0 / 0 0 0 x 0 \ 0
+1 0 3 0 c 0 3 0 1
+0 \ 0 0 0 0 0 / 0
+0 0 2 0 3 0 2 0 0
+0 0 0 \ 0 / 0 0 0
+0 0 0 0 1 0 0 0 0
+
+Indices des points une fois mergés
+
+        0 
+      /   \ 
+    1   8   7 
+  /          \ 
+2   9   12  11 6
+  \          / 
+    3   10  5 
+      \   / 
+        4 
+        
+ex : 
+
+        0 
+      / | \ 
+    1   8   7 
+  /   \ |    \ 
+2 - 9 - 12-11-6
+  \     |    / 
+    3   10  5 
+      \ | / 
+        4
+        
+
+On part de 0-1 et on essaye de trouver le chemin le plus court.
+En principentrouve 0-1-12-8-0 puis on créer un polygone avec ses points
+auquel on retire les points dont l'angle est à 180°.
+
+        A 
+      / | \ 
+    B   I   H 
+  /   \ |    \ 
+ C- J - M - L-G
+  \     |    / 
+    D   K  F 
+      \ | / 
+        E
+        
+à partir du graphe ci dessous :
+
+const graph = {
+    A: { B: 1, I: 1, H: 1},              
+    B: { A: 1, C: 1, M: 1},        
+    C: { B: 1, J: 1, D: 1},
+    D: { C: 1, E: 1},
+    E: { D: 1, K: 1, F: 1},
+    F: { E: 1, G: 1},
+    G: { F: 1, L: 1, H: 1},
+    H: { G: 1, A: 1},
+    I: { A: 1, M: 1},
+    J: { C: 1, M: 1},
+    K: { E: 1, M: 1},
+    L: { G: 1, M: 1},
+    M: { I: 1, J: 1, K: 1, L: 1},
+};
+
+const graph = {
+    A: [ "B", "I", "H" ],
+    B: [ "A", "C", "M" ],
+    C: [ "B", "J", "D" ],
+    D: [ "C", "E" ],
+    E: [ "D", "K", "F"],
+    F: [ "E", "G"],
+    G: [ "F", "L", "H"],
+    H: [ "G", "A"],
+    I: [ "A", "M"],
+    J: [ "C", "M"],
+    K: [ "E", "M"],
+    L: [ "G", "M"],
+    M: [ "I", "J", "K", "L"],
+};
+
+
+
+peux tu trouver l'ensemble des chemins qui partent d'un point de départ, 
+qui reviennent au même point en passant par au minimum 3 noeuds mais qui ne passe pas deux fois au même endroit  ?
+
+
+
+
+```
+
+
 * [ ] un fois la matrice en place, il faut pouvoir diviser le losange à partir de ça
   <br>.... trouver l'algo pour ça
   

@@ -1563,7 +1563,7 @@
                             if (adaptive_drawing) {
                                 for (let j = 1; j < 4; j += 2) {
                                     const pt1 = front_points_3D[j], pt2 = front_points_3D[(j + 1) % 4];
-                                    const line_center = midpoint(pt1, pt2);
+                                    const line_center = get_midpoint(pt1, pt2);
                                     const dotted_line_start = point_to(line_center, sub(pt1, pt2), 20);
                                     const dotted_line_end = point_to(line_center, sub(pt2, pt1), 20);
 
@@ -3210,7 +3210,7 @@
                             C = vertices[iC];
 
                             // Compute the new point to close diamond/kite face
-                            D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
+                            D = add(A, mul(sub(get_midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
                             y = to_decimal(D[1]);
