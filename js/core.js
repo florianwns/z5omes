@@ -193,14 +193,14 @@ function swap_axes(points, axes_order = "XYZ") {
 
 
 function dot_product(vec1, vec2) {
-    // The dot product or scalar product of two 3D vectors (or points
+    // The dot product 'vec1 . vec2' or scalar product of two 3D vectors (or points
     // because a point can be represented as a position vector from the origin).
     return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
 }
 
 
 function cross_product(vec1, vec2) {
-    // Also named 'vector product', the cross product is perpendicular to vec1 and vec2
+    // Also named 'vector product', the cross product 'vec1 x vec2' is perpendicular to vec1 and vec2
     // https://en.wikipedia.org/wiki/Cross_product
     return [
         vec1[1] * vec2[2] - vec1[2] * vec2[1],
