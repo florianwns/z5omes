@@ -11,14 +11,50 @@
 // ------------------------------------
 // ========== Constants ==========
 // ------------------------------------
-const DEBUG = false;
+const DEBUG = true;
 
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
 const FLOAT_PRECISION = 7;
 const FLOAT_2_STR_PRECISION = 2;
 
+// const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
+const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
+
 const ASSEMBLY_DIRECTIONS = ["Clockwise Rotation", "Counterclockwise Rotation", "Symmetry Axis"]
+
+const THREE_EDGES_MATERIAL = new THREE.LineBasicMaterial({color: 0x333333})
+const THREE_VANISHING_LINES_MATERIAL = new THREE.LineBasicMaterial({color: 0x00ffff});
+const THREE_LABELS_MATERIAL = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.FrontSide,
+    transparent: true
+});
+const THREE_VERTEX_COLOR_MATERIAL = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, vertexColors: true});
+
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const FOOTING_CHAR = '~';
+const FLOOR_CHAR = '⬢';
+const XYZ = ["X", "Y", "Z"];
+
+const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
+const FRAMEWORK_CUSTOMIZER_SVG_IDS = [
+    "#svg_vertical_bar_at_top",
+    "#svg_diagonal_bar_at_top_left",
+    "#svg_horizontal_bar_at_left",
+    "#svg_diagonal_bar_at_bottom_left",
+    "#svg_vertical_bar_at_bottom",
+    "#svg_diagonal_bar_at_bottom_right",
+    "#svg_horizontal_bar_at_right",
+    "#svg_diagonal_bar_at_top_right",
+
+    "#svg_horizontal_bar_at_top",
+    "#svg_vertical_bar_at_left",
+    "#svg_horizontal_bar_at_bottom",
+    "#svg_vertical_bar_at_right",
+];
+const SVG_VERTICAL_BAR_BITWISE_FLAG = 1 + 16;
+const SVG_HORIZONTAL_BAR_BITWISE_FLAG = SVG_VERTICAL_BAR_BITWISE_FLAG << 2;
 
 check_is_mobile = function () {
     let check = false;
@@ -38,8 +74,7 @@ const IS_MOBILE = check_is_mobile();
 function decode_url_params(key) {
     const url = new URLSearchParams(window.location.search);
     const query_param = url.get(key)
-    const decoded_params = (query_param) ? JSON.parse(atob(query_param)) : {};
-    return decoded_params;
+    return (query_param) ? JSON.parse(atob(query_param)) : {};
 }
 
 
@@ -51,7 +86,7 @@ function small_hash(params) {
     const param_values = _.map(params, value => {
         switch (typeof value) {
             case 'number':
-                return to_decimal(value);    // Trunc number
+                return to_decimal_str(value);           // Trunc number
             case 'boolean':
                 return +value;                          // Convert to int
             default:
@@ -65,8 +100,7 @@ function small_hash(params) {
         .replaceAll('', '')
 
     param_str = _.reduce(`${param_str}`, (res, c) => res += c.charCodeAt(0), 0)
-    const hash = btoa(param_str).replaceAll('=', '');
-    return hash;
+    return btoa(param_str).replaceAll('=', '');
 }
 
 function sync_params_from_url(params, key = "q") {
@@ -118,41 +152,55 @@ function mul(p1, k) {
 function are_points_equal(p1, p2) {
     const [x1, y1, z1] = round_values(p1);
     const [x2, y2, z2] = round_values(p2);
-    return x1 == x2 && y1 == y2 && z1 == z2;
+    return x1 === x2 && y1 === y2 && z1 === z2;
 }
 
-
 function round_values(pt, num_digits = FLOAT_PRECISION) {
-    return pt.map(value => to_decimal(value, num_digits));
+    const rounded_pt = new Array(pt.length);
+    for (let i = 0; i < pt.length; i++) {
+        rounded_pt[i] = to_decimal(pt[i], num_digits);
+    }
+    return rounded_pt;
 }
 
 function swap_axes(points, axes_order = "XYZ") {
-    return points.map(p => {
-        const reordered_point = [p[0], p[1], p[2]];
-        const axis_indexes = ["X", "Y", "Z"].map(c => axes_order.indexOf(c));
-        for (let i = 0; i < 3; i++) {
-            const axis_index = axis_indexes[i];
-            if (axis_index === -1) {
-                console.error("Please use only one X, Y, Z for the axes_order");
-                return;
-            }
-            reordered_point[axis_index] = p[i];
+    const axis_indexes = new Array(3);
+    for (let i = 0; i < 3; i++) {
+        const axis_char = axes_order[i];
+        const axis_index = axis_char == "X"
+            ? 0
+            : axis_char == "Y"
+                ? 1
+                : axis_char == "Z"
+                    ? 2
+                    : -1;
+
+        if (axis_index === -1) {
+            console.error("Please use only one X, Y, Z for the axes_order");
+            return;
         }
-        ;
-        return reordered_point;
-    });
+        axis_indexes[i] = axis_index;
+    }
+
+    // Reorder points
+    const [i0, i1, i2] = axis_indexes;
+    const reordered_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        reordered_points[i] = [points[i][i0], points[i][i1], points[i][i2]];
+    }
+    return reordered_points;
 }
 
 
 function dot_product(vec1, vec2) {
-    // The dot product or scalar product of two 3D vectors (or points
+    // The dot product 'vec1 . vec2' or scalar product of two 3D vectors (or points
     // because a point can be represented as a position vector from the origin).
     return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2];
 }
 
 
 function cross_product(vec1, vec2) {
-    // Also named 'vector product', the cross product is perpendicular to vec1 and vec2
+    // Also named 'vector product', the cross product 'vec1 x vec2' is perpendicular to vec1 and vec2
     // https://en.wikipedia.org/wiki/Cross_product
     return [
         vec1[1] * vec2[2] - vec1[2] * vec2[1],
@@ -192,7 +240,7 @@ function norm(vec) {
     return mul(vec, 1 / len(vec));
 }
 
-function midpoint(p1, p2) {
+function get_midpoint(p1, p2) {
     // Find the midpoint of a segment/line
     return mul(add(p1, p2), 0.5);
 }
@@ -207,13 +255,7 @@ function point_between(p1, p2, d) {
 function point_to(p1, vec, d) {
     // Find point at distance d from origin p1 to direction vec
     const normalized_vec = norm(vec);
-    const point = add(p1, mul(normalized_vec, d))
-    return point;
-}
-
-function angle_between_vectors(vec1, vec2) {
-    const theta = Math.acos(dot_product(vec1, vec2) / (len(vec1) * len(vec2)));
-    return theta;
+    return add(p1, mul(normalized_vec, d));
 }
 
 function points_2_plane(p1, p2, p3) {
@@ -227,28 +269,23 @@ function points_2_plane(p1, p2, p3) {
 }
 
 function plane_on_axis(axis = "X", value = 0) {
-    const axis_index = _.findIndex(["X", "Y", "Z"], item => item == axis.toUpperCase());
+    const axis_index = _.findIndex(XYZ, item => item === axis.toUpperCase());
     const points = [
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1],
     ];
-
-    _.forEach(points, pt => {
-        pt[axis_index] = value;
-    });
+    for (let i = 0; i < points.length; i++) {
+        points[i][axis_index] = value;
+    }
 
     return points_2_plane(...points);
 }
 
-function triangle_area_from_points(A, B, C) {
+function triangle_area_from_distances(ab, bc, ca) {
     // Heron formula to compute area of the triangle
-    const ab = dist(A, B);
-    const bc = dist(B, C);
-    const ca = dist(C, A);
     const s = (ab + bc + ca) / 2;
-    const area = Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
-    return area;
+    return Math.sqrt(s * (s - ab) * (s - bc) * (s - ca));
 }
 
 function plan_intersection(p1, vec1, plane1) {
@@ -259,8 +296,7 @@ function plan_intersection(p1, vec1, plane1) {
         (a * vec1[0] + b * vec1[1] + c * vec1[2]);
 
     // Calculation of intersection point coordinates
-    const intersection_point = add(p1, mul(vec1, t))
-    return intersection_point;
+    return add(p1, mul(vec1, t));
 }
 
 function intersect(p, v, q, u) {
@@ -281,21 +317,79 @@ function intersect(p, v, q, u) {
     const t = dot_product(b, a) / dot;
 
     // find intersection point by substituting t to the line1 eq
-    const point = add(p, mul(v, t))
-    return point;
+    return add(p, mul(v, t));
 }
 
-function angle(p1, p2, p3) {
-    // Compute the angle of 3 points in radians
-    const a = dist(p2, p3);
-    const b = dist(p1, p2);
-    const c = dist(p1, p3);
-    return Math.acos((c * c - a * a - b * b) / (-2 * a * b)) || 0;
+function acos(k) {
+    // Add limit to acos to avoid NaN errors
+    // See : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Math/acos
+    if (k >= 1) return 0;
+    if (k <= -1) return Math.PI;
+    return Math.acos(k);
 }
 
-function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
-    const sin_theta = Math.sin(theta);
-    const cos_theta = Math.cos(theta);
+function angle_between_vectors(vec1, vec2) {
+    return acos(dot_product(vec1, vec2) / (len(vec1) * len(vec2)));
+}
+
+function angle_between_planes(plane1, plane2) {
+    return angle_between_vectors(plane1, plane2);
+}
+
+function angle_between_points(p1, p2, p3) {
+    // Calculate vectors between points
+    const vec1 = sub(p2, p1);
+    const vec2 = sub(p2, p3);
+
+    // Calculate angle in radians
+    return angle_between_vectors(vec1, vec2);
+}
+
+function signed_angle_between_vectors(vec1, vec2, plane, right_handed_rotation = false) {
+    // Calculate Signed angle in radians between vector
+    // source : https://stackoverflow.com/questions/5188561/signed-angle-between-two-3d-vectors-with-same-origin-within-the-same-plane
+
+
+    // The right handed rotation correspond to ccw rotation
+    // and left handed rotation is clockwise rotation
+    // source : https://en.wikipedia.org/wiki/Right-hand_rule
+
+    // Normalize plane
+    const norm_plane = norm(plane)
+
+    // atan2((Va x Vb) . Vn, Va . Vb),
+    return Math.atan2(
+        dot_product(
+            (right_handed_rotation)
+                ? cross_product(vec1, vec2)
+                : cross_product(vec2, vec1),
+            norm_plane
+        ),
+        dot_product(vec1, vec2)
+    )
+}
+
+function signed_angle_between_points(p1, p2, p3, plane, right_handed_rotation = false) {
+    // Calculate vectors between points
+    const vec1 = sub(p2, p1);
+    const vec2 = sub(p2, p3);
+
+    // Calculate signed angle in radians
+    return signed_angle_between_vectors(vec1, vec2, plane, right_handed_rotation);
+}
+
+function dihedral_angle(a, b, c) {
+    // Compute the dihedral angle from 3 angles
+    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
+    return acos(
+        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
+    )
+}
+
+
+function rotate_point_around_z_axis(vec, angle, origin = [0, 0, 0]) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
     // Rotate an 2D vector around z axis with an origin
     let delta = sub(vec, origin);
@@ -306,33 +400,40 @@ function rotate_point_around_z_axis(vec, theta, origin = [0, 0, 0]) {
     ];
 }
 
+function rotate_points_around_z_axis(points, angle) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
-function rotate_point_around_y_axis(vec, theta, origin = [0, 0, 0]) {
-    const sin_theta = Math.sin(theta);
-    const cos_theta = Math.cos(theta);
-
-    // Rotate an 2D vector around z axis with an origin
-    let delta = sub(vec, origin);
-    return [
-        delta[0] * cos_theta + delta[2] * sin_theta + origin[0],
-        vec[1],
-        -delta[0] * sin_theta + delta[2] * cos_theta + origin[2],
-    ];
+    // Rotate 2D points around z axis
+    const rotated_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        const [x, y, z] = points[i];
+        rotated_points[i] = [
+            x * cos_theta - y * sin_theta,
+            x * sin_theta + y * cos_theta,
+            z,
+        ];
+    }
+    return rotated_points;
 }
 
-function dihedral_angle(a, b, c) {
-    // Compute the dihedral angle from 3 angles
-    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
-    return Math.acos(
-        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
-    )
+function rotate_points_around_y_axis(points, angle) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
+
+    // Rotate 2D points around y axis
+    const rotated_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        const [x, y, z] = points[i];
+        rotated_points[i] = [
+            x * cos_theta + z * sin_theta,
+            y,
+            -x * sin_theta + z * cos_theta,
+        ];
+    }
+    return rotated_points;
 }
 
-function angle_between_planes(plane1, plane2) {
-    const dot = dot_product(plane1, plane2);
-    const theta = Math.acos(dot / (len(plane1) * len(plane2)));
-    return theta;
-}
 
 function rotation_matrix_from_points(a, b, c) {
     const axis1 = new THREE.Vector3(...sub(a, b)).normalize()
@@ -358,7 +459,7 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     // Use quaternion method to flat points
 
     // Compute the angle/distances with the pt2 point
-    const theta = angle(pt1, pt2, pt3);
+    const theta = angle_between_points(pt1, pt2, pt3);
     const dist_2_pt1 = dist(pt2, pt1);
     const dist_2_pt3 = dist(pt2, pt3);
 
@@ -380,11 +481,11 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
     // Apply quaternion and sub translation vec to planar the face
     const flattened_points = new Array(points.length);
     const translation = new THREE.Vector3(...points[0]).applyQuaternion(quaternion);
-    _.forEach(points, (point, i) => {
-        flattened_points[i] = new THREE.Vector3(...point)
+    for (let i = 0; i < points.length; i++) {
+        flattened_points[i] = new THREE.Vector3(...points[i])
             .applyQuaternion(quaternion).sub(translation)
             .toArray();
-    });
+    }
 
     return flattened_points;
 }
@@ -420,105 +521,68 @@ function circle_path(cx, cy, r) {
 }
 
 
-// --------------------------
-// ====== CANVAS/WEBGL ======
-// --------------------------
-
-
-function color_rgb_buffer(num, r, g, b) {
-    const num_rgb = 3 * num;
-    const colors = new Float32Array(num_rgb);
-    for (let i = 0; i < num_rgb; i += 3) {
-        colors[i] = r;
-        colors[i + 1] = g;
-        colors[i + 2] = b;
-    }
-    return new THREE.Float32BufferAttribute(colors, 3);
-}
-
-function clone_and_color_mesh(other_mesh, color) {
-    if (other_mesh instanceof THREE.Group || other_mesh instanceof THREE.Mesh) {
-        const mesh = other_mesh.clone();
-        return color_mesh(mesh, color);
-    }
-}
-
-function color_mesh(mesh, color) {
-    if (mesh instanceof THREE.Group) {
-        _.forEach(mesh.children, child => {
-            child.material.color.set(color.hex);
-        });
-    } else if (mesh instanceof THREE.Mesh) {
-        mesh.material.color.set(color.hex);
-    }
-    return mesh;
-}
-
-
-function name_mesh(mesh, label) {
-    if (mesh instanceof THREE.Mesh) {
-        mesh.name = label;
-    }
-
-    if (mesh instanceof THREE.Group) {
-        _.forEach(mesh.children, child => {
-            child.name = label;
-        });
-    }
-    return mesh;
-}
-
-
-function create_text_mesh(
-    text,
-    font_size = 26,
-    padding = 4,
-    text_color = 'white',
-    background_color = null,
-) {
-    const canvas = document.createElement("canvas");
-    const has_background = background_color !== null;
-    let ctx = canvas.getContext("2d", {antialias: true, alpha: !has_background});
-
-    // Trick to adapt the canvas size to the text
-    ctx.font = font_size + "px Roboto, sans-serif";
-    const text_width = ctx.measureText(text).width;
-    canvas.width = text_width + 2 * padding;
-    canvas.height = font_size + 2 * padding;
-    ctx = canvas.getContext("2d");
-    ctx.font = font_size + "px Arial";
-
-    // Set the background color
-    if (has_background) {
-        ctx.fillStyle = background_color;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = text_color;
-
-    // Add an offset to the vertical position to center the text
-    // (i don't know why, maybe a little shift due of the font style)
-    const text_x_position = canvas.width * 0.5,
-        text_y_position = canvas.height * 0.55;
-    ctx.fillText(text, text_x_position, text_y_position);
-    ctx.strokeText(text, text_x_position, text_y_position);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        map: texture,
-        transparent: true
-    });
-    const geometry = new THREE.PlaneGeometry(canvas.width, canvas.height);
-    const mesh = new THREE.Mesh(geometry, material);
-    return mesh;
-}
-
 // ---------------------------------
 // ========== Conversions ==========
 // ---------------------------------
+
+function numbers_2_str(numbers) {
+    // Convert an array of numbers to a string where the values are separated by commas
+    return (numbers instanceof Array) ? numbers.toString() : "";
+}
+
+function str_to_numbers(value) {
+    // Convert a string where the values are separated by commas to an array of numbers
+    if (!value) return [];
+
+    const values = value.split(",");
+    for (let i = 0; i < values.length; i++) {
+        values[i] = parseFloat(values[i]);
+    }
+    return values;
+}
+
+function bitwise_flags_to_boolean_matrix(bitwise_flags) {
+    // const bitwise_flags = [13, 5, 0];
+    // bitwise_flags_to_boolean_matrix(bitwise_flags) => [[true, false, true, true], [true, false, true, false], []]
+    let boolean_mat = new Array(bitwise_flags.length);
+    for (let i = 0; i < bitwise_flags.length; i++) {
+        boolean_mat[i] = bitwise_flag_to_boolean_array(bitwise_flags[i]);
+    }
+    return boolean_mat;
+}
+
+function bitwise_flag_to_boolean_array(bitwise_flag) {
+    // const bitwise_flag = 13;
+    // bitwise_flag_to_boolean_array(bitwise_flag) => [true, false, true, true]
+    const boolean_arr = [];
+    for (let j = 0; bitwise_flag > 0; j++) {
+        const pow_2 = Math.pow(2, j);
+        const is_checked = (bitwise_flag & pow_2) == pow_2;
+        boolean_arr.push(is_checked);
+        if (is_checked) {
+            bitwise_flag -= pow_2;
+        }
+    }
+    return boolean_arr;
+}
+
+function boolean_matrix_to_bitwise_flags(boolean_mat) {
+    // const mat = [[true, false, true, true], [true, false, true, false], []];
+    // boolean_matrix_to_bitwise_flags(mat) => [13, 5, 0]
+    let bitwise_flags = new Array(boolean_mat.length);
+    for (let i = 0; i < boolean_mat.length; i++) {
+        const values = boolean_mat[i];
+        bitwise_flags[i] = 0;
+        for (let j = 0; j < values.length; j++) {
+            const is_checked = values[j];
+            if (is_checked) {
+                bitwise_flags[i] |= Math.pow(2, j);
+            }
+        }
+    }
+    return bitwise_flags;
+}
+
 
 function convert_3D_to_2D(points) {
     // Points without the z axis
@@ -540,8 +604,8 @@ function to_decimal(val, num_digits = FLOAT_PRECISION) {
     return parseFloat(val.toFixed(num_digits));
 }
 
-function to_int(x) {
-    return to_decimal(x, 0);
+function to_decimal_str(val, num_digits = FLOAT_PRECISION) {
+    return val.toFixed(num_digits);
 }
 
 function to_mm(v, unit) {
@@ -583,18 +647,19 @@ function hsl2rgb(h, s, l) {
 
 function rgb2hex(rgb) {
     // Convert RGB color to HSL color
-    return `#${_.reduce(rgb, (res, v) => res + parseInt(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
+    return `#${_.reduce(rgb || [1, 1, 1], (res, v) => res + Math.round(255 * v).toString(16).toUpperCase().padStart(2, '0'), "")}`;
 }
 
 function average(points) {
     // compute average positions of 3D points
     const num_points = points.length;
     let [x_sum, y_sum, z_sum] = [0, 0, 0];
-    _.forEach(points, (point) => {
+    for (let i = 0; i < points.length; i++) {
+        const point = points[i];
         x_sum += point[0];
         y_sum += point[1];
         z_sum += point[2];
-    });
+    }
     return [x_sum / num_points, y_sum / num_points, z_sum / num_points];
 }
 
@@ -603,21 +668,33 @@ function get_centroid(points) {
     return average(points);
 }
 
+
+function points_to_graph(points) {
+    // Convert a point list to a graph with no neighbors
+    const graph = {};
+    for (let num_nodes = 0; num_nodes < points.length; num_nodes++) {
+        graph[ALPHABET[num_nodes]] = {
+            point: points[num_nodes],
+            neighbors: [],
+        };
+    }
+    return graph;
+}
+
 function compute_hash_from_geometry(area, angles, edge_distances) {
     // Sort parameters to compare symmetric geometry
     const hash_parameters = {
-        area: to_decimal(area, FLOAT_2_STR_PRECISION),
+        area: to_decimal_str(area, FLOAT_2_STR_PRECISION),
         angles: _.sortBy(
-            _.map(angles, (a) => to_decimal(a, FLOAT_2_STR_PRECISION))
+            _.map(angles, (a) => to_decimal_str(a, FLOAT_2_STR_PRECISION))
         ),
         edge_distances: _.sortBy(
-            _.map(edge_distances, (d) => to_decimal(d, FLOAT_2_STR_PRECISION))
+            _.map(edge_distances, (d) => to_decimal_str(d, FLOAT_2_STR_PRECISION))
         ),
     };
 
     // Sort parameters to compare geometries
-    const hash = encode_params(hash_parameters);
-    return hash;
+    return encode_params(hash_parameters);
 }
 
 // -----------------------------
@@ -660,13 +737,13 @@ function humanize_distance(d, num_digits = FLOAT_2_STR_PRECISION) {
     }
     // Distance are in millimeters
     if (d >= 1e7) {
-        return to_decimal(d / 1e6, num_digits) + "km";
+        return to_decimal_str(d / 1e6, num_digits) + "km";
     } else if (d >= 1e4) {
-        return to_decimal(d / 1e3, num_digits) + "m";
+        return to_decimal_str(d / 1e3, num_digits) + "m";
     } else if (d >= 1e2) {
-        return to_decimal(d / 10, num_digits) + "cm";
+        return to_decimal_str(d / 10, num_digits) + "cm";
     } else {
-        return to_decimal(d, num_digits) + "mm";
+        return to_decimal_str(d, num_digits) + "mm";
     }
 }
 
@@ -678,18 +755,19 @@ function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
 
     // Area are in mm²
     if (d >= 1e12) {
-        return to_decimal(d / 1e12, num_digits) + "km²";
+        return to_decimal_str(d / 1e12, num_digits) + "km²";
     } else if (d >= 1e6) {
-        return to_decimal(d / 1e6, num_digits) + "m²";
+        return to_decimal_str(d / 1e6, num_digits) + "m²";
     } else if (d >= 100) {
-        return to_decimal(d / 100, num_digits) + "cm²";
+        return to_decimal_str(d / 100, num_digits) + "cm²";
     } else {
-        return to_decimal(d, num_digits) + "mm²";
+        return to_decimal_str(d, num_digits) + "mm²";
     }
 }
 
 function humanize_angle(a, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display angle in degrees
+
     return !isNaN(a) ? a.toFixed(num_digits) + "°" : "";
 }
 
@@ -703,35 +781,6 @@ function unique_arr(arr) {
     // Set retains list order
     const s = new Set(arr);
     return [...s];
-}
-
-
-function get_boundaries(points) {
-    // Compute Boundaries
-    let x_max = Number.MIN_VALUE,
-        y_max = Number.MIN_VALUE,
-        z_max = Number.MIN_VALUE,
-        x_min = Number.MAX_VALUE,
-        y_min = Number.MAX_VALUE,
-        z_min = Number.MAX_VALUE;
-
-    for (let i = 0; i < points.length; i++) {
-        const [x, y, z] = points[i];
-
-        // Save Boundaries
-        if (x < x_min) x_min = x;
-        if (x > x_max) x_max = x;
-        if (y < y_min) y_min = y;
-        if (y > y_max) y_max = y;
-        if (z < z_min) z_min = z;
-        if (z > z_max) z_max = z;
-    }
-
-    // Compute width and height from 2D boundaries
-    const width = Math.abs(x_max - x_min);      // X Axis
-    const height = Math.abs(y_max - y_min);     // Y Axis
-    const depth = Math.abs(z_max - z_min);      // Z AXis
-    return [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth];
 }
 
 
@@ -779,62 +828,67 @@ class Color {
 
 const COLOR_BASE = Color.from_angles(0, 0);
 
-class LabeledObject {
-    constructor(label, color) {
-        // With color and label it's more fun
-        this._label = label || "";
-        this._color = color || COLOR_BASE;
-    }
-}
-
-class Base3DGeometry extends LabeledObject {
-    constructor(points, label, color) {
-        // Call parent constructor
-        super(label, color);
-
+class Base3DGeometry {
+    constructor(points, label, color, crown_index) {
+        // Check point number
         const num_points = points.length;
         if (num_points < 3) {
             console.error("Not enough points to make a simple geometry");
             return;
         }
 
+        // With color, label flag it's more fun
+        this._label = label || "";
+        this._color = color || COLOR_BASE;
+
+        // Add crown and spiral index to retrieve the object
+        this.crown_index = crown_index || 0;
+
         // Store points
-        this.num_points = points.length;
         this.points = points;
+        this.reset_geometry_params();
+    }
+
+    get points() {
+        return this._points;
+    }
+
+    set points(value) {
+        this._points = value;
+        this.num_points = value.length;
+
+        // Compute previous and next indexes to optimize performances
+        this.prev_indexes = new Array(this.num_points);
+        this.next_indexes = new Array(this.num_points);
+        for (let i = 0; i < this.num_points; i++) {
+            this.prev_indexes[i] = (this.num_points + i - 1) % this.num_points;
+            this.next_indexes[i] = (i + 1) % this.num_points;
+        }
 
         // Declare private variables use by getters for dynamic computing
-        this._points_2D = null;
         this._flattened_points = null;
+        this._children = null;
+        this.reset_other_points();
+        this.reset_boundaries();
+        this._mesh_material = null;
+        this.reset_3D_objects();
+    }
 
-        // THREE JS objects
-        this._mesh = null;
-        this._edges = null;
-        this._label_mesh = null;
-        this._bounding_box = null;
+    get label() {
+        return this._label;
+    }
 
-        // Geometry Params to compute hash
-        this._area = null;
-        this._perimeter = null;
-        this._angles = null;
-        this._edge_distances = null;
-        this._mid_points = null;
-        this._centroid = null;
+    set label(value) {
+        this._label = value || "";
+    }
 
-        this._slope = null;
+    get color() {
+        return this._color;
+    }
 
-        this._hash = null;
-
-        // Boundaries
-        this._x_min = null;
-        this._x_max = null;
-        this._y_min = null;
-        this._y_max = null;
-        this._z_min = null;
-        this._z_max = null;
-        this._width = null;
-        this._height = null;
-        this._depth = null;
-
+    set color(value) {
+        this._color = value || COLOR_BASE;
+        this._mesh_material = null; // reset the mesh material
     }
 
     get points_2D() {
@@ -843,6 +897,35 @@ class Base3DGeometry extends LabeledObject {
             this._points_2D = convert_3D_to_2D(this.points);
         }
         return this._points_2D;
+    }
+
+    get centroid() {
+        if (this._centroid === null) {
+            // Compute centroid
+            this._centroid = [0, 0, 0];
+            for (let i = 0; i < this.num_points; i++) {
+                const [x, y, z] = this.points[i];
+                this._centroid[0] += x;
+                this._centroid[1] += y;
+                this._centroid[2] += z;
+            }
+            this._centroid = mul(this._centroid, 1 / this.num_points);
+        }
+        return this._centroid;
+    }
+
+    get midpoints() {
+        if (this._midpoints === null) {
+            // Compute mid points
+            this._midpoints = new Array(this.num_points);
+            for (let i = 0; i < this.num_points; i++) {
+                this._midpoints[i] = get_midpoint(
+                    this.points[i],
+                    this.points[this.next_indexes[i]]
+                );
+            }
+        }
+        return this._midpoints;
     }
 
     get area() {
@@ -865,16 +948,9 @@ class Base3DGeometry extends LabeledObject {
         return this._edge_distances;
     }
 
-    get centroid() {
-        if (this._centroid === null) {
-            this._centroid = get_centroid(this.points);
-        }
-        return this._centroid;
-    }
-
-    get mid_points() {
-        if (this._mid_points === null) this.compute_geometry_parameters();
-        return this._mid_points;
+    get centroid_distances() {
+        if (this._centroid_distances === null) this.compute_geometry_parameters();
+        return this._centroid_distances;
     }
 
     get hash() {
@@ -955,27 +1031,9 @@ class Base3DGeometry extends LabeledObject {
     }
 
     get depth() {
-        // Z Axis 
+        // Z Axis
         if (this._depth === null) this.compute_boundaries();
         return this._depth;
-    }
-
-    get color() {
-        return this._color;
-    }
-
-    set color(color) {
-        this._color = color;
-        this._mesh = color_mesh(this.mesh, color);
-    }
-
-    get label() {
-        return this._label;
-    }
-
-    set label(label) {
-        this._label = label;
-        this._mesh = name_mesh(this.mesh, label);
     }
 
     get flattened_points() {
@@ -983,74 +1041,201 @@ class Base3DGeometry extends LabeledObject {
     }
 
     get label_mesh() {
-        if (this._mesh === null) this.compute_meshes();
-        if (this._label_mesh === null) {
-            // Get top face
-            const side = "front";
-            const flattened_face = this.flatten_face(side);
-            if (flattened_face.label) {
-                const min_size = _.reduce(flattened_face.mid_points, (res, p) => {
-                    return Math.min(res, dist(flattened_face.centroid, p))
-                }, Number.MAX_VALUE) * 1.2;
-
-                // const min_size = Math.min(flattened_face.height, flattened_face.width);
-                // const min_size = Math.min(flattened_face.height, flattened_face.width) / 2;
-                this._label_mesh = create_text_mesh(
-                    flattened_face.label,
-                    min_size * 0.9, // font_face
-                    min_size * 0.05, // padding
-                );
-
-                const face = this.get_face(side);
-
-                // Trick to have good orientation
-                this._label_mesh.rotateZ(Math.PI);
-                this._label_mesh.rotateY(Math.PI);
-
-                const translation = sub(face.centroid, flattened_face.centroid);
-                const [x, y, z] = add(flattened_face.centroid, translation);
-
-                this._label_mesh.position.x = x;
-                this._label_mesh.position.y = y;
-                this._label_mesh.position.z = z;
-                const quaternion = quaternion_from_points(
-                    ...flattened_face.points.slice(0, 3),
-                    ...face.points.slice(0, 3)
-                )
-                this._label_mesh.applyQuaternion(quaternion);
-            }
-
-        }
         return this._label_mesh;
+    }
+
+    get mesh_material() {
+        if (this._mesh_material === null) {
+            this._mesh_material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex});
+        }
+        return this._mesh_material;
+    }
+
+    get mesh_points() {
+        if (this._mesh_points === null) this.compute_mesh_points();
+        return this._mesh_points;
+    }
+
+    get mesh_colors() {
+        if (this._mesh_colors === null) this.compute_mesh_colors();
+        return this._mesh_colors;
+    }
+
+    get edge_points() {
+        if (this._edge_points === null) this.compute_mesh_points();
+        return this._edge_points;
+    }
+
+    get fitted_points() {
+        // Adjust the points so the minimum values end up at zero
+        if (this._fitted_points === null) {
+            this._fitted_points = new Array(this.num_points);
+            for (let i = 0; i < this.num_points; i++) {
+                const point = this.points[i];
+                this._fitted_points[i] = [
+                    point[0] - this.x_min,
+                    point[1] - this.y_min,
+                    point[2] - this.z_min
+                ];
+            }
+        }
+        return this._fitted_points
+    }
+
+    compute_label_mesh(font) {
+        if (this._label_mesh !== null || font === null) {
+            return;
+        }
+
+        // Get top face
+        const side = "front";
+        const flattened_face = this.flatten_face(side);
+
+        if (flattened_face.label) {
+            const midpoints_item = new Polygon3D(flattened_face.midpoints);
+            const font_size = Math.min(midpoints_item.width, midpoints_item.height) * 0.7;
+            const shapes = font.generateShapes(flattened_face.label, font_size);
+
+            const geometry = new THREE.ShapeGeometry(shapes);
+            geometry.computeBoundingBox();
+            const xMid = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+            const yMid = -0.5 * (geometry.boundingBox.max.y - geometry.boundingBox.min.y);
+
+            geometry.translate(xMid, yMid, 2);
+            this._label_mesh = new THREE.Mesh(geometry, THREE_LABELS_MATERIAL);
+            this._label_mesh.name = flattened_face.label;
+
+            const face = this.get_face(side);
+
+            // Trick to have good orientation
+            this._label_mesh.rotateZ(Math.PI);
+            this._label_mesh.rotateY(Math.PI);
+
+            const translation = sub(face.centroid, flattened_face.centroid);
+            const [x, y, z] = add(flattened_face.centroid, translation);
+
+            this._label_mesh.position.x = x;
+            this._label_mesh.position.y = y;
+            this._label_mesh.position.z = z;
+            const quaternion = quaternion_from_points(
+                ...flattened_face.points.slice(0, 3),
+                ...face.points.slice(0, 3)
+            )
+            this._label_mesh.applyQuaternion(quaternion);
+        }
+    }
+
+    reset_3D_objects() {
+        this._mesh_points = null;
+        this._mesh_colors = null;
+        this._mesh = null;
+        this._edge_points = null;
+        this._edges = null;
+        this._label_mesh = null;
+        this._bounding_box = null;
+    }
+
+    compute_mesh_points() {
+        const centroid_vec = new THREE.Vector3(...this.centroid);
+        // Compute triangle and edges points of a polygon for 3D visualization
+        this._mesh_points = new Array(3 * this.num_points);
+        this._edge_points = new Array(2 * this.num_points);
+        for (let i = 0, j = 0, k = 0; i < this.num_points; i++, j += 2, k += 3) {
+            this._mesh_points[k] = this._edge_points[j] = new THREE.Vector3(
+                ...this.points[i]
+            );
+            this._mesh_points[k + 1] = this._edge_points[j + 1] = new THREE.Vector3(
+                ...this.points[this.next_indexes[i]]
+            );
+            this._mesh_points[k + 2] = centroid_vec;
+        }
+    }
+
+    compute_mesh_colors() {
+        // Compute colors of a polygon for 3D visualization
+        this._mesh_colors = new Array(9 * this.num_points);
+        const [r, g, b] = this.color.rgb;
+        for (let i = 0, k = 0; i < this.num_points; i++, k += 9) {
+            this._mesh_colors[k] = this._mesh_colors[k + 3] = this._mesh_colors[k + 6] = r;
+            this._mesh_colors[k + 1] = this._mesh_colors[k + 4] = this._mesh_colors[k + 7] = g;
+            this._mesh_colors[k + 2] = this._mesh_colors[k + 5] = this._mesh_colors[k + 8] = b;
+        }
+    }
+
+    reset_other_points() {
+        this._points_2D = null;
+        this._fitted_points = null;
+        this._midpoints = null;
+        this._centroid = null;
+    }
+
+    reset_geometry_params() {
+        // Geometry Params to compute hash
+        this._area = null;
+        this._perimeter = null;
+        this._angles = null;
+        this._edge_distances = null;
+        this._centroid_distances = null;
+        this._slope = null;
+        this._hash = null;
+    }
+
+    reset_boundaries() {
+        this._x_min = null;
+        this._x_max = null;
+        this._y_min = null;
+        this._y_max = null;
+        this._z_min = null;
+        this._z_max = null;
+        this._width = null;
+        this._height = null;
+        this._depth = null;
+    }
+
+    clone() {
+        const cloned_obj = _.clone(this);
+        return cloned_obj;
     }
 
     compute_boundaries() {
         // Compute boundaries
-        const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = get_boundaries(this.points);
-        this._x_min = x_min;
-        this._x_max = x_max
-        this._y_min = y_min;
-        this._y_max = y_max;
-        this._z_min = z_min;
-        this._z_max = z_max;
-        this._width = width;     // X Axis
-        this._height = height;   // Y Axis
-        this._depth = depth;     // Z Axis
-    }
+        this._x_max = Number.MIN_VALUE;
+        this._y_max = Number.MIN_VALUE;
+        this._z_max = Number.MIN_VALUE;
+        this._x_min = Number.MAX_VALUE;
+        this._y_min = Number.MAX_VALUE;
+        this._z_min = Number.MAX_VALUE;
 
-    // Computing interfaces
-    compute_geometry_parameters() {
+        for (let i = 0; i < this.num_points; i++) {
+            const cur_point = this.points[i];
+            const [x, y, z] = cur_point;
+
+            // Save Boundaries
+            if (x < this._x_min) this._x_min = x;
+            if (x > this._x_max) this._x_max = x;
+            if (y < this._y_min) this._y_min = y;
+            if (y > this._y_max) this._y_max = y;
+            if (z < this._z_min) this._z_min = z;
+            if (z > this._z_max) this._z_max = z;
+        }
+
+        // Compute width and height from 2D boundaries
+        this._width = Math.abs(this._x_max - this._x_min);      // X Axis
+        this._height = Math.abs(this._y_max - this._y_min);     // Y Axis
+        this._depth = Math.abs(this._z_max - this._z_min);      // Z AXis
     }
 
     compute_meshes() {
     }
 
+    compute_geometry_parameters() {
+    }
+
     compute_bounding_box() {
-        if (this._mesh === null) this.compute_meshes();
-        if (this._mesh instanceof THREE.Mesh) {
+        if (this.mesh instanceof THREE.Mesh) {
             // Ensure the bounding box is computed for its geometry
             // This should be done only once (assuming static geometries)
-            this._mesh.geometry.computeBoundingBox();
+            this.mesh.geometry.computeBoundingBox();
 
             // Compute the bounding box
             this._bounding_box = new THREE.Box3();
@@ -1058,9 +1243,8 @@ class Base3DGeometry extends LabeledObject {
         }
     }
 
-    fit_points() {
-        // Adjust the points so the minimum values end up at zero
-        return this.points.map(p => [p[0] - this.x_min, p[1] - this.y_min, p[2] - this.z_min]);
+    flatten_face(side = "top") {
+        return Polygon3D.copy(this, this.flattened_points);
     }
 
     filter_points_by_side(side, points) {
@@ -1082,6 +1266,7 @@ class Base3DGeometry extends LabeledObject {
             (p[1] - this.y_min - this.height / 2) * pixel_ratio + center,
         ]);
     }
+
 }
 
 
@@ -1092,23 +1277,58 @@ class Polygon3D extends Base3DGeometry {
     //
     // points are distributed counterclockwise
 
-    constructor(points, label, color) {
+    constructor(points, label, color, crown_index) {
         // Call parent constructor
-        super(points, label, color);
+        super(points, label, color, crown_index);
 
         // Check coplanarity
         if (DEBUG) {
-            this.is_coplanar = this.num_points == 3 || check_is_coplanar(this.points);
+            this.is_coplanar = this.num_points === 3 || check_is_coplanar(this.points);
             if (!this.is_coplanar) {
-                console.error(`The polygon ${this.label || ''} is not coplanar`, this.points);
+                console.warn(`The polygon ${this.label || ''} is not coplanar`, this.points);
             }
         }
 
-        // Because we consider this polygon coplanar, we make a plane with 3 points
-        this.plane = points_2_plane(this.points[0], this.points[1], this.points[this.num_points - 1]);
+        this._plane = null;
+        this._radius = null;
+        this._diameter = null;
+        this._framework_timbers = null;
+        this._framework_outer_points = null;
+        this._framework_inner_points = null;
+    }
 
-        // TODO : remove from the class and compute distance outside
-        this.diameter = 2 * dist_on_xz_axes(this.points[1]);
+    get plane() {
+        if (this._plane === null) {
+            // Because we consider this polygon coplanar, we make a plane with 3 points
+            this._plane = points_2_plane(this.points[0], this.points[1], this.points[this.num_points - 1]);
+        }
+        return this._plane;
+    }
+
+    get framework_timbers() {
+        return this._framework_timbers;
+    }
+
+    get framework_outer_points() {
+        return this._framework_outer_points;
+    }
+
+    get framework_inner_points() {
+        return this._framework_inner_points;
+    }
+
+    get diameter() {
+        if (this._diameter === null) {
+            this._diameter = 2 * this.radius;
+        }
+        return this._diameter;
+    }
+
+    get radius() {
+        if (this._radius === null) {
+            this._radius = dist_on_xz_axes(this.points[1]);
+        }
+        return this._radius;
     }
 
     get flattened_points() {
@@ -1119,73 +1339,474 @@ class Polygon3D extends Base3DGeometry {
         return this._flattened_points;
     }
 
+    static copy(obj, points) {
+        return new Polygon3D(
+            points || obj.points, obj.label, obj.color, obj.crown_index
+        );
+    }
+
+    compute_framework(
+        strengthening_of_timbers_bitwise_flag,  // A bitwise flag which let us to divide polygon
+
+        // Assembly parameters
+        assembly_method = 0,            // 0 : GoodKarma
+        // 1 : Beveled
+        // 2 : Xpansion
+
+        assembly_direction = 0,         // 0 : Clockwise Rotation,
+        // 1 : Counterclockwise Rotation,
+        // 2 : Symmetry Axis
+
+        // xpansion parameters
+        vanishing_pt = [0, 0, 0],      // The vanishing point is used for GoodKamra or Beveled method
+        xpansion_direction = 1,         // Outward or Inward
+
+        // Timbers size in millimeters
+        timber_thickness = 40,
+        timber_width = 60,
+    ) {
+        // Compute framework timbers
+
+        // Init timbers
+        this._framework_timbers = [];
+        this._framework_outer_points = new Array(this.num_points);
+        this._framework_inner_points = new Array(this.num_points);
+
+        // Divide polygons into many parts
+        let framework_faces = [...this.split(strengthening_of_timbers_bitwise_flag)];
+
+        const outward_xpansion = assembly_method === 2 || xpansion_direction === -1;
+
+        // Declare common variables
+        let A, B, C, D, E, F, G, H, theta,
+            hypotenuse, adjacent_side, pivot_pt,
+            thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
+
+        // Loop over the framework faces to build timbers
+        let timber_label_index = 0;
+        for (let iFace = 0; iFace < framework_faces.length; iFace++) {
+            const face = framework_faces[iFace];
+            const num_points = face.num_points;
+
+            // Declare multiple arrays
+            const ccw_vecs = new Array(num_points),
+                cw_vecs = new Array(num_points),
+                thickness_offset_pts = new Array(num_points),
+                width_offset_pts = new Array(num_points),
+                horizontal_proj_vecs = new Array(num_points),
+                wall_planes = new Array(num_points),
+                shifted_wall_planes = new Array(num_points);
+
+            // Calculate vectors and projected points to avoid multiple calculations
+            for (let i = 0; i < face.num_points; i++) {
+                const cur_pt = face.points[i];
+                const next_index = face.next_indexes[i];
+                const prev_index = face.prev_indexes[i];
+
+                const prev_pt = face.points[prev_index];
+                const sec_pt = face.points[next_index];
+
+                const cur_2_sec_vec = sub(sec_pt, cur_pt);
+                const cur_2_prev_vec = sub(prev_pt, cur_pt);
+
+                const midpoint = face.midpoints[i];
+                const mid_2_vanishing_vec = sub(vanishing_pt, midpoint)
+
+                switch (assembly_method) {
+                    case 0: // GoodKarma
+                        horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
+                        thickness_offset_pt = point_to(midpoint, horizontal_proj_vec, timber_thickness);
+                        vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
+                        width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, timber_width);
+
+                        // Multiply vertical proj by xpansion direction
+                        vertical_proj_vec = mul(vertical_proj_vec, xpansion_direction);
+                        break;
+                    case 1: // Beveled
+                    case 2: // Xpansion
+                        theta = face.angles[i];
+                        hypotenuse = timber_thickness / Math.sin(theta);
+                        adjacent_side = timber_thickness / Math.tan(theta);
+                        pivot_pt = point_to(midpoint, cur_2_sec_vec, -adjacent_side);
+
+                        thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
+                        horizontal_proj_vec = sub(thickness_offset_pt, midpoint);
+
+                        if (to_decimal(theta) === to_decimal(TAU_Q)) {
+                            // Add Hack to avoid issues with bad cross_products on 90° angles
+                            vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
+                        } else if (theta > TAU_Q) {
+                            // Change direction if theta is greater than 90°,
+                            // Because pivot point is after midpoint, so the direction is opposite
+                            vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_prev_vec);
+                        } else {
+                            // The normal way if theta is smaller than 90 °
+                            vertical_proj_vec = cross_product(horizontal_proj_vec, mul(cur_2_prev_vec, -1));
+                        }
+
+                        if (assembly_method === 1) {
+                            vertical_proj_vec = mul(vertical_proj_vec, -xpansion_direction);
+
+                            wall_planes[i] = points_2_plane(cur_pt, midpoint, vanishing_pt);
+                            width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, timber_width);
+
+                            const opposite_midpoint = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[i])
+                            const opposite_thickness = dist(opposite_midpoint, width_offset_pt);
+
+                            // If opposite width is superior than TIMBER_THICKNESS
+                            if (opposite_thickness > timber_thickness) {
+                                // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
+                                const thickness_delta = opposite_thickness - timber_thickness;
+                                thickness_offset_pt = point_to(midpoint, horizontal_proj_vec, timber_thickness - thickness_delta)
+                            }
+                        }
+                }
+
+                width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, timber_width);
+
+                // Push vectors
+                ccw_vecs[i] = cur_2_sec_vec;
+                cw_vecs[i] = cur_2_prev_vec;
+                horizontal_proj_vecs[i] = horizontal_proj_vec;
+
+                // Push points
+                thickness_offset_pts[i] = thickness_offset_pt;
+                width_offset_pts[i] = width_offset_pt;
+
+                // Push Planes
+                switch (assembly_method) {
+                    case 0: // GoodKarma
+                    case 1: // Beveled
+                        // Use vanishing pt for wall
+                        wall_planes[i] = points_2_plane(cur_pt, midpoint, vanishing_pt);
+                        break;
+                    case 2: // Xpansion
+                        // Use vertical proj rather vanishing pt
+                        wall_planes[i] = points_2_plane(
+                            cur_pt,
+                            midpoint,
+                            point_to(midpoint, vertical_proj_vec, 100)
+                        );
+                        break;
+                }
+
+                // Shifted wall plane
+                shifted_wall_planes[i] = points_2_plane(
+                    point_to(thickness_offset_pt, cur_2_sec_vec, 100),
+                    thickness_offset_pt,
+                    width_offset_pt,
+                );
+            }
+
+            // Build the prism and outer/inner faces
+            for (let i = 0; i < face.num_points; i++) {
+                const next_index = face.next_indexes[i];
+                const prev_index = face.prev_indexes[i];
+
+                thickness_offset_pt = thickness_offset_pts[i];
+                width_offset_pt = width_offset_pts[i];
+
+                // Get vectors
+                const cur_pt = face.points[i];
+                const midpoint = face.midpoints[i];
+                const cur_2_sec_vec = ccw_vecs[i];
+                const sec_2_cur_vec = cw_vecs[next_index];
+
+                // Compute Planes to make point intersections
+                let planes = new Array(4);
+                switch (assembly_direction) {
+                    // Clockwise Rotation
+                    case 0:
+                        planes[0] = planes[1] = shifted_wall_planes[prev_index];
+                        planes[2] = planes[3] = wall_planes[next_index];
+                        break;
+                    // Counterclockwise Rotation
+                    case 1:
+                        planes[0] = planes[1] = wall_planes[prev_index];
+                        planes[2] = planes[3] = shifted_wall_planes[next_index];
+                        break;
+                    // Symmetry Axis
+                    case 2:
+                        planes[0] = wall_planes[prev_index];
+                        planes[1] = shifted_wall_planes[prev_index];
+                        planes[2] = wall_planes[next_index];
+                        planes[3] = shifted_wall_planes[next_index];
+                        break;
+                }
+
+                // Compute planes to find intersection points
+                horizontal_proj_vec = horizontal_proj_vecs[i];
+                const along_plane = wall_planes[i]
+                const midpoint_with_vertical_proj = plan_intersection(
+                    width_offset_pt, horizontal_proj_vec, along_plane
+                )
+
+                // A, B, C, D is the top part (trapezoid) of the timber
+                A = plan_intersection(midpoint, sec_2_cur_vec, planes[0]);
+                B = plan_intersection(thickness_offset_pt, sec_2_cur_vec, planes[1]);
+                C = plan_intersection(midpoint, cur_2_sec_vec, planes[2])
+                D = plan_intersection(thickness_offset_pt, cur_2_sec_vec, planes[3])
+
+                // E, F, G, H is the bottom part (trapezoid) of the timber
+                E = plan_intersection(midpoint_with_vertical_proj, sec_2_cur_vec, planes[0]);
+                F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
+                G = plan_intersection(midpoint_with_vertical_proj, cur_2_sec_vec, planes[2]);
+                H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
+
+                // Reverse top and bottom sides depends on the xpansion direction
+                if (outward_xpansion) {
+                    [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
+                }
+
+                // Build a TrapezoidalPrism with a label prefixed from the crown face label
+                timber_label_index += 1;
+                const timber_label = `${face.label}${timber_label_index}`;
+                const timber_prism = new TrapezoidalPrism(
+                    [A, B, C, D, E, F, G, H],
+                    timber_label,
+                    face.color,
+                    face.crown_index,
+                );
+
+                this._framework_timbers.push(timber_prism);
+
+                // Compute outer and inner face points of the framework
+                if (_.some(this._framework_outer_points, p => p === undefined)) {
+                    const pt_index = _.findIndex(this.points, p => _.isEqual(p, cur_pt));
+                    if (pt_index > -1) {
+                        this._framework_outer_points[pt_index] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
+                        this._framework_inner_points[pt_index] = plan_intersection(E, sec_2_cur_vec, wall_planes[prev_index]);
+                    }
+                }
+            }
+        }
+    }
+
     compute_geometry_parameters() {
         this._area = 0;
         this._perimeter = 0;
         this._angles = new Array(this.num_points);               // In radians
         this._edge_distances = new Array(this.num_points);
-        this._mid_points = new Array(this.num_points);
+        this._centroid_distances = new Array(this.num_points);
 
         // Compute angle, edge distances, perimeter and area, centroid, and faces
-        _.forEach(this.points, (cur_point, i) => {
-            const prev_point = this.points[(this.num_points + i - 1) % this.num_points];
-            const next_point = this.points[(i + 1) % this.num_points];
+        for (let i = 0; i < this.num_points; i++) {
+            const cur_point = this.points[i];
+            const prev_point = this.points[this.prev_indexes[i]];
+            const next_point = this.points[this.next_indexes[i]];
 
             // Compute angle in radians
-            this._angles[i] = angle(prev_point, cur_point, next_point);
+            this._angles[i] = angle_between_points(prev_point, cur_point, next_point);
 
-            // Compute edges distances, mid points and perimeter
-            const d = dist(cur_point, next_point)
+            // Compute edges distances and perimeter
+            const d = dist(cur_point, next_point);
             this._edge_distances[i] = d;
-            this._mid_points[i] = midpoint(cur_point, next_point);
             this._perimeter += d;
 
+            this._centroid_distances[i] = dist(cur_point, this.centroid);
+            if (!this._centroid_distances[this.next_indexes[i]]) {
+                this._centroid_distances[this.next_indexes[i]] = dist(next_point, this.centroid);
+            }
+
             // Compute area of the triangle
-            this._area += triangle_area_from_points(cur_point, next_point, this.centroid);
-        });
+            this._area += triangle_area_from_distances(
+                this._edge_distances[i],
+                this._centroid_distances[this.next_indexes[i]],
+                this._centroid_distances[i],
+            );
+        }
     }
 
     compute_meshes() {
-        // Compute number of points to draw faces (composed by triangles) of a polygon for 3D visualization
-        const num_triangles = this.num_points;
-        const num_triangle_points = 3 * num_triangles;
-
-        // Arrays of THREE.Vector3 for 3D visualization
-        const triangle_points = new Array(num_triangle_points);
-        const edge_points = new Array(this.num_points * 2);
-
-        let face_index = 0;
-        _.forEach(this.points, (cur_point, i) => {
-            const next_point = this.points[(i + 1) % this.num_points];
-
-            // Compute line segments points
-            edge_points[i * 2] = new THREE.Vector3(...cur_point);
-            edge_points[i * 2 + 1] = new THREE.Vector3(...next_point);
-
-            // Compute face triangles
-            if (face_index < num_triangle_points) {
-                // Faces points for 3D display
-                triangle_points[face_index] = new THREE.Vector3(...cur_point);
-                triangle_points[face_index + 1] = new THREE.Vector3(...next_point);
-                triangle_points[face_index + 2] = new THREE.Vector3(...this.centroid);
-                face_index += 3;
-            }
-        });
-
         // Compute geometry for THREE JS display
-        const geometry = new THREE.BufferGeometry().setFromPoints(triangle_points)
-        const material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, color: this.color.hex});
-        this._mesh = new THREE.Mesh(geometry, material);
-        this._mesh.name = this._label;
+        const mesh_geometry = new THREE.BufferGeometry().setFromPoints(this.mesh_points);
+        this._mesh = new THREE.Mesh(mesh_geometry, this.mesh_material);
 
-        this._edges = new THREE.LineSegments(
-            new THREE.BufferGeometry().setFromPoints(edge_points),
-            new THREE.LineBasicMaterial({color: 0x333333}),
-        );
+        // Add a mesh name (use for 3D export)
+        this._mesh.name = this.label;
+
+        const edge_geometry = new THREE.BufferGeometry().setFromPoints(this.edge_points);
+        this._edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
     }
 
-    flatten_face(side = "top") {
-        return new Polygon3D(this.flattened_points, this.label, this.color);
+    split(strengthening_of_timbers_bitwise_flag = 0) {
+        // Split polygon in multiple polygons
+        // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
+
+        // if 0 or not a rhombus return [this]
+        if (this.num_points != 4 || strengthening_of_timbers_bitwise_flag === 0) {
+            return [this];
+        }
+
+        // Create a graph like this one to find sub polygons
+        // With a counterclockwise spiral pattern
+        //
+        // Ex : for a polygon with 4 vertices like rhombus
+        //
+        //         A
+        //       / | \
+        //     B   I   H
+        //   /   \ |    \
+        //  C- J - M - L- G
+        //   \     |    /
+        //     D   K   F
+        //       \ | /
+        //         E
+
+        // Chars   : Spiral 2 => A B C D E F G H    Spiral 1 => I J K  L      Centroid => M
+        // Indexes :             0 1 2 3 4 5 6 7                8 9 10 11                 12
+
+        // Order graph point in spiral, add centroid at the end
+        const graph_points = new Array(3 * this.num_points + 1);
+        for (let i = 0, j = 0; i < this.num_points; i++, j += 2) {
+            // Spiral 2
+            graph_points[j] = this.points[i];
+            graph_points[j + 1] = this.midpoints[i];
+
+            // Spiral 1
+            graph_points[i + 8] = get_midpoint(this.points[i], this.centroid);
+        }
+
+        // Spiral center => one point => centroid
+        graph_points[graph_points.length - 1] = this.centroid;
+
+        // Create an graph with no neighbors
+        const graph = points_to_graph(graph_points);
+        const nodes = Object.keys(graph);
+
+        // Convert flag to boolean array
+        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
+
+        // Add neighbors only for polygon with 4 points
+        const spiral2_num_nodes = 8;
+        const spiral1_num_nodes = spiral2_num_nodes / 2;
+        const spiral_center_node = nodes[nodes.length - 1];
+
+        for (let spiral2_node_index = 0; spiral2_node_index < spiral2_num_nodes; spiral2_node_index++) {
+            // Add neighbors for outer edges
+            const node = nodes[spiral2_node_index];
+            const prev_node = nodes[(spiral2_node_index + spiral2_num_nodes - 1) % spiral2_num_nodes];
+            const next_node = nodes[(spiral2_node_index + 1) % spiral2_num_nodes];
+            graph[node].neighbors.push(next_node);
+
+            // Make difference with midpoints
+            const even_node = spiral2_node_index % 2 === 0;
+
+            // compute spiral1 node index
+            const spiral1_node_index = 8 + Math.floor(spiral2_node_index / 2) % spiral1_num_nodes;
+
+            // Add neighbors in both ways for the polygon division
+            const bar_to_centroid_is_selected = strengthening_of_timbers[spiral2_node_index];
+            if (bar_to_centroid_is_selected) {
+                if (even_node) {
+                    graph[node].neighbors.push(nodes[spiral1_node_index]);
+                    graph[nodes[spiral1_node_index]].neighbors.push(node);
+
+                    graph[nodes[spiral1_node_index]].neighbors.push(spiral_center_node);
+                    graph[spiral_center_node].neighbors.push(nodes[spiral1_node_index]);
+                } else {
+                    graph[node].neighbors.push(spiral_center_node);
+                    graph[spiral_center_node].neighbors.push(node);
+                }
+            }
+
+            const transversal_bar_is_selected = strengthening_of_timbers[spiral1_node_index];
+            if (even_node && transversal_bar_is_selected) {
+                graph[prev_node].neighbors.push(nodes[spiral1_node_index]);
+                graph[nodes[spiral1_node_index]].neighbors.push(prev_node);
+
+                graph[nodes[spiral1_node_index]].neighbors.push(next_node);
+                graph[next_node].neighbors.push(nodes[spiral1_node_index]);
+            }
+        }
+
+        // compute plane before exploration for angle computing
+        const plane = this.plane;
+
+        function explore_smallest_convex_path(path, prev_node, node, end_node) {
+            // Graph nodes exploration with signed angle calculation
+            // Add node points if the algorithm found the smallest convex path
+
+            // Remove node from the neighbors
+            graph[prev_node].neighbors = graph[prev_node].neighbors.filter(item => item !== node);
+
+            // If node is equal to ending_node, stop the searching
+            if (node === end_node) {
+                // End of exploration if node is the same of ending_node and sum_angle is equal to 360° degrees
+                return true;
+            }
+
+            // Push node without the end
+            path.push(node);
+
+            // Calculate signed angle between prev node node and next neighbor nodes
+            // and take to minimum signed angle more than 0
+            let chosen_neighbor = null,
+                smallest_angle = Number.MAX_VALUE;
+
+            // Filter neighbor to avoid computing angle with the same node
+            const neighbors = graph[node].neighbors.filter(neighbor => neighbor !== prev_node);
+            const num_neighbors = neighbors.length;
+            for (let i = 0; i < num_neighbors; i++) {
+                const neighbor = neighbors[i];
+                const angle_nodes = [prev_node, node, neighbor];
+
+                // Compute signed angle and take the smallest
+                let angle = signed_angle_between_points(...angle_nodes.map(node => graph[node].point), plane);
+                angle = angle < 0 ? TAU + angle : angle;
+                if (num_neighbors === 1 || angle < smallest_angle) {
+                    smallest_angle = angle;
+                    chosen_neighbor = neighbor;
+                }
+            }
+            if (chosen_neighbor && explore_smallest_convex_path(path, node, chosen_neighbor, end_node)) {
+                // End of exploration if ending_node is found
+                return true;
+            }
+
+            // Remove last element from the path,
+            // and add the node to neighbors for a next exploration
+            path.pop();
+            graph[prev_node].neighbors.push(node);
+            return false;
+        }
+
+        const num_nodes = nodes.length;
+        const paths = [];
+        for (let i = 0; i < num_nodes; i++) {
+            // Take the first neighbor and remove it from the list
+            const start_node = ALPHABET[i];
+            const end_node = start_node;
+            for (let j = 0; j < graph[start_node].neighbors.length; j++) {
+                const neighbor = graph[start_node].neighbors.shift();
+                const explored_path = [start_node];
+                const exploration_worked = explore_smallest_convex_path(explored_path, start_node, neighbor, end_node)
+                if (neighbor && exploration_worked) {
+                    paths.push(explored_path);
+                }
+            }
+        }
+
+        // Convert path to polygons
+        const parts = new Array(paths.length);
+        for (let i = 0; i < paths.length; i++) {
+            const path = paths[i];
+            const points = path.map(node => graph[node].point);
+
+            // Filter the points that form a straight line, and keep only good angles
+            const item = new Polygon3D(points);
+            const angles = item.angles;
+            const filtered_points = [];
+            for (let point_index = 0; point_index < item.num_points; point_index++) {
+                const rounded_angle = to_decimal(rad2deg(angles[point_index]), 0);
+                if (rounded_angle > 0 && rounded_angle < 180) {
+                    filtered_points.push(item.points[point_index]);
+                }
+            }
+
+            parts[i] = Polygon3D.copy(this, filtered_points);
+        }
+        return parts;
     }
 
     divide(horizontally = true) {
@@ -1197,40 +1818,25 @@ class Polygon3D extends Base3DGeometry {
         let parts = []
         switch (this.num_points) {
             case 3:
-                parts.push(new Polygon3D(this.points), this.label, this.color);
+                parts.push(Polygon3D.copy(this));
+                break;
             case 4:
                 if (horizontally) {
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[3]], this._label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3]], this._label, this.color)
-                    );
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[3]]));
+                    parts.push(Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3]]));
                 } else {
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2]], this._label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([this.points[2], this.points[3], this.points[0]], this._label, this.color)
-                    );
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2]]));
+                    parts.push(Polygon3D.copy(this, [this.points[2], this.points[3], this.points[0]]));
                 }
                 break;
             case 5:
                 if (horizontally) {
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[4]], this._label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([this.points[1], this.points[2], this.points[3], this.points[4]], this._label, this.color)
-                    );
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[4]]));
+                    parts.push(Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3], this.points[4]]));
                 } else {
-                    const mid_pt = midpoint(this.points[2], this.points[3]);
-                    parts.push(
-                        new Polygon3D([this.points[0], this.points[1], this.points[2], mid_pt], this._label, this.color)
-                    );
-                    parts.push(
-                        new Polygon3D([mid_pt, this.points[3], this.points[4], this.points[0]], this._label, this.color)
-                    );
+                    const midpoint = get_midpoint(this.points[2], this.points[3]);
+                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2], midpoint]));
+                    parts.push(Polygon3D.copy(this, [midpoint, this.points[3], this.points[4], this.points[0]]));
                 }
                 break;
         }
@@ -1239,7 +1845,7 @@ class Polygon3D extends Base3DGeometry {
 }
 
 class TrapezoidalPrism extends Base3DGeometry {
-    constructor(points, label, color) {
+    constructor(points, label, color, crown_index) {
         const num_points = points.length;
         if (num_points !== 8) {
             console.error("TrapezoidalPrism must have 8 point");
@@ -1247,16 +1853,21 @@ class TrapezoidalPrism extends Base3DGeometry {
         }
 
         // Call parent constructor
-        super(points, label, color);
+        super(points, label, color, crown_index);
+    }
 
-        this.polygons = [
-            this.get_face("top"),
-            this.get_face("bottom"),
-            this.get_face("left"),
-            this.get_face("right"),
-            this.get_face("front"),
-            this.get_face("back"),
-        ];
+    get children() {
+        if (this._children === null) {
+            this._children = [
+                this.get_face("top"),
+                this.get_face("bottom"),
+                this.get_face("left"),
+                this.get_face("right"),
+                this.get_face("front"),
+                this.get_face("back"),
+            ];
+        }
+        return this._children;
     }
 
     get flattened_points() {
@@ -1268,35 +1879,66 @@ class TrapezoidalPrism extends Base3DGeometry {
         return this._flattened_points;
     }
 
+    static copy(obj, points) {
+        return new TrapezoidalPrism(
+            points || obj.points, obj.label, obj.color, obj.crown_index
+        );
+    }
+
     compute_geometry_parameters() {
         this._area = 0;
         this._perimeter = 0;
         this._angles = [];               // Array of angles in radians
         this._edge_distances = [];       // Edges distances
 
-        _.forEach(this.polygons, item => {
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
             this._angles.push(...item.angles);
             this._edge_distances.push(...item.edge_distances);
             this._area += item.area; // recompute area
             this._perimeter += item.perimeter; // recompute area
-        });
+        }
+    }
+
+    compute_mesh_points() {
+        // Compute triangle and edges points of all polygons for 3D visualization
+        this._mesh_points = [], this._edge_points = [];
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
+            this._mesh_points.push(...item.mesh_points);
+            this._edge_points.push(...item.edge_points);
+        }
+    }
+
+    compute_mesh_colors() {
+        // Compute colors of all polygons for 3D visualization
+        this._mesh_colors = [];
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
+            item.color = this.color;
+            this._mesh_colors.push(...item.mesh_colors);
+        }
     }
 
     compute_meshes() {
         // Group of geometries
         this._mesh = new THREE.Group();
-        this._mesh.name = this._label;
+        this._mesh.name = this.label;
         this._edges = new THREE.Group();
 
-        _.forEach(this.polygons, item => {
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
+            item.color = this.color;
+            item.label = this.label;
+            item._mesh_material = this.mesh_material;
             this._mesh.add(item.mesh);
             this._edges.add(item.edges);
-        });
+        }
     }
 
     get_face(side = "top") {
         // return a Polygon 3D of a specific side
-        return new Polygon3D(this.filter_points_by_side(side), this.label, this.color);
+        return Polygon3D.copy(this, this.filter_points_by_side(side));
     }
 
     filter_points_by_side(side, points) {
@@ -1337,7 +1979,11 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 
     flatten() {
-        return new TrapezoidalPrism(this.flattened_points, this.label, this.color);
+        return new TrapezoidalPrism(
+            this.flattened_points,
+            this.label, this.color,
+            this.crown_index
+        );
     }
 
     flatten_face(side = "top", add_opposite_side = false, rotation_angle = null) {
@@ -1361,9 +2007,7 @@ class TrapezoidalPrism extends Base3DGeometry {
         }
 
         if (rotation_angle !== null) {
-            flattened_points = flattened_points.map(p => {
-                return rotate_point_around_z_axis(p, rotation_angle);
-            });
+            flattened_points = rotate_points_around_z_axis(flattened_points, rotation_angle);
         }
 
         const filtered_points = add_opposite_side
@@ -1373,7 +2017,35 @@ class TrapezoidalPrism extends Base3DGeometry {
             ]
             : this.filter_points_by_side(side, flattened_points);
 
-        return new Polygon3D(filtered_points, this.label, this.color);
+        return Polygon3D.copy(this, filtered_points);
+    }
+}
+
+
+class Angle {
+    // Simple object to avoid multiple calculations of sinus, cosinus, and degree values
+    constructor(theta) {
+        this.rad = theta;
+        this.deg = rad2deg(theta);
+        this.cos = Math.cos(theta);
+        this.sin = Math.sin(theta);
+        this.tan = Math.tan(theta);
+    }
+
+    static from_3_points(p1, p2, p3) {
+        return new Angle(angle_between_points(p1, p2, p3));
+    }
+
+    static from_2_planes(plane1, plane2) {
+        return new Angle(angle_between_planes(plane1, plane2));
+    }
+
+    toString() {
+        return `${this.deg}°`;
+    };
+
+    reverse() {
+        return new Angle(-this.rad);
     }
 }
 
@@ -1389,11 +2061,11 @@ class ItemHashCollection {
 class Zome {
     constructor(
         {
-            num = null,
+            num_spirals = null,
+            num_crowns = null,
             assembly_method = null,
             rotation_angles = null,
             rotated_colors = null,
-            vertices = null,
 
             skeleton_3D = null,
             skeleton_3D_hash_collections = null,
@@ -1414,12 +2086,11 @@ class Zome {
             vanishing_lines = null
         }
     ) {
-        this.num = num || 0;
+        this.num_spirals = num_spirals || 0;
+        this.num_crowns = num_crowns || 0;
         this.assembly_method = assembly_method || 0;
-
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
-        this.vertices = vertices || [];
 
         this.skeleton_3D = skeleton_3D || [];
         this.skeleton_3D_hash_collections = skeleton_3D_hash_collections || [];

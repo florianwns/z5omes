@@ -24,7 +24,9 @@ const I18N_EN = {
         profile: "profile",
         mandala: 'Mandala',
         spirals: 'Spirals',
+        framework_customization: "Framework customization",
         zome_made_with: "This zome was made with",
+        framework_customizer: "Framework customizer",
 
         // Tooltips
         tooltip_display_help: "Display help",
@@ -41,6 +43,9 @@ const I18N_EN = {
         tooltip_draw_face_colors: "Draw face colors",
         tooltip_draw_face_centroids: "Draw face centroids",
         tooltip_split_drawing: "Split the drawing into multiple A4 sheets for export to PDF",
+        tooltip_customize_framework: "Customize framework",
+        tooltip_show_keyboard_shortcuts: "Show keyboard shortcuts",
+        tooltip_inversion_Y_Z_axes: "Inversion of Y and Z axes",
 
         // Keyboard shortcuts
         key_H_3D_view: "Reset camera view",
@@ -60,6 +65,7 @@ const I18N_EN = {
         tooltip_draw_axes: "Draw 3D axes",
         tooltip_draw_labels: "Draw labels",
         tooltip_spin: "Spin on/off",
+        tooltip_selected_crown: "Selected crown",
 
         // Options
         opt_none: "None",
@@ -69,8 +75,8 @@ const I18N_EN = {
 
         // Help
         help_shape: "The shape of a zome is determined by :",
-        help_n_param: "Number of rhombuses rotating around the vertical axis",
-        help_m_param: "Number of rhombuses from top to bottom",
+        help_n_param: "Number of rhombuses spirals rotating around the vertical axis",
+        help_m_param: "Number of rhombuses crowns from top to bottom",
         help_f_param: "Shape angle(Θ) | Number(F) which allows to calculate the slope of zome. F = tan(Θ)",
         help_hr_param: "Ratio of the visible height of the zome to its total height (Set HR to 1 for an entire zome)",
         help_magnetize_param: "Magnetize to complete the zome with a whole rhombus",

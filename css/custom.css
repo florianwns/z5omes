@@ -105,7 +105,7 @@ body:after {
 }
 
 .btn-small-padding {
-    line-height: 1px;
+    line-height: 20px;
     --bs-btn-padding-y: 0.2rem;
     --bs-btn-padding-x: 0.2rem;
 }
@@ -271,4 +271,42 @@ ul.keyboard-shortcut-list .key:hover {
 
 .up-first:first-letter {
     text-transform: uppercase;
+}
+
+
+svg.svg_rhombus_icon use {
+    stroke: #0B5ED7;
+    stroke-width: 2;
+    fill: none;
+}
+
+
+.btn-primary svg.svg_rhombus_icon use,
+.btn-secondary svg.svg_rhombus_icon use {
+    stroke: white !important;
+}
+
+#svg_rhombus_customizer use {
+    stroke: #bfbfbf;
+    stroke-width: 0.75;
+    fill: none;
+}
+
+#svg_rhombus_customizer circle {
+    fill: #0B5ED7;
+    stroke: #0B5ED7;
+}
+
+#svg_rhombus_customizer use.clickable {
+    stroke: transparent;
+    cursor: pointer;
+    pointer-events: stroke;
+}
+
+svg.svg_rhombus_customizer use.clickable:hover {
+    stroke: #5C636A;
+}
+
+#svg_rhombus_customizer use.selected {
+    stroke: #0B5ED7 !important;
 }
