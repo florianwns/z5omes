@@ -1,7 +1,13 @@
 # TODO-LIST
 
-$ [ ] renommer strengthening_of_timbers en polygon_division_bars
+* [ ] Finir la division pour les triangles
 
+* [ ] Finir la division pour les truncated kite
+
+* [ ] renommer strengthening_of_timbers en polygon_division_bars
+
+* [ ] Ajouter les renforts en plus de la division des polygones
+  
 * [ ] pour le flattened mandala avec le bindu zome, pas de rotate sur le même crown_index
 
 * [ ] Essayer de faire un zome bindu
