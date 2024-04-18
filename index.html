@@ -2119,7 +2119,7 @@
         Alpine.data('renderer_3D', () => {
             // Three JS Objects
             let scene, camera, renderer, controls,
-                canvas, raycaster, pointer, font;
+                canvas, font;
 
             const meshes = {
                 "axes": null,
@@ -2214,50 +2214,6 @@
                     // Add controls
                     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-                    // Add pointer handler
-                    // raycaster = new THREE.Raycaster();
-                    // pointer = new THREE.Vector2();
-
-                    // renderer.domElement.onmousemove = (event) => {
-                    //     if (event.button === 0 && event.ctrlKey) {
-                    //         this.update_pointer_from_event(event);
-                    //         raycaster.setFromCamera(pointer, camera);
-                    //         const obj_group = scene.getObjectByName("obj");
-                    //         const intersects = raycaster.intersectObjects(obj_group.children, true);
-                    //         if (intersects.length > 0) {
-                    //             const objectName = intersects[0].object.name;
-                    //             const obj = scene.getObjectByName(objectName);
-                    //             obj.visible = false;
-                    //             // scene.remove(obj.parent);
-                    //         }
-                    //     }
-                    // };
-                    //
-                    // renderer.domElement.onpointerdown = (event) => {
-                    //     if (event.button === 0 && event.ctrlKey) {
-                    //         // calculate pointer position in normalized device coordinates
-                    //         // (-1 to +1) for both components
-                    //         pointer.x = event.offsetX - 1;
-                    //         pointer.y = -event.offsetY + 1;
-                    //         console.log("canvas", canvas.offsetWidth, canvas.offsetHeight)
-                    //         console.log("event", event)
-                    //         console.log("pointer", pointer)
-                    //         raycaster.setFromCamera(pointer, camera);
-                    //
-                    //         console.log(scene.children)
-                    //         const obj_group = scene.getObjectByName("obj");
-                    //         console.log(obj_group)
-                    //         const intersects = raycaster.intersectObjects(obj_group.children, true  );
-                    //         console.log(intersects)
-                    //         if (intersects.length > 0) {
-                    //             const objectName = intersects[0].object.name;
-                    //             const obj = scene.getObjectByName(objectName);
-                    //             obj.visible = false;
-                    //             // scene.remove(obj.parent);
-                    //         }
-                    //     }
-                    // };
-
                     // Add (x, y, z) Axes
                     meshes.axes = new THREE.AxesHelper(WORLD_HEIGHT);
                     meshes.axes.visible = this.draw_axes;
@@ -2275,15 +2231,6 @@
                         font = loaded_font;
                         self.$dispatch('zome-renderer-is-ready');
                     });
-                },
-
-                update_pointer_from_event(event) {
-                    // calculate pointer position in normalized device coordinates
-                    // source : https://stackoverflow.com/a/69971471
-                    const rect = renderer.domElement.getBoundingClientRect();
-                    pointer.x = ((event.clientX - rect.left) / (rect.right - rect.left)) * 2 - 1;
-                    pointer.y = -((event.clientY - rect.top) / (rect.bottom - rect.top)) * 2 + 1;
-                    return pointer;
                 },
 
                 get clone_and_rotate_mode() {
