@@ -1646,36 +1646,76 @@ class Polygon3D extends Base3DGeometry {
         //   /   \ |    \
         //  C- J - M - L- G
         //   \     |    /
-        //     D   K  F
+        //     D   K   F
         //       \ | /
         //         E
 
+        // Chars   : Spiral 2 => A B C D E F G H    Spiral 1 => I J K  L      Centroid => M
+        // Indexes :             0 1 2 3 4 5 6 7                8 9 10 11                 12
 
         // Order graph point in spiral, add centroid at the end
         const graph_points = new Array(3 * this.num_points + 1);
         for (let i = 0, j = 0; i < this.num_points; i++, j += 2) {
+            // Spiral 2
             graph_points[j] = this.points[i];
             graph_points[j + 1] = this.midpoints[i];
+
+            // Spiral 1
             graph_points[i + 8] = get_midpoint(this.points[i], this.centroid);
         }
+
+        // Spiral center => one point => centroid
         graph_points[graph_points.length - 1] = this.centroid;
 
         // Create an graph with no neighbors
         const graph = points_to_graph(graph_points);
         const nodes = Object.keys(graph);
 
-
-        // Add neighbors to each nodes
-        // Add Level 1 neighbors always in CCW
-        for (let i = 0; i < 8; i++) {
-            const node = nodes[i];
-            const next_node = nodes[(i + 1) % 8];
-            graph[node].neighbors.push(next_node);
-        }
-
+        // Convert flag to boolean array
         const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
 
-        // TODO : add neighbors depends on the polygons divsion bars
+        // Add neighbors only for polygon with 4 points
+        const spiral2_num_nodes = 8;
+        const spiral1_num_nodes = spiral2_num_nodes / 2;
+        const spiral_center_node = nodes[nodes.length - 1];
+
+        for (let spiral2_node_index = 0; spiral2_node_index < spiral2_num_nodes; spiral2_node_index++) {
+            // Add neighbors for outer edges
+            const node = nodes[spiral2_node_index];
+            const prev_node = nodes[(spiral2_node_index + spiral2_num_nodes - 1) % spiral2_num_nodes];
+            const next_node = nodes[(spiral2_node_index + 1) % spiral2_num_nodes];
+            graph[node].neighbors.push(next_node);
+
+            // Make difference with midpoints
+            const even_node = spiral2_node_index % 2 === 0;
+
+            // compute spiral1 node index
+            const spiral1_node_index = 8 + Math.floor(spiral2_node_index / 2) % spiral1_num_nodes;
+
+            // Add neighbors in both ways for the polygon division
+            const bar_to_centroid_is_selected = strengthening_of_timbers[spiral2_node_index];
+            if (bar_to_centroid_is_selected) {
+                if (even_node) {
+                    graph[node].neighbors.push(nodes[spiral1_node_index]);
+                    graph[nodes[spiral1_node_index]].neighbors.push(node);
+
+                    graph[nodes[spiral1_node_index]].neighbors.push(spiral_center_node);
+                    graph[spiral_center_node].neighbors.push(nodes[spiral1_node_index]);
+                } else {
+                    graph[node].neighbors.push(spiral_center_node);
+                    graph[spiral_center_node].neighbors.push(node);
+                }
+            }
+
+            const transversal_bar_is_selected = strengthening_of_timbers[spiral1_node_index];
+            if(even_node && transversal_bar_is_selected){
+                graph[prev_node].neighbors.push(nodes[spiral1_node_index]);
+                graph[nodes[spiral1_node_index]].neighbors.push(prev_node);
+
+                graph[nodes[spiral1_node_index]].neighbors.push(next_node);
+                graph[next_node].neighbors.push(nodes[spiral1_node_index]);
+            }
+        }
 
 
         // Bar indexes
@@ -1748,6 +1788,7 @@ class Polygon3D extends Base3DGeometry {
                 }
             }
         }
+
         console.log("Paths", paths)
         console.log("Graph", graph)
         console.log("###########")
