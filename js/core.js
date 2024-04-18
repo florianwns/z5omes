@@ -1640,6 +1640,9 @@ class Polygon3D extends Base3DGeometry {
 
         // Create a graph like this one to find sub polygons
         // With a counterclockwise spiral pattern
+        //
+        // Ex : for a polygon with 4 vertices like rhombus
+        //
         //         A
         //       / | \
         //     B   I   H
@@ -1708,7 +1711,7 @@ class Polygon3D extends Base3DGeometry {
             }
 
             const transversal_bar_is_selected = strengthening_of_timbers[spiral1_node_index];
-            if(even_node && transversal_bar_is_selected){
+            if (even_node && transversal_bar_is_selected) {
                 graph[prev_node].neighbors.push(nodes[spiral1_node_index]);
                 graph[nodes[spiral1_node_index]].neighbors.push(prev_node);
 
@@ -1717,23 +1720,17 @@ class Polygon3D extends Base3DGeometry {
             }
         }
 
-
-        // Bar indexes
-        // 0 1 2 3 4 5 6 7      bars to rhombus centroid
-        // 8   9   10  11       rhombus midpoint bars
-
-
         // compute plane before exploration for angle computing
         const plane = this.plane;
 
-        function explore_smallest_convex_path(path, prev_node, node, ending_node) {
+        function explore_smallest_convex_path(path, prev_node, node, end_node) {
             // Graph nodes exploration with signed angle calculation
 
             // Remove node from the neighbors
             graph[prev_node].neighbors = graph[prev_node].neighbors.filter(item => item !== node);
 
             // If node is equal to ending_node, stop the searching
-            if (node === ending_node) {
+            if (node === end_node) {
                 // End of exploration if node is the same of ending_node and sum_angle is equal to 360° degrees
                 return true;
             }
@@ -1759,7 +1756,7 @@ class Polygon3D extends Base3DGeometry {
                 }
             }
 
-            if (chosen_neighbor && explore_smallest_convex_path(path, node, chosen_neighbor, ending_node)) {
+            if (chosen_neighbor && explore_smallest_convex_path(path, node, chosen_neighbor, end_node)) {
                 // End of exploration if ending_node is found
                 return true;
             }
@@ -1776,14 +1773,14 @@ class Polygon3D extends Base3DGeometry {
 
         for (let i = 0; i < num_nodes; i++) {
             // Take the first neighbor and remove it from the list
-            const first_node = ALPHABET[i];
-            const end_node = first_node;
-            for (let j = 0; j < graph[first_node].neighbors.length; j++) {
-                const neighbor = graph[first_node].neighbors.shift();
+            const start_node = ALPHABET[i];
+            const end_node = start_node;
+            for (let j = 0; j < graph[start_node].neighbors.length; j++) {
+                const neighbor = graph[start_node].neighbors.shift();
 
                 // TODO : use first_node point rather than first_node for explored_path, for polygon creation
-                const explored_path = [first_node];
-                if (neighbor && explore_smallest_convex_path(explored_path, first_node, neighbor, end_node)) {
+                const explored_path = [start_node];
+                if (neighbor && explore_smallest_convex_path(explored_path, start_node, neighbor, end_node)) {
                     paths.push(explored_path);
                 }
             }
