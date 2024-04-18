@@ -1,8 +1,5 @@
 # TODO-LIST
 
-* [ ]  un fois la matrice en place, il faut pouvoir diviser le losange à partir de ça
-  <br>.... trouver l'algo pour ça
-
 $ [ ] renommer strengthening_of_timbers en polygon_division_bars
 
 * [ ] pour le flattened mandala avec le bindu zome, pas de rotate sur le même crown_index
