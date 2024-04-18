@@ -292,24 +292,6 @@
                            x-model.lazy.number="timber_thickness">
                 </div>
 
-                <!-- Strengthening of timbers -->
-                <div x-show="params.help_is_displayed">
-                    <b>ST</b> :
-                    <span x-text="i18n('help_st_param')"></span>
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text"
-                          data-bs-toggle="tooltip" :title="i18n('help_st_param')">
-                        ST
-                    </span>
-                    <select class="form-select" aria-label="Strengthening of timbers"
-                            x-model.number="params.strengthening_of_timbers">
-                        <option selected value=0 x-text="i18n('opt_none')"></option>
-                        <option value=1 x-text="i18n('opt_horizontal')"></option>
-                        <option value=2 x-text="i18n('opt_vertical')"></option>
-                    </select>
-                </div>
-
                 <!-- Assembly method -->
                 <div x-show="params.help_is_displayed">
                     <b>AM</b> :
@@ -1276,14 +1258,14 @@
                     </h5>
 
                     <!-- ZIP Button -->
-                    <div>
-                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                              :title="i18n('tooltip_export_2_format', 'ZIP')"
-                              @click="download_zip()">
-                            <i class="fa-solid fa-file"></i>
-                            <span class="fa-icon-file-type">ZIP</span>
-                        </span>
-                    </div>
+<!--                    <div>-->
+<!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
+<!--                              :title="i18n('tooltip_export_2_format', 'ZIP')"-->
+<!--                              @click="download_zip()">-->
+<!--                            <i class="fa-solid fa-file"></i>-->
+<!--                            <span class="fa-icon-file-type">ZIP</span>-->
+<!--                        </span>-->
+<!--                    </div>-->
                 </div>
 
                 <div class="row">
