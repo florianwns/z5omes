@@ -1744,19 +1744,21 @@ class Polygon3D extends Base3DGeometry {
             let chosen_neighbor = null,
                 smallest_angle = Number.MAX_VALUE;
 
-            const num_neighbors = graph[node].neighbors.length;
+            // Filter neighbor to avoid computing angle with the same node
+            const neighbors = graph[node].neighbors.filter(neighbor => neighbor !== prev_node);
+            const num_neighbors = neighbors.length;
             for (let i = 0; i < num_neighbors; i++) {
-                const neighbor = graph[node].neighbors[i];
+                const neighbor = neighbors[i];
                 const angle_nodes = [prev_node, node, neighbor];
 
                 // Compute signed angle and take the smallest
-                const angle = signed_angle_between_points(...angle_nodes.map(node => graph[node].point), plane);
-                if (num_neighbors === 1 || (angle > 0 && angle < smallest_angle)) {
+                let angle = signed_angle_between_points(...angle_nodes.map(node => graph[node].point), plane);
+                angle = angle < 0 ? TAU + angle : angle;
+                if (num_neighbors === 1 || angle < smallest_angle) {
                     smallest_angle = angle;
                     chosen_neighbor = neighbor;
                 }
             }
-
             if (chosen_neighbor && explore_smallest_convex_path(path, node, chosen_neighbor, end_node)) {
                 // End of exploration if ending_node is found
                 return true;
@@ -1778,7 +1780,8 @@ class Polygon3D extends Base3DGeometry {
             for (let j = 0; j < graph[start_node].neighbors.length; j++) {
                 const neighbor = graph[start_node].neighbors.shift();
                 const explored_path = [start_node];
-                if (neighbor && explore_smallest_convex_path(explored_path, start_node, neighbor, end_node)) {
+                const exploration_worked = explore_smallest_convex_path(explored_path, start_node, neighbor, end_node)
+                if (neighbor && exploration_worked) {
                     paths.push(explored_path);
                 }
             }
@@ -1803,7 +1806,6 @@ class Polygon3D extends Base3DGeometry {
 
             parts[i] = Polygon3D.copy(this, filtered_points);
         }
-
         return parts;
     }
 
