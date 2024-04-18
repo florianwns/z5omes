@@ -1638,13 +1638,6 @@ class Polygon3D extends Base3DGeometry {
             return [this];
         }
 
-        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
-
-        // 0 1 2 3 4 5 6 7      bars
-        // 8   9   10  11       mini bars    8 + (i / 2)
-        let parts = [];
-
-
         // Create a graph like this one to find sub polygons
         // With a counterclockwise spiral pattern
         //         A
@@ -1670,9 +1663,8 @@ class Polygon3D extends Base3DGeometry {
         // Create an graph with no neighbors
         const graph = points_to_graph(graph_points);
         const nodes = Object.keys(graph);
-        const num_nodes = nodes.length;
 
-        console.log(graph);
+
         // Add neighbors to each nodes
         // Add Level 1 neighbors always in CCW
         for (let i = 0; i < 8; i++) {
@@ -1681,11 +1673,84 @@ class Polygon3D extends Base3DGeometry {
             graph[node].neighbors.push(next_node);
         }
 
-        // TODO : graph nodes exploration with signed angle calculation
-        // if num_neighbors > 2, calculate signed angle between prev node node and next neighbor nodes
-        // and take to minimum signed angle more than 0
+        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
 
-        console.log(graph);
+        // TODO : add neighbors depends on the polygons divsion bars
+
+
+        // Bar indexes
+        // 0 1 2 3 4 5 6 7      bars to rhombus centroid
+        // 8   9   10  11       rhombus midpoint bars
+
+
+        // compute plane before exploration for angle computing
+        const plane = this.plane;
+
+        function explore_smallest_convex_path(path, prev_node, node, ending_node) {
+            // Graph nodes exploration with signed angle calculation
+
+            // Remove node from the neighbors
+            graph[prev_node].neighbors = graph[prev_node].neighbors.filter(item => item !== node);
+
+            // If node is equal to ending_node, stop the searching
+            if (node === ending_node) {
+                // End of exploration if node is the same of ending_node and sum_angle is equal to 360° degrees
+                return true;
+            }
+
+            // Add node to path (without the end_node)
+            path.push(node);
+
+            // Calculate signed angle between prev node node and next neighbor nodes
+            // and take to minimum signed angle more than 0
+            let chosen_neighbor = null,
+                smallest_angle = Number.MAX_VALUE;
+
+            const num_neighbors = graph[node].neighbors.length;
+            for (let i = 0; i < num_neighbors; i++) {
+                const neighbor = graph[node].neighbors[i];
+                const angle_nodes = [...path.slice(-2), neighbor];
+
+                // Compute signed angle and take the smallest
+                const angle = signed_angle_between_points(...angle_nodes.map(node => graph[node].point), plane);
+                if (angle > 0 && angle < smallest_angle) {
+                    smallest_angle = angle;
+                    chosen_neighbor = neighbor;
+                }
+            }
+
+            if (chosen_neighbor && explore_smallest_convex_path(path, node, chosen_neighbor, ending_node)) {
+                // End of exploration if ending_node is found
+                return true;
+            }
+
+            // Remove last element from the path,
+            // and add the node to neighbors for a next exploration
+            path.pop();
+            graph[prev_node].neighbors.push(node);
+            return false;
+        }
+
+        const num_nodes = nodes.length;
+        const paths = [];
+
+        for (let i = 0; i < num_nodes; i++) {
+            // Take the first neighbor and remove it from the list
+            const first_node = ALPHABET[i];
+            const end_node = first_node;
+            for (let j = 0; j < graph[first_node].neighbors.length; j++) {
+                const neighbor = graph[first_node].neighbors.shift();
+
+                // TODO : use first_node point rather than first_node for explored_path, for polygon creation
+                const explored_path = [first_node];
+                if (neighbor && explore_smallest_convex_path(explored_path, first_node, neighbor, end_node)) {
+                    paths.push(explored_path);
+                }
+            }
+        }
+        console.log("Paths", paths)
+        console.log("Graph", graph)
+        console.log("###########")
 
         return [this];
     }
