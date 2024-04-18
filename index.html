@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.9b02" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.10" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -116,7 +116,7 @@
                 <div x-show="params.help_is_displayed">
                     <p class="mb-1" x-text="i18n('help_shape')"></p>
 
-                    <!-- Num of Order -->
+                    <!-- Num of Spirals -->
                     <b>N</b> :
                     <span x-text="i18n('help_n_param')"></span>
                 </div>
@@ -126,25 +126,80 @@
                         N
                     </span>
                     <input class="form-control form-range" :max="ALPHABET.length" min="3" step="1" type="range"
-                           x-model.number="params.num" x-ref="num_slider">
+                           x-model.number="params.num_spirals" x-ref="num_spirals_slider">
                     <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="params.num">
+                           x-model.lazy.number="params.num_spirals">
                 </div>
 
-                <!-- Num of rhombus from the top -->
-                <div x-show="params.help_is_displayed">
-                    <b>M</b> :
-                    <span x-text="i18n('help_m_param')"></span>
+                <!-- Num of rhombuses vertically (from the top) -->
+                <div x-show="!params.use_hr_mode">
+                    <div x-show="params.help_is_displayed">
+                        <b>M</b> :
+                        <span x-text="i18n('help_m_param')"></span>
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <button class="btn btn-primary text-start" type="button"
+                                data-bs-toggle="tooltip" :title="i18n('help_m_param')"
+                                @click="params.use_hr_mode = !params.use_hr_mode">
+                            M
+                        </button>
+                        <input class="form-control form-range" min="1" :max="params.num_spirals - 1" step="1"
+                               type="range"
+                               x-model.number="num_rhombuses_vertically" x-ref="num_rhombuses_vertically_slider">
+                        <input class="form-control" step="1" type="number"
+                               x-model.lazy.number="num_rhombuses_vertically">
+                    </div>
                 </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text"
-                          data-bs-toggle="tooltip" :title="i18n('help_m_param')">
-                        M
-                    </span>
-                    <input class="form-control form-range" min="1" :max="params.num - 1" step="1" type="range"
-                           x-model.number="num_rhombus" x-ref="num_rhombus_slider">
-                    <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="num_rhombus">
+
+                <!-- Height Ratio of Zome -->
+                <div x-show="params.use_hr_mode">
+                    <div x-show="params.help_is_displayed">
+                        <b>HR</b> :
+                        <span x-text="i18n('help_hr_param')"></span>
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <button class="btn btn-primary text-start" type="button"
+                                data-bs-toggle="tooltip" :title="i18n('help_hr_param')"
+                                @click="params.use_hr_mode = !params.use_hr_mode">
+                            HR
+                        </button>
+                        <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
+                               :min="to_decimal(2 / params.num_spirals)"
+                               x-model.number="params.height_ratio" x-ref="height_ratio_slider">
+                        <input class="form-control" step="0.01" type="number"
+                               x-model.lazy.number="params.height_ratio">
+                        <button class="btn btn-primary"
+                                data-bs-toggle="tooltip" :title="i18n('help_magnetize_param')"
+                                type="button"
+                                :class="(params.height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
+                                @click="magnetize">
+                            <i class="fa-solid fa-magnet fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kite Ratio of Zome -->
+                <div x-show="params.use_hr_mode">
+                    <div x-show="params.help_is_displayed">
+                        <b>KR</b> :
+                        <span x-text="i18n('help_kr_param')"></span>
+                    </div>
+                    <div class="input-group input-group-sm mb-3">
+                        <span class="input-group-text"
+                              data-bs-toggle="tooltip" :title="i18n('help_kr_param')">
+                            KR
+                        </span>
+                        <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
+                               x-model.number="params.kite_ratio" x-ref="kite_ratio_slider">
+                        <input class="form-control" step="0.01" type="number"
+                               x-model.lazy.number="params.kite_ratio">
+                        <button class="btn btn-primary" type="button"
+                                data-bs-toggle="tooltip" :title="i18n('help_set_rhombus_param')"
+                                :class="(is_rhombus) ? 'btn-secondary' : ''"
+                                @click="is_rhombus = true">
+                            <i class="fa-solid fa-rhombus fa-fw"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!--  Shape angle of Zome -->
@@ -159,7 +214,6 @@
                             @click="params.angle_unit = (params.angle_unit == 'tan') ? 'deg': 'tan'"
                             x-text="(params.angle_unit == 'tan') ? 'F' : 'Θ'">
                     </button>
-                    </span>
                     <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
                            x-model.number="params.theta_deg" x-ref="theta_deg_slider">
                     <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
@@ -169,52 +223,6 @@
                         <option value="rad">rad</option>
                         <option hidden value="tan">tan</option>
                     </select>
-                </div>
-
-                <!-- Height Ratio of Zome -->
-                <div x-show="params.help_is_displayed">
-                    <b>HR</b> :
-                    <span x-text="i18n('help_hr_param')"></span>
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text"
-                      data-bs-toggle="tooltip" :title="i18n('help_hr_param')">
-                      HR
-                </span>
-                    <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
-                           :min="to_decimal(2 / params.num)"
-                           x-model.number="params.height_ratio" x-ref="height_ratio_slider">
-                    <input class="form-control" step="0.01" type="number"
-                           x-model.lazy.number="params.height_ratio">
-                    <button class="btn btn-primary"
-                            data-bs-toggle="tooltip" :title="i18n('help_magnetize_param')"
-                            type="button"
-                            :class="(params.height_ratio == suggested_height_ratio) ? 'btn-secondary' : ''"
-                            @click="magnetize">
-                        <i class="fa-solid fa-magnet fa-fw"></i>
-                    </button>
-                </div>
-
-                <!-- Kite Ratio of Zome -->
-                <div x-show="params.help_is_displayed">
-                    <b>KR</b> :
-                    <span x-text="i18n('help_kr_param')"></span>
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text"
-                      data-bs-toggle="tooltip" :title="i18n('help_kr_param')">
-                    KR
-                </span>
-                    <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
-                           x-model.number="params.kite_ratio" x-ref="kite_ratio_slider">
-                    <input class="form-control" step="0.01" type="number"
-                           x-model.lazy.number="params.kite_ratio">
-                    <button class="btn btn-primary" type="button"
-                            data-bs-toggle="tooltip" :title="i18n('help_set_rhombus_param')"
-                            :class="(is_rhombus) ? 'btn-secondary' : ''"
-                            @click="is_rhombus = true">
-                        <i class="fa-solid fa-rhombus fa-fw"></i>
-                    </button>
                 </div>
             </div>
 
@@ -282,24 +290,6 @@
                            x-model.number="params.timber_thickness_in_mm" x-ref="timber_thickness_in_mm_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="timber_thickness">
-                </div>
-
-                <!-- Strengthening of timbers -->
-                <div x-show="params.help_is_displayed">
-                    <b>ST</b> :
-                    <span x-text="i18n('help_st_param')"></span>
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text"
-                          data-bs-toggle="tooltip" :title="i18n('help_st_param')">
-                        ST
-                    </span>
-                    <select class="form-select" aria-label="Strengthening of timbers"
-                            x-model.number="params.strengthening_of_timbers">
-                        <option selected value=0 x-text="i18n('opt_none')"></option>
-                        <option value=1 x-text="i18n('opt_horizontal')"></option>
-                        <option value=2 x-text="i18n('opt_vertical')"></option>
-                    </select>
                 </div>
 
                 <!-- Assembly method -->
@@ -461,32 +451,32 @@
                             <div class="d-flex justify-content-center">
                                 <div style="width:calc(100% - 72px); max-width: 800px;" class="position-relative">
                                     <!-- Export to -->
-                                    <div x-show="draw_obj" class="ps-2 absolute-top-right-48">
+                                    <div x-show="draw_zome" class="ps-2 absolute-top-right-48">
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'OBJ')"
-                                                  @click="download_obj()">
-                                                <i class="fa-solid fa-file"></i>
-                                                <span class="fa-icon-file-type">OBJ</span>
-                                            </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'STL')"
-                                                  @click="download_stl()">
-                                                <i class="fa-solid fa-file"></i>
-                                                <span class="fa-icon-file-type">STL</span>
-                                            </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'GLTF')"
+                                                  :title="i18n('tooltip_export_2_format', 'GLTF (Meters)')"
                                                   @click="download_gltf()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">GLTF</span>
                                             </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'PLY')"
+                                                  :title="i18n('tooltip_export_2_format', 'OBJ (Millimeters)')"
+                                                  @click="download_obj()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">OBJ</span>
+                                            </span>
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'STL (Millimeters)')"
+                                                  @click="download_stl()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">STL</span>
+                                            </span>
+                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'PLY (Millimeters)')"
                                                   @click="download_ply()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">PLY</span>
@@ -528,27 +518,27 @@
                                                 <i class="fa fa-tag"></i>
                                             </button>
 
-                                            <!-- Num Spiral Rotations -->
+                                            <!-- Num Spirals to display -->
                                             <div class="vstack">
                                                 <button class="btn btn-primary"
-                                                        @click="draw_obj = !draw_obj"
-                                                        :class="(draw_obj) ? `btn-primary` : `btn-secondary`"
+                                                        @click="draw_zome = !draw_zome"
+                                                        :class="(draw_zome) ? `btn-primary` : `btn-secondary`"
                                                         data-bs-toggle="tooltip"
                                                         :title="i18n('tooltip_illuminate_object')">
                                                     <i class="fa"
-                                                       :class="(draw_obj) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
+                                                       :class="(draw_zome) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
                                                 </button>
-                                                <div class="mt-1" x-show="draw_obj && clone_and_rotate_mode">
-                                                    <button class="btn btn-sm btn-small-padding line-height-1px"
-                                                            @click="num_spiral_rotations = Math.max(num_spiral_rotations - 1, 1)"
-                                                            :class="(num_spiral_rotations <= 1) ? `btn-secondary` : `btn-primary`"
+                                                <div class="mt-1" x-show="draw_zome && clone_and_rotate_mode">
+                                                    <button class="btn btn-sm btn-small-padding"
+                                                            @click="num_spirals_to_display = Math.max(num_spirals_to_display - 1, 1)"
+                                                            :class="(num_spirals_to_display <= 1) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('tooltip_decrease_spiral_rotations')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
-                                                    <button class="btn btn-sm btn-small-padding line-height-1px"
-                                                            @click="num_spiral_rotations = Math.min(num_spiral_rotations + 1, params.num)"
-                                                            :class="(num_spiral_rotations >= params.num) ? `btn-secondary` : `btn-primary`"
+                                                    <button class="btn btn-sm btn-small-padding"
+                                                            @click="num_spirals_to_display = Math.min(num_spirals_to_display + 1, params.num_spirals)"
+                                                            :class="(num_spirals_to_display >= params.num_spirals) ? `btn-secondary` : `btn-primary`"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('tooltip_increase_spiral_rotations')">
                                                         <i class="fa fa-plus"></i>
@@ -557,7 +547,7 @@
                                             </div>
 
                                             <!-- Add floor -->
-                                            <button class="btn btn-primary"
+                                            <button x-show="show_add_floor_btn" class="btn btn-primary"
                                                     @click="add_floor = !add_floor"
                                                     :class="(add_floor) ? `btn-primary` : `btn-secondary`"
                                                     data-bs-toggle="tooltip" :title="i18n('tooltip_add_floor')">
@@ -565,7 +555,7 @@
                                             </button>
 
                                             <!-- Draw Vanishing Lines -->
-                                            <button class="btn btn-primary"
+                                            <button x-show="show_vanishing_lines_toggle_btn" class="btn btn-primary"
                                                     @click="draw_vanishing_lines = !draw_vanishing_lines"
                                                     :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
                                                     data-bs-toggle="tooltip"
@@ -581,6 +571,15 @@
                                                 <i class="fa fa-chart-scatter-3d"></i>
                                             </button>
 
+                                            <!-- Inversion of Z and Y axes -->
+                                            <button class="btn px-0 btn-primary"
+                                                    @click="inverse_Y_Z_axes = !inverse_Y_Z_axes"
+                                                    :class="(inverse_Y_Z_axes) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip"
+                                                    :title="i18n('tooltip_inversion_Y_Z_axes')">
+                                                <small>Y⬄Z</small>
+                                            </button>
+
                                             <!-- Spin on/off -->
                                             <div class="vstack">
                                                 <button class="btn btn-primary"
@@ -594,13 +593,13 @@
 
                                                 <!-- Rotation Speed -->
                                                 <div class="mt-1" x-show="is_spinning">
-                                                    <button class="btn btn-sm btn-primary btn-small-padding line-height-1px"
+                                                    <button class="btn btn-sm btn-primary btn-small-padding"
                                                             @click="decrease_speed"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('key_div_3D_view')">
                                                         <i class="fa fa-minus"></i>
                                                     </button>
-                                                    <button class="btn btn-sm btn-primary btn-small-padding line-height-1px"
+                                                    <button class="btn btn-sm btn-primary btn-small-padding"
                                                             @click="increase_speed"
                                                             data-bs-toggle="tooltip"
                                                             :title="i18n('key_mul_3D_view')">
@@ -612,11 +611,14 @@
 
                                         <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
                                             <!-- Keyboard shortcuts -->
-                                            <button class="btn btn-primary"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#shortcuts-modal">
-                                                <i class="fa-solid fa-keyboard"></i>
-                                            </button>
+                                            <div class="btn btn-primary p-0"
+                                                 data-bs-toggle="modal"
+                                                 data-bs-target="#shortcuts-modal">
+                                                <div class="btn btn-primary" data-bs-toggle="tooltip"
+                                                     :title="i18n('tooltip_show_keyboard_shortcuts')">
+                                                    <i class="fa-solid fa-keyboard"></i>
+                                                </div>
+                                            </div>
 
                                             <!-- Fullscreen Toggle btn -->
                                             <button class="btn btn-primary"
@@ -722,6 +724,314 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="table-responsive top-0 py-2 px-3 d-flex flex-column gap-3">
+                                        <div class="d-none">
+                                            <!-- Set ids to SVG symbols -->
+                                            <svg xmlns="http://www.w3.org/2000/svg">
+                                                <symbol id="svg_horizontal_bar" width="26"
+                                                        height="26" viewBox="0 0 26 26">
+                                                    <line y2="13" x2="24" y1="13" x1="2"/>
+                                                </symbol>
+                                                <symbol id="svg_vertical_bar" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="24" x2="13" y1="2" x1="13"/>
+                                                </symbol>
+
+                                                <!-- Rhombus -->
+                                                <symbol id="svg_rhombus" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <polygon points="13 2, 2 13, 13 24, 24 13"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at top -->
+                                                <symbol id="svg_horizontal_bar_at_top" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="7.5" x2="18.5" y1="7.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at right -->
+                                                <symbol id="svg_horizontal_bar_at_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="24" y1="13" x1="13"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at bottom -->
+                                                <symbol id="svg_horizontal_bar_at_bottom" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="18.5" x2="18.5" y1="18.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Horizontal Bar at left -->
+                                                <symbol id="svg_horizontal_bar_at_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="13" x1="2"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at top -->
+                                                <symbol id="svg_vertical_bar_at_top" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="2" x1="13"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at bottom -->
+                                                <symbol id="svg_vertical_bar_at_bottom" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="24" x2="13" y1="13" x1="13"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at left -->
+                                                <symbol id="svg_vertical_bar_at_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="18.5" x2="7.5" y1="7.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Vertical Bar at right -->
+                                                <symbol id="svg_vertical_bar_at_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="18.5" x2="18.5" y1="7.5" x1="18.5"/>
+                                                </symbol>
+
+
+                                                <!-- Diagonal Bar at top left -->
+                                                <symbol id="svg_diagonal_bar_at_top_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="7.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Diagonal Bar at top right -->
+                                                <symbol id="svg_diagonal_bar_at_top_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="7.5" x1="18.5"/>
+                                                </symbol>
+
+                                                <!-- Diagonal Bar at bottom left -->
+                                                <symbol id="svg_diagonal_bar_at_bottom_left" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="18.5" x1="7.5"/>
+                                                </symbol>
+
+                                                <!-- Diagonal Bar at bottom right -->
+                                                <symbol id="svg_diagonal_bar_at_bottom_right" width="26" height="26"
+                                                        viewBox="0 0 26 26">
+                                                    <line y2="13" x2="13" y1="18.5" x1="18.5"/>
+                                                </symbol>
+                                            </svg>
+                                        </div>
+
+                                        <div class="d-flex justify-content-center m-auto">
+                                            <div class="input-group input-group-sm me-2">
+                                                <button class="btn btn-primary text-start" type="button"
+                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_selected_crown')"
+                                                        data-bs-original-title="Selected crown">
+                                                    <i class="fa fa-crown"></i>
+                                                </button>
+                                                <input class="form-control form-range"
+                                                       min="1" :max="num_crowns" step="1" type="range"
+                                                       x-model.number="selected_crown"
+                                                       id="selected_crown_slider">
+                                                <input class="form-control" step="1" type="number"
+                                                       style="max-width: 60px"
+                                                       x-model.lazy.number="selected_crown">
+                                            </div>
+
+                                            <div id="btn-rhombus-types-group"
+                                                 class="btn-group bg-white" role="group"
+                                                 aria-label="Toggle button group">
+
+                                                <btn class="btn btn-primary"
+                                                     @click="strengthening_of_timbers_bitwise_flag = 0"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === 0) ? 'btn-primary' : 'btn-secondary'">
+                                                    <svg class="svg_rhombus_icon" width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use href="#svg_rhombus"></use>
+                                                    </svg>
+                                                </btn>
+
+                                                <btn class="btn btn-primary"
+                                                     @click="strengthening_of_timbers_bitwise_flag = SVG_HORIZONTAL_BAR_BITWISE_FLAG"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
+                                                    <svg class="svg_rhombus_icon" width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use href="#svg_horizontal_bar"></use>
+                                                        <use href="#svg_rhombus"></use>
+                                                    </svg>
+                                                </btn>
+
+                                                <btn class="btn btn-primary"
+                                                     @click="strengthening_of_timbers_bitwise_flag = SVG_VERTICAL_BAR_BITWISE_FLAG"
+                                                     :class="(strengthening_of_timbers_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
+                                                    <svg class="svg_rhombus_icon" width="18" height="18"
+                                                         viewBox="0 0 26 26">
+                                                        <use href="#svg_vertical_bar"></use>
+                                                        <use href="#svg_rhombus"></use>
+                                                    </svg>
+                                                </btn>
+
+                                                <btn class="btn btn-primary position-relative"
+                                                     :class="(![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
+                                                     data-bs-toggle="modal"
+                                                     data-bs-target="#framework-customizer-modal"
+                                                     for="btn-custom-rhombus">
+                                                    <i class="fa fa-pencil"></i>
+                                                    <div class="position-absolute" style="top:-10px;right:-10px">
+                                                        <div x-show="crown_of_framework_timbers_is_valid"
+                                                             class="badge bg-success rounded-pill p-1">
+                                                            <i class="fa fa-circle-check"></i>
+                                                        </div>
+                                                        <div x-show="!crown_of_framework_timbers_is_valid"
+                                                             class="badge bg-danger rounded-pill p-1">
+                                                            <i class="fa fa-ban"></i>
+                                                        </div>
+                                                    </div>
+                                                </btn>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Keyboard shortcuts Modal -->
+                                    <div class="modal fade" id="framework-customizer-modal" tabindex="-1"
+                                         aria-labelledby="framework-customizer-modal-title" aria-hidden="true">
+                                        <div class="modal-dialog  mx-auto">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="text-secondary my-1 me-3"
+                                                        id="framework-customizer-modal-title">
+                                                        <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                                                        <span x-text="i18n('framework_customizer')"></span>
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="vstack gap-3">
+                                                        <div class="d-flex justify-content-center m-auto">
+                                                            <svg id="svg_rhombus_customizer" width="300" height="300"
+                                                                 viewBox="0 0 26 26">
+
+                                                                <use href="#svg_vertical_bar_at_top"></use>
+                                                                <use href="#svg_diagonal_bar_at_top_left"></use>
+                                                                <use href="#svg_horizontal_bar_at_left"></use>
+                                                                <use href="#svg_diagonal_bar_at_bottom_left"></use>
+                                                                <use href="#svg_vertical_bar_at_bottom"></use>
+                                                                <use href="#svg_diagonal_bar_at_bottom_right"></use>
+                                                                <use href="#svg_horizontal_bar_at_right"></use>
+                                                                <use href="#svg_diagonal_bar_at_top_right"></use>
+
+                                                                <use href="#svg_horizontal_bar_at_top"></use>
+                                                                <use href="#svg_vertical_bar_at_left"></use>
+                                                                <use href="#svg_horizontal_bar_at_bottom"></use>
+                                                                <use href="#svg_vertical_bar_at_right"></use>
+
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(0)"
+                                                                     :class="is_framework_timber_selected(0) ? 'selected' : ''"
+                                                                     href="#svg_vertical_bar_at_top"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(1)"
+                                                                     :class="is_framework_timber_selected(1) ? 'selected' : ''"
+                                                                     href="#svg_diagonal_bar_at_top_left"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(2)"
+                                                                     :class="is_framework_timber_selected(2) ? 'selected' : ''"
+                                                                     href="#svg_horizontal_bar_at_left"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(3)"
+                                                                     :class="is_framework_timber_selected(3) ? 'selected' : ''"
+                                                                     href="#svg_diagonal_bar_at_bottom_left"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(4)"
+                                                                     :class="is_framework_timber_selected(4) ? 'selected' : ''"
+                                                                     href="#svg_vertical_bar_at_bottom"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(5)"
+                                                                     :class="is_framework_timber_selected(5) ? 'selected' : ''"
+                                                                     href="#svg_diagonal_bar_at_bottom_right"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(6)"
+                                                                     :class="is_framework_timber_selected(6) ? 'selected' : ''"
+                                                                     href="#svg_horizontal_bar_at_right"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(7)"
+                                                                     :class="is_framework_timber_selected(7) ? 'selected' : ''"
+                                                                     href="#svg_diagonal_bar_at_top_right"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(8)"
+                                                                     :class="is_framework_timber_selected(8) ? 'selected' : ''"
+                                                                     href="#svg_horizontal_bar_at_top"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(9)"
+                                                                     :class="is_framework_timber_selected(9) ? 'selected' : ''"
+                                                                     href="#svg_vertical_bar_at_left"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(10)"
+                                                                     :class="is_framework_timber_selected(10) ? 'selected' : ''"
+                                                                     href="#svg_horizontal_bar_at_bottom"></use>
+                                                                <use class="clickable"
+                                                                     @click="toggle_framework_timber(11)"
+                                                                     :class="is_framework_timber_selected(11) ? 'selected' : ''"
+                                                                     href="#svg_vertical_bar_at_right"></use>
+
+                                                                <use class="selected" href="#svg_rhombus"></use>
+                                                                <circle cx="13" cy="13" r="0.01"/>
+                                                            </svg>
+                                                        </div>
+
+                                                        <div class="mx-auto">
+                                                            <div x-show="crown_of_framework_timbers_is_valid"
+                                                                 class="badge bg-success rounded-pill">
+                                                                <i class="fa fa-circle-check me-1"></i>
+                                                                <span x-text="i18n('valid')"></span>
+                                                            </div>
+                                                            <div x-show="!crown_of_framework_timbers_is_valid"
+                                                                 class="badge bg-danger rounded-pill">
+                                                                <i class="fa fa-ban me-1"></i>
+                                                                <span x-text="i18n('not_allowed')"></span>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <div class="input-group input-group-sm mx-auto w-auto">
+                                                            <span class="btn btn-secondary p-1"
+                                                                  style="cursor:initial;"></span>
+                                                            <template
+                                                                    x-for="(svg_name, i) in FRAMEWORK_CUSTOMIZER_SVG_IDS"
+                                                                    :key="i">
+                                                                <button class="btn btn-primary text-start"
+                                                                        :class="is_framework_timber_selected(i) ? 'btn-primary' : 'btn-secondary'"
+                                                                        @click="toggle_framework_timber(i)"
+                                                                        type="button">
+                                                                    <svg class="svg_rhombus_icon" width="18" height="18"
+                                                                         viewBox="0 0 26 26">
+                                                                        <use href="#svg_rhombus"></use>
+                                                                        <use :href="svg_name"></use>
+                                                                    </svg>
+                                                                </button>
+                                                            </template>
+                                                            <span class="btn btn-secondary p-1"
+                                                                  style="cursor:initial;"></span>
+                                                        </div>
+
+                                                        <div class="input-group input-group-sm w-75 mx-auto">
+                                                            <button class="btn btn-primary text-start" type="button"
+                                                                    data-bs-toggle="tooltip"
+                                                                    :title="i18n('tooltip_selected_crown')"
+                                                                    data-bs-original-title="Selected crown">
+                                                                <i class="fa fa-crown"></i>
+                                                            </button>
+                                                            <input class="form-control form-range"
+                                                                   min="1" :max="num_crowns" step="1" type="range"
+                                                                   x-model.number="selected_crown">
+                                                            <input class="form-control" step="1" type="number"
+                                                                   style="max-width: 60px"
+                                                                   x-model.lazy.number="selected_crown">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -733,19 +1043,20 @@
                                     <!-- Export to -->
                                     <div class="ps-2 absolute-top-right-48" style="top:48px;">
                                         <div class="vstack">
-                                        <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
-                                              data-bs-toggle="tooltip" :title="i18n('tooltip_export_2_format', 'SVG')"
-                                              @click="download_svg()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">SVG</span>
-                                        </span>
+                                            <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
+                                                  data-bs-toggle="tooltip"
+                                                  :title="i18n('tooltip_export_2_format', 'SVG')"
+                                                  @click="download_svg()">
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">SVG</span>
+                                            </span>
                                             <span class="text-primary btn btn-sm fs-2 py-0 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
                                                   :title="i18n('tooltip_export_2_format', 'PDF')"
                                                   @click="download_pdf()">
-                                            <i class="fa-solid fa-file"></i>
-                                            <span class="fa-icon-file-type">PDF</span>
-                                        </span>
+                                                <i class="fa-solid fa-file"></i>
+                                                <span class="fa-icon-file-type">PDF</span>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -947,14 +1258,14 @@
                     </h5>
 
                     <!-- ZIP Button -->
-                    <div>
-                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                              :title="i18n('tooltip_export_2_format', 'ZIP')"
-                              @click="download_zip()">
-                            <i class="fa-solid fa-file"></i>
-                            <span class="fa-icon-file-type">ZIP</span>
-                        </span>
-                    </div>
+<!--                    <div>-->
+<!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
+<!--                              :title="i18n('tooltip_export_2_format', 'ZIP')"-->
+<!--                              @click="download_zip()">-->
+<!--                            <i class="fa-solid fa-file"></i>-->
+<!--                            <span class="fa-icon-file-type">ZIP</span>-->
+<!--                        </span>-->
+<!--                    </div>-->
                 </div>
 
                 <div class="row">
@@ -1016,27 +1327,21 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.9b02"></script>
-<script src="i18n/en.js?v=1.0.9b02"></script>
-<script src="i18n/it.js?v=1.0.9b02"></script>
-<script src="i18n/fr.js?v=1.0.9b02"></script>
-<script src="i18n/pl.js?v=1.0.9b02"></script>
-<script src="i18n/sv.js?v=1.0.9b02"></script>
+<script src="i18n/es.js?v=1.0.10"></script>
+<script src="i18n/en.js?v=1.0.10"></script>
+<script src="i18n/it.js?v=1.0.10"></script>
+<script src="i18n/fr.js?v=1.0.10"></script>
+<script src="i18n/pl.js?v=1.0.10"></script>
+<script src="i18n/sv.js?v=1.0.10"></script>
 
-<!-- Core and geometry functions -->
-<script src="js/core.js?v=1.0.9b02"></script>
+<!-- Core JS -->
+<script src="js/core.js?v=1.0.10"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
 
 <!-- Custom Javascript -->
 <script type="text/javascript">
-    // const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
-    const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
-    const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
-
-    const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
     const I18N_LANGUAGES = {
@@ -1206,7 +1511,7 @@
                             draw_y_end = draw_y_start + side.height * pixel_ratio;
 
                             // fit points
-                            const fitted_points = side.fit_points();
+                            const fitted_points = side.fitted_points;
                             const drawing_points = fitted_points.map(p => [
                                 (i < 2 || p[0] < side.width / 2)
                                     ? column_x_start + p[0] * pixel_ratio
@@ -1240,7 +1545,7 @@
                             if (adaptive_drawing) {
                                 for (let j = 1; j < 4; j += 2) {
                                     const pt1 = front_points_3D[j], pt2 = front_points_3D[(j + 1) % 4];
-                                    const line_center = midpoint(pt1, pt2);
+                                    const line_center = get_midpoint(pt1, pt2);
                                     const dotted_line_start = point_to(line_center, sub(pt1, pt2), 20);
                                     const dotted_line_end = point_to(line_center, sub(pt2, pt1), 20);
 
@@ -1281,9 +1586,9 @@
                                 }
 
                                 const real_pt = fitted_points[j];
-                                const rounded_x = to_int(real_pt[0]);
+                                const rounded_x = Math.round(real_pt[0]);
                                 if (!rounded_xs.includes(rounded_x)) {
-                                    const is_boundary = rounded_x === 0 || rounded_x === to_int(side.width);
+                                    const is_boundary = rounded_x === 0 || rounded_x === Math.round(side.width);
 
                                     const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                                     measurement_text.setAttribute('x', p[0]);
@@ -1327,11 +1632,11 @@
                                     ],
                                 ] : [
                                     [
-                                        Math.abs(TAU_Q - angle(A, B, C)),
+                                        Math.abs(TAU_Q - angle_between_points(A, B, C)),
                                         point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'
                                     ],
                                     [
-                                        Math.abs(TAU_Q - angle(D, C, B)),
+                                        Math.abs(TAU_Q - angle_between_points(D, C, B)),
                                         point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'
                                     ],
                                     [
@@ -1411,11 +1716,11 @@
                     return humanize_distance(value);
                 },
                 get total_area_of_faces() {
-                    const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num, 0);
+                    const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num_spirals, 0);
                     return humanize_area(value);
                 },
                 get total_number_of_faces() {
-                    return ZOME.num * this.faces.length;
+                    return ZOME.num_spirals * this.faces.length;
                 },
 
                 get floor_diameter() {
@@ -1431,16 +1736,6 @@
                     return humanize_distance(value);
                 },
 
-                format(key, value) {
-                    return to_decimal(value, FLOAT_2_STR_PRECISION);
-                },
-                get_slider(key) {
-                    return eval(`this.$refs.${key}_slider`);
-                },
-                clamp(key, value) {
-                    const slider = this.get_slider(key);
-                    this.params[key] = this.format(key, _.clamp(value, slider.min, slider.max));
-                },
                 download_tsv() {
                     this.download_csv("\t", "tsv");
                 },
@@ -1727,11 +2022,11 @@
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
-                    for (let i = 0; i < ZOME.num; i++) {
+                    for (let i = 0; i < ZOME.num_spirals; i++) {
                         _.forEach(mandala_3D, (face) => {
                             mandala_faces.push(
                                 new Polygon3D(
-                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i], O)),
+                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i].rad, O)),
                                     face.label,
                                     (this.paint_similar_pieces)
                                         ? face.color
@@ -1749,7 +2044,7 @@
                     const mandala_3D = ZOME.mandala_3D;
 
                     // For each color, Add a page with outer_faces_3D faces
-                    for (let i = 0; i < ZOME.num; i++) {
+                    for (let i = 0; i < ZOME.num_spirals; i++) {
                         const colored_spiral_faces = [];
                         _.forEach(mandala_3D, (face) => {
                             colored_spiral_faces.push(
@@ -1804,32 +2099,37 @@
         });
 
         Alpine.data('renderer_3D', () => {
-            let scene, camera, renderer, controls, canvas;              // Three JS Parameters
+            // Three JS Objects
+            let scene, camera, renderer, controls,
+                canvas, font;
+
             const meshes = {
                 "axes": null,
-                "obj": null,
-                "labels": null,
+                "zome": null,
                 "edges": null,
-                "vertices": null,
+                "labels": null,
+                "vanishing_lines": null,
             }
 
             return {
                 // 3D Rendering Parameters
-                num_spiral_rotations: 1,
-                last_zome_num: 1,
+                num_spirals_to_display: 1,
+                last_num_spirals: 1,
                 is_spinning: false,
                 speed: 0.001,
                 type_of_3D_objects: "skeleton_3D",
 
-                draw_obj: true,
+                draw_zome: true,
                 draw_labels: true,
-                draw_axes: false,
+                draw_axes: true,
+
                 draw_vanishing_lines: false,
-                draw_vertices: false,
+                show_vanishing_lines_toggle_btn: false,
 
                 add_floor: true,
-                show_vanishing_lines_switch: false,
-                show_vertices_switch: false,
+                show_add_floor_btn: false,
+
+                inverse_Y_Z_axes: false,
 
                 is_fullscreen: false,
                 __auto_size: null,
@@ -1842,16 +2142,16 @@
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
 
-                    ["obj", "labels", "axes", "vanishing_lines", "vertices"].forEach(
+                    ["zome", "labels", "axes", "vanishing_lines"].forEach(
                         (key) => this.$watch(`draw_${key}`, (value) => {
                             this.set_visibility(key, value);
                         })
                     );
 
-                    this.num_spiral_rotations = this.params.num;
-                    this.last_zome_num = this.params.num;
+                    this.num_spirals_to_display = this.params.num_spirals;
+                    this.last_num_spirals = this.params.num_spirals;
 
-                    ["num_spiral_rotations", "add_floor", "type_of_3D_objects"].forEach(
+                    ["num_spirals_to_display", "inverse_Y_Z_axes", "add_floor", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -1906,10 +2206,12 @@
                     this.auto_size()
                     this.animate()
 
+                    // use font loader to print 3D labels
                     const loader = new THREE.FontLoader();
-                    loader.load('webfonts/helvetiker_regular.typeface.json', (font) => {
-                        this.font = font;
-                        this.$dispatch('zome-renderer-is-ready');
+                    const self = this;
+                    loader.load('webfonts/roboto_black.typeface.json', function (loaded_font) {
+                        font = loaded_font;
+                        self.$dispatch('zome-renderer-is-ready');
                     });
                 },
 
@@ -1946,8 +2248,13 @@
                 },
                 download_gltf() {
                     const exporter = new THREE.GLTFExporter();
+
+                    // Because GLTF is in meters, convert millimeters to meters
+                    const resized_obj = this.compute_obj_to_export();
+                    resized_obj.scale.set(0.001, 0.001, 0.001);
+
                     exporter.parse(
-                        meshes.obj,
+                        resized_obj,
                         (res) => {
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});
@@ -1961,134 +2268,203 @@
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
-                    const str = exporter.parse(meshes.obj);
+                    const str = exporter.parse(meshes.zome);
                     const blob = new Blob([str], {type: 'text/plain'});
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
                     download(filename, window.URL.createObjectURL(blob));
                 },
+
+                compute_obj_to_export() {
+                    // Build 3D faces and edges
+                    const obj_to_export = new THREE.Group();
+                    obj_to_export.name = this.gen_filename(`_${this.type_of_3D_objects}`);
+
+                    const zome_meshes = new THREE.Group();
+                    zome_meshes.name = "zome";
+
+                    const label_meshes = new THREE.Group();
+                    label_meshes.name = "labels";
+
+                    const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
+
+                    // Same as above but for spirals with geometry cloning for more efficiency
+                    for (let i = 0; i < items_3D.length; i++) {
+                        const item = items_3D[i];
+                        zome_meshes.add(item.mesh);
+
+                        if (this.draw_labels) {
+                            item.compute_label_mesh(font);
+                            if (item.label_mesh) {
+                                label_meshes.add(item.label_mesh);
+                            }
+                        }
+
+                        if (this.clone_and_rotate_mode) {
+                            for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
+                                const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+
+                                if (spiral_index < this.num_spirals_to_display) {
+                                    const rotated_mesh = item.mesh.clone();
+                                    rotated_mesh.rotateY(rotation_angle);
+                                    zome_meshes.add(rotated_mesh);
+                                }
+                            }
+                        }
+                    }
+
+                    let floor_3D = this.get_floor_3D();
+                    if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
+                        zome_meshes.add(floor_3D.mesh.clone());
+                    }
+
+                    obj_to_export.add(zome_meshes);
+                    obj_to_export.add(label_meshes);
+
+                    if (this.inverse_Y_Z_axes) {
+                        obj_to_export.rotateX(TAU_Q);
+                    }
+                    return obj_to_export;
+                },
+
                 clear() {
-                    // Clean old meshes
+                    // Create and clean old old meshes
                     if (meshes.vanishing_lines instanceof THREE.Group) {
                         scene.remove(meshes.vanishing_lines)
                     }
                     meshes.vanishing_lines = new THREE.Group();
+                    meshes.vanishing_lines.name = "vanishing_lines";
 
-                    if (meshes.obj instanceof THREE.Group) {
-                        scene.remove(meshes.obj)
+                    if (meshes.zome instanceof THREE.Group) {
+                        scene.remove(meshes.zome)
                     }
-                    meshes.obj = new THREE.Group();
+                    meshes.zome = new THREE.Group();
+                    meshes.zome.name = "zome";
 
                     if (meshes.edges instanceof THREE.Group) {
                         scene.remove(meshes.edges)
                     }
                     meshes.edges = new THREE.Group();
+                    meshes.edges.name = "edges";
 
                     if (meshes.labels instanceof THREE.Group) {
                         scene.remove(meshes.labels)
                     }
                     meshes.labels = new THREE.Group();
-
-                    if (meshes.vertices instanceof THREE.Group) {
-                        scene.remove(meshes.vertices)
-                    }
-                    meshes.vertices = new THREE.Group();
+                    meshes.labels.name = "labels";
                 },
 
 
                 process() {
                     this.clear();
 
-                    if (this.last_zome_num !== ZOME.num) {
-                        this.num_spiral_rotations = this.last_zome_num = ZOME.num;
+                    if (this.last_num_spirals !== ZOME.num_spirals) {
+                        this.num_spirals_to_display = this.last_num_spirals = ZOME.num_spirals;
                     }
                     // Display switch buttons
-                    this.show_vanishing_lines_switch = ZOME.vanishing_lines
+                    this.show_vanishing_lines_toggle_btn = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
                         && this.type_of_3D_objects === "skeleton_3D";
 
-                    this.show_vertices_switch = DEBUG
-                        && ZOME.vertices
-                        && ZOME.vertices.length > 0;
-
                     // Display vanishing lines
                     {
-                        const material = new THREE.LineBasicMaterial({color: 0x00ffff});
                         _.forEach(ZOME.vanishing_lines, (line) => {
                             const points = [new THREE.Vector3(...line[0]), new THREE.Vector3(...line[1])];
-                            const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                            meshes.vanishing_lines.add(new THREE.Line(geometry, material))
+                            meshes.vanishing_lines.add(
+                                new THREE.Line(
+                                    new THREE.BufferGeometry().setFromPoints(points),
+                                    THREE_VANISHING_LINES_MATERIAL
+                                )
+                            )
                         });
+                        scene.add(meshes.vanishing_lines);
+                        this.set_visibility("vanishing_lines", this.show_vanishing_lines_toggle_btn && this.draw_vanishing_lines);
                     }
-
-                    scene.add(meshes.vanishing_lines);
-                    this.set_visibility("vanishing_lines", this.show_vanishing_lines_switch && this.draw_vanishing_lines);
-
-                    // Display zome vertices
-                    {
-                        const geometry = new THREE.BufferGeometry();
-                        geometry.setAttribute('position', new THREE.Float32BufferAttribute(_.flattenDeep(ZOME.vertices), 3));
-
-                        const material = new THREE.PointsMaterial({color: 0x888888, size: 20});
-                        meshes.vertices.add(new THREE.Points(geometry, material))
-                    }
-                    scene.add(meshes.vertices);
-                    this.set_visibility("vertices", this.show_vertices_switch && this.draw_vertices);
 
                     // Build 3D faces and edges
                     const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
-                    if (!this.clone_and_rotate_mode) {
-                        _.forEach(items_3D, item => {
-                            if (this.draw_obj) meshes.obj.add(item.mesh);
-                            meshes.edges.add(item.edges);
-                            if (item.label_mesh) meshes.labels.add(item.label_mesh);
-                        });
-                    } else {
-                        // Same as above but for spirals with geometry cloning for more efficiency
-                        _.forEach(items_3D, item => {
-                            for (let i = 0; i < ZOME.num; i++) {
-                                if (i < this.num_spiral_rotations) {
-                                    const mesh = clone_and_color_mesh(item.mesh, item.color);
-                                    mesh.rotateY(ZOME.rotation_angles[i]);
-                                    meshes.obj.add(mesh);
-                                }
 
-                                const edges = item.edges.clone();
-                                edges.rotateY(ZOME.rotation_angles[i]);
-                                meshes.edges.add(edges);
+                    const mesh_points = [], mesh_colors = [], edge_points = [];
+                    for (let i = 0; i < items_3D.length; i++) {
+                        const item = items_3D[i];
+                        mesh_points.push(...item.mesh_points);
+                        mesh_colors.push(...item.mesh_colors);
+                        edge_points.push(...item.edge_points);
 
-                                // Add label once
-                                if (i === 0) {
-                                    if (item.label_mesh) meshes.labels.add(item.label_mesh);
-                                }
+                        item.compute_label_mesh(font);
+                        if (item.label_mesh) meshes.labels.add(item.label_mesh);
+                    }
+
+                    // Build mesh and edge geometries
+                    const mesh_geometry = new THREE.BufferGeometry().setFromPoints(mesh_points);
+                    mesh_geometry.setAttribute('color', new THREE.Float32BufferAttribute(mesh_colors, 3));
+                    mesh_geometry.computeVertexNormals()
+                    let mesh = new THREE.Mesh(mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
+                    mesh.name = 'Item 1';
+                    meshes.zome.add(mesh)
+
+                    const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points);
+                    const edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
+                    meshes.edges.add(edges);
+
+                    // Clone meshes and rotate them around Y Axes
+                    if (this.clone_and_rotate_mode) {
+                        for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
+                            const angle = ZOME.rotation_angles[spiral_index].rad;
+
+                            // Add mesh
+                            if (spiral_index < this.num_spirals_to_display) {
+                                const rotated_mesh_geometry = mesh_geometry.clone();
+                                rotated_mesh_geometry.rotateY(angle);
+
+                                const rotated_mesh = new THREE.Mesh(rotated_mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
+                                rotated_mesh.name = `Item ${spiral_index + 1}`;
+                                meshes.zome.add(rotated_mesh)
                             }
-                        });
 
-                        // Add floor
-                        let floor_3D = null;
-                        switch (this.type_of_3D_objects) {
-                            case "inner_faces_3D":
-                                floor_3D = ZOME.inner_floor_3D;
-                                break;
-                            case "outer_faces_3D":
-                            case "skeleton_3D":
-                                floor_3D = ZOME.outer_floor_3D;
-                                break;
-                        }
-                        if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                            if (this.draw_obj) meshes.obj.add(floor_3D.mesh);
-                            meshes.edges.add(floor_3D.edges);
+                            // Add edges
+                            const rotated_edge_geometry = edge_geometry.clone()
+                            rotated_edge_geometry.rotateY(angle);
+
+                            const rotated_edges = new THREE.LineSegments(rotated_edge_geometry, THREE_EDGES_MATERIAL);
+                            meshes.edges.add(rotated_edges);
                         }
                     }
 
+                    // Add floor
+                    let floor_3D = this.get_floor_3D()
+                    this.show_add_floor_btn = floor_3D != null;
+                    if (this.add_floor && this.show_add_floor_btn && floor_3D.mesh != null) {
+                        if (this.draw_zome) meshes.zome.add(floor_3D.mesh);
+                        meshes.edges.add(floor_3D.edges);
+                    }
+
+                    // Inverse Y and Z axes
+                    if (this.inverse_Y_Z_axes) {
+                        _.forEach(meshes, (value, key) => {
+                            if (key == "axes") return;
+                            value.rotateX(TAU_Q);
+                        });
+                    }
+
                     // Add the final obj mesh to the scene
-                    scene.add(meshes.obj);
-                    this.set_visibility("obj", this.draw_obj);
+                    scene.add(meshes.zome);
+                    this.set_visibility("zome", this.draw_zome);
 
                     scene.add(meshes.edges);
-
                     scene.add(meshes.labels);
                     this.set_visibility("labels", this.draw_labels);
+                },
+
+                get_floor_3D() {
+                    switch (this.type_of_3D_objects) {
+                        case "inner_faces_3D":
+                            return ZOME.inner_floor_3D;
+                        case "outer_faces_3D":
+                        case "skeleton_3D":
+                            return ZOME.outer_floor_3D;
+                    }
+                    return null
                 },
                 get right() {
                     return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
@@ -2208,13 +2584,12 @@
             return {
                 // Group parameters
                 params: {
-                    // Language parameters
-                    language: null,
-
                     // Shape Parameters
-                    num: 10,                            // number of faces (kites or diamonds)
+                    num_spirals: 10,                    // number of spirals
                     theta_deg: 52,                      // In degrees, angle of shape which allows to calculate the slope of the first rhombus.
                     angle_unit: "deg",                  // Degrees or Radians
+
+                    use_hr_mode: false,
                     height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
                     kite_ratio: 1,                      // Kite ratio, lower half to upper half (1 => is rhombus else kites)
 
@@ -2227,19 +2602,28 @@
                     assembly_method: 1,
                     assembly_direction: 0,
                     xpansion_direction: 1,
-                    strengthening_of_timbers: 0,
                     add_footing: 1,
+                    strengthening_of_timbers_by_crowns_str: "",     // The values are separated by commas
 
-                    // Commons parameters
+                    // Commons parameters, Not  zome params, but we save them
+                    language: null,
                     help_is_displayed: false,
                 },
                 params_backup: null,
 
+
                 show_splash_screen: true,
+                num_crowns: 1,
+                selected_crown: 1,    // If -1, select all crowns
+                strengthening_of_timbers_by_crowns: [],
+                strengthening_of_timbers_bitwise_flag: 0,
+                crown_of_framework_timbers_is_valid: true,
+
                 is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
                 i18n_dictionary: {},
+
 
                 // Debouncers
                 __make_zome: null,
@@ -2281,7 +2665,10 @@
                     this.save_params(false);
 
                     // Add shape parameter listeners
-                    const zome_param_keys = Object.keys(this.params).filter(el => el !== 'language');
+                    const zome_param_keys = Object.keys(this.params).filter(el => {
+                        return el !== 'language';
+                    });
+
                     _.forEach(zome_param_keys, key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
@@ -2294,10 +2681,51 @@
                         this.params.assembly_direction = this.constrained_assembly_direction;
                     });
 
-                    // Refresh the height_ratio if you change the zome params.num
-                    this.$watch("params.num", () => {
-                        this.clamp("height_ratio", this.params.height_ratio);
+                    // Refresh the height_ratio if you change the zome params.num_spirals
+                    _.forEach(["num_spirals", "use_hr_mode"], key => {
+                        this.$watch(`params.${key}`, (value) => {
+                            this.clamp("height_ratio", this.params.height_ratio);
+                            if (!this.params.use_hr_mode) {
+                                this.params.kite_ratio = 1;
+                                this.params.height_ratio = to_decimal((this.num_rhombuses_vertically + 1) / this.params.num_spirals);
+                            }
+                        });
                     });
+
+                    // Selected crown listener
+                    _.forEach(["num_crowns", "params.strengthening_of_timbers_by_crowns_str"], key => {
+                        this.$watch(key, (value) => {
+                            this.init_strengthening_of_timbers();
+                            this.update_strengthening_of_timbers();
+                        });
+                    });
+
+                    // Clamp selected_crown value
+                    this.$watch("strengthening_of_timbers_bitwise_flag", (value) => {
+                        const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                        bitwise_flags[this.selected_crown - 1] = value;
+                        this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(bitwise_flags);
+                    });
+
+                    // Clamp selected_crown value
+                    this.$watch("selected_crown", () => {
+                        this.update_strengthening_of_timbers();
+                    });
+
+                    this.$watch("strengthening_of_timbers_by_crowns", (value) => {
+                        this.crown_of_framework_timbers_is_valid = this.is_crown_of_framework_timbers_valid(
+                            this.strengthening_of_timbers_by_crowns[this.selected_crown - 1]
+                        );
+
+                        // Save param only if crown of framework is valid
+                        if (this.crown_of_framework_timbers_is_valid) {
+                            this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(
+                                boolean_matrix_to_bitwise_flags(this.strengthening_of_timbers_by_crowns)
+                            );
+                        }
+
+                    });
+
 
                     // Refresh data related to the height
                     // if you change the zome height
@@ -2338,6 +2766,70 @@
                     // Save params to url
                     sync_url_from_params(this.params)
                 },
+
+                update_strengthening_of_timbers() {
+                    this.clamp("selected_crown", this.selected_crown, false);
+                    const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                    this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
+                    this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
+                },
+
+                init_strengthening_of_timbers() {
+                    // Get current strengthening_of_timbers and fill missing values
+                    const current_numbers = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                    const numbers = new Array(this.num_crowns);
+                    for (let i = 0; i < this.num_crowns; i++) {
+                        numbers[i] = current_numbers[i] || 0;
+                    }
+                    this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(numbers);
+                },
+
+                is_framework_timber_selected(svg_index = 0) {
+                    const framework_timber_crown = this.strengthening_of_timbers_by_crowns[this.selected_crown - 1];
+                    return framework_timber_crown && framework_timber_crown[svg_index];
+                },
+
+                toggle_framework_timber(svg_index) {
+                    const framework_timber_crown = this.strengthening_of_timbers_by_crowns[this.selected_crown - 1];
+                    framework_timber_crown[svg_index] = (framework_timber_crown[svg_index]) ? false : true;
+                    this.strengthening_of_timbers_by_crowns[this.selected_crown - 1] = [...framework_timber_crown];
+                },
+
+                is_crown_of_framework_timbers_valid(framework_timber_crown) {
+                    // Check if there is consecutive_unselected that is more and equal than 4
+                    let first_selected = null,
+                        last_selected = null,
+                        consecutive_unselected = 0;
+
+                    for (let svg_index = 0; svg_index < 8; svg_index++) {
+                        const is_selected = framework_timber_crown && framework_timber_crown[svg_index];
+                        if (is_selected) {
+                            last_selected = svg_index;
+                            consecutive_unselected = 0;
+                            if (first_selected === null) first_selected = svg_index;
+                        } else if (first_selected !== null) {
+                            consecutive_unselected++;
+                            if (consecutive_unselected >= 4) {
+                                return false;
+                            }
+                        }
+                    }
+
+                    if (last_selected != null && first_selected != null) {
+                        const consecutive_unselected = (first_selected + 7 - last_selected);
+                        if (consecutive_unselected >= 4) {
+                            return false;
+                        }
+                    }
+
+                    // The crown is valid
+                    return true;
+                },
+
+                set_strengthening_of_timbers(crown_index, value) {
+                    // this.strengthening_of_timbers_by_crowns
+                },
+
                 i18n(key, value = null) {
                     // Translation function using JSON dictionnaries
                     // Return the key if not found in language and default language dictionaries
@@ -2395,12 +2887,12 @@
                     }
                 },
 
-                get num_rhombus() {
-                    return to_decimal(this.params.num * this.params.height_ratio - 1, 0);
+                get num_rhombuses_vertically() {
+                    return Math.round(this.params.num_spirals * this.params.height_ratio - 1, 0);
                 },
-                set num_rhombus(value) {
+                set num_rhombuses_vertically(value) {
                     this.params.kite_ratio = 1;
-                    this.params.height_ratio = to_decimal((value + 1) / this.params.num);
+                    this.params.height_ratio = to_decimal((value + 1) / this.params.num_spirals);
                 },
                 get is_rhombus() {
                     return this.params.kite_ratio === 1;
@@ -2433,7 +2925,7 @@
                     this.clamp("timber_thickness_in_mm", to_mm(value, this.params.measuring_unit));
                 },
                 get max_timber_thickness() {
-                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.params.num)), FLOAT_2_STR_PRECISION);
+                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.params.num_spirals)), FLOAT_2_STR_PRECISION);
                 },
                 set z_vanishing_point(value) {
                     this.clamp("z_vanishing_point_in_mm", to_mm(value, this.params.measuring_unit));
@@ -2463,7 +2955,7 @@
                     return this.params.zome_height_in_mm / this.params.height_ratio;
                 },
                 get k_sum() {
-                    return this.is_rhombus ? this.params.num : (1 - Math.pow(this.params.kite_ratio, this.params.num)) / (1 - this.params.kite_ratio);
+                    return this.is_rhombus ? this.params.num_spirals : (1 - Math.pow(this.params.kite_ratio, this.params.num_spirals)) / (1 - this.params.kite_ratio);
                 },
                 // First crown properties
                 get first_edge() {
@@ -2489,6 +2981,7 @@
                 get constrained_assembly_direction() {
                     return this.params.assembly_direction % this.num_assembly_directions;
                 },
+
                 set constrained_assembly_direction(value) {
                     this.params.assembly_direction = value % this.num_assembly_directions;
                 },
@@ -2517,21 +3010,22 @@
                     toast.show()
                 },
                 magnetize() {
-                    if (this.suggested_height_ratio && this.suggested_height_ratio != this.params.height_ratio) {
+                    if (this.suggested_height_ratio && this.suggested_height_ratio !== this.params.height_ratio) {
                         this.params.height_ratio = this.suggested_height_ratio;
                     }
                 },
                 format(key, value) {
                     // Format Zome parameters by pair of [key, value]
                     switch (key) {
-                        case 'params.num':
+                        case 'num_spirals':
+                        case 'selected_crown':
                             return to_decimal(value, 0);
                         default:
                             return to_decimal(value);
                     }
                 },
                 randomize_shape() {
-                    _.forEach(["num", "theta_deg", "num_rhombus"], (key) => {
+                    _.forEach(["num_spirals", "theta_deg", "num_rhombuses_vertically"], (key) => {
                             const slider = this.get_slider(key);
                             this.params[key] = _.random(slider.min, slider.max)
                         },
@@ -2539,12 +3033,18 @@
                     this.params.kite_ratio = 1;
                 },
                 get_slider(key) {
-                    return eval(`this.$refs.${key}_slider`);
+                    const slider_id = `${key}_slider`;
+                    return eval(`this.$refs.${slider_id}`) || document.getElementById(slider_id);
                 },
-                clamp(key, value) {
+                clamp(key, value, in_params = true) {
                     const slider = this.get_slider(key);
                     if (slider) {
-                        this.params[key] = this.format(key, _.clamp(value, slider.min, slider.max));
+                        const clamped_value = this.format(key, _.clamp(value, slider.min, slider.max));
+                        if (in_params) {
+                            this.params[key] = clamped_value
+                        } else {
+                            this[key] = clamped_value;
+                        }
                     }
                 },
                 to_suggested_height_ratio(y, WORLD_HEIGHT, polar_height) {
@@ -2556,7 +3056,7 @@
                         .replaceAll('T', '_')
                         .replaceAll(':', '')
                         .slice(0, 9);
-                    return `Z5omes_${date_str}N${this.params.num}${small_hash(this.params)}${suffix}`
+                    return `Z5omes_${date_str}N${this.params.num_spirals}${small_hash(this.params)}${suffix}`
                 },
                 add_vertex(vertices, p) {
                     vertices.push(p);
@@ -2570,7 +3070,7 @@
                     let zome_faces_3D = [];
 
                     // Config Parameters
-                    const N = this.params.num;
+                    const N = this.params.num_spirals;
                     const K = this.params.kite_ratio;
                     const ZOME_HEIGHT = this.params.zome_height_in_mm;
                     const TIMBER_WIDTH = this.params.timber_width_in_mm;
@@ -2580,7 +3080,7 @@
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
-                    const OUTWARD_EXPANSION = ASSEMBLY_METHOD == 2 || XPANSION_DIRECTION === -1;
+                    const OUTWARD_EXPANSION = ASSEMBLY_METHOD === 2 || XPANSION_DIRECTION === -1;
 
                     // Constants
                     const M = N - 1;
@@ -2597,7 +3097,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
-                        theta, dist_to_ground, y, face, face_label;
+                        dist_to_ground, y, face, face_label;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
 
@@ -2606,13 +3106,11 @@
                     const INCR_RAD = TAU / N;
                     const rotation_angles = new Array(N);
                     for (let i = 0; i < N; i++) {
-                        theta = i * INCR_RAD;
-                        rotation_angles[i] = theta;
-
+                        rotation_angles[i] = new Angle(i * INCR_RAD);
                         A = [
-                            first_crown_radius * Math.sin(theta),
+                            first_crown_radius * rotation_angles[i].sin,
                             Math.max(0, ZOME_HEIGHT - first_crown_height),
-                            first_crown_radius * Math.cos(theta)
+                            first_crown_radius * rotation_angles[i].cos
                         ];
                         this.add_vertex(vertices, A);
                     }
@@ -2620,25 +3118,26 @@
                     // Loop over crowns (M = N - 1), while zome does not hit ground
                     let hit_ground = false;
                     const last_triangle_indexes = [];
-                    for (let iCrown = 0; iCrown < M && !hit_ground; iCrown++) {         // iR => Crown index
-                        ficc = iCrown * N + 1;                  // First Index on current crown
+                    let crown_index = 0;
+                    for (; crown_index < M && !hit_ground; crown_index++) {
+                        ficc = crown_index * N + 1;                  // First Index on current crown
                         fipc = ficc - N;                        // First index on previous crown
-                        face_label = ALPHABET[iCrown];          // Alphabet letter distribution
+                        face_label = ALPHABET[crown_index];          // Alphabet letter distribution
 
                         // On current crown, Loop over points from left to right
-                        for (let i = 0; i < N; i++) {
-                            k = (i + 1) % N
+                        for (let spiral_index = 0; spiral_index < N; spiral_index++) {
+                            k = (spiral_index + 1) % N
 
-                            iA = (iCrown === 0) ? 0 : fipc + k;      // Index of A point          A
-                            iB = ficc + i;                      // Index of B point        B ◇ C
-                            iC = ficc + k;                      // Index of C point          D
+                            iA = (crown_index === 0) ? 0 : fipc + k;            // Index of A point          A
+                            iB = ficc + spiral_index;                           // Index of B point        B ◇ C
+                            iC = ficc + k;                                      // Index of C point          D
 
                             A = vertices[iA];
                             B = vertices[iB];
                             C = vertices[iC];
 
                             // Compute the new point to close diamond/kite face
-                            D = add(A, mul(sub(midpoint(B, C), A), 1 + K));
+                            D = add(A, mul(sub(get_midpoint(B, C), A), 1 + K));
 
                             // Draw the second part of shape while D is higher than the ground
                             y = to_decimal(D[1]);
@@ -2649,8 +3148,8 @@
                                 iD = this.add_vertex(vertices, D);
 
                                 // Add only the first piece
-                                if (i === 0) {
-                                    face = new Polygon3D([A, B, D, C], face_label);
+                                if (spiral_index === 0) {
+                                    face = new Polygon3D([A, B, D, C], face_label, null, crown_index);
                                     zome_faces_3D.push(face);
                                 }
 
@@ -2669,12 +3168,11 @@
                                 iE = this.add_vertex(vertices, E);
                                 iF = this.add_vertex(vertices, F);
 
-                                // Add Truncated Kite to faces
-                                if (i == 0) {
-                                    face = new Polygon3D([A, B, E, F, C], face_label)
+                                // Add Truncated Kite
+                                if (spiral_index === 0) {
+                                    face = new Polygon3D([A, B, E, F, C], face_label, null, crown_index);
                                     zome_faces_3D.push(face);
                                 }
-
                                 // Add last triangles to close it after if needed
                                 last_triangle_indexes.push(iE, iF, iC);
                                 hit_ground = true;
@@ -2693,48 +3191,23 @@
                     // Close The Zome
                     const num_triangles = last_triangle_indexes.length;
                     if (num_triangles > 0) {
-                        iA = last_triangle_indexes[2 % num_triangles]
-                        iB = last_triangle_indexes[1 % num_triangles]
-                        iC = last_triangle_indexes[3 % num_triangles]
-
-                        A = vertices[iA];
-                        B = vertices[iB];
-                        C = vertices[iC];
+                        A = vertices[last_triangle_indexes[2 % num_triangles]];
+                        B = vertices[last_triangle_indexes[1 % num_triangles]];
+                        C = vertices[last_triangle_indexes[3 % num_triangles]];
 
                         // Deal with case where B and C are too close, so we don't add them
                         const far_enough = to_decimal(dist(B, C), 2) !== 0;
                         if (far_enough) {
                             // Add triangle to faces
-                            face_label = ALPHABET[zome_faces_3D.length];
-                            face = new Polygon3D([A, B, C], face_label);
+                            face = new Polygon3D([A, B, C], ALPHABET[crown_index], null, crown_index);
                             zome_faces_3D.push(face);
                         }
                     }
 
-                    // Divide zome faces into two parts to add strengthening of timbers
-                    let framework_faces = [], framework_crowns = [];
-                    const divide_faces_into_two_parts = this.params.strengthening_of_timbers >= 1;
-                    const divide_horizontally = this.params.strengthening_of_timbers === 1;
-                    _.forEach(zome_faces_3D, (face, iCrown) => {
-                        if (!divide_faces_into_two_parts || iCrown == 0 || iCrown === zome_faces_3D.length - 1) {
-                            framework_faces.push(face);
-                            framework_crowns.push(iCrown);
-                        } else {
-                            _.forEach(face.divide(divide_horizontally), part_of_face => {
-                                framework_faces.push(part_of_face);
-                                framework_crowns.push(iCrown);
-                            });
-                        }
-                    });
-
                     // Build Outer/Inner faces
-                    const num_faces = zome_faces_3D.length
-                    const outer_faces_3D = new Array(num_faces),
-                        inner_faces_3D = new Array(num_faces);
-
-                    let inner_face_points = new Array(zome_faces_3D[0].num_points),
-                        outer_face_points = new Array(zome_faces_3D[0].num_points);
-
+                    const num_crowns = zome_faces_3D.length
+                    const outer_faces_3D = new Array(num_crowns),
+                        inner_faces_3D = new Array(num_crowns);
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -2744,250 +3217,55 @@
                     let lowest_vertical_position = Number.MAX_VALUE,
                         footing_params = [];
 
-                    // Build Timbers using the assembly method
-                    let hypotenuse, adjacent_side, pivot_pt, last_iCrown, timber_label_index,
-                        thickness_offset_pt, width_offset_pt, vertical_proj_vec, horizontal_proj_vec;
-
                     // Loop over the faces of the framework to build timbers
-                    _.forEach(framework_faces, (face, iFace) => {
-                        const num_points = face.num_points;
+                    // Divide zome faces and build framework timbers
+                    const strengthening_of_timbers_bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                    for (let crown_index = 0; crown_index < zome_faces_3D.length; crown_index++) {
+                        const face = zome_faces_3D[crown_index];
+                        face.compute_framework(
+                            strengthening_of_timbers_bitwise_flags[crown_index] || 0,
+                            ASSEMBLY_METHOD,
+                            ASSEMBLY_DIRECTION,
+                            vanishing_pt,
+                            XPANSION_DIRECTION,
+                            TIMBER_THICKNESS,
+                            TIMBER_WIDTH,
+                        );
 
-                        // Get the crown index then reset the timber label index
-                        const iCrown = framework_crowns[iFace];
-                        if (iCrown !== last_iCrown) {
-                            timber_label_index = 0;
+                        // Add timbers to skeleton 3D
+                        skeleton_3D.push(...face.framework_timbers);
+
+                        // Add vanishing lines for the GoodKarma and Beveled methods
+                        if (ASSEMBLY_METHOD < 2) {
+                            vanishing_lines.push([vanishing_pt, face.points[0]]);
                         }
 
-                        // Declare multiple arrays
-                        const ccw_vecs = new Array(num_points),
-                            cw_vecs = new Array(num_points),
-                            mid_pts = new Array(num_points),
-                            thickness_offset_pts = new Array(num_points),
-                            width_offset_pts = new Array(num_points),
-                            horizontal_proj_vecs = new Array(num_points),
-                            wall_planes = new Array(num_points),
-                            shifted_wall_planes = new Array(num_points),
-                            prev_indexes = new Array(num_points),
-                            next_indexes = new Array(num_points);
+                        const outer_face_points = face.framework_outer_points;
+                        const inner_face_points = face.framework_inner_points;
 
-                        // Calculate vectors and projected points to avoid multiple calculations
-                        _.forEach(face.points, (cur_pt, i) => {
-                            const next_index = (i + 1) % num_points;
-                            const prev_index = (num_points + i - 1) % num_points;
+                        inner_faces_3D[crown_index] = Polygon3D.copy(face, inner_face_points);
+                        outer_faces_3D[crown_index] = Polygon3D.copy(face, outer_face_points);
 
-                            prev_indexes[i] = prev_index;
-                            next_indexes[i] = next_index;
+                        // Footing parameters computing
+                        // On the two last crown, check if points are far enough
+                        // Take vectors and points from outer/inner faces to build a Footing timber
+                        if ([3, 5].includes(face.num_points)) {
+                            const start_index = (face.num_points === 5) ? 1 : 0;
+                            [B, D, F, H] = [
+                                outer_face_points[start_index + 1], // outer top left corner
+                                outer_face_points[start_index + 2], // outer top right corner
+                                inner_face_points[start_index + 1], // inner top left corner
+                                inner_face_points[start_index + 2], // inner top right corner
+                            ]
 
-                            const prev_pt = face.points[prev_index];
-                            const sec_pt = face.points[next_index];
+                            _.forEach([B, D, F, H], p => {
+                                lowest_vertical_position = Math.min(p[1], lowest_vertical_position);
+                            });
 
-                            const cur_2_sec_vec = sub(sec_pt, cur_pt);
-                            const cur_2_prev_vec = sub(prev_pt, cur_pt);
-
-                            const mid_pt = midpoint(cur_pt, sec_pt);
-                            const mid_2_vanishing_vec = sub(vanishing_pt, mid_pt)
-
-                            switch (ASSEMBLY_METHOD) {
-                                case 0: // GoodKarma
-                                    horizontal_proj_vec = cross_product(cur_2_sec_vec, mid_2_vanishing_vec);
-                                    thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS);
-                                    vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_sec_vec);
-                                    width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-
-                                    // Multiply vertical proj by xpansion direction
-                                    vertical_proj_vec = mul(vertical_proj_vec, XPANSION_DIRECTION);
-                                    break;
-                                case 1: // Beveled
-                                case 2: // Xpansion
-                                    theta = face.angles[i];
-                                    hypotenuse = TIMBER_THICKNESS / Math.sin(theta);
-                                    adjacent_side = TIMBER_THICKNESS / Math.tan(theta);
-                                    pivot_pt = point_to(mid_pt, cur_2_sec_vec, -adjacent_side);
-
-                                    thickness_offset_pt = point_to(pivot_pt, cur_2_prev_vec, hypotenuse);
-                                    horizontal_proj_vec = sub(thickness_offset_pt, mid_pt);
-
-                                    if (to_decimal(theta) === to_decimal(TAU_Q)) {
-                                        // Add Hack to avoid issues with bad cross_products on 90° angles
-                                        vertical_proj_vec = cross_product(cur_2_sec_vec, cur_2_prev_vec);
-                                    } else if (theta > TAU_Q) {
-                                        // Change direction if theta is greater than 90°,
-                                        // Because pivot point is after mid_pt, so the direction is opposite
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, cur_2_prev_vec);
-                                    } else {
-                                        // The normal way if theta is smaller than 90 °
-                                        vertical_proj_vec = cross_product(horizontal_proj_vec, mul(cur_2_prev_vec, -1));
-                                    }
-
-                                    if (ASSEMBLY_METHOD === 1) {
-                                        vertical_proj_vec = mul(vertical_proj_vec, -XPANSION_DIRECTION);
-
-                                        wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
-                                        width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-
-                                        const opposite_mid_pt = plan_intersection(width_offset_pt, horizontal_proj_vec, wall_planes[i])
-                                        const opposite_thickness = dist(opposite_mid_pt, width_offset_pt);
-
-                                        // If opposite width is superior than TIMBER_THICKNESS
-                                        if (opposite_thickness > TIMBER_THICKNESS) {
-                                            // Reduce Timber thickness to have maximum of TIMBER_THICKNESS
-                                            const thickness_delta = opposite_thickness - TIMBER_THICKNESS;
-                                            thickness_offset_pt = point_to(mid_pt, horizontal_proj_vec, TIMBER_THICKNESS - thickness_delta)
-                                        }
-                                    }
-                            }
-
-                            width_offset_pt = point_to(thickness_offset_pt, vertical_proj_vec, TIMBER_WIDTH);
-
-                            // Push vectors
-                            ccw_vecs[i] = cur_2_sec_vec;
-                            cw_vecs[i] = cur_2_prev_vec;
-                            horizontal_proj_vecs[i] = horizontal_proj_vec;
-
-                            // Push points
-                            mid_pts[i] = mid_pt;
-                            thickness_offset_pts[i] = thickness_offset_pt;
-                            width_offset_pts[i] = width_offset_pt;
-
-                            // Push Planes
-                            switch (ASSEMBLY_METHOD) {
-                                case 0: // GoodKarma
-                                case 1: // Beveled
-                                    // Use vanishing pt for wall
-                                    wall_planes[i] = points_2_plane(cur_pt, mid_pt, vanishing_pt);
-                                    break;
-                                case 2: // Xpansion
-                                    // Use vertical proj rather vanishing pt
-                                    wall_planes[i] = points_2_plane(
-                                        cur_pt,
-                                        mid_pt,
-                                        point_to(mid_pt, vertical_proj_vec, 100)
-                                    );
-                                    break;
-                            }
-
-                            // Shifted wall plane
-                            shifted_wall_planes[i] = points_2_plane(
-                                point_to(thickness_offset_pt, cur_2_sec_vec, 100),
-                                thickness_offset_pt,
-                                width_offset_pt,
-                            );
-                        });
-
-                        // Build the prism and outer/inner faces
-                        _.forEach(face.points, (cur_pt, i) => {
-                            const prev_index = prev_indexes[i];    // previous index
-                            const next_index = next_indexes[i];        // next index
-
-                            thickness_offset_pt = thickness_offset_pts[i];
-                            width_offset_pt = width_offset_pts[i];
-
-                            // Get vectors
-                            const mid_pt = mid_pts[i];
-                            const cur_2_sec_vec = ccw_vecs[i];
-                            const sec_2_cur_vec = cw_vecs[next_index];
-
-                            // Compute Planes to make point intersections
-                            let planes = new Array(4);
-                            switch (ASSEMBLY_DIRECTION) {
-                                // Clockwise Rotation
-                                case 0:
-                                    planes[0] = planes[1] = shifted_wall_planes[prev_index];
-                                    planes[2] = planes[3] = wall_planes[next_index];
-                                    break;
-                                // Counterclockwise Rotation
-                                case 1:
-                                    planes[0] = planes[1] = wall_planes[prev_index];
-                                    planes[2] = planes[3] = shifted_wall_planes[next_index];
-                                    break;
-                                // Symmetry Axis
-                                case 2:
-                                    planes[0] = wall_planes[prev_index];
-                                    planes[1] = shifted_wall_planes[prev_index];
-                                    planes[2] = wall_planes[next_index];
-                                    planes[3] = shifted_wall_planes[next_index];
-                                    break;
-                            }
-
-                            // Compute planes to find intersection points
-                            horizontal_proj_vec = horizontal_proj_vecs[i];
-                            const along_plane = wall_planes[i]
-                            const mid_pt_with_vertical_proj = plan_intersection(
-                                width_offset_pt, horizontal_proj_vec, along_plane
-                            )
-
-                            // A, B, C, D is the top part (trapezoid) of the timber
-                            A = plan_intersection(mid_pt, sec_2_cur_vec, planes[0]);
-                            B = plan_intersection(thickness_offset_pt, sec_2_cur_vec, planes[1]);
-                            C = plan_intersection(mid_pt, cur_2_sec_vec, planes[2])
-                            D = plan_intersection(thickness_offset_pt, cur_2_sec_vec, planes[3])
-
-                            // E, F, G, H is the bottom part (trapezoid) of the timber
-                            E = plan_intersection(mid_pt_with_vertical_proj, sec_2_cur_vec, planes[0]);
-                            F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
-                            G = plan_intersection(mid_pt_with_vertical_proj, cur_2_sec_vec, planes[2]);
-                            H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
-
-                            // Reverse top and bottom sides depends on the xpansion direction
-                            if (OUTWARD_EXPANSION) {
-                                [A, B, C, D, E, F, G, H] = [E, F, G, H, A, B, C, D];
-                            }
-
-                            // Build a TrapezoidalPrism with a label prefixed from the crown face label
-                            const crown_face = zome_faces_3D[iCrown]
-                            timber_label_index += 1;
-                            const timber_label = `${crown_face.label}${timber_label_index}`;
-                            const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label, face.color);
-                            skeleton_3D.push(timber_prism);
-
-                            // Until the exterior/interior face has been built
-                            if (outer_faces_3D[iCrown] === undefined) {
-                                // If at least one is undefined
-                                if (_.some(outer_face_points, p => p === undefined)) {
-                                    const crown_face_point_index = _.findIndex(crown_face.points, p => _.isEqual(p, cur_pt));
-                                    if (crown_face_point_index > -1) {
-                                        outer_face_points[crown_face_point_index] = plan_intersection(A, sec_2_cur_vec, wall_planes[prev_index]);
-                                        inner_face_points[crown_face_point_index] = plan_intersection(E, sec_2_cur_vec, wall_planes[prev_index]);
-                                    }
-                                }
-
-                                // If every points are defined
-                                if (_.every(outer_face_points, p => p !== undefined)) {
-                                    inner_faces_3D[iCrown] = new Polygon3D(inner_face_points, crown_face.label, crown_face.color);
-                                    outer_faces_3D[iCrown] = new Polygon3D(outer_face_points, crown_face.label, crown_face.color);
-
-                                    // Footing parameters computing
-                                    // On the two last crown, check if points are far enough
-                                    // Take vectors and points from outer/inner faces to build a Footing timber
-                                    if ([3, 5].includes(crown_face.num_points)) {
-                                        const start_index = (crown_face.num_points === 5) ? 1 : 0;
-                                        [B, D, F, H] = [
-                                            outer_face_points[start_index + 1], // outer top left corner
-                                            outer_face_points[start_index + 2], // outer top right corner
-                                            inner_face_points[start_index + 1], // inner top left corner
-                                            inner_face_points[start_index + 2], // inner top right corner
-                                        ]
-
-                                        _.forEach([B, D, F, H], p => {
-                                            lowest_vertical_position = Math.min(p[1], lowest_vertical_position);
-                                        });
-
-                                        // Add Footing params to build prism later with the lowest_vertical_position variable
-                                        footing_params.push([B, D, F, H]);
-                                    }
-
-                                    // Create next array as long as possible
-                                    const next_iCrown = iCrown + 1;
-                                    if (next_iCrown < zome_faces_3D.length) {
-                                        inner_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
-                                        outer_face_points = new Array(zome_faces_3D[next_iCrown].num_points);
-                                    }
-                                }
-                            }
-
-                            vanishing_lines.push([vanishing_pt, cur_pt]);
-                        });
-                    });
+                            // Add Footing params to build prism later with the lowest_vertical_position variable
+                            footing_params.push([B, D, F, H]);
+                        }
+                    }
 
                     // Build Footing timbers
                     const footing_thickness = (this.params.add_footing === 1) ? TIMBER_THICKNESS : 0
@@ -3019,23 +3297,22 @@
                         picked_outer_floor_points.push(A);
                         picked_outer_floor_points.push(C);
 
-
                         picked_inner_floor_points.push(E);
                         picked_inner_floor_points.push(G);
                     });
 
                     // Rotate picked floor points
                     let outer_floor_points = [], inner_floor_points = [];
-                    _.forEach(rotation_angles, theta => {
-                        inner_floor_points.push(...picked_inner_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
-                        outer_floor_points.push(...picked_outer_floor_points.map(p => rotate_point_around_y_axis(p, theta)));
+                    _.forEach(rotation_angles, angle => {
+                        inner_floor_points.push(...rotate_points_around_y_axis(picked_inner_floor_points, angle));
+                        outer_floor_points.push(...rotate_points_around_y_axis(picked_outer_floor_points, angle));
                     });
 
                     // Remove duplicates and create floors ⬢
                     outer_floor_points = _.uniqWith(outer_floor_points, are_points_equal);
                     inner_floor_points = _.uniqWith(inner_floor_points, are_points_equal);
-                    const outer_floor_3D = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, '⬢') : null;
-                    const inner_floor_3D = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, '⬢') : null;
+                    const outer_floor_3D = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, FLOOR_CHAR) : null;
+                    const inner_floor_3D = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, FLOOR_CHAR) : null;
 
                     const obj_3D_to_label = [
                         skeleton_3D,
@@ -3045,21 +3322,17 @@
                     ];
 
                     // Group items by hash
-                    const arr_of_obj_hash_collections = _.map(obj_3D_to_label, obj_3D => {
-                        // Compute hash to compare objects
-                        return _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                    const arr_of_obj_hash_collections = new Array(obj_3D_to_label.length);
+                    for (let i = 0; i < obj_3D_to_label.length; i++) {
+                        const obj_3D = obj_3D_to_label[i];
+                        arr_of_obj_hash_collections[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                            // Update label of each member
+                            for (let j = 1; j < group.length; j++) {
+                                group[j].label = group[0].label;
+                            }
                             return new ItemHashCollection(group[0], hash, group.length * N);
                         });
-                    });
-
-                    // Label all items with the first item label of the group
-                    _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
-                        // Apply labels to items
-                        _.forEach(obj_3D_to_label[i], item => {
-                            const collection_item_index = _.findIndex(obj_hash_collections, collection => collection.hash === item.hash);
-                            item.label = obj_hash_collections[collection_item_index].item.label;
-                        });
-                    });
+                    }
 
                     // 🎨 Add colors to items and build rotated colors
                     let rotated_colors = {};
@@ -3080,7 +3353,7 @@
                         _.forEach(obj_3D_to_label[i], item => {
                             item.color = hash_to_color[item.hash];
                             if (!rotated_colors.hasOwnProperty(item.color.hex)) {
-                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a, item.slope));
+                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.slope));
                             }
                         });
                     });
@@ -3107,28 +3380,23 @@
                             // Move to Origin and rotate to match with previous piece
                             let rotated_points = flattened_face.points.map(p => add(p, O));
                             if (i > 0) {
-                                theta = angle(A, O, rotated_points[1]);
-                                rotated_A = rotate_point_around_z_axis(rotated_points[1], theta, O);
+                                let angle = Angle.from_3_points(A, O, rotated_points[1]);
+                                rotated_A = rotate_point_around_z_axis(rotated_points[1], angle, O);
 
-                                // Rotate the other way if rotatedA is not too close to A
+                                // Rotate the other way if rotated A is not too close to A
                                 if (to_decimal(dist(rotated_A, A)) !== 0) {
-                                    theta = -theta;
+                                    angle = angle.reverse();
                                 }
-                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, theta, O));
+                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, angle, O));
                             }
                             O = rotated_points[rotated_points.length - 1];
                             A = rotated_points[rotated_points.length - 2];
 
                             // Swap y axis with z axis for 3D display
-                            mandala_3D[i] = new Polygon3D(
-                                swap_axes(rotated_points, "XZY"),
-                                face.label,
-                                face.color
-                            )
+                            mandala_3D[i] = Polygon3D.copy(face, swap_axes(rotated_points, "XZY"));
                         });
                         return mandala_3D;
                     });
-
 
                     // Build timber_profiles_3D
                     const timber_profiles_3D = [];
@@ -3136,26 +3404,31 @@
                     _.forIn(skeleton_3D_hash_collections, collection => {
                         // Retrieve the prism from collection and flatten it
                         const prism = collection.item.flatten();
+
+                        const fitted_points = prism.fitted_points;
                         const translated_points = new Array(prism.num_points);
-                        _.forEach(prism.fit_points(), (point, i) => {
-                            translated_points[i] = add(point, [0, 0, z_origin]);
-                        });
+                        for (let i = 0; i < fitted_points.length; i++) {
+                            translated_points[i] = add(fitted_points[i], [0, 0, z_origin]);
+                        }
 
                         // Add space between timbers
-                        z_origin += prism.depth + 50;
+                        z_origin += prism.depth * 2;
                         timber_profiles_3D.push(
                             new TrapezoidalPrism(translated_points, prism.label, prism.color)
                         );
                     });
 
+                    // Reset selected crown index
+                    this.num_crowns = num_crowns;
+
                     // Save Zome and dispatch it
                     ZOME = new Zome({
-                        num: N,
+                        num_spirals: N,
+                        num_crowns: num_crowns,
                         assembly_method: ASSEMBLY_METHOD,
 
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
-                        vertices: vertices,
 
                         skeleton_3D: skeleton_3D,
                         skeleton_3D_hash_collections: skeleton_3D_hash_collections,
@@ -3190,3 +3463,4 @@
 </script>
 </body>
 </html>
+
