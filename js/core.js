@@ -11,7 +11,7 @@
 // ------------------------------------
 // ========== Constants ==========
 // ------------------------------------
-const DEBUG = false;
+const DEBUG = true;
 
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
@@ -1725,6 +1725,7 @@ class Polygon3D extends Base3DGeometry {
 
         function explore_smallest_convex_path(path, prev_node, node, end_node) {
             // Graph nodes exploration with signed angle calculation
+            // Add node points if the algorithm found the smallest convex path
 
             // Remove node from the neighbors
             graph[prev_node].neighbors = graph[prev_node].neighbors.filter(item => item !== node);
@@ -1735,7 +1736,7 @@ class Polygon3D extends Base3DGeometry {
                 return true;
             }
 
-            // Add node to path (without the end_node)
+            // Push node without the end
             path.push(node);
 
             // Calculate signed angle between prev node node and next neighbor nodes
@@ -1746,11 +1747,11 @@ class Polygon3D extends Base3DGeometry {
             const num_neighbors = graph[node].neighbors.length;
             for (let i = 0; i < num_neighbors; i++) {
                 const neighbor = graph[node].neighbors[i];
-                const angle_nodes = [...path.slice(-2), neighbor];
+                const angle_nodes = [prev_node, node, neighbor];
 
                 // Compute signed angle and take the smallest
                 const angle = signed_angle_between_points(...angle_nodes.map(node => graph[node].point), plane);
-                if (angle > 0 && angle < smallest_angle) {
+                if (num_neighbors === 1 || (angle > 0 && angle < smallest_angle)) {
                     smallest_angle = angle;
                     chosen_neighbor = neighbor;
                 }
@@ -1770,15 +1771,12 @@ class Polygon3D extends Base3DGeometry {
 
         const num_nodes = nodes.length;
         const paths = [];
-
         for (let i = 0; i < num_nodes; i++) {
             // Take the first neighbor and remove it from the list
             const start_node = ALPHABET[i];
             const end_node = start_node;
             for (let j = 0; j < graph[start_node].neighbors.length; j++) {
                 const neighbor = graph[start_node].neighbors.shift();
-
-                // TODO : use first_node point rather than first_node for explored_path, for polygon creation
                 const explored_path = [start_node];
                 if (neighbor && explore_smallest_convex_path(explored_path, start_node, neighbor, end_node)) {
                     paths.push(explored_path);
@@ -1786,160 +1784,27 @@ class Polygon3D extends Base3DGeometry {
             }
         }
 
-        console.log("Paths", paths)
-        console.log("Graph", graph)
-        console.log("###########")
+        // Convert path to polygons
+        const parts = new Array(paths.length);
+        for (let i = 0; i < paths.length; i++) {
+            const path = paths[i];
+            const points = path.map(node => graph[node].point);
 
-        return [this];
-    }
-
-    split_v1(strengthening_of_timbers_bitwise_flag = 0) {
-        // Split polygon in multiple polygons
-        // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
-
-        // if 0 return this
-        if ([3, 5].includes(this.num_points) || strengthening_of_timbers_bitwise_flag === 0) {
-            return [this];
-        }
-
-        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
-
-        // 0 1 2 3 4 5 6 7      bars
-        // 8   9   10  11       mini bars    8 + (i / 2)
-        let parts = [];
-
-        // Find the first selected bar
-        let first_selected_bar_index = 0;
-        for (let bar_index = 0; bar_index < 8; bar_index++) {
-            const bar_is_selected = strengthening_of_timbers[bar_index];
-            if (bar_is_selected) {
-                first_selected_bar_index = bar_index;
-                break;
-            }
-        }
-
-        // Merge points and midpoints in one array
-        const num_points = 2 * this.num_points;
-        let points_to_add = new Array(num_points);
-        for (let i = 0, j = 0; i < this.num_points; i++, j += 2) {
-            points_to_add[j] = this.points[i];
-            points_to_add[j + 1] = this.midpoints[i];
-        }
-
-        console.log("points_to_add", ...points_to_add)
-        let building_points = [];
-        let last_bar_index = first_selected_bar_index
-
-        // Loop through the bars starting from the first selected bar
-        const last_index = first_selected_bar_index + 8;
-        for (let i = first_selected_bar_index; i < last_index; i++) {
-            const bar_index = i % 8;
-
-            // not on midpoints
-            const bar_index_is_on_points = bar_index % 2 === 0;
-            const bar_is_selected = strengthening_of_timbers[bar_index];
-
-            const pt_index = bar_index;
-            const prev_pt_index = (pt_index + 7) % 8;
-            const next_pt_index = (pt_index + 1) % 8;
-
-            console.log("indexes", i, pt_index, prev_pt_index, next_pt_index);
-
-            // Add small triangles on horizontal and vertical bars if transversal bar is selected
-            if (bar_index_is_on_points) {
-                // On points get current transversal bar,
-                const transversal_bar_index = 8 + Math.floor(pt_index / 2) % 4;
-                const transversal_bar_is_selected = strengthening_of_timbers[transversal_bar_index];
-                if (transversal_bar_is_selected) {
-                    const midpoint_to_centroid = get_midpoint(points_to_add[pt_index], this.centroid);
-
-                    // Create one polygon or two if bar is selected
-                    if (bar_is_selected) {
-                        parts.push(
-                            Polygon3D.copy(this, [
-                                points_to_add[pt_index],
-                                midpoint_to_centroid,
-                                points_to_add[prev_pt_index]
-                            ])
-                        );
-                        parts.push(
-                            Polygon3D.copy(this, [
-                                points_to_add[pt_index],
-                                points_to_add[next_pt_index],
-                                midpoint_to_centroid
-                            ])
-                        );
-
-                        // Shift the point to add at midpoint_to_centroid
-                        points_to_add[pt_index] = midpoint_to_centroid;
-                    } else {
-                        parts.push(
-                            Polygon3D.copy(this, [
-                                points_to_add[pt_index],
-                                points_to_add[next_pt_index],
-                                points_to_add[prev_pt_index],
-                            ])
-                        );
-                    }
+            // Filter the points that form a straight line, and keep only good angles
+            const item = new Polygon3D(points);
+            const angles = item.angles;
+            const filtered_points = [];
+            for (let point_index = 0; point_index < item.num_points; point_index++) {
+                const rounded_angle = to_decimal(rad2deg(angles[point_index]), 0);
+                if (rounded_angle > 0 && rounded_angle < 180) {
+                    filtered_points.push(item.points[point_index]);
                 }
             }
 
-
+            parts[i] = Polygon3D.copy(this, filtered_points);
         }
 
-        // Pass
-        for (let i = first_selected_bar_index; i <= last_index; i++) {
-            const bar_index = i % 8;
-
-            // not on midpoints
-            const bar_is_selected = strengthening_of_timbers[bar_index];
-
-            const pt_index = bar_index;
-            const prev_pt_index = (pt_index + 7) % 8;
-            const next_pt_index = (pt_index + 1) % 8;
-
-            if (bar_is_selected) {
-                // Close the last polygon in the process of building
-                if (building_points.length > 0) {
-                    building_points.push(points_to_add[pt_index]);
-
-                    // Add the centroid only it last bar is not directly at 180 degrees
-                    if ((last_bar_index + 4) % 8 !== bar_index) {
-                        building_points.push(this.centroid);
-                    }
-
-                    console.log("bar close", bar_index, ...building_points);
-                    console.log("######################");
-
-                    parts.push(
-                        Polygon3D.copy(this, building_points)
-                    );
-                }
-
-                // Initialize building points with a new point
-                building_points = [
-                    points_to_add[pt_index]
-                ];
-
-                // Reset the array and the last
-                last_bar_index = bar_index;
-
-                console.log("selected bar => add point", i, last_bar_index, ...building_points)
-            } else {
-                const theta = angle_between_points(
-                    points_to_add[prev_pt_index],
-                    points_to_add[pt_index],
-                    points_to_add[next_pt_index],
-                );
-
-                console.log("theta", rad2deg(theta));
-                if (theta > 0 && theta < Math.PI) {
-                    building_points.push(points_to_add[pt_index]);
-                    console.log("add point", i, last_bar_index, rad2deg(theta), ...building_points)
-                }
-            }
-        }
-        return parts
+        return parts;
     }
 
     divide(horizontally = true) {
