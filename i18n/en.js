@@ -37,6 +37,7 @@ const I18N_EN = {
         tooltip_copy_link: "Copy link",
         tooltip_link_buymeacoffee: "Buy me a coffee ☕ if you love Z5omes 🙏",
         tooltip_link_facebook: "Come and chat with 📢 with the 'Zome Network Building' community",
+        tooltip_link_youtube: "Visit the YouTube channel 🎥 to learn more about using z5omes",
         tooltip_link_github: "Go to Github 🐈 if you have any questions",
         tooltip_link_linkedin: "Visit my profile on Linkedin",
         tooltip_export_2_format: "Exporter au format $1",
