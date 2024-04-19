@@ -1,9 +1,5 @@
 # TODO-LIST
 
-* [ ] Finir la division pour les triangles
-
-* [ ] Finir la division pour les truncated kite
-
 * [ ] renommer strengthening_of_timbers en polygon_division_bars
 
 * [ ] Ajouter les renforts en plus de la division des polygones
