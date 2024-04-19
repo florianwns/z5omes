@@ -167,11 +167,11 @@ function swap_axes(points, axes_order = "XYZ") {
     const axis_indexes = new Array(3);
     for (let i = 0; i < 3; i++) {
         const axis_char = axes_order[i];
-        const axis_index = axis_char == "X"
+        const axis_index = axis_char === "X"
             ? 0
-            : axis_char == "Y"
+            : axis_char === "Y"
                 ? 1
-                : axis_char == "Z"
+                : axis_char === "Z"
                     ? 2
                     : -1;
 
@@ -557,7 +557,7 @@ function bitwise_flag_to_boolean_array(bitwise_flag) {
     const boolean_arr = [];
     for (let j = 0; bitwise_flag > 0; j++) {
         const pow_2 = Math.pow(2, j);
-        const is_checked = (bitwise_flag & pow_2) == pow_2;
+        const is_checked = (bitwise_flag & pow_2) === pow_2;
         boolean_arr.push(is_checked);
         if (is_checked) {
             bitwise_flag -= pow_2;
@@ -1193,8 +1193,7 @@ class Base3DGeometry {
     }
 
     clone() {
-        const cloned_obj = _.clone(this);
-        return cloned_obj;
+        return _.clone(this);
     }
 
     compute_boundaries() {
@@ -1633,9 +1632,58 @@ class Polygon3D extends Base3DGeometry {
         // Split polygon in multiple polygons
         // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
 
+        // Check polygon point number
+        if (this.num_points < 3 || this.num_points > 5) {
+            console.error("Split function is only implemented for polygons with 3,4 or 5 points");
+        }
+
         // if 0 or not a rhombus return [this]
-        if (this.num_points != 4 || strengthening_of_timbers_bitwise_flag === 0) {
+        if (strengthening_of_timbers_bitwise_flag === 0
+            || (
+                this.num_points != 4
+                && ![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(strengthening_of_timbers_bitwise_flag)
+            )
+        ) {
             return [this];
+        }
+
+        // Use basic method, old school
+        let midpoint;
+        if (strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG)
+            switch (this.num_points) {
+                case 3:
+                    return [this];
+                case 4:
+                    return [
+                        Polygon3D.copy(this, [this.points[0], this.points[1], this.points[3]]),
+                        Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3]])
+                    ];
+                case 5:
+                    return [
+                        Polygon3D.copy(this, [this.points[0], this.points[1], this.points[4]]),
+                        Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3], this.points[4]])
+                    ];
+            }
+        else if (strengthening_of_timbers_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) {
+            switch (this.num_points) {
+                case 3:
+                    midpoint = get_midpoint(this.points[1], this.points[2]);
+                    return [
+                        Polygon3D.copy(this, [this.points[0], this.points[1], midpoint]),
+                        Polygon3D.copy(this, [midpoint, this.points[2], this.points[0]]),
+                    ];
+                case 4:
+                    return [
+                        Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2]]),
+                        Polygon3D.copy(this, [this.points[2], this.points[3], this.points[0]]),
+                    ];
+                case 5:
+                    midpoint = get_midpoint(this.points[2], this.points[3]);
+                    return [
+                        Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2], midpoint]),
+                        Polygon3D.copy(this, [midpoint, this.points[3], this.points[4], this.points[0]]),
+                    ];
+            }
         }
 
         // Create a graph like this one to find sub polygons
@@ -1776,11 +1824,10 @@ class Polygon3D extends Base3DGeometry {
         for (let i = 0; i < num_nodes; i++) {
             // Take the first neighbor and remove it from the list
             const start_node = ALPHABET[i];
-            const end_node = start_node;
             for (let j = 0; j < graph[start_node].neighbors.length; j++) {
                 const neighbor = graph[start_node].neighbors.shift();
                 const explored_path = [start_node];
-                const exploration_worked = explore_smallest_convex_path(explored_path, start_node, neighbor, end_node)
+                const exploration_worked = explore_smallest_convex_path(explored_path, start_node, neighbor, start_node)
                 if (neighbor && exploration_worked) {
                     paths.push(explored_path);
                 }
@@ -1805,40 +1852,6 @@ class Polygon3D extends Base3DGeometry {
             }
 
             parts[i] = Polygon3D.copy(this, filtered_points);
-        }
-        return parts;
-    }
-
-    divide(horizontally = true) {
-        // Divide polygon into two parts horizontally or vertically
-        if (this.num_points < 3 || this.num_points > 5) {
-            console.error("Divide function is only implemented for polygons with 3,4 or 5 points");
-        }
-
-        let parts = []
-        switch (this.num_points) {
-            case 3:
-                parts.push(Polygon3D.copy(this));
-                break;
-            case 4:
-                if (horizontally) {
-                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[3]]));
-                    parts.push(Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3]]));
-                } else {
-                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2]]));
-                    parts.push(Polygon3D.copy(this, [this.points[2], this.points[3], this.points[0]]));
-                }
-                break;
-            case 5:
-                if (horizontally) {
-                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[4]]));
-                    parts.push(Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3], this.points[4]]));
-                } else {
-                    const midpoint = get_midpoint(this.points[2], this.points[3]);
-                    parts.push(Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2], midpoint]));
-                    parts.push(Polygon3D.copy(this, [midpoint, this.points[3], this.points[4], this.points[0]]));
-                }
-                break;
         }
         return parts;
     }
@@ -1902,7 +1915,8 @@ class TrapezoidalPrism extends Base3DGeometry {
 
     compute_mesh_points() {
         // Compute triangle and edges points of all polygons for 3D visualization
-        this._mesh_points = [], this._edge_points = [];
+        this._mesh_points = [];
+        this._edge_points = [];
         for (let i = 0; i < this.children.length; i++) {
             const item = this.children[i];
             this._mesh_points.push(...item.mesh_points);
@@ -2063,6 +2077,8 @@ class Zome {
         {
             num_spirals = null,
             num_crowns = null,
+            num_points_per_crown= null,
+
             assembly_method = null,
             rotation_angles = null,
             rotated_colors = null,
@@ -2088,6 +2104,7 @@ class Zome {
     ) {
         this.num_spirals = num_spirals || 0;
         this.num_crowns = num_crowns || 0;
+        this.num_points_per_crown = num_points_per_crown || [];
         this.assembly_method = assembly_method || 0;
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];

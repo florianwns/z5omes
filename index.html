@@ -850,7 +850,7 @@
 
                                                 <btn class="btn btn-primary"
                                                      @click="strengthening_of_timbers_bitwise_flag = SVG_HORIZONTAL_BAR_BITWISE_FLAG"
-                                                     :class="(strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
+                                                     :class="(num_points_of_selected_crown === 3) ? 'btn-secondary disabled' : (strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_horizontal_bar"></use>
@@ -869,7 +869,7 @@
                                                 </btn>
 
                                                 <btn class="btn btn-primary position-relative"
-                                                     :class="(![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
+                                                     :class="(num_points_of_selected_crown !== 4) ? 'btn-secondary disabled' : (![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
                                                      data-bs-toggle="modal"
                                                      data-bs-target="#framework-customizer-modal"
                                                      for="btn-custom-rhombus">
@@ -1258,14 +1258,14 @@
                     </h5>
 
                     <!-- ZIP Button -->
-<!--                    <div>-->
-<!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
-<!--                              :title="i18n('tooltip_export_2_format', 'ZIP')"-->
-<!--                              @click="download_zip()">-->
-<!--                            <i class="fa-solid fa-file"></i>-->
-<!--                            <span class="fa-icon-file-type">ZIP</span>-->
-<!--                        </span>-->
-<!--                    </div>-->
+                    <!--                    <div>-->
+                    <!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
+                    <!--                              :title="i18n('tooltip_export_2_format', 'ZIP')"-->
+                    <!--                              @click="download_zip()">-->
+                    <!--                            <i class="fa-solid fa-file"></i>-->
+                    <!--                            <span class="fa-icon-file-type">ZIP</span>-->
+                    <!--                        </span>-->
+                    <!--                    </div>-->
                 </div>
 
                 <div class="row">
@@ -2617,13 +2617,13 @@
                 selected_crown: 1,    // If -1, select all crowns
                 strengthening_of_timbers_by_crowns: [],
                 strengthening_of_timbers_bitwise_flag: 0,
+                num_points_of_selected_crown: 4,
                 crown_of_framework_timbers_is_valid: true,
 
                 is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
                 i18n_dictionary: {},
-
 
                 // Debouncers
                 __make_zome: null,
@@ -2693,7 +2693,7 @@
                     });
 
                     // Selected crown listener
-                    _.forEach(["num_crowns", "params.strengthening_of_timbers_by_crowns_str"], key => {
+                    _.forEach(["num_crowns", "params.height_ratio", "params.strengthening_of_timbers_by_crowns_str"], key => {
                         this.$watch(key, (value) => {
                             this.init_strengthening_of_timbers();
                             this.update_strengthening_of_timbers();
@@ -2772,6 +2772,7 @@
                     const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
                     this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
                     this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
+                    this.num_points_of_selected_crown = ZOME.num_points_per_crown[this.selected_crown - 1] || 4;
                 },
 
                 init_strengthening_of_timbers() {
@@ -3220,8 +3221,11 @@
                     // Loop over the faces of the framework to build timbers
                     // Divide zome faces and build framework timbers
                     const strengthening_of_timbers_bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
-                    for (let crown_index = 0; crown_index < zome_faces_3D.length; crown_index++) {
+                    const num_points_per_crown = new Array(num_crowns);
+                    for (let crown_index = 0; crown_index < num_crowns; crown_index++) {
                         const face = zome_faces_3D[crown_index];
+                        num_points_per_crown[crown_index] = face.num_points;
+
                         face.compute_framework(
                             strengthening_of_timbers_bitwise_flags[crown_index] || 0,
                             ASSEMBLY_METHOD,
@@ -3418,15 +3422,13 @@
                         );
                     });
 
-                    // Reset selected crown index
-                    this.num_crowns = num_crowns;
-
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num_spirals: N,
                         num_crowns: num_crowns,
-                        assembly_method: ASSEMBLY_METHOD,
+                        num_points_per_crown: num_points_per_crown,
 
+                        assembly_method: ASSEMBLY_METHOD,
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
 
@@ -3448,6 +3450,10 @@
 
                         vanishing_lines: vanishing_lines,
                     });
+
+                    // Reset selected crown index
+                    this.num_crowns = num_crowns;
+                    this.update_strengthening_of_timbers();
 
                     // Dispatch zome
                     this.$dispatch('zome-is-made');
