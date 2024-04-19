@@ -11,7 +11,7 @@
 // ------------------------------------
 // ========== Constants ==========
 // ------------------------------------
-const DEBUG = true;
+const DEBUG = false;
 
 const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
