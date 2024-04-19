@@ -2028,17 +2028,19 @@
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
-                    for (let i = 0; i < ZOME.num_spirals; i++) {
+                    const incr_angle = mandala_3D[0].angles[0];
+                    for (let i = 0, rotation_angle = 0; i < ZOME.num_spirals; i++, rotation_angle += incr_angle) {
                         _.forEach(mandala_3D, (face) => {
                             mandala_faces.push(
                                 new Polygon3D(
-                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -ZOME.rotation_angles[i].rad, O)),
+                                    swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -rotation_angle, O)),
                                     face.label,
                                     (this.paint_similar_pieces)
                                         ? face.color
                                         : ZOME.rotated_colors[face.color.hex][i],
                                 )
                             );
+
                         });
                     }
 
@@ -3381,7 +3383,7 @@
                         mandala_3D_of_outer_faces,
                         mandala_3D_of_inner_faces
                     ] = _.map([zome_faces_3D, outer_faces_3D, inner_faces_3D], obj_3D => {
-                        const mandala_3D = new Array(obj_3D.length);
+                        const mandala = new Array(obj_3D.length);
                         let O = [0, 0, 0];
                         let rotated_A;
                         _.forEach(obj_3D, (face, i) => {
@@ -3403,9 +3405,9 @@
                             A = rotated_points[rotated_points.length - 2];
 
                             // Swap y axis with z axis for 3D display
-                            mandala_3D[i] = Polygon3D.copy(face, swap_axes(rotated_points, "XZY"));
+                            mandala[i] = Polygon3D.copy(face, swap_axes(rotated_points, "XZY"));
                         });
-                        return mandala_3D;
+                        return mandala;
                     });
 
                     // Build timber_profiles_3D
