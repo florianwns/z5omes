@@ -1345,7 +1345,7 @@ class Polygon3D extends Base3DGeometry {
     }
 
     compute_framework(
-        strengthening_of_timbers_bitwise_flag,  // A bitwise flag which let us to divide polygon
+        face_divisions_bitwise_flag,  // A bitwise flag which let us to divide polygon
 
         // Assembly parameters
         assembly_method = 0,            // 0 : GoodKarma
@@ -1372,7 +1372,7 @@ class Polygon3D extends Base3DGeometry {
         this._framework_inner_points = new Array(this.num_points);
 
         // Divide polygons into many parts
-        let framework_faces = [...this.split(strengthening_of_timbers_bitwise_flag)];
+        let framework_faces = [...this.split(face_divisions_bitwise_flag)];
 
         const outward_xpansion = assembly_method === 2 || xpansion_direction === -1;
 
@@ -1628,7 +1628,7 @@ class Polygon3D extends Base3DGeometry {
         this._edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
     }
 
-    split(strengthening_of_timbers_bitwise_flag = 0) {
+    split(face_divisions_bitwise_flag = 0) {
         // Split polygon in multiple polygons
         // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
 
@@ -1638,10 +1638,10 @@ class Polygon3D extends Base3DGeometry {
         }
 
         // if 0 or not a rhombus return [this]
-        if (strengthening_of_timbers_bitwise_flag === 0
+        if (face_divisions_bitwise_flag === 0
             || (
                 this.num_points != 4
-                && ![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(strengthening_of_timbers_bitwise_flag)
+                && ![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(face_divisions_bitwise_flag)
             )
         ) {
             return [this];
@@ -1649,7 +1649,7 @@ class Polygon3D extends Base3DGeometry {
 
         // Use basic method, old school
         let midpoint;
-        if (strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG)
+        if (face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG)
             switch (this.num_points) {
                 case 3:
                     return [this];
@@ -1664,7 +1664,7 @@ class Polygon3D extends Base3DGeometry {
                         Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3], this.points[4]])
                     ];
             }
-        else if (strengthening_of_timbers_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) {
+        else if (face_divisions_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) {
             switch (this.num_points) {
                 case 3:
                     midpoint = get_midpoint(this.points[1], this.points[2]);
@@ -1723,7 +1723,7 @@ class Polygon3D extends Base3DGeometry {
         const nodes = Object.keys(graph);
 
         // Convert flag to boolean array
-        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
+        const face_divisions = bitwise_flag_to_boolean_array(face_divisions_bitwise_flag);
 
         // Add neighbors only for polygon with 4 points
         const spiral2_num_nodes = 8;
@@ -1744,7 +1744,7 @@ class Polygon3D extends Base3DGeometry {
             const spiral1_node_index = 8 + Math.floor(spiral2_node_index / 2) % spiral1_num_nodes;
 
             // Add neighbors in both ways for the polygon division
-            const bar_to_centroid_is_selected = strengthening_of_timbers[spiral2_node_index];
+            const bar_to_centroid_is_selected = face_divisions[spiral2_node_index];
             if (bar_to_centroid_is_selected) {
                 if (even_node) {
                     graph[node].neighbors.push(nodes[spiral1_node_index]);
@@ -1758,7 +1758,7 @@ class Polygon3D extends Base3DGeometry {
                 }
             }
 
-            const transversal_bar_is_selected = strengthening_of_timbers[spiral1_node_index];
+            const transversal_bar_is_selected = face_divisions[spiral1_node_index];
             if (even_node && transversal_bar_is_selected) {
                 graph[prev_node].neighbors.push(nodes[spiral1_node_index]);
                 graph[nodes[spiral1_node_index]].neighbors.push(prev_node);

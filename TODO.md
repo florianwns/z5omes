@@ -1,6 +1,6 @@
 # TODO-LIST
 
-* [ ] renommer strengthening_of_timbers en polygon_division_bars
+* [x] renommer strengthening_of_timbers en face_divisions
 
 * [ ] Ajouter les renforts en plus de la division des polygones
   

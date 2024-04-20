@@ -47,6 +47,7 @@ const I18N_EN = {
         tooltip_customize_framework: "Customize framework",
         tooltip_show_keyboard_shortcuts: "Show keyboard shortcuts",
         tooltip_inversion_Y_Z_axes: "Inversion of Y and Z axes",
+        tooltip_bindu_ratio: "Bindu ratio of selected crown (Available only if the kite is split horizontally)",
 
         // Keyboard shortcuts
         key_H_3D_view: "Reset camera view",
@@ -87,7 +88,6 @@ const I18N_EN = {
         help_zh_param: "Height of the visible part of the zome before xpansion (outwards/inwards)",
         help_tw_param: "Width of timbers",
         help_tt_param: "Thickness of timbers",
-        help_st_param: "Strengthening of timbers",
         help_am_param: "From left to right :",
         help_am_param_1: "Xpansion direction : ↑ outwards or ↓ inwards",
         help_am_param_2: "Assembly method",
