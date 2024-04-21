@@ -1276,7 +1276,7 @@ class Polygon3D extends Base3DGeometry {
     //
     // points are distributed counterclockwise
 
-    constructor(points, label, color, crown_index) {
+    constructor(points, label, color, crown_index, is_bottom_part = false) {
         // Call parent constructor
         super(points, label, color, crown_index);
 
@@ -1287,6 +1287,9 @@ class Polygon3D extends Base3DGeometry {
                 console.warn(`The polygon ${this.label || ''} is not coplanar`, this.points);
             }
         }
+
+        // A property used to flatten bottom part of bindu faces (divided horizontally)
+        this.is_bottom_part = is_bottom_part;
 
         this._plane = null;
         this._radius = null;
@@ -1333,15 +1336,15 @@ class Polygon3D extends Base3DGeometry {
     get flattened_points() {
         if (this._flattened_points === null) {
             // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-            this._flattened_points = (to_decimal(this.points[0][1]) != to_decimal(this.points[this.num_points - 1][1]))
+            this._flattened_points = (this.is_bottom_part)
                 ? flatten_3D_points(
                     this.points,
-                    this.centroid, this.points[0], this.points[1],
+                    this.centroid, this.midpoints[this.num_points - 1], this.points[0],
                     false
                 )
                 : flatten_3D_points(
                     this.points,
-                    this.centroid, this.midpoints[this.num_points - 1], this.points[0],
+                    this.centroid, this.points[0], this.points[1],
                     false
                 )
         }
@@ -1350,7 +1353,7 @@ class Polygon3D extends Base3DGeometry {
 
     static copy(obj, points) {
         return new Polygon3D(
-            points || obj.points, obj.label, obj.color, obj.crown_index
+            points || obj.points, obj.label, obj.color, obj.crown_index, obj.is_bottom_part
         );
     }
 

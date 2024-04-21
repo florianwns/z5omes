@@ -1,7 +1,8 @@
 # TODO-LIST
 
+* [ ] Ajouter la page du zomecamp 2024 sur z5omes
+  
 * [x] renommer strengthening_of_timbers en face_divisions
-
 * [x] Essayer de faire un zome bindu => ça fonctionne à merveille
 * [x] Ajouter la division des faces en bindu inner and outer...utilise la lettre suivant dans un mega alphabet (contient des symboles grec)
 * [x] Répare le flattened_points pour le polygon3D (adapté au triangle renversé : sommet en bas)
@@ -18,7 +19,7 @@
   - calculer le mur precedent horizontal ?
   
 
-
+* [ ] Ajouter le bounding box sur le selected crown
 
 
 * [ ] Ajouter les renforts en plus de la division des polygones

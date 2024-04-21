@@ -3123,6 +3123,7 @@
                         zome_faces_3D.push(faces[0]);
 
                         faces[1].label = ALPHABET[zome_faces_3D.length];
+                        faces[1].is_bottom_part = true;
                         zome_faces_3D.push(faces[1]);
                     } else {
                         zome_faces_3D.push(face);
@@ -3473,28 +3474,47 @@
                         mandala_3D_of_inner_faces
                     ] = _.map([zome_faces_3D, outer_faces_3D, inner_faces_3D], obj_3D => {
                         const mandala = new Array(obj_3D.length);
-                        let O = [0, 0, 0];
-                        let rotated_A;
+                        let last_pt = [0, 0, 0], before_last_pt, first_pt, second_pt;
+                        let last_crown_index = null, rotation_angle = null;
                         _.forEach(obj_3D, (face, i) => {
                             let flattened_face = face.flatten_face();
 
                             // Move to Origin and rotate to match with previous piece
-                            let rotated_points = flattened_face.points.map(p => add(p, O));
-                            if (i > 0) {
-                                let angle = Angle.from_3_points(A, O, rotated_points[1]);
-                                rotated_A = rotate_point_around_z_axis(rotated_points[1], angle, O);
+                            let mandala_face_points = (second_pt && face.is_bottom_part)
+                                ? flattened_face.points.map(p => add(p, second_pt))
+                                : flattened_face.points.map(p => add(p, last_pt));
 
-                                // Rotate the other way if rotated A is not too close to A
-                                if (to_decimal(dist(rotated_A, A)) !== 0) {
-                                    angle = angle.reverse();
+                            second_pt = mandala_face_points[1];
+
+                            if (i > 0) {
+                                if(!face.is_bottom_part){
+                                    rotation_angle = Angle.from_3_points(before_last_pt, last_pt, second_pt);
+                                    const second_pt_rotated = rotate_point_around_z_axis(second_pt, rotation_angle, last_pt);
+
+                                    // Rotate the other way if second point rotated
+                                    // is not too close to the before last point
+                                    if (to_decimal(dist(second_pt_rotated, before_last_pt)) !== 0) {
+                                        rotation_angle = rotation_angle.reverse();
+                                    }
+
+                                    mandala_face_points = mandala_face_points.map(p => {
+                                        return rotate_point_around_z_axis(p, rotation_angle, last_pt);
+                                    });
+                                }else{
+                                    mandala_face_points = mandala_face_points.map(p => {
+                                        return rotate_point_around_z_axis(p, rotation_angle, first_pt);
+                                    });
                                 }
-                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, angle, O));
+
                             }
-                            O = rotated_points[rotated_points.length - 1];
-                            A = rotated_points[rotated_points.length - 2];
+
+                            first_pt = mandala_face_points[0];
+                            last_pt = mandala_face_points[mandala_face_points.length - 1];
+                            before_last_pt = mandala_face_points[mandala_face_points.length - 2];
 
                             // Swap y axis with z axis for 3D display
-                            mandala[i] = Polygon3D.copy(face, swap_axes(rotated_points, "XZY"));
+                            mandala[i] = Polygon3D.copy(face, swap_axes(mandala_face_points, "XZY"));
+                            last_crown_index = face.crown_index;
                         });
                         return mandala;
                     });
