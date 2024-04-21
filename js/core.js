@@ -32,7 +32,7 @@ const THREE_LABELS_MATERIAL = new THREE.MeshBasicMaterial({
 });
 const THREE_VERTEX_COLOR_MATERIAL = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, vertexColors: true});
 
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZΘΞΠΣΦΨΩαβδεζηϑικλμνξπρςσφχψ'.split('');
 const FOOTING_CHAR = '~';
 const FLOOR_CHAR = '⬢';
 const XYZ = ["X", "Y", "Z"];
@@ -1333,7 +1333,17 @@ class Polygon3D extends Base3DGeometry {
     get flattened_points() {
         if (this._flattened_points === null) {
             // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-            this._flattened_points = flatten_3D_points(this.points, this.centroid, this.points[0], this.points[1], false);
+            this._flattened_points = (to_decimal(this.points[0][1]) != to_decimal(this.points[this.num_points - 1][1]))
+                ? flatten_3D_points(
+                    this.points,
+                    this.centroid, this.points[0], this.points[1],
+                    false
+                )
+                : flatten_3D_points(
+                    this.points,
+                    this.centroid, this.midpoints[this.num_points - 1], this.points[0],
+                    false
+                )
         }
         return this._flattened_points;
     }
@@ -2076,8 +2086,6 @@ class Zome {
     constructor(
         {
             num_spirals = null,
-            num_crowns = null,
-            num_points_per_crown= null,
 
             assembly_method = null,
             rotation_angles = null,
@@ -2103,8 +2111,7 @@ class Zome {
         }
     ) {
         this.num_spirals = num_spirals || 0;
-        this.num_crowns = num_crowns || 0;
-        this.num_points_per_crown = num_points_per_crown || [];
+
         this.assembly_method = assembly_method || 0;
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];

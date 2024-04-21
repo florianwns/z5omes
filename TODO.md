@@ -3,15 +3,26 @@
 * [x] renommer strengthening_of_timbers en face_divisions
 
 * [x] Essayer de faire un zome bindu => ça fonctionne à merveille
+* [x] Ajouter la division des faces en bindu inner and outer...utilise la lettre suivant dans un mega alphabet (contient des symboles grec)
+* [x] Répare le flattened_points pour le polygon3D (adapté au triangle renversé : sommet en bas)
 
+* [ ] Appliquer la séparation differement quand le bindu ratio est ajouter
+  
+* [ ] Ne pas ajouter de bindu sur la derniere colonne si elle a 3 points
+  
 * [ ] Pour le bindu ajouter des petits correctifs
-  - Ajouter la division des faces inner and outer
-    - label en minuscule pour la partie basse
   - Il faudra sans doute revoir le mandala au niveau de la rotation
-    - pas de rotate sur le même crown_index
+    - Si le precedent est un triangle, et que le current aussi alors...
+  
+* [ ] revoir l'expansion quand le bindu est supérieur à 1, car le montant rentre les un dans les autre
+  - calculer le mur precedent horizontal ?
+  
+
+
+
 
 * [ ] Ajouter les renforts en plus de la division des polygones
-  
+
 
 * [ ] Ajouter le zomandala (Différent du mandala)
   https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html

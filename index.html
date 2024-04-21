@@ -125,7 +125,7 @@
                           data-bs-toggle="tooltip" :title="i18n('help_n_param')">
                         N
                     </span>
-                    <input class="form-control form-range" :max="ALPHABET.length" min="3" step="1" type="range"
+                    <input class="form-control form-range" :max="26" min="3" step="1" type="range"
                            x-model.number="params.num_spirals" x-ref="num_spirals_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="params.num_spirals">
@@ -2646,6 +2646,7 @@
                 selected_crown: 1,
 
                 face_divisions_by_crowns: [],
+                num_points_per_crown: [],
                 selected_face_divisions_bitwise_flag: 0,
                 num_points_of_selected_crown: 4,
                 crown_of_framework_timbers_is_valid: true,
@@ -2804,8 +2805,6 @@
                     // Save params to url
                     sync_url_from_params(this.params)
                 },
-
-
                 init_face_divisions() {
                     // Get current face_divisions and fill missing values
                     const current_numbers = str_to_numbers(this.params.face_divisions_by_crowns_str);
@@ -2815,52 +2814,46 @@
                     }
                     this.params.face_divisions_by_crowns_str = numbers_2_str(numbers);
                 },
-
                 update_face_divisions() {
                     this.clamp("selected_crown", this.selected_crown, false);
                     const bitwise_flags = str_to_numbers(this.params.face_divisions_by_crowns_str);
                     this.face_divisions_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
                     this.selected_face_divisions_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
-                    this.num_points_of_selected_crown = ZOME.num_points_per_crown[this.selected_crown - 1] || 4;
+                    this.num_points_of_selected_crown = this.num_points_per_crown[this.selected_crown - 1] || 4;
                 },
-
                 init_bindu_ratios() {
                     const face_divisions_by_crowns = str_to_numbers(this.params.face_divisions_by_crowns_str);
                     const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     const bindu_ratios = new Array(this.num_crowns);
                     for (let i = 0; i < this.num_crowns; i++) {
-                        const can_use_bindu_ratio = (face_divisions_by_crowns[i] & SVG_HORIZONTAL_BAR_BITWISE_FLAG) === SVG_HORIZONTAL_BAR_BITWISE_FLAG
+                        const can_use_bindu_ratio = this.num_points_per_crown[i] !== 3
+                            && (face_divisions_by_crowns[i] & SVG_HORIZONTAL_BAR_BITWISE_FLAG) === SVG_HORIZONTAL_BAR_BITWISE_FLAG
                         bindu_ratios[i] = (can_use_bindu_ratio) ? current_bindu_ratios[i] || 1 : 1;
                     }
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
                 },
-
-                update_bindu_ratio(){
+                update_bindu_ratio() {
                     const bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     this.selected_bindu_ratio = bindu_ratios[this.selected_crown - 1] || 1;
                 },
-
-                update_bindu_ratios(){
+                update_bindu_ratios() {
                     const bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     bindu_ratios[this.selected_crown - 1] = this.selected_bindu_ratio;
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
                 },
-
-                get can_use_bindu_ratio(){
-                    return (this.selected_face_divisions_bitwise_flag & SVG_HORIZONTAL_BAR_BITWISE_FLAG) === SVG_HORIZONTAL_BAR_BITWISE_FLAG;
+                get can_use_bindu_ratio() {
+                    return this.num_points_of_selected_crown !== 3
+                        && (this.selected_face_divisions_bitwise_flag & SVG_HORIZONTAL_BAR_BITWISE_FLAG) === SVG_HORIZONTAL_BAR_BITWISE_FLAG;
                 },
-
                 is_framework_timber_selected(svg_index = 0) {
                     const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
                     return framework_timber_crown && framework_timber_crown[svg_index];
                 },
-
                 toggle_framework_timber(svg_index) {
                     const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
                     framework_timber_crown[svg_index] = (framework_timber_crown[svg_index]) ? false : true;
                     this.face_divisions_by_crowns[this.selected_crown - 1] = [...framework_timber_crown];
                 },
-
                 is_crown_of_framework_timbers_valid(framework_timber_crown) {
                     // Check if there is consecutive_unselected that is more and equal than 4
                     let first_selected = null,
@@ -2891,11 +2884,9 @@
                     // The crown is valid
                     return true;
                 },
-
                 set_face_divisions(crown_index, value) {
                     // this.face_divisions_by_crowns
                 },
-
                 i18n(key, value = null) {
                     // Translation function using JSON dictionnaries
                     // Return the key if not found in language and default language dictionaries
@@ -2952,7 +2943,6 @@
                             this.params.theta_deg = angle;
                     }
                 },
-
                 get num_rhombuses_vertically() {
                     return Math.round(this.params.num_spirals * this.params.height_ratio - 1, 0);
                 },
@@ -2968,7 +2958,6 @@
                         this.params.kite_ratio = 1
                     }
                 },
-
                 get zome_height() {
                     return from_mm(this.params.zome_height_in_mm, this.params.measuring_unit);
                 },
@@ -3128,6 +3117,17 @@
                     vertices.push(p);
                     return vertices.length - 1;
                 },
+                add_face(zome_faces_3D, face, apply_bindu_ratio = false) {
+                    if (apply_bindu_ratio) {
+                        const faces = face.split(SVG_HORIZONTAL_BAR_BITWISE_FLAG);
+                        zome_faces_3D.push(faces[0]);
+
+                        faces[1].label = ALPHABET[zome_faces_3D.length];
+                        zome_faces_3D.push(faces[1]);
+                    } else {
+                        zome_faces_3D.push(face);
+                    }
+                },
                 make_zome() {
                     this.is_computing = true;
 
@@ -3185,11 +3185,18 @@
                     // Loop over crowns (M = N - 1), while zome does not hit ground
                     let hit_ground = false;
                     const last_triangle_indexes = [];
+
+                    // We use 'crown index' term only at the vertices building.
                     let crown_index = 0;
+                    const num_points_per_crown = [];
+
+                    // Loop and build vertices array
                     for (; crown_index < M && !hit_ground; crown_index++) {
                         ficc = crown_index * N + 1;                  // First Index on current crown
-                        fipc = ficc - N;                        // First index on previous crown
-                        face_label = ALPHABET[crown_index];          // Alphabet letter distribution
+                        fipc = ficc - N;                             // First index on previous crown
+
+                        // Alphabet letter distribution
+                        face_label = ALPHABET[zome_faces_3D.length]
 
                         // On current crown, Loop over points from left to right
                         for (let spiral_index = 0; spiral_index < N; spiral_index++) {
@@ -3207,14 +3214,15 @@
                             D = add(A, mul(sub(get_midpoint(B, C), A), 1 + K));
 
                             const bindu_ratio = BINDU_RATIOS[crown_index] || 1;
+                            const apply_bindu_ratio = bindu_ratio !== 1;
 
                             // Apply the bindu ratio
-                            if(bindu_ratio !== 1){
-                               D = [
-                                   D[0] * bindu_ratio,
-                                   D[1] ,
-                                   D[2] * bindu_ratio
-                               ];
+                            if (apply_bindu_ratio) {
+                                D = [
+                                    D[0] * bindu_ratio,
+                                    D[1],
+                                    D[2] * bindu_ratio
+                                ];
                             }
 
                             // Draw the second part of shape while D is higher than the ground
@@ -3228,7 +3236,8 @@
                                 // Add only the first piece
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, D, C], face_label, null, crown_index);
-                                    zome_faces_3D.push(face);
+                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio);
+                                    num_points_per_crown[crown_index] = face.num_points;
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
@@ -3249,7 +3258,8 @@
                                 // Add Truncated Kite
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, E, F, C], face_label, null, crown_index);
-                                    zome_faces_3D.push(face);
+                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio);
+                                    num_points_per_crown[crown_index] = face.num_points;
                                 }
                                 // Add last triangles to close it after if needed
                                 last_triangle_indexes.push(iE, iF, iC);
@@ -3277,15 +3287,22 @@
                         const far_enough = to_decimal(dist(B, C), 2) !== 0;
                         if (far_enough) {
                             // Add triangle to faces
-                            face = new Polygon3D([A, B, C], ALPHABET[crown_index], null, crown_index);
-                            zome_faces_3D.push(face);
+                            face_label = ALPHABET[zome_faces_3D.length]
+                            face = new Polygon3D([A, B, C], face_label, null, crown_index);
+                            this.add_face(zome_faces_3D, face, false);
+                            num_points_per_crown[crown_index] = face.num_points;
+                            crown_index++;
                         }
                     }
 
+                    // Make difference between num_crowns (used for face divisions)
+                    const num_crowns = crown_index;
+                    // And num zome faces to init outer/inner faces
+                    const num_zome_faces = zome_faces_3D.length
+
                     // Build Outer/Inner faces
-                    const num_crowns = zome_faces_3D.length
-                    const outer_faces_3D = new Array(num_crowns),
-                        inner_faces_3D = new Array(num_crowns);
+                    const outer_faces_3D = new Array(num_zome_faces),
+                        inner_faces_3D = new Array(num_zome_faces);
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -3298,13 +3315,13 @@
                     // Loop over the faces of the framework to build timbers
                     // Divide zome faces and build framework timbers
                     const selected_face_divisions_bitwise_flags = str_to_numbers(this.params.face_divisions_by_crowns_str);
-                    const num_points_per_crown = new Array(num_crowns);
-                    for (let crown_index = 0; crown_index < num_crowns; crown_index++) {
-                        const face = zome_faces_3D[crown_index];
-                        num_points_per_crown[crown_index] = face.num_points;
+
+
+                    for (let face_index = 0; face_index < num_zome_faces; face_index++) {
+                        const face = zome_faces_3D[face_index];
 
                         face.compute_framework(
-                            selected_face_divisions_bitwise_flags[crown_index] || 0,
+                            selected_face_divisions_bitwise_flags[face_index] || 0,
                             ASSEMBLY_METHOD,
                             ASSEMBLY_DIRECTION,
                             vanishing_pt,
@@ -3324,13 +3341,16 @@
                         const outer_face_points = face.framework_outer_points;
                         const inner_face_points = face.framework_inner_points;
 
-                        inner_faces_3D[crown_index] = Polygon3D.copy(face, inner_face_points);
-                        outer_faces_3D[crown_index] = Polygon3D.copy(face, outer_face_points);
+                        inner_faces_3D[face_index] = Polygon3D.copy(face, inner_face_points);
+                        outer_faces_3D[face_index] = Polygon3D.copy(face, outer_face_points);
 
                         // Footing parameters computing
                         // On the two last crown, check if points are far enough
                         // Take vectors and points from outer/inner faces to build a Footing timber
-                        if ([3, 5].includes(face.num_points)) {
+                        if (
+                            [3, 5].includes(face.num_points)
+                            && [face_index + 1, face_index + 2].includes(num_zome_faces)
+                        ) {
                             const start_index = (face.num_points === 5) ? 1 : 0;
                             [B, D, F, H] = [
                                 outer_face_points[start_index + 1], // outer top left corner
@@ -3502,8 +3522,6 @@
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num_spirals: N,
-                        num_crowns: num_crowns,
-                        num_points_per_crown: num_points_per_crown,
 
                         assembly_method: ASSEMBLY_METHOD,
                         rotation_angles: rotation_angles,
@@ -3528,12 +3546,15 @@
                         vanishing_lines: vanishing_lines,
                     });
 
-                    // Reset selected crown index
-                    this.num_crowns = num_crowns;
-                    this.update_face_divisions();
-
                     // Dispatch zome
                     this.$dispatch('zome-is-made');
+
+                    // Reset selected crown index
+                    this.num_crowns = num_crowns;
+                    this.num_points_per_crown = num_points_per_crown;
+
+                    // Force face divisions
+                    this.update_face_divisions();
 
                     sync_url_from_params(this.params);
 
