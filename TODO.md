@@ -1,7 +1,5 @@
 # TODO-LIST
-
-* [ ] Ajouter la page du zomecamp 2024 sur z5omes
-  
+ 
 * [ ] revoir l'expansion quand le bindu est supérieur à 1, car le montant rentre les un dans les autre
   - calculer le mur precedent horizontal ?
   
