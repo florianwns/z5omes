@@ -899,8 +899,8 @@
                                             </div>
 
                                             <div class="col-md d-flex">
-                                                <div x-show="can_use_bindu_ratio"
-                                                     class="w-auto mx-auto input-group input-group-sm" style="min-width:180px">
+                                                <div class="w-auto mx-auto input-group input-group-sm " style="min-width:180px"
+                                                     :class="(can_use_bindu_ratio)? '': 'invisible'">
                                                     <button class="btn btn-primary text-start" type="button"
                                                             data-bs-toggle="tooltip" :title="i18n('tooltip_bindu_ratio')"
                                                             data-bs-original-title="Bindu ratio of the selected crown">
