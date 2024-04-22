@@ -1,7 +1,7 @@
               Zome habitat 7
                                             Mes Valeurs
 Nombre d'Ordre       : 7            OK      7
-Nombre de Niveaux    : 5            OK      5
+Nombre de Niveaux    : 5            OK      4
 Nombre de Faces      : 35           OK      35
 Nombre de Forme      : 1,19         OK      1,191754
 Angle de Forme       : 50,00 °      OK      50

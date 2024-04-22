@@ -903,11 +903,11 @@
                                                     <i class="fa fa-mosque"></i>
                                                 </button>
                                                 <input class="form-control form-range"
-                                                       min="0.5" max="1.5" step="0.01" type="range"
+                                                       min="0.75" max="1.25" step="0.01" type="range"
                                                        @dblclick="selected_bindu_ratio = 1"
                                                        x-model.number="selected_bindu_ratio"
                                                        id="selected_bindu_ratio_slider">
-                                                <input class="form-control" step="0.1" type="number"
+                                                <input class="form-control" step="0.05" type="number"
                                                        style="max-width: 63px"
                                                        x-model.lazy.number="selected_bindu_ratio">
                                             </div>
@@ -1788,8 +1788,9 @@
                         this.i18n('id'),
                         this.i18n('width'),
                         this.i18n('height'),
-                        this.i18n('edges'),    // CCW Edges
-                        this.i18n('angles'),   // CCW Angles
+                        this.i18n('edges'),            // CCW Edges
+                        this.i18n('angles'),           // CCW Angles
+                        this.i18n('dihedral_angle'),   // Dihedral angle with plane above
                         this.i18n('slope_angle'),
                         this.i18n('area'),
                         this.i18n('diameter'),
@@ -1808,6 +1809,7 @@
                             humanize_distance(flattened_face.height),
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
+                            humanize_angle(rad2deg(face.dihedral_angle)),
                             humanize_angle(rad2deg(face.slope)),
                             humanize_area(face.area),
                             humanize_distance(face.diameter),
@@ -3320,6 +3322,17 @@
                     let lowest_vertical_position = Number.MAX_VALUE,
                         footing_params = [];
 
+
+                    // Compute dihedral angles
+                    for (let face_index = 0; face_index < num_zome_faces; face_index++) {
+                        const face = zome_faces_3D[face_index];
+                        const plane_above = (face_index > 0)
+                            ? zome_faces_3D[face_index - 1].plane
+                            : rotate_point_around_y_axis(face.plane, -INCR_RAD);
+
+                        face.dihedral_angle = Math.PI - angle_between_planes(face.plane, plane_above);
+                    }
+
                     // Loop over the faces of the framework to build timbers
                     // Divide zome faces and build framework timbers
                     for (let face_index = 0; face_index < num_zome_faces; face_index++) {
@@ -3348,6 +3361,10 @@
 
                         inner_faces_3D[face_index] = Polygon3D.copy(face, inner_face_points);
                         outer_faces_3D[face_index] = Polygon3D.copy(face, outer_face_points);
+
+                        // Copy dihedral angle
+                        inner_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
+                        outer_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
 
                         // Footing parameters computing
                         // On the two last crown, check if points are far enough

@@ -378,15 +378,6 @@ function signed_angle_between_points(p1, p2, p3, plane, right_handed_rotation = 
     return signed_angle_between_vectors(vec1, vec2, plane, right_handed_rotation);
 }
 
-function dihedral_angle(a, b, c) {
-    // Compute the dihedral angle from 3 angles
-    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
-    return acos(
-        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
-    )
-}
-
-
 function rotate_point_around_z_axis(vec, angle, origin = [0, 0, 0]) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
@@ -415,6 +406,20 @@ function rotate_points_around_z_axis(points, angle) {
         ];
     }
     return rotated_points;
+}
+
+
+function rotate_point_around_y_axis(vec, angle) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
+
+    // Rotate an 2D vector around y axis
+    const [x, y, z] = vec;
+    return [
+        x * cos_theta + z * sin_theta,
+        y,
+        -x * sin_theta + z * cos_theta,
+    ];
 }
 
 function rotate_points_around_y_axis(points, angle) {
@@ -1290,6 +1295,9 @@ class Polygon3D extends Base3DGeometry {
 
         // A property used to flatten bottom part of bindu faces (divided horizontally)
         this.is_bottom_part = is_bottom_part;
+
+        // Add a dihedral angle
+        this.dihedral_angle = null;
 
         this._plane = null;
         this._radius = null;

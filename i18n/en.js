@@ -27,6 +27,7 @@ const I18N_EN = {
         framework_customization: "Framework customization",
         zome_made_with: "This zome was made with",
         framework_customizer: "Framework customizer",
+        dihedral_angle: "Dihedral Angle",
 
         // Tooltips
         tooltip_display_help: "Display help",
