@@ -1,9 +1,9 @@
 # TODO-LIST
  
-* [ ] revoir l'expansion quand le bindu est supérieur à 1, car le montant rentre les un dans les autre
-  - calculer le mur precedent horizontal ?
+* [ ] Revoir la méthode d'expansion quand le bindu est supérieur à 1, 
+  car le montant du haut du triangle bas rentre dans le montat bas du triangle haut 
   
-* [ ] Ajouter le bounding box sur le selected crown
+* [ ] Ajouter le bounding box sur le selected crown et mettre un bouton d'affichage
 
 * [ ] Ajouter les renforts en plus de la division des polygones
 
@@ -36,8 +36,6 @@
 
 * [ ] Utiliser la css sticky pour afficher les crowns à côté des timbers profiles
 
-* [ ] Ajouter l'angle diedre au niveau du dessin des faces avec les timbers profiles
-
 * [ ] Revoir la terminologie de assembly method et de assembly direction pour plus de clarté (coupe des angles, methode
   de coupe)
 
@@ -45,20 +43,6 @@
 
 * [ ] Mettre à jour les autres traductions avec les termes manquants
 
-    * Commencer à dessiner la premier polygone (vue de dessus)
-    * La hauteur du dessin est fixe
-    * Sa largeur est donc relative.... on peut la tronquer avec des pointillés
-    * l'angle de coupe arrière est dessinée en pointillés
-    * Ajouter les indexs des montants/faces sur la 3D
-
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
 
-* [ ] Rajouter les essences de bois pour calculer le poids total du zome
-
-    * https://www.warmaths.fr/SCIENCES/densiteCatalogue..htm
-    * https://www.cndb.org/site/wp-content/uploads/2019/01/Le_Guide_des_Essences_de_Bois_Yves_Benoit_FCBA_Eyrolles.pdf
-
-
-* [ ] Ajouter une page wikipedia avec des vidéos pour l'apprentissage de la construction zome
-
-* [ ] Et une page community pour les gens qui n'auraient pas facebook
+* [ ] Ajouter une page wikipedia avec les vidéos youtube pour l'apprentissage de la construction zome
