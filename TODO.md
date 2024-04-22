@@ -1,16 +1,26 @@
 # TODO-LIST
- 
+
+* [x] is_bottom_part => part = "" || "top" || "bottom"
+
+* [ ] Bug mandala sur roof overflow. 
+  => ne plus faire le mandala 3D des inner/outer faces 
+      mais les poser à plat (flattened)
+  * [ ] Renommed mandala par flattened
+  
+* [ ] Dessiner les crowns à plat en 2D avec les timbers profiles pour mieux comprendre le schéma de montage
+
+* [ ] Ajouter l'export ZIP (svgs) et PDF pour les figures des timber profiles
+
 * [ ] Revoir la méthode d'expansion quand le bindu est supérieur à 1, 
   car le montant du haut du triangle bas rentre dans le montat bas du triangle haut 
   
 * [ ] Ajouter le bounding box sur le selected crown et mettre un bouton d'affichage
+  seulement sur les faces et les montants
 
 * [ ] Ajouter les renforts en plus de la division des polygones
 
 * [ ] Ajouter le zomandala (Différent du mandala)
   https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
-
-* [ ] Dessiner les crowns à plat en 2D avec les timbers profiles pour mieux comprendre le schéma de montage
 
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
 
@@ -22,14 +32,11 @@
     * Spiral =>
     * Zomandala ?? à Ajouter
 
-* [ ] Renommed mandala par flattened
 
 * [ ] Corriger les points de la semelle de la méthode goodkarma
     * Sans doute dû aux inner/outer faces qui sont mal calculées pour le goodkarma
 
 * [ ] Ajouter les boutons de navigation dans la 3D (home, <-, ->, etc....)
-
-* [ ] Ajouter l'export SVG et PDF
 
 * [ ] Dans le flattened du trapezoidalPrism Ne pas renvoyer une polygone avec la face opposé pour éviter de lever
   l'exception de coplanarité

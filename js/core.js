@@ -966,12 +966,15 @@ class Base3DGeometry {
         return this._hash;
     }
 
+    get normalized_slope() {
+        return (this.slope > TAU_Q) ? Math.PI - this.slope : this.slope;
+    }
+
     get slope() {
         if (this._slope === null) {
             // Compute the slope based on normal vector and vertical axis
             const norm_vec = cross_product(sub(this.points[1], this.points[0]), sub(this.points[2], this.points[0]));
-            const slope = angle_between_vectors(norm_vec, [0, 1, 0])
-            this._slope = (slope > TAU_Q) ? Math.PI - slope : slope;
+            this._slope = angle_between_vectors(norm_vec, [0, 1, 0]);
         }
         return this._slope;
     }
@@ -1281,7 +1284,7 @@ class Polygon3D extends Base3DGeometry {
     //
     // points are distributed counterclockwise
 
-    constructor(points, label, color, crown_index, is_bottom_part = false) {
+    constructor(points, label, color, crown_index, part = null) {
         // Call parent constructor
         super(points, label, color, crown_index);
 
@@ -1294,7 +1297,7 @@ class Polygon3D extends Base3DGeometry {
         }
 
         // A property used to flatten bottom part of bindu faces (divided horizontally)
-        this.is_bottom_part = is_bottom_part;
+        this.part = part;
 
         // Add a dihedral angle
         this.dihedral_angle = null;
@@ -1305,6 +1308,22 @@ class Polygon3D extends Base3DGeometry {
         this._framework_timbers = null;
         this._framework_outer_points = null;
         this._framework_inner_points = null;
+    }
+
+    get is_bottom_part() {
+        return this.part == "bottom";
+    }
+
+    set is_bottom_part(value) {
+        this.part = (value === true) ? "bottom" : null;
+    }
+
+    get is_top_part() {
+        return this.part == "top";
+    }
+
+    set is_top_part(value) {
+        this.part = (value === true) ? "top" : null;
     }
 
     get plane() {
@@ -1361,7 +1380,7 @@ class Polygon3D extends Base3DGeometry {
 
     static copy(obj, points) {
         return new Polygon3D(
-            points || obj.points, obj.label, obj.color, obj.crown_index, obj.is_bottom_part
+            points || obj.points, obj.label, obj.color, obj.crown_index, obj.part
         );
     }
 

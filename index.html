@@ -375,6 +375,31 @@
                 </div>
             </div>
             <hr>
+
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="text-secondary my-1 me-auto">
+                    <i class="fa-solid fa-people-roof me-1"></i>
+                    <span x-text="i18n('roof')" class="up-first"></span>
+                </h5>
+            </div>
+
+            <div class="text-muted small aligned-form">
+                <!-- Roof overflow -->
+                <div x-show="params.help_is_displayed">
+                    <b>RO</b> :
+                    <span x-text="i18n('help_ro_param')"></span>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text"
+                          data-bs-toggle="tooltip" :title="i18n('help_ro_param')">
+                    RO
+                    </span>
+                    <input class="form-control form-range" min="0" max="1000" step="1" type="range"
+                           x-model.number="params.roof_overflow_in_mm" x-ref="roof_overflow_in_mm_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="roof_overflow">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1820,7 +1845,7 @@
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
                             humanize_angle(rad2deg(face.dihedral_angle)),
-                            humanize_angle(rad2deg(face.slope)),
+                            humanize_angle(rad2deg(face.normalized_slope)),
                             humanize_area(face.area),
                             humanize_distance(face.diameter),
                         ]];
@@ -2632,7 +2657,7 @@
                     height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
                     kite_ratio: 1,                      // Kite ratio, lower half to upper half (1 => is rhombus else kites)
 
-                    // Sizing Parameters
+                    // Framework Parameters
                     measuring_unit: "cm",                               // Measuring unit by default is cm
                     zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
                     timber_width_in_mm: 60,                             // Timber width in mm
@@ -2642,6 +2667,9 @@
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     add_footing: 1,
+
+                    // Roof parameters
+                    roof_overflow_in_mm: 0,
 
                     // Values separated by commas
                     face_divisions_by_crowns_str: "",
@@ -2982,6 +3010,12 @@
                 set timber_width(value) {
                     this.clamp("timber_width_in_mm", to_mm(value, this.params.measuring_unit));
                 },
+                get roof_overflow() {
+                    return to_decimal(from_mm(this.params.roof_overflow_in_mm, this.params.measuring_unit));
+                },
+                set roof_overflow(value) {
+                    this.clamp("roof_overflow_in_mm", to_mm(value, this.params.measuring_unit));
+                },
                 get max_timber_width() {
                     return to_decimal(this.first_crown_radius / 2, FLOAT_2_STR_PRECISION);
                 },
@@ -3133,6 +3167,7 @@
                     if (apply_bindu_ratio) {
                         // If we apply the bindu ratio, we split face in two parts (top and bottom)
                         const faces = face.split(SVG_HORIZONTAL_BAR_BITWISE_FLAG);
+                        faces[0].is_top_part = true;
                         zome_faces_3D.push(faces[0]);
 
                         // The bottom face have a new label, flag the bottom part
@@ -3345,6 +3380,8 @@
 
                     // Loop over the faces of the framework to build timbers
                     // Divide zome faces and build framework timbers
+                    const ROOF_OVERFLOW_DISTANCE = this.params.roof_overflow_in_mm;
+
                     for (let face_index = 0; face_index < num_zome_faces; face_index++) {
                         const face = zome_faces_3D[face_index];
 
@@ -3366,14 +3403,35 @@
                             vanishing_lines.push([vanishing_pt, face.points[0]]);
                         }
 
-                        const outer_face_points = face.framework_outer_points;
                         const inner_face_points = face.framework_inner_points;
-
                         inner_faces_3D[face_index] = Polygon3D.copy(face, inner_face_points);
-                        outer_faces_3D[face_index] = Polygon3D.copy(face, outer_face_points);
-
-                        // Copy dihedral angle
                         inner_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
+
+                        // Add roof overflow points on outer face
+                        const outer_face_points = face.framework_outer_points;
+                        let outer_face = Polygon3D.copy(face, outer_face_points);
+                        if (face.crown_index + 2 < num_crowns   // dont use roof overflow on last crowns
+                            && face.slope < TAU_Q               // if slope is superior thant TAU_Q
+                            && ROOF_OVERFLOW_DISTANCE > 0       // if there is not a minimal distance
+                            && !face.is_top_part                // and not on top part of divided face (bindu option)
+                        ) {
+                            const bottom_index = Math.floor(face.num_points / 2);
+                            const vertical_vec = sub(outer_face.points[bottom_index], outer_face.centroid)
+                            const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                            const points_with_overflow = [];
+
+                            for (let i = 0; i < outer_face.num_points; i++) {
+                                const normal_pt = outer_face.points[i];
+                                const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+
+                                if(i < bottom_index) points_with_overflow.push(normal_pt);
+                                if(!(i === 0 && face.num_points === 4)) points_with_overflow.push(pt_with_overflow);
+                                if(i > bottom_index) points_with_overflow.push(normal_pt);
+                            }
+                            outer_face.points = points_with_overflow;
+                        }
+
+                        outer_faces_3D[face_index] = outer_face;
                         outer_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
 
                         // Footing parameters computing
@@ -3492,7 +3550,7 @@
                         _.forEach(obj_3D_to_label[i], item => {
                             item.color = hash_to_color[item.hash];
                             if (!rotated_colors.hasOwnProperty(item.color.hex)) {
-                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.slope));
+                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.normalized_slope));
                             }
                         });
                     });

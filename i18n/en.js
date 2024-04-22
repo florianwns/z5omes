@@ -96,6 +96,7 @@ const I18N_EN = {
         help_vp_param: "Height of vanishing point (used to build 'GoodKarma' and 'Beveled' methods)",
         help_zc_param: "Place the vanishing point at the centroid of the entire zome",
         help_ft_param: "Add a footing based on the half of timber width",
+        help_ro_param: "Roof overflow",
 
         // Measurements table
         measurements: "Measurements",
