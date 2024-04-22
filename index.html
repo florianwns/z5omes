@@ -375,31 +375,6 @@
                 </div>
             </div>
             <hr>
-
-            <div class="d-flex align-items-center mb-3">
-                <h5 class="text-secondary my-1 me-auto">
-                    <i class="fa-solid fa-people-roof me-1"></i>
-                    <span x-text="i18n('roof')" class="up-first"></span>
-                </h5>
-            </div>
-
-            <div class="text-muted small aligned-form">
-                <!-- Height of Zome -->
-                <div x-show="params.help_is_displayed">
-                    <b>ZH</b> :
-                    <span x-text="i18n('help_zh_param')"></span>
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text"
-                          data-bs-toggle="tooltip" :title="i18n('help_zh_param')">
-                    ZH
-                    </span>
-                    <input class="form-control form-range" min="100" max="10000" step="10" type="range"
-                           x-model.number="params.zome_height_in_mm" x-ref="zome_height_in_mm_slider">
-                    <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="zome_height">
-                </div>
-            </div>
         </div>
     </div>
 
