@@ -46,7 +46,7 @@ If you have any requests/questions, see any bugs,
 I prefered use an homemade version of i18n, to make the app faster and lighter.
 
 So if you want add a new language to Z5omes, 
-you can modify the [i18n.js](i18n/i18n.js) file.
+you can copy the [i18n.js](i18n/en.js) file and modify the new file.
 
 Please, fork the project, commit your changes and pull a new request.
 
