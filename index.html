@@ -3353,8 +3353,14 @@
                         // On the two last crown, check if points are far enough
                         // Take vectors and points from outer/inner faces to build a Footing timber
                         if (
-                            [3, 5].includes(face.num_points)
-                            && [face_index + 1, face_index + 2].includes(num_zome_faces)
+                            // For the last Triangle
+                            (face.num_points === 3 && face_index + 1 == num_zome_faces)
+
+                            // For truncated kite
+                            || (face.num_points === 5 && face_index + 2 == num_zome_faces)
+
+                            // For bottom part of the last rhombus in bindu case
+                            || (face.is_bottom_part && face.num_points === 4 && face_index + 2 == num_zome_faces)
                         ) {
                             const start_index = (face.num_points === 5) ? 1 : 0;
                             [B, D, F, H] = [
