@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.10b01" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.10b02" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -125,7 +125,7 @@
                           data-bs-toggle="tooltip" :title="i18n('help_n_param')">
                         N
                     </span>
-                    <input class="form-control form-range" :max="ALPHABET.length" min="3" step="1" type="range"
+                    <input class="form-control form-range" :max="26" min="3" step="1" type="range"
                            x-model.number="params.num_spirals" x-ref="num_spirals_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="params.num_spirals">
@@ -189,7 +189,8 @@
                               data-bs-toggle="tooltip" :title="i18n('help_kr_param')">
                             KR
                         </span>
-                        <input class="form-control form-range" max="1.5" min="0.5" step="0.01" type="range"
+                        <input class="form-control form-range" min="0.5" max="1.5" step="0.01" type="range"
+                               @dblclick="params.kite_ratio = 1"
                                x-model.number="params.kite_ratio" x-ref="kite_ratio_slider">
                         <input class="form-control" step="0.01" type="number"
                                x-model.lazy.number="params.kite_ratio">
@@ -390,7 +391,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.10b01</span>
+                              style="font-size: 10px; top:0px">v1.0.10b02</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -837,7 +838,7 @@
                                                        x-model.number="selected_crown"
                                                        id="selected_crown_slider">
                                                 <input class="form-control" step="1" type="number"
-                                                       style="max-width: 60px"
+                                                       style="max-width: 63px"
                                                        x-model.lazy.number="selected_crown">
                                             </div>
 
@@ -846,8 +847,8 @@
                                                  aria-label="Toggle button group">
 
                                                 <btn class="btn btn-primary"
-                                                     @click="strengthening_of_timbers_bitwise_flag = 0"
-                                                     :class="(strengthening_of_timbers_bitwise_flag === 0) ? 'btn-primary' : 'btn-secondary'">
+                                                     @click="selected_face_divisions_bitwise_flag = 0"
+                                                     :class="(selected_face_divisions_bitwise_flag === 0) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_rhombus"></use>
@@ -855,8 +856,8 @@
                                                 </btn>
 
                                                 <btn class="btn btn-primary"
-                                                     @click="strengthening_of_timbers_bitwise_flag = SVG_HORIZONTAL_BAR_BITWISE_FLAG"
-                                                     :class="(num_points_of_selected_crown === 3) ? 'btn-secondary disabled' : (strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
+                                                     @click="selected_face_divisions_bitwise_flag = SVG_HORIZONTAL_BAR_BITWISE_FLAG"
+                                                     :class="(num_points_of_selected_crown === 3) ? 'btn-secondary disabled' : (selected_face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_horizontal_bar"></use>
@@ -865,8 +866,8 @@
                                                 </btn>
 
                                                 <btn class="btn btn-primary"
-                                                     @click="strengthening_of_timbers_bitwise_flag = SVG_VERTICAL_BAR_BITWISE_FLAG"
-                                                     :class="(strengthening_of_timbers_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
+                                                     @click="selected_face_divisions_bitwise_flag = SVG_VERTICAL_BAR_BITWISE_FLAG"
+                                                     :class="(selected_face_divisions_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) ? 'btn-primary' : 'btn-secondary'">
                                                     <svg class="svg_rhombus_icon" width="18" height="18"
                                                          viewBox="0 0 26 26">
                                                         <use href="#svg_vertical_bar"></use>
@@ -875,7 +876,7 @@
                                                 </btn>
 
                                                 <btn class="btn btn-primary position-relative"
-                                                     :class="(num_points_of_selected_crown !== 4) ? 'btn-secondary disabled' : (![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG, 0].includes(strengthening_of_timbers_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
+                                                     :class="(num_points_of_selected_crown !== 4) ? 'btn-secondary disabled' : (![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG, 0].includes(selected_face_divisions_bitwise_flag)) ? 'btn-primary' : 'btn-secondary'"
                                                      data-bs-toggle="modal"
                                                      data-bs-target="#framework-customizer-modal"
                                                      for="btn-custom-rhombus">
@@ -891,6 +892,24 @@
                                                         </div>
                                                     </div>
                                                 </btn>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-center m-auto">
+                                            <div x-show="can_use_bindu_ratio"
+                                                 class="input-group input-group-sm me-2">
+                                                <button class="btn btn-primary text-start" type="button"
+                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_bindu_ratio')"
+                                                        data-bs-original-title="Bindu ratio of the selected crown">
+                                                    <i class="fa fa-mosque"></i>
+                                                </button>
+                                                <input class="form-control form-range"
+                                                       min="0.75" max="1.25" step="0.01" type="range"
+                                                       @dblclick="selected_bindu_ratio = 1"
+                                                       x-model.number="selected_bindu_ratio"
+                                                       id="selected_bindu_ratio_slider">
+                                                <input class="form-control" step="0.05" type="number"
+                                                       style="max-width: 63px"
+                                                       x-model.lazy.number="selected_bindu_ratio">
                                             </div>
                                         </div>
                                     </div>
@@ -1029,7 +1048,7 @@
                                                                    min="1" :max="num_crowns" step="1" type="range"
                                                                    x-model.number="selected_crown">
                                                             <input class="form-control" step="1" type="number"
-                                                                   style="max-width: 60px"
+                                                                   style="max-width: 63px"
                                                                    x-model.lazy.number="selected_crown">
                                                         </div>
                                                     </div>
@@ -1333,15 +1352,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.10b01"></script>
-<script src="i18n/en.js?v=1.0.10b01"></script>
-<script src="i18n/it.js?v=1.0.10b01"></script>
-<script src="i18n/fr.js?v=1.0.10b01"></script>
-<script src="i18n/pl.js?v=1.0.10b01"></script>
-<script src="i18n/sv.js?v=1.0.10b01"></script>
+<script src="i18n/es.js?v=1.0.10b02"></script>
+<script src="i18n/en.js?v=1.0.10b02"></script>
+<script src="i18n/it.js?v=1.0.10b02"></script>
+<script src="i18n/fr.js?v=1.0.10b02"></script>
+<script src="i18n/pl.js?v=1.0.10b02"></script>
+<script src="i18n/sv.js?v=1.0.10b02"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.10b01"></script>
+<script src="js/core.js?v=1.0.10b02"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1769,8 +1788,9 @@
                         this.i18n('id'),
                         this.i18n('width'),
                         this.i18n('height'),
-                        this.i18n('edges'),    // CCW Edges
-                        this.i18n('angles'),   // CCW Angles
+                        this.i18n('edges'),            // CCW Edges
+                        this.i18n('angles'),           // CCW Angles
+                        this.i18n('dihedral_angle'),   // Dihedral angle with plane above
                         this.i18n('slope_angle'),
                         this.i18n('area'),
                         this.i18n('diameter'),
@@ -1789,6 +1809,7 @@
                             humanize_distance(flattened_face.height),
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
+                            humanize_angle(rad2deg(face.dihedral_angle)),
                             humanize_angle(rad2deg(face.slope)),
                             humanize_area(face.area),
                             humanize_distance(face.diameter),
@@ -2611,7 +2632,10 @@
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     add_footing: 1,
-                    strengthening_of_timbers_by_crowns_str: "",     // The values are separated by commas
+
+                    // Values separated by commas
+                    face_divisions_by_crowns_str: "",
+                    bindu_ratios_str: "",
 
                     // Commons parameters, Not  zome params, but we save them
                     language: null,
@@ -2619,14 +2643,16 @@
                 },
                 params_backup: null,
 
-
                 show_splash_screen: true,
                 num_crowns: 1,
-                selected_crown: 1,    // If -1, select all crowns
-                strengthening_of_timbers_by_crowns: [],
-                strengthening_of_timbers_bitwise_flag: 0,
+                selected_crown: 1,
+
+                face_divisions_by_crowns: [],
+                num_points_per_crown: [],
+                selected_face_divisions_bitwise_flag: 0,
                 num_points_of_selected_crown: 4,
                 crown_of_framework_timbers_is_valid: true,
+                selected_bindu_ratio: 1,
 
                 is_computing: true,
                 suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
@@ -2701,34 +2727,41 @@
                     });
 
                     // Selected crown listener
-                    _.forEach(["num_crowns", "params.height_ratio", "params.strengthening_of_timbers_by_crowns_str"], key => {
+                    _.forEach(["num_crowns", "params.height_ratio", "params.face_divisions_by_crowns_str"], key => {
                         this.$watch(key, (value) => {
-                            this.init_strengthening_of_timbers();
-                            this.update_strengthening_of_timbers();
+                            this.init_face_divisions();
+                            this.update_face_divisions();
+                            this.init_bindu_ratios();
+                            this.update_bindu_ratio();
                         });
                     });
 
-                    // Clamp selected_crown value
-                    this.$watch("strengthening_of_timbers_bitwise_flag", (value) => {
-                        const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                    this.$watch("selected_face_divisions_bitwise_flag", (value) => {
+                        const bitwise_flags = str_to_numbers(this.params.face_divisions_by_crowns_str);
                         bitwise_flags[this.selected_crown - 1] = value;
-                        this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(bitwise_flags);
+                        this.params.face_divisions_by_crowns_str = numbers_2_str(bitwise_flags);
                     });
 
                     // Clamp selected_crown value
                     this.$watch("selected_crown", () => {
-                        this.update_strengthening_of_timbers();
+                        this.update_face_divisions();
+                        this.update_bindu_ratio();
                     });
 
-                    this.$watch("strengthening_of_timbers_by_crowns", (value) => {
+                    this.$watch("selected_bindu_ratio", () => {
+                        this.clamp("selected_bindu_ratio", this.selected_bindu_ratio, false);
+                        this.update_bindu_ratios();
+                    });
+
+                    this.$watch("face_divisions_by_crowns", (value) => {
                         this.crown_of_framework_timbers_is_valid = this.is_crown_of_framework_timbers_valid(
-                            this.strengthening_of_timbers_by_crowns[this.selected_crown - 1]
+                            this.face_divisions_by_crowns[this.selected_crown - 1]
                         );
 
                         // Save param only if crown of framework is valid
                         if (this.crown_of_framework_timbers_is_valid) {
-                            this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(
-                                boolean_matrix_to_bitwise_flags(this.strengthening_of_timbers_by_crowns)
+                            this.params.face_divisions_by_crowns_str = numbers_2_str(
+                                boolean_matrix_to_bitwise_flags(this.face_divisions_by_crowns)
                             );
                         }
 
@@ -2774,36 +2807,55 @@
                     // Save params to url
                     sync_url_from_params(this.params)
                 },
-
-                update_strengthening_of_timbers() {
-                    this.clamp("selected_crown", this.selected_crown, false);
-                    const bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
-                    this.strengthening_of_timbers_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
-                    this.strengthening_of_timbers_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
-                    this.num_points_of_selected_crown = ZOME.num_points_per_crown[this.selected_crown - 1] || 4;
-                },
-
-                init_strengthening_of_timbers() {
-                    // Get current strengthening_of_timbers and fill missing values
-                    const current_numbers = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
+                init_face_divisions() {
+                    // Get current face_divisions and fill missing values
+                    const current_numbers = str_to_numbers(this.params.face_divisions_by_crowns_str);
                     const numbers = new Array(this.num_crowns);
                     for (let i = 0; i < this.num_crowns; i++) {
                         numbers[i] = current_numbers[i] || 0;
                     }
-                    this.params.strengthening_of_timbers_by_crowns_str = numbers_2_str(numbers);
+                    this.params.face_divisions_by_crowns_str = numbers_2_str(numbers);
                 },
-
+                update_face_divisions() {
+                    this.clamp("selected_crown", this.selected_crown, false);
+                    const bitwise_flags = str_to_numbers(this.params.face_divisions_by_crowns_str);
+                    this.face_divisions_by_crowns = bitwise_flags_to_boolean_matrix(bitwise_flags);
+                    this.selected_face_divisions_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
+                    this.num_points_of_selected_crown = this.num_points_per_crown[this.selected_crown - 1] || 4;
+                },
+                init_bindu_ratios() {
+                    const face_divisions_by_crowns = str_to_numbers(this.params.face_divisions_by_crowns_str);
+                    const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
+                    const bindu_ratios = new Array(this.num_crowns);
+                    for (let i = 0; i < this.num_crowns; i++) {
+                        const can_use_bindu_ratio = this.num_points_per_crown[i] !== 3
+                            && face_divisions_by_crowns[i] === SVG_HORIZONTAL_BAR_BITWISE_FLAG
+                        bindu_ratios[i] = (can_use_bindu_ratio) ? current_bindu_ratios[i] || 1 : 1;
+                    }
+                    this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
+                },
+                update_bindu_ratio() {
+                    const bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
+                    this.selected_bindu_ratio = bindu_ratios[this.selected_crown - 1] || 1;
+                },
+                update_bindu_ratios() {
+                    const bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
+                    bindu_ratios[this.selected_crown - 1] = this.selected_bindu_ratio;
+                    this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
+                },
+                get can_use_bindu_ratio() {
+                    return this.num_points_of_selected_crown !== 3
+                        && this.selected_face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG;
+                },
                 is_framework_timber_selected(svg_index = 0) {
-                    const framework_timber_crown = this.strengthening_of_timbers_by_crowns[this.selected_crown - 1];
+                    const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
                     return framework_timber_crown && framework_timber_crown[svg_index];
                 },
-
                 toggle_framework_timber(svg_index) {
-                    const framework_timber_crown = this.strengthening_of_timbers_by_crowns[this.selected_crown - 1];
+                    const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
                     framework_timber_crown[svg_index] = (framework_timber_crown[svg_index]) ? false : true;
-                    this.strengthening_of_timbers_by_crowns[this.selected_crown - 1] = [...framework_timber_crown];
+                    this.face_divisions_by_crowns[this.selected_crown - 1] = [...framework_timber_crown];
                 },
-
                 is_crown_of_framework_timbers_valid(framework_timber_crown) {
                     // Check if there is consecutive_unselected that is more and equal than 4
                     let first_selected = null,
@@ -2834,11 +2886,9 @@
                     // The crown is valid
                     return true;
                 },
-
-                set_strengthening_of_timbers(crown_index, value) {
-                    // this.strengthening_of_timbers_by_crowns
+                set_face_divisions(crown_index, value) {
+                    // this.face_divisions_by_crowns
                 },
-
                 i18n(key, value = null) {
                     // Translation function using JSON dictionnaries
                     // Return the key if not found in language and default language dictionaries
@@ -2895,7 +2945,6 @@
                             this.params.theta_deg = angle;
                     }
                 },
-
                 get num_rhombuses_vertically() {
                     return Math.round(this.params.num_spirals * this.params.height_ratio - 1, 0);
                 },
@@ -2911,7 +2960,6 @@
                         this.params.kite_ratio = 1
                     }
                 },
-
                 get zome_height() {
                     return from_mm(this.params.zome_height_in_mm, this.params.measuring_unit);
                 },
@@ -3071,6 +3119,23 @@
                     vertices.push(p);
                     return vertices.length - 1;
                 },
+                add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags) {
+                    if (apply_bindu_ratio) {
+                        // If we apply the bindu ratio, we split face in two parts (top and bottom)
+                        const faces = face.split(SVG_HORIZONTAL_BAR_BITWISE_FLAG);
+                        zome_faces_3D.push(faces[0]);
+
+                        // The bottom face have a new label, flag the bottom part
+                        faces[1].label = ALPHABET[zome_faces_3D.length];
+                        faces[1].is_bottom_part = true;
+                        zome_faces_3D.push(faces[1]);
+
+                        // Then we insert an empty bitwise flag for the bottom part... not perfect but it's working
+                        face_divisions_bitwise_flags.splice(zome_faces_3D.length - 1, 0, 0);
+                    } else {
+                        zome_faces_3D.push(face);
+                    }
+                },
                 make_zome() {
                     this.is_computing = true;
 
@@ -3090,6 +3155,9 @@
                     const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
                     const OUTWARD_EXPANSION = ASSEMBLY_METHOD === 2 || XPANSION_DIRECTION === -1;
+                    const BINDU_RATIOS = str_to_numbers(this.params.bindu_ratios_str);
+                    const face_divisions_bitwise_flags = str_to_numbers(this.params.face_divisions_by_crowns_str);
+
 
                     // Constants
                     const M = N - 1;
@@ -3127,11 +3195,18 @@
                     // Loop over crowns (M = N - 1), while zome does not hit ground
                     let hit_ground = false;
                     const last_triangle_indexes = [];
+
+                    // We use 'crown index' term only at the vertices building.
                     let crown_index = 0;
+                    const num_points_per_crown = [];
+
+                    // Loop and build vertices array
                     for (; crown_index < M && !hit_ground; crown_index++) {
                         ficc = crown_index * N + 1;                  // First Index on current crown
-                        fipc = ficc - N;                        // First index on previous crown
-                        face_label = ALPHABET[crown_index];          // Alphabet letter distribution
+                        fipc = ficc - N;                             // First index on previous crown
+
+                        // Alphabet letter distribution
+                        face_label = ALPHABET[zome_faces_3D.length]
 
                         // On current crown, Loop over points from left to right
                         for (let spiral_index = 0; spiral_index < N; spiral_index++) {
@@ -3148,6 +3223,18 @@
                             // Compute the new point to close diamond/kite face
                             D = add(A, mul(sub(get_midpoint(B, C), A), 1 + K));
 
+                            const bindu_ratio = BINDU_RATIOS[crown_index] || 1;
+                            const apply_bindu_ratio = bindu_ratio !== 1;
+
+                            // Apply the bindu ratio
+                            if (apply_bindu_ratio) {
+                                D = [
+                                    D[0] * bindu_ratio,
+                                    D[1],
+                                    D[2] * bindu_ratio
+                                ];
+                            }
+
                             // Draw the second part of shape while D is higher than the ground
                             y = to_decimal(D[1]);
 
@@ -3159,7 +3246,8 @@
                                 // Add only the first piece
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, D, C], face_label, null, crown_index);
-                                    zome_faces_3D.push(face);
+                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags);
+                                    num_points_per_crown[crown_index] = face.num_points;
                                 }
 
                                 // Close the zome => Deal with case where this crown is exactly on the ground
@@ -3180,7 +3268,8 @@
                                 // Add Truncated Kite
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, E, F, C], face_label, null, crown_index);
-                                    zome_faces_3D.push(face);
+                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags);
+                                    num_points_per_crown[crown_index] = face.num_points;
                                 }
                                 // Add last triangles to close it after if needed
                                 last_triangle_indexes.push(iE, iF, iC);
@@ -3208,15 +3297,22 @@
                         const far_enough = to_decimal(dist(B, C), 2) !== 0;
                         if (far_enough) {
                             // Add triangle to faces
-                            face = new Polygon3D([A, B, C], ALPHABET[crown_index], null, crown_index);
-                            zome_faces_3D.push(face);
+                            face_label = ALPHABET[zome_faces_3D.length]
+                            face = new Polygon3D([A, B, C], face_label, null, crown_index);
+                            this.add_face(zome_faces_3D, face, false, face_divisions_bitwise_flags);
+                            num_points_per_crown[crown_index] = face.num_points;
+                            crown_index++;
                         }
                     }
 
+                    // Make difference between num_crowns (used for face divisions)
+                    const num_crowns = crown_index;
+                    // And num zome faces to init outer/inner faces
+                    const num_zome_faces = zome_faces_3D.length
+
                     // Build Outer/Inner faces
-                    const num_crowns = zome_faces_3D.length
-                    const outer_faces_3D = new Array(num_crowns),
-                        inner_faces_3D = new Array(num_crowns);
+                    const outer_faces_3D = new Array(num_zome_faces),
+                        inner_faces_3D = new Array(num_zome_faces);
                     const skeleton_3D = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -3226,16 +3322,24 @@
                     let lowest_vertical_position = Number.MAX_VALUE,
                         footing_params = [];
 
+
+                    // Compute dihedral angles
+                    for (let face_index = 0; face_index < num_zome_faces; face_index++) {
+                        const face = zome_faces_3D[face_index];
+                        const plane_above = (face_index > 0)
+                            ? zome_faces_3D[face_index - 1].plane
+                            : rotate_point_around_y_axis(face.plane, -INCR_RAD);
+
+                        face.dihedral_angle = Math.PI - angle_between_planes(face.plane, plane_above);
+                    }
+
                     // Loop over the faces of the framework to build timbers
                     // Divide zome faces and build framework timbers
-                    const strengthening_of_timbers_bitwise_flags = str_to_numbers(this.params.strengthening_of_timbers_by_crowns_str);
-                    const num_points_per_crown = new Array(num_crowns);
-                    for (let crown_index = 0; crown_index < num_crowns; crown_index++) {
-                        const face = zome_faces_3D[crown_index];
-                        num_points_per_crown[crown_index] = face.num_points;
+                    for (let face_index = 0; face_index < num_zome_faces; face_index++) {
+                        const face = zome_faces_3D[face_index];
 
                         face.compute_framework(
-                            strengthening_of_timbers_bitwise_flags[crown_index] || 0,
+                            face_divisions_bitwise_flags[face_index] || 0,
                             ASSEMBLY_METHOD,
                             ASSEMBLY_DIRECTION,
                             vanishing_pt,
@@ -3255,13 +3359,26 @@
                         const outer_face_points = face.framework_outer_points;
                         const inner_face_points = face.framework_inner_points;
 
-                        inner_faces_3D[crown_index] = Polygon3D.copy(face, inner_face_points);
-                        outer_faces_3D[crown_index] = Polygon3D.copy(face, outer_face_points);
+                        inner_faces_3D[face_index] = Polygon3D.copy(face, inner_face_points);
+                        outer_faces_3D[face_index] = Polygon3D.copy(face, outer_face_points);
+
+                        // Copy dihedral angle
+                        inner_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
+                        outer_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
 
                         // Footing parameters computing
                         // On the two last crown, check if points are far enough
                         // Take vectors and points from outer/inner faces to build a Footing timber
-                        if ([3, 5].includes(face.num_points)) {
+                        if (
+                            // For the last Triangle
+                            (face.num_points === 3 && face_index + 1 == num_zome_faces)
+
+                            // For truncated kite
+                            || (face.num_points === 5 && face_index + 2 == num_zome_faces)
+
+                            // For bottom part of the last rhombus in bindu case
+                            || (face.is_bottom_part && face.num_points === 4 && face_index + 2 == num_zome_faces)
+                        ) {
                             const start_index = (face.num_points === 5) ? 1 : 0;
                             [B, D, F, H] = [
                                 outer_face_points[start_index + 1], // outer top left corner
@@ -3384,28 +3501,47 @@
                         mandala_3D_of_inner_faces
                     ] = _.map([zome_faces_3D, outer_faces_3D, inner_faces_3D], obj_3D => {
                         const mandala = new Array(obj_3D.length);
-                        let O = [0, 0, 0];
-                        let rotated_A;
+                        let last_pt = [0, 0, 0], before_last_pt, first_pt, second_pt;
+                        let last_crown_index = null, rotation_angle = null;
                         _.forEach(obj_3D, (face, i) => {
                             let flattened_face = face.flatten_face();
 
                             // Move to Origin and rotate to match with previous piece
-                            let rotated_points = flattened_face.points.map(p => add(p, O));
-                            if (i > 0) {
-                                let angle = Angle.from_3_points(A, O, rotated_points[1]);
-                                rotated_A = rotate_point_around_z_axis(rotated_points[1], angle, O);
+                            let mandala_face_points = (second_pt && face.is_bottom_part)
+                                ? flattened_face.points.map(p => add(p, second_pt))
+                                : flattened_face.points.map(p => add(p, last_pt));
 
-                                // Rotate the other way if rotated A is not too close to A
-                                if (to_decimal(dist(rotated_A, A)) !== 0) {
-                                    angle = angle.reverse();
+                            second_pt = mandala_face_points[1];
+
+                            if (i > 0) {
+                                if (!face.is_bottom_part) {
+                                    rotation_angle = Angle.from_3_points(before_last_pt, last_pt, second_pt);
+                                    const second_pt_rotated = rotate_point_around_z_axis(second_pt, rotation_angle, last_pt);
+
+                                    // Rotate the other way if second point rotated
+                                    // is not too close to the before last point
+                                    if (to_decimal(dist(second_pt_rotated, before_last_pt)) !== 0) {
+                                        rotation_angle = rotation_angle.reverse();
+                                    }
+
+                                    mandala_face_points = mandala_face_points.map(p => {
+                                        return rotate_point_around_z_axis(p, rotation_angle, last_pt);
+                                    });
+                                } else {
+                                    mandala_face_points = mandala_face_points.map(p => {
+                                        return rotate_point_around_z_axis(p, rotation_angle, first_pt);
+                                    });
                                 }
-                                rotated_points = rotated_points.map(p => rotate_point_around_z_axis(p, angle, O));
+
                             }
-                            O = rotated_points[rotated_points.length - 1];
-                            A = rotated_points[rotated_points.length - 2];
+
+                            first_pt = mandala_face_points[0];
+                            last_pt = mandala_face_points[mandala_face_points.length - 1];
+                            before_last_pt = mandala_face_points[mandala_face_points.length - 2];
 
                             // Swap y axis with z axis for 3D display
-                            mandala[i] = Polygon3D.copy(face, swap_axes(rotated_points, "XZY"));
+                            mandala[i] = Polygon3D.copy(face, swap_axes(mandala_face_points, "XZY"));
+                            last_crown_index = face.crown_index;
                         });
                         return mandala;
                     });
@@ -3433,8 +3569,6 @@
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num_spirals: N,
-                        num_crowns: num_crowns,
-                        num_points_per_crown: num_points_per_crown,
 
                         assembly_method: ASSEMBLY_METHOD,
                         rotation_angles: rotation_angles,
@@ -3459,12 +3593,15 @@
                         vanishing_lines: vanishing_lines,
                     });
 
-                    // Reset selected crown index
-                    this.num_crowns = num_crowns;
-                    this.update_strengthening_of_timbers();
-
                     // Dispatch zome
                     this.$dispatch('zome-is-made');
+
+                    // Reset selected crown index
+                    this.num_crowns = num_crowns;
+                    this.num_points_per_crown = num_points_per_crown;
+
+                    // Force face divisions
+                    this.update_face_divisions();
 
                     sync_url_from_params(this.params);
 

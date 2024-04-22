@@ -1,36 +1,18 @@
 # TODO-LIST
-
-* [ ] renommer strengthening_of_timbers en polygon_division_bars
+ 
+* [ ] revoir l'expansion quand le bindu est supérieur à 1, car le montant rentre les un dans les autre
+  - calculer le mur precedent horizontal ?
+  
+* [ ] Ajouter le bounding box sur le selected crown
 
 * [ ] Ajouter les renforts en plus de la division des polygones
-  
-* [ ] pour le flattened mandala avec le bindu zome, pas de rotate sur le même crown_index
-
-* [ ] Essayer de faire un zome bindu
 
 * [ ] Ajouter le zomandala (Différent du mandala)
   https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
 
-* [ ] Dessiner les crowns à plat avec les timbers profiles pour mieux comprendre le schéma de montage
+* [ ] Dessiner les crowns à plat en 2D avec les timbers profiles pour mieux comprendre le schéma de montage
 
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
-
-
-* [ ] Utiliser le clic droit Three js pour modifier des faces
-  https://github.com/timoxley/threejs/blob/master/examples/webgl_interactive_cubes.html
-
-  Le raycasting ne marche pas bien sur les meshs clonés, il faut donc ne pas cloner les mesh, mais le polygon/prism qui
-  aura son propre mesh la rotation ne se fait plus au niveau de la 3D et du mandala, mais au niveau de la création du
-  zome, le polygon prendra aussi un uuid afin d'être identifié, via son mesh dans le userData.uuid le compte des pièce
-  ne sera plus multiplié par N puisque les pièce existeront bel et bien pour cela il vaut mieux créer une branche.
-
-* [ ] Au clic souris sur un element, à partir de sa position (i, j)
-  sélectionne le type de l'element de la face au sein de la matrice
-
-  Ajouter un bouding box autour de tout les elements portant le même couple i, j
-
-  Commencer avec les losanges plein, faire les moitiés de losanges plus tard Sauvegarder la matrice dans les paramètres.
-
 
 * [ ] Corriger bug sur les vues de côtés haut bas quand on se déplace dans la caméra. -> resetter avant de faire les vue
   de côté

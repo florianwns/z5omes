@@ -32,7 +32,7 @@ const THREE_LABELS_MATERIAL = new THREE.MeshBasicMaterial({
 });
 const THREE_VERTEX_COLOR_MATERIAL = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, vertexColors: true});
 
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZΘΞΠΣΦΨΩαβδεζηϑικλμνξπρςσφχψ'.split('');
 const FOOTING_CHAR = '~';
 const FLOOR_CHAR = '⬢';
 const XYZ = ["X", "Y", "Z"];
@@ -378,15 +378,6 @@ function signed_angle_between_points(p1, p2, p3, plane, right_handed_rotation = 
     return signed_angle_between_vectors(vec1, vec2, plane, right_handed_rotation);
 }
 
-function dihedral_angle(a, b, c) {
-    // Compute the dihedral angle from 3 angles
-    // https://www.had2know.org/academics/dihedral-angle-calculator-polyhedron.html
-    return acos(
-        (Math.cos(a) - (Math.cos(b) * Math.cos(c))) / (Math.sin(b) * Math.sin(c))
-    )
-}
-
-
 function rotate_point_around_z_axis(vec, angle, origin = [0, 0, 0]) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
@@ -415,6 +406,20 @@ function rotate_points_around_z_axis(points, angle) {
         ];
     }
     return rotated_points;
+}
+
+
+function rotate_point_around_y_axis(vec, angle) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
+
+    // Rotate an 2D vector around y axis
+    const [x, y, z] = vec;
+    return [
+        x * cos_theta + z * sin_theta,
+        y,
+        -x * sin_theta + z * cos_theta,
+    ];
 }
 
 function rotate_points_around_y_axis(points, angle) {
@@ -1276,7 +1281,7 @@ class Polygon3D extends Base3DGeometry {
     //
     // points are distributed counterclockwise
 
-    constructor(points, label, color, crown_index) {
+    constructor(points, label, color, crown_index, is_bottom_part = false) {
         // Call parent constructor
         super(points, label, color, crown_index);
 
@@ -1287,6 +1292,12 @@ class Polygon3D extends Base3DGeometry {
                 console.warn(`The polygon ${this.label || ''} is not coplanar`, this.points);
             }
         }
+
+        // A property used to flatten bottom part of bindu faces (divided horizontally)
+        this.is_bottom_part = is_bottom_part;
+
+        // Add a dihedral angle
+        this.dihedral_angle = null;
 
         this._plane = null;
         this._radius = null;
@@ -1333,19 +1344,29 @@ class Polygon3D extends Base3DGeometry {
     get flattened_points() {
         if (this._flattened_points === null) {
             // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-            this._flattened_points = flatten_3D_points(this.points, this.centroid, this.points[0], this.points[1], false);
+            this._flattened_points = (this.is_bottom_part)
+                ? flatten_3D_points(
+                    this.points,
+                    this.centroid, this.midpoints[this.num_points - 1], this.points[0],
+                    false
+                )
+                : flatten_3D_points(
+                    this.points,
+                    this.centroid, this.points[0], this.points[1],
+                    false
+                )
         }
         return this._flattened_points;
     }
 
     static copy(obj, points) {
         return new Polygon3D(
-            points || obj.points, obj.label, obj.color, obj.crown_index
+            points || obj.points, obj.label, obj.color, obj.crown_index, obj.is_bottom_part
         );
     }
 
     compute_framework(
-        strengthening_of_timbers_bitwise_flag,  // A bitwise flag which let us to divide polygon
+        face_divisions_bitwise_flag,  // A bitwise flag which let us to divide polygon
 
         // Assembly parameters
         assembly_method = 0,            // 0 : GoodKarma
@@ -1372,7 +1393,7 @@ class Polygon3D extends Base3DGeometry {
         this._framework_inner_points = new Array(this.num_points);
 
         // Divide polygons into many parts
-        let framework_faces = [...this.split(strengthening_of_timbers_bitwise_flag)];
+        let framework_faces = [...this.split(face_divisions_bitwise_flag)];
 
         const outward_xpansion = assembly_method === 2 || xpansion_direction === -1;
 
@@ -1628,7 +1649,7 @@ class Polygon3D extends Base3DGeometry {
         this._edges = new THREE.LineSegments(edge_geometry, THREE_EDGES_MATERIAL);
     }
 
-    split(strengthening_of_timbers_bitwise_flag = 0) {
+    split(face_divisions_bitwise_flag = 0) {
         // Split polygon in multiple polygons
         // depends on the bitwise flag (based on FRAMEWORK_CUSTOMIZER_SVG_IDS)
 
@@ -1638,10 +1659,10 @@ class Polygon3D extends Base3DGeometry {
         }
 
         // if 0 or not a rhombus return [this]
-        if (strengthening_of_timbers_bitwise_flag === 0
+        if (face_divisions_bitwise_flag === 0
             || (
                 this.num_points != 4
-                && ![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(strengthening_of_timbers_bitwise_flag)
+                && ![SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(face_divisions_bitwise_flag)
             )
         ) {
             return [this];
@@ -1649,7 +1670,7 @@ class Polygon3D extends Base3DGeometry {
 
         // Use basic method, old school
         let midpoint;
-        if (strengthening_of_timbers_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG)
+        if (face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG)
             switch (this.num_points) {
                 case 3:
                     return [this];
@@ -1664,7 +1685,7 @@ class Polygon3D extends Base3DGeometry {
                         Polygon3D.copy(this, [this.points[1], this.points[2], this.points[3], this.points[4]])
                     ];
             }
-        else if (strengthening_of_timbers_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) {
+        else if (face_divisions_bitwise_flag === SVG_VERTICAL_BAR_BITWISE_FLAG) {
             switch (this.num_points) {
                 case 3:
                     midpoint = get_midpoint(this.points[1], this.points[2]);
@@ -1723,7 +1744,7 @@ class Polygon3D extends Base3DGeometry {
         const nodes = Object.keys(graph);
 
         // Convert flag to boolean array
-        const strengthening_of_timbers = bitwise_flag_to_boolean_array(strengthening_of_timbers_bitwise_flag);
+        const face_divisions = bitwise_flag_to_boolean_array(face_divisions_bitwise_flag);
 
         // Add neighbors only for polygon with 4 points
         const spiral2_num_nodes = 8;
@@ -1744,7 +1765,7 @@ class Polygon3D extends Base3DGeometry {
             const spiral1_node_index = 8 + Math.floor(spiral2_node_index / 2) % spiral1_num_nodes;
 
             // Add neighbors in both ways for the polygon division
-            const bar_to_centroid_is_selected = strengthening_of_timbers[spiral2_node_index];
+            const bar_to_centroid_is_selected = face_divisions[spiral2_node_index];
             if (bar_to_centroid_is_selected) {
                 if (even_node) {
                     graph[node].neighbors.push(nodes[spiral1_node_index]);
@@ -1758,7 +1779,7 @@ class Polygon3D extends Base3DGeometry {
                 }
             }
 
-            const transversal_bar_is_selected = strengthening_of_timbers[spiral1_node_index];
+            const transversal_bar_is_selected = face_divisions[spiral1_node_index];
             if (even_node && transversal_bar_is_selected) {
                 graph[prev_node].neighbors.push(nodes[spiral1_node_index]);
                 graph[nodes[spiral1_node_index]].neighbors.push(prev_node);
@@ -2076,8 +2097,6 @@ class Zome {
     constructor(
         {
             num_spirals = null,
-            num_crowns = null,
-            num_points_per_crown= null,
 
             assembly_method = null,
             rotation_angles = null,
@@ -2103,8 +2122,7 @@ class Zome {
         }
     ) {
         this.num_spirals = num_spirals || 0;
-        this.num_crowns = num_crowns || 0;
-        this.num_points_per_crown = num_points_per_crown || [];
+
         this.assembly_method = assembly_method || 0;
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
