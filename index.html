@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.10b02" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.10b03" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -375,6 +375,31 @@
                 </div>
             </div>
             <hr>
+
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="text-secondary my-1 me-auto">
+                    <i class="fa-solid fa-people-roof me-1"></i>
+                    <span x-text="i18n('roof')" class="up-first"></span>
+                </h5>
+            </div>
+
+            <div class="text-muted small aligned-form">
+                <!-- Roof overflow -->
+                <div x-show="params.help_is_displayed">
+                    <b>RO</b> :
+                    <span x-text="i18n('help_ro_param')"></span>
+                </div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text"
+                          data-bs-toggle="tooltip" :title="i18n('help_ro_param')">
+                    RO
+                    </span>
+                    <input class="form-control form-range" min="0" max="1000" step="1" type="range"
+                           x-model.number="params.roof_overflow_in_mm" x-ref="roof_overflow_in_mm_slider">
+                    <input class="form-control" step="1" type="number"
+                           x-model.lazy.number="roof_overflow">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -392,7 +417,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.10b02</span>
+                              style="font-size: 10px; top:0px">v1.0.10b03</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -503,10 +528,12 @@
                                                     x-text="i18n('inner_faces_3D')"></option>
                                             <option value="outer_faces_3D"
                                                     x-text="i18n('outer_faces_3D')"></option>
-                                            <option value="mandala_3D_of_inner_faces"
-                                                    x-text="i18n('mandala_3D_of_inner_faces')"></option>
-                                            <option value="mandala_3D_of_outer_faces"
-                                                    x-text="i18n('mandala_3D_of_outer_faces')"></option>
+                                            <option value="flattened_inner_faces_3D"
+                                                    x-text="i18n('flattened_inner_faces_3D')"></option>
+                                            <option value="flattened_outer_faces_3D"
+                                                    x-text="i18n('flattened_outer_faces_3D')"></option>
+                                            <option value="mandala_3D"
+                                                    x-text="i18n('mandala_3D')"></option>
                                         </select>
                                     </div>
 
@@ -664,7 +691,7 @@
                                                                 <span x-text="i18n('timber_profiles_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('E')">E
+                                                                <button class="key me-2" @click="keydown('O')">O
                                                                 </button>
                                                                 <span x-text="i18n('outer_faces_3D')"></span>
                                                             </li>
@@ -674,14 +701,19 @@
                                                                 <span x-text="i18n('inner_faces_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('Z')">Z
+                                                                <button class="key me-2" @click="keydown('K')">K
                                                                 </button>
-                                                                <span x-text="i18n('mandala_3D_of_outer_faces')"></span>
+                                                                <span x-text="i18n('flattened_outer_faces_3D')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('U')">U
+                                                                <button class="key me-2" @click="keydown('L')">L
                                                                 </button>
-                                                                <span x-text="i18n('mandala_3D_of_inner_faces')"></span>
+                                                                <span x-text="i18n('flattened_inner_faces_3D')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('M')">U
+                                                                </button>
+                                                                <span x-text="i18n('mandala_3D')"></span>
                                                             </li>
                                                             <!-- Camera view -->
                                                             <li class="d-flex align-items-center mb-2">
@@ -1362,15 +1394,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.10b02"></script>
-<script src="i18n/en.js?v=1.0.10b02"></script>
-<script src="i18n/it.js?v=1.0.10b02"></script>
-<script src="i18n/fr.js?v=1.0.10b02"></script>
-<script src="i18n/pl.js?v=1.0.10b02"></script>
-<script src="i18n/sv.js?v=1.0.10b02"></script>
+<script src="i18n/es.js?v=1.0.10b03"></script>
+<script src="i18n/en.js?v=1.0.10b03"></script>
+<script src="i18n/it.js?v=1.0.10b03"></script>
+<script src="i18n/fr.js?v=1.0.10b03"></script>
+<script src="i18n/pl.js?v=1.0.10b03"></script>
+<script src="i18n/sv.js?v=1.0.10b03"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.10b02"></script>
+<script src="js/core.js?v=1.0.10b03"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1732,8 +1764,10 @@
         Alpine.data('face_measurements', () => {
             return {
                 faces: [],
+                quantities: [],
                 floor: null,
                 type_of_3D_objects: "inner_faces_3D",
+                total_number_of_faces: 0,
 
                 async init() {
                     ["type_of_3D_objects"].forEach(
@@ -1753,9 +1787,6 @@
                 get total_area_of_faces() {
                     const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num_spirals, 0);
                     return humanize_area(value);
-                },
-                get total_number_of_faces() {
-                    return ZOME.num_spirals * this.faces.length;
                 },
 
                 get floor_diameter() {
@@ -1796,6 +1827,7 @@
                 get table_column_names() {
                     return [
                         this.i18n('id'),
+                        this.i18n('quantity'),
                         this.i18n('width'),
                         this.i18n('height'),
                         this.i18n('edges'),            // CCW Edges
@@ -1814,13 +1846,14 @@
                     _.forEach(row_faces, (face, i) => {
                         const flattened_face = face.flatten_face();
                         rows[i] = [flattened_face, [
-                            flattened_face.label, // i + 1
+                            flattened_face.label,
+                            this.quantities[i] || 1,
                             humanize_distance(flattened_face.width),
                             humanize_distance(flattened_face.height),
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
                             humanize_angle(rad2deg(face.dihedral_angle)),
-                            humanize_angle(rad2deg(face.slope)),
+                            humanize_angle(rad2deg(face.normalized_slope)),
                             humanize_area(face.area),
                             humanize_distance(face.diameter),
                         ]];
@@ -1840,7 +1873,19 @@
                     }
 
                     // Add faces
-                    this.faces = eval(`ZOME.${this.type_of_3D_objects}`);
+                    const hash_collections = eval(`ZOME.${this.type_of_3D_objects}_hash_collections`);
+                    const num_items = Object.keys(hash_collections).length;
+                    this.faces = new Array(num_items);
+                    this.quantities = new Array(num_items);
+
+                    this.total_number_of_faces = 0;
+                    let face_index = 0;
+                    _.forIn(hash_collections, collection => {
+                        this.faces[face_index] = collection.item;
+                        this.quantities[face_index] = collection.count;
+                        this.total_number_of_faces += collection.count;
+                        face_index++;
+                    });
                 },
             };
         });
@@ -2257,6 +2302,8 @@
                 get clone_and_rotate_mode() {
                     switch (this.type_of_3D_objects) {
                         case "timber_profiles_3D" :
+                        case "flattened_outer_faces_3D" :
+                        case "flattened_inner_faces_3D" :
                             return false;
                         default:
                             return true;
@@ -2567,8 +2614,8 @@
                         case " ":
                             this.is_spinning = !this.is_spinning;
                             break;
-                        case "e":
-                        case "E":
+                        case "o":
+                        case "O":
                             this.type_of_3D_objects = "outer_faces_3D";
                             break;
                         case "i":
@@ -2579,13 +2626,17 @@
                         case "H":
                             this.reset();
                             break;
-                        case "z":
-                        case "Z":
-                            this.type_of_3D_objects = "mandala_3D_of_outer_faces";
+                        case "l":
+                        case "L":
+                            this.type_of_3D_objects = "flattened_outer_faces_3D";
                             break;
-                        case "u":
-                        case "U":
-                            this.type_of_3D_objects = "mandala_3D_of_inner_faces";
+                        case "k":
+                        case "K":
+                            this.type_of_3D_objects = "flattened_inner_faces_3D";
+                            break;
+                        case "m":
+                        case "M":
+                            this.type_of_3D_objects = "mandala_3D";
                             break;
                         case "t":
                         case "T":
@@ -2632,7 +2683,7 @@
                     height_ratio: 0.6,                  // Height ratio as proportion of pole-to-pole distance (0.5 => middle)
                     kite_ratio: 1,                      // Kite ratio, lower half to upper half (1 => is rhombus else kites)
 
-                    // Sizing Parameters
+                    // Framework Parameters
                     measuring_unit: "cm",                               // Measuring unit by default is cm
                     zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
                     timber_width_in_mm: 60,                             // Timber width in mm
@@ -2642,6 +2693,9 @@
                     assembly_direction: 0,
                     xpansion_direction: 1,
                     add_footing: 1,
+
+                    // Roof parameters
+                    roof_overflow_in_mm: 0,
 
                     // Values separated by commas
                     face_divisions_by_crowns_str: "",
@@ -2982,6 +3036,12 @@
                 set timber_width(value) {
                     this.clamp("timber_width_in_mm", to_mm(value, this.params.measuring_unit));
                 },
+                get roof_overflow() {
+                    return to_decimal(from_mm(this.params.roof_overflow_in_mm, this.params.measuring_unit));
+                },
+                set roof_overflow(value) {
+                    this.clamp("roof_overflow_in_mm", to_mm(value, this.params.measuring_unit));
+                },
                 get max_timber_width() {
                     return to_decimal(this.first_crown_radius / 2, FLOAT_2_STR_PRECISION);
                 },
@@ -3133,6 +3193,7 @@
                     if (apply_bindu_ratio) {
                         // If we apply the bindu ratio, we split face in two parts (top and bottom)
                         const faces = face.split(SVG_HORIZONTAL_BAR_BITWISE_FLAG);
+                        faces[0].is_top_part = true;
                         zome_faces_3D.push(faces[0]);
 
                         // The bottom face have a new label, flag the bottom part
@@ -3345,6 +3406,8 @@
 
                     // Loop over the faces of the framework to build timbers
                     // Divide zome faces and build framework timbers
+                    const ROOF_OVERFLOW_DISTANCE = this.params.roof_overflow_in_mm;
+
                     for (let face_index = 0; face_index < num_zome_faces; face_index++) {
                         const face = zome_faces_3D[face_index];
 
@@ -3366,14 +3429,35 @@
                             vanishing_lines.push([vanishing_pt, face.points[0]]);
                         }
 
-                        const outer_face_points = face.framework_outer_points;
                         const inner_face_points = face.framework_inner_points;
-
                         inner_faces_3D[face_index] = Polygon3D.copy(face, inner_face_points);
-                        outer_faces_3D[face_index] = Polygon3D.copy(face, outer_face_points);
-
-                        // Copy dihedral angle
                         inner_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
+
+                        // Add roof overflow points on outer face
+                        const outer_face_points = face.framework_outer_points;
+                        let outer_face = Polygon3D.copy(face, outer_face_points);
+                        if (face.crown_index + 2 < num_crowns   // dont use roof overflow on last crowns
+                            && face.slope < TAU_Q               // if slope is superior thant TAU_Q
+                            && ROOF_OVERFLOW_DISTANCE > 0       // if there is not a minimal distance
+                            && !face.is_top_part                // and not on top part of divided face (bindu option)
+                        ) {
+                            const bottom_index = Math.floor(face.num_points / 2);
+                            const vertical_vec = sub(outer_face.points[bottom_index], outer_face.centroid)
+                            const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                            const points_with_overflow = [];
+
+                            for (let i = 0; i < outer_face.num_points; i++) {
+                                const normal_pt = outer_face.points[i];
+                                const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+
+                                if (i < bottom_index) points_with_overflow.push(normal_pt);
+                                if (!(i === 0 && face.num_points === 4)) points_with_overflow.push(pt_with_overflow);
+                                if (i > bottom_index) points_with_overflow.push(normal_pt);
+                            }
+                            outer_face.points = points_with_overflow;
+                        }
+
+                        outer_faces_3D[face_index] = outer_face;
                         outer_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
 
                         // Footing parameters computing
@@ -3492,7 +3576,7 @@
                         _.forEach(obj_3D_to_label[i], item => {
                             item.color = hash_to_color[item.hash];
                             if (!rotated_colors.hasOwnProperty(item.color.hex)) {
-                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.slope));
+                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.normalized_slope));
                             }
                         });
                     });
@@ -3504,76 +3588,85 @@
                         inner_faces_3D_hash_collections,
                     ] = arr_of_obj_hash_collections;
 
-                    // Build Mandalas
-                    const [
-                        mandala_3D,
-                        mandala_3D_of_outer_faces,
-                        mandala_3D_of_inner_faces
-                    ] = _.map([zome_faces_3D, outer_faces_3D, inner_faces_3D], obj_3D => {
-                        const mandala = new Array(obj_3D.length);
-                        let last_pt = [0, 0, 0], before_last_pt, first_pt, second_pt;
-                        let last_crown_index = null, rotation_angle = null;
-                        _.forEach(obj_3D, (face, i) => {
-                            let flattened_face = face.flatten_face();
+                    // Build Mandala
+                    const mandala_3D = new Array(zome_faces_3D.length);
+                    let last_pt = [0, 0, 0], before_last_pt, first_pt, second_pt;
+                    let last_crown_index = null, rotation_angle = null;
+                    for (let face_index = 0; face_index < num_zome_faces; face_index++) {
+                        const face = zome_faces_3D[face_index];
+                        let flattened_face = face.flatten_face();
 
-                            // Move to Origin and rotate to match with previous piece
-                            let mandala_face_points = (second_pt && face.is_bottom_part)
-                                ? flattened_face.points.map(p => add(p, second_pt))
-                                : flattened_face.points.map(p => add(p, last_pt));
+                        // Move to Origin and rotate to match with previous piece
+                        let mandala_face_points = (second_pt && face.is_bottom_part)
+                            ? flattened_face.points.map(p => add(p, second_pt))
+                            : flattened_face.points.map(p => add(p, last_pt));
 
-                            second_pt = mandala_face_points[1];
+                        second_pt = mandala_face_points[1];
 
-                            if (i > 0) {
-                                if (!face.is_bottom_part) {
-                                    rotation_angle = Angle.from_3_points(before_last_pt, last_pt, second_pt);
-                                    const second_pt_rotated = rotate_point_around_z_axis(second_pt, rotation_angle, last_pt);
+                        if (face_index > 0) {
+                            if (!face.is_bottom_part) {
+                                rotation_angle = Angle.from_3_points(before_last_pt, last_pt, second_pt);
+                                const second_pt_rotated = rotate_point_around_z_axis(second_pt, rotation_angle, last_pt);
 
-                                    // Rotate the other way if second point rotated
-                                    // is not too close to the before last point
-                                    if (to_decimal(dist(second_pt_rotated, before_last_pt)) !== 0) {
-                                        rotation_angle = rotation_angle.reverse();
-                                    }
-
-                                    mandala_face_points = mandala_face_points.map(p => {
-                                        return rotate_point_around_z_axis(p, rotation_angle, last_pt);
-                                    });
-                                } else {
-                                    mandala_face_points = mandala_face_points.map(p => {
-                                        return rotate_point_around_z_axis(p, rotation_angle, first_pt);
-                                    });
+                                // Rotate the other way if second point rotated
+                                // is not too close to the before last point
+                                if (to_decimal(dist(second_pt_rotated, before_last_pt)) !== 0) {
+                                    rotation_angle = rotation_angle.reverse();
                                 }
 
+                                mandala_face_points = mandala_face_points.map(p => {
+                                    return rotate_point_around_z_axis(p, rotation_angle, last_pt);
+                                });
+                            } else {
+                                mandala_face_points = mandala_face_points.map(p => {
+                                    return rotate_point_around_z_axis(p, rotation_angle, first_pt);
+                                });
                             }
-
-                            first_pt = mandala_face_points[0];
-                            last_pt = mandala_face_points[mandala_face_points.length - 1];
-                            before_last_pt = mandala_face_points[mandala_face_points.length - 2];
-
-                            // Swap y axis with z axis for 3D display
-                            mandala[i] = Polygon3D.copy(face, swap_axes(mandala_face_points, "XZY"));
-                            last_crown_index = face.crown_index;
-                        });
-                        return mandala;
-                    });
-
-                    // Build timber_profiles_3D
-                    const timber_profiles_3D = [];
-                    let z_origin = 0;
-                    _.forIn(skeleton_3D_hash_collections, collection => {
-                        // Retrieve the prism from collection and flatten it
-                        const prism = collection.item.flatten();
-
-                        const fitted_points = prism.fitted_points;
-                        const translated_points = new Array(prism.num_points);
-                        for (let i = 0; i < fitted_points.length; i++) {
-                            translated_points[i] = add(fitted_points[i], [0, 0, z_origin]);
                         }
 
-                        // Add space between timbers
-                        z_origin += prism.depth * 2;
-                        timber_profiles_3D.push(
-                            new TrapezoidalPrism(translated_points, prism.label, prism.color)
-                        );
+                        first_pt = mandala_face_points[0];
+                        last_pt = mandala_face_points[mandala_face_points.length - 1];
+                        before_last_pt = mandala_face_points[mandala_face_points.length - 2];
+
+                        // Swap y axis with z axis for 3D display
+                        mandala_3D[face_index] = Polygon3D.copy(face, swap_axes(mandala_face_points, "XZY"));
+                        last_crown_index = face.crown_index;
+                    }
+
+                    // Flatten collections
+                    const [
+                        timber_profiles_3D,
+                        flattened_outer_faces_3D,
+                        flattened_inner_faces_3D
+                    ] = _.map(arr_of_obj_hash_collections, hash_collections => {
+                        // Compute num of item and create an array from that num
+                        const num_items = Object.keys(hash_collections).length;
+                        const flattened_collection = new Array(num_items);
+
+                        // Initiate variables and iterates through collections
+                        let z_origin = 0, item_index = 0;
+                        _.forIn(hash_collections, collection => {
+                            // Retrieve the item from collection and flatten it
+                            const item = collection.item.flatten();
+                            const is_prism = item instanceof TrapezoidalPrism;
+
+                            const fitted_points = (is_prism) ? item.fitted_points : swap_axes(item.fitted_points, "XZY");
+                            const translated_points = new Array(item.num_points);
+                            for (let i = 0; i < fitted_points.length; i++) {
+                                translated_points[i] = add(fitted_points[i], [0, 0, z_origin]);
+                            }
+
+                            if (is_prism) {
+                                flattened_collection[item_index] = TrapezoidalPrism.copy(item, translated_points);
+                            } else {
+                                flattened_collection[item_index] = Polygon3D.copy(item, translated_points);
+                            }
+
+                            // Add space between items and increment item index
+                            z_origin += flattened_collection[item_index].depth + 100;
+                            item_index++;
+                        });
+                        return flattened_collection;
                     });
 
                     // Save Zome and dispatch it
@@ -3597,8 +3690,8 @@
 
                         timber_profiles_3D: timber_profiles_3D,
                         mandala_3D: mandala_3D,
-                        mandala_3D_of_outer_faces: mandala_3D_of_outer_faces,
-                        mandala_3D_of_inner_faces: mandala_3D_of_inner_faces,
+                        flattened_outer_faces_3D: flattened_outer_faces_3D,
+                        flattened_inner_faces_3D: flattened_inner_faces_3D,
 
                         vanishing_lines: vanishing_lines,
                     });

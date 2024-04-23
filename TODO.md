@@ -1,16 +1,21 @@
 # TODO-LIST
- 
-* [ ] revoir l'expansion quand le bindu est supérieur à 1, car le montant rentre les un dans les autre
-  - calculer le mur precedent horizontal ?
+
+* [ ] Measurements of collections
   
-* [ ] Ajouter le bounding box sur le selected crown
+* [ ] Dessiner les crowns à plat en 2D avec les timbers profiles pour mieux comprendre le schéma de montage
+
+* [ ] Ajouter l'export ZIP (svgs) et PDF pour les figures des timber profiles
+
+* [ ] Revoir la méthode d'expansion quand le bindu est supérieur à 1, 
+  car le montant du haut du triangle bas rentre dans le montat bas du triangle haut 
+  
+* [ ] Ajouter le bounding box sur le selected crown et mettre un bouton d'affichage
+  seulement sur les faces et les montants
 
 * [ ] Ajouter les renforts en plus de la division des polygones
 
 * [ ] Ajouter le zomandala (Différent du mandala)
   https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
-
-* [ ] Dessiner les crowns à plat en 2D avec les timbers profiles pour mieux comprendre le schéma de montage
 
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
 
@@ -22,21 +27,16 @@
     * Spiral =>
     * Zomandala ?? à Ajouter
 
-* [ ] Renommed mandala par flattened
 
 * [ ] Corriger les points de la semelle de la méthode goodkarma
     * Sans doute dû aux inner/outer faces qui sont mal calculées pour le goodkarma
 
 * [ ] Ajouter les boutons de navigation dans la 3D (home, <-, ->, etc....)
 
-* [ ] Ajouter l'export SVG et PDF
-
 * [ ] Dans le flattened du trapezoidalPrism Ne pas renvoyer une polygone avec la face opposé pour éviter de lever
   l'exception de coplanarité
 
 * [ ] Utiliser la css sticky pour afficher les crowns à côté des timbers profiles
-
-* [ ] Ajouter l'angle diedre au niveau du dessin des faces avec les timbers profiles
 
 * [ ] Revoir la terminologie de assembly method et de assembly direction pour plus de clarté (coupe des angles, methode
   de coupe)
@@ -45,20 +45,6 @@
 
 * [ ] Mettre à jour les autres traductions avec les termes manquants
 
-    * Commencer à dessiner la premier polygone (vue de dessus)
-    * La hauteur du dessin est fixe
-    * Sa largeur est donc relative.... on peut la tronquer avec des pointillés
-    * l'angle de coupe arrière est dessinée en pointillés
-    * Ajouter les indexs des montants/faces sur la 3D
-
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
 
-* [ ] Rajouter les essences de bois pour calculer le poids total du zome
-
-    * https://www.warmaths.fr/SCIENCES/densiteCatalogue..htm
-    * https://www.cndb.org/site/wp-content/uploads/2019/01/Le_Guide_des_Essences_de_Bois_Yves_Benoit_FCBA_Eyrolles.pdf
-
-
-* [ ] Ajouter une page wikipedia avec des vidéos pour l'apprentissage de la construction zome
-
-* [ ] Et une page community pour les gens qui n'auraient pas facebook
+* [ ] Ajouter une page wikipedia avec les vidéos youtube pour l'apprentissage de la construction zome
