@@ -102,6 +102,7 @@ const I18N_EN = {
         // Measurements table
         measurements: "Measurements",
         id: "Id",
+        quantity: "Quantity",
         width: "Width",
         height: "Height",
         edges: "Edges",

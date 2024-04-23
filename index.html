@@ -1764,8 +1764,10 @@
         Alpine.data('face_measurements', () => {
             return {
                 faces: [],
+                quantities: [],
                 floor: null,
                 type_of_3D_objects: "inner_faces_3D",
+                total_number_of_faces: 0,
 
                 async init() {
                     ["type_of_3D_objects"].forEach(
@@ -1785,9 +1787,6 @@
                 get total_area_of_faces() {
                     const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num_spirals, 0);
                     return humanize_area(value);
-                },
-                get total_number_of_faces() {
-                    return ZOME.num_spirals * this.faces.length;
                 },
 
                 get floor_diameter() {
@@ -1828,6 +1827,7 @@
                 get table_column_names() {
                     return [
                         this.i18n('id'),
+                        this.i18n('quantity'),
                         this.i18n('width'),
                         this.i18n('height'),
                         this.i18n('edges'),            // CCW Edges
@@ -1846,7 +1846,8 @@
                     _.forEach(row_faces, (face, i) => {
                         const flattened_face = face.flatten_face();
                         rows[i] = [flattened_face, [
-                            flattened_face.label, // i + 1
+                            flattened_face.label,
+                            this.quantities[i] || 1,
                             humanize_distance(flattened_face.width),
                             humanize_distance(flattened_face.height),
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
@@ -1872,7 +1873,19 @@
                     }
 
                     // Add faces
-                    this.faces = eval(`ZOME.${this.type_of_3D_objects}`);
+                    const hash_collections = eval(`ZOME.${this.type_of_3D_objects}_hash_collections`);
+                    const num_items = Object.keys(hash_collections).length;
+                    this.faces = new Array(num_items);
+                    this.quantities = new Array(num_items);
+
+                    this.total_number_of_faces = 0;
+                    let face_index = 0;
+                    _.forIn(hash_collections, collection => {
+                        this.faces[face_index] = collection.item;
+                        this.quantities[face_index] = collection.count;
+                        this.total_number_of_faces += collection.count;
+                        face_index++;
+                    });
                 },
             };
         });
