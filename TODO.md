@@ -1,12 +1,5 @@
 # TODO-LIST
 
-* [x] is_bottom_part => part = "" || "top" || "bottom"
-
-* [ ] Bug mandala sur roof overflow. 
-  => ne plus faire le mandala 3D des inner/outer faces 
-      mais les poser à plat (flattened)
-  * [ ] Renommed mandala par flattened
-  
 * [ ] Dessiner les crowns à plat en 2D avec les timbers profiles pour mieux comprendre le schéma de montage
 
 * [ ] Ajouter l'export ZIP (svgs) et PDF pour les figures des timber profiles

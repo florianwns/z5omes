@@ -1250,8 +1250,18 @@ class Base3DGeometry {
         }
     }
 
+    static copy(obj, points) {
+        return new Base3DGeometry(
+            points || obj.points, obj.label, obj.color, obj.crown_index, obj.part
+        );
+    }
+
+    flatten() {
+        return Base3DGeometry.copy(this, this.flattened_points);
+    }
+
     flatten_face(side = "top") {
-        return Polygon3D.copy(this, this.flattened_points);
+        return this.flatten();
     }
 
     filter_points_by_side(side, points) {
@@ -1376,6 +1386,10 @@ class Polygon3D extends Base3DGeometry {
                 )
         }
         return this._flattened_points;
+    }
+
+    flatten() {
+        return Polygon3D.copy(this, this.flattened_points);
     }
 
     static copy(obj, points) {
@@ -2033,11 +2047,7 @@ class TrapezoidalPrism extends Base3DGeometry {
     }
 
     flatten() {
-        return new TrapezoidalPrism(
-            this.flattened_points,
-            this.label, this.color,
-            this.crown_index
-        );
+        return TrapezoidalPrism.copy(this, this.flattened_points);
     }
 
     flatten_face(side = "top", add_opposite_side = false, rotation_angle = null) {
@@ -2134,8 +2144,8 @@ class Zome {
 
             timber_profiles_3D = null,
             mandala_3D = null,
-            mandala_3D_of_outer_faces = null,
-            mandala_3D_of_inner_faces = null,
+            flattened_outer_faces_3D = null,
+            flattened_inner_faces_3D = null,
 
             vanishing_lines = null
         }
@@ -2159,8 +2169,8 @@ class Zome {
 
         this.timber_profiles_3D = timber_profiles_3D || [];
         this.mandala_3D = mandala_3D || [];
-        this.mandala_3D_of_outer_faces = mandala_3D_of_outer_faces || [];
-        this.mandala_3D_of_inner_faces = mandala_3D_of_inner_faces || [];
+        this.flattened_outer_faces_3D = flattened_outer_faces_3D || [];
+        this.flattened_inner_faces_3D = flattened_inner_faces_3D || [];
 
         this.vanishing_lines = vanishing_lines || [];
     }
