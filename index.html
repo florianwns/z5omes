@@ -532,6 +532,8 @@
                                                     x-text="i18n('flattened_inner_faces_3D')"></option>
                                             <option value="flattened_outer_faces_3D"
                                                     x-text="i18n('flattened_outer_faces_3D')"></option>
+                                            <option value="skeleton_by_crowns_3D"
+                                                    x-text="i18n('skeleton_by_crowns_3D')"></option>
                                             <option value="mandala_3D"
                                                     x-text="i18n('mandala_3D')"></option>
                                         </select>
@@ -1434,7 +1436,7 @@
 
                 process() {
                     // Group prims by hash
-                    const skeleton_3D_hash_collections = ZOME.skeleton_3D_hash_collections;
+                    const skeleton_3D_collections = ZOME.skeleton_3D_collections;
 
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
@@ -1449,14 +1451,14 @@
 
                     // Flatten side and define global boundaries
                     let all_labeled_sides = {};
-                    _.forIn(skeleton_3D_hash_collections, collection => {
+                    _.forIn(skeleton_3D_collections, collection => {
                         // Take the first element of group
                         const prism = collection.item;
                         all_labeled_sides[prism.label] = new Array(side_names.length);
 
                         // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
-                            const side = prism.flatten_face(side_name, true, (i === 1) ? TAU_Q : null);
+                            const side = prism.flatten_face(side_name, true, true, (i === 1) ? -TAU_Q : null);
                             switch (i) {
                                 case 0:
                                 case 1:
@@ -1491,7 +1493,7 @@
                     const left_column_x_start = x_padding;
                     const right_column_x_start = left_column_x_start + left_column_width + 2 * x_padding;
 
-                    _.forIn(skeleton_3D_hash_collections, collection => {
+                    _.forIn(skeleton_3D_collections, collection => {
                         // Take the item of collection
                         const prism = collection.item;
                         const sides = all_labeled_sides[prism.label];
@@ -1844,7 +1846,7 @@
                         : this.faces
                     const rows = new Array(row_faces.length);
                     _.forEach(row_faces, (face, i) => {
-                        const flattened_face = face.flatten_face();
+                        const flattened_face = face.flatten_face("front", true);
                         rows[i] = [flattened_face, [
                             flattened_face.label,
                             this.quantities[i] || 1,
@@ -1873,14 +1875,14 @@
                     }
 
                     // Add faces
-                    const hash_collections = eval(`ZOME.${this.type_of_3D_objects}_hash_collections`);
-                    const num_items = Object.keys(hash_collections).length;
+                    const collections = eval(`ZOME.${this.type_of_3D_objects}_collections`);
+                    const num_items = Object.keys(collections).length;
                     this.faces = new Array(num_items);
                     this.quantities = new Array(num_items);
 
                     this.total_number_of_faces = 0;
                     let face_index = 0;
-                    _.forIn(hash_collections, collection => {
+                    _.forIn(collections, collection => {
                         this.faces[face_index] = collection.item;
                         this.quantities[face_index] = collection.count;
                         this.total_number_of_faces += collection.count;
@@ -2302,6 +2304,7 @@
                 get clone_and_rotate_mode() {
                     switch (this.type_of_3D_objects) {
                         case "timber_profiles_3D" :
+                        case "skeleton_by_crowns_3D":
                         case "flattened_outer_faces_3D" :
                         case "flattened_inner_faces_3D" :
                             return false;
@@ -2377,12 +2380,12 @@
                     // Same as above but for spirals with geometry cloning for more efficiency
                     for (let i = 0; i < items_3D.length; i++) {
                         const item = items_3D[i];
-                        zome_meshes.add(item.mesh);
+                        zome_meshes.add(item.mesh.clone());
 
                         if (this.draw_labels) {
                             item.compute_label_mesh(font);
                             if (item.label_mesh) {
-                                label_meshes.add(item.label_mesh);
+                                label_meshes.add(item.label_mesh.clone());
                             }
                         }
 
@@ -3545,10 +3548,10 @@
                     ];
 
                     // Group items by hash
-                    const arr_of_obj_hash_collections = new Array(obj_3D_to_label.length);
+                    const arr_of_obj_collections = new Array(obj_3D_to_label.length);
                     for (let i = 0; i < obj_3D_to_label.length; i++) {
                         const obj_3D = obj_3D_to_label[i];
-                        arr_of_obj_hash_collections[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                        arr_of_obj_collections[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
                             // Update label of each member
                             for (let j = 1; j < group.length; j++) {
                                 group[j].label = group[0].label;
@@ -3559,9 +3562,9 @@
 
                     // 🎨 Add colors to items and build rotated colors
                     let rotated_colors = {};
-                    _.forIn(arr_of_obj_hash_collections, (obj_hash_collections, i) => {
+                    _.forIn(arr_of_obj_collections, (obj_collections, i) => {
                         // Get hash group
-                        const hashes = obj_hash_collections.map(collection => collection.hash);
+                        const hashes = obj_collections.map(collection => collection.hash);
                         const num_hashes = hashes.length;
 
                         // Associates a hash to a color
@@ -3583,10 +3586,19 @@
 
                     // Unpack variables
                     const [
-                        skeleton_3D_hash_collections,
-                        outer_faces_3D_hash_collections,
-                        inner_faces_3D_hash_collections,
-                    ] = arr_of_obj_hash_collections;
+                        skeleton_3D_collections,
+                        outer_faces_3D_collections,
+                        inner_faces_3D_collections,
+                        zome_faces_3D_collections,
+                    ] = arr_of_obj_collections;
+
+                    const skeleton_by_crowns_3D = [];
+                    _.forIn(zome_faces_3D_collections, collection => {
+                        const parent = collection.item;
+                        skeleton_by_crowns_3D.push(
+                            new TrapezoidalPrismCrown(parent.framework_timbers, parent).flatten()
+                        )
+                    });
 
                     // Build Mandala
                     const mandala_3D = new Array(zome_faces_3D.length);
@@ -3606,7 +3618,7 @@
                         if (face_index > 0) {
                             if (!face.is_bottom_part) {
                                 rotation_angle = Angle.from_3_points(before_last_pt, last_pt, second_pt);
-                                const second_pt_rotated = rotate_point_around_z_axis(second_pt, rotation_angle, last_pt);
+                                const second_pt_rotated = rotate_point_around_y_axis(second_pt, rotation_angle, last_pt);
 
                                 // Rotate the other way if second point rotated
                                 // is not too close to the before last point
@@ -3615,11 +3627,11 @@
                                 }
 
                                 mandala_face_points = mandala_face_points.map(p => {
-                                    return rotate_point_around_z_axis(p, rotation_angle, last_pt);
+                                    return rotate_point_around_y_axis(p, rotation_angle, last_pt);
                                 });
                             } else {
                                 mandala_face_points = mandala_face_points.map(p => {
-                                    return rotate_point_around_z_axis(p, rotation_angle, first_pt);
+                                    return rotate_point_around_y_axis(p, rotation_angle, first_pt);
                                 });
                             }
                         }
@@ -3629,7 +3641,7 @@
                         before_last_pt = mandala_face_points[mandala_face_points.length - 2];
 
                         // Swap y axis with z axis for 3D display
-                        mandala_3D[face_index] = Polygon3D.copy(face, swap_axes(mandala_face_points, "XZY"));
+                        mandala_3D[face_index] = Polygon3D.copy(face, mandala_face_points);
                         last_crown_index = face.crown_index;
                     }
 
@@ -3637,20 +3649,20 @@
                     const [
                         timber_profiles_3D,
                         flattened_outer_faces_3D,
-                        flattened_inner_faces_3D
-                    ] = _.map(arr_of_obj_hash_collections, hash_collections => {
+                        flattened_inner_faces_3D,
+                    ] = _.map(arr_of_obj_collections, collections => {
                         // Compute num of item and create an array from that num
-                        const num_items = Object.keys(hash_collections).length;
+                        const num_items = Object.keys(collections).length;
                         const flattened_collection = new Array(num_items);
 
                         // Initiate variables and iterates through collections
                         let z_origin = 0, item_index = 0;
-                        _.forIn(hash_collections, collection => {
+                        _.forIn(collections, collection => {
                             // Retrieve the item from collection and flatten it
                             const item = collection.item.flatten();
                             const is_prism = item instanceof TrapezoidalPrism;
 
-                            const fitted_points = (is_prism) ? item.fitted_points : swap_axes(item.fitted_points, "XZY");
+                            const fitted_points = item.fitted_points;
                             const translated_points = new Array(item.num_points);
                             for (let i = 0; i < fitted_points.length; i++) {
                                 translated_points[i] = add(fitted_points[i], [0, 0, z_origin]);
@@ -3669,6 +3681,8 @@
                         return flattened_collection;
                     });
 
+                    console.log(skeleton_by_crowns_3D);
+
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num_spirals: N,
@@ -3678,15 +3692,16 @@
                         rotated_colors: rotated_colors,
 
                         skeleton_3D: skeleton_3D,
-                        skeleton_3D_hash_collections: skeleton_3D_hash_collections,
+                        skeleton_3D_collections: skeleton_3D_collections,
+                        skeleton_by_crowns_3D: skeleton_by_crowns_3D,
 
                         outer_faces_3D: outer_faces_3D,
                         outer_floor_3D: outer_floor_3D,
-                        outer_faces_3D_hash_collections: outer_faces_3D_hash_collections,
+                        outer_faces_3D_collections: outer_faces_3D_collections,
 
                         inner_faces_3D: inner_faces_3D,
                         inner_floor_3D: inner_floor_3D,
-                        inner_faces_3D_hash_collections: inner_faces_3D_hash_collections,
+                        inner_faces_3D_collections: inner_faces_3D_collections,
 
                         timber_profiles_3D: timber_profiles_3D,
                         mandala_3D: mandala_3D,

@@ -32,9 +32,13 @@ qui calcule les boundaries
 
 ------
 
-
-
-* [x] Measurements of collections
+* [ ] Ne pas créer d'objets flattened array, mais qu'ils soient généré 
+  par les collections au moment du process 3D
+  
+    ex : skeleton_3D_collections + flatten => timber_profiles_3D flatten
+    donc pas besoin de créer des objets inutilements.
+  
+    
 
 * [ ] Copier le hash des zome_faces dans inner 
   outer faces pour éviter de le recalculer et du coup de recalculer toute la géometrie
