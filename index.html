@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.10b04" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.10b05" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -417,7 +417,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.10b04</span>
+                              style="font-size: 10px; top:0px">v1.0.10b05</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -529,8 +529,8 @@
                                                     x-text="i18n('outer_faces')"></option>
                                             <option value="timber_profiles_grouped_by_hash"
                                                     x-text="i18n('timber_profiles')"></option>
-                                            <option value="timber_profiles_grouped_by_crown"
-                                                    x-text="i18n('crowns_of_timber_profiles')"></option>
+                                            <option value="timbers_grouped_by_face"
+                                                    x-text="i18n('timbers_of_each_face')"></option>
                                             <option value="inner_faces_grouped_by_hash"
                                                     x-text="i18n('inner_faces_on_the_ground')"></option>
                                             <option value="outer_faces_grouped_by_hash"
@@ -715,7 +715,7 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('C')">C
                                                                 </button>
-                                                                <span x-text="i18n('crowns_of_timber_profiles')"></span>
+                                                                <span x-text="i18n('timbers_of_each_face')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('K')">K
@@ -1411,15 +1411,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.10b04"></script>
-<script src="i18n/en.js?v=1.0.10b04"></script>
-<script src="i18n/it.js?v=1.0.10b04"></script>
-<script src="i18n/fr.js?v=1.0.10b04"></script>
-<script src="i18n/pl.js?v=1.0.10b04"></script>
-<script src="i18n/sv.js?v=1.0.10b04"></script>
+<script src="i18n/es.js?v=1.0.10b05"></script>
+<script src="i18n/en.js?v=1.0.10b05"></script>
+<script src="i18n/it.js?v=1.0.10b05"></script>
+<script src="i18n/fr.js?v=1.0.10b05"></script>
+<script src="i18n/pl.js?v=1.0.10b05"></script>
+<script src="i18n/sv.js?v=1.0.10b05"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.10b04"></script>
+<script src="js/core.js?v=1.0.10b05"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -2713,7 +2713,7 @@
                             break;
                         case "c":
                         case "C":
-                            this.type_of_3D_objects = "timber_profiles_grouped_by_crown";
+                            this.type_of_3D_objects = "timbers_grouped_by_face";
                             break;
                         case "o":
                         case "O":
@@ -2868,10 +2868,7 @@
                     this.save_params(false);
 
                     // Add shape parameter listeners
-                    const zome_param_keys = Object.keys(this.params).filter(el => {
-                        return el !== 'language';
-                    });
-
+                    const zome_param_keys = Object.keys(this.params);
                     _.forEach(zome_param_keys, key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
@@ -3695,10 +3692,10 @@
                     ] = arr_of_obj_groups;
 
                     // Create a fake group of crowns only for display
-                    const timber_profiles_grouped_by_crown = [];
+                    const timbers_grouped_by_face = [];
                     _.forIn(zome_faces_grouped_by_hash, group => {
                         const parent = group.item;
-                        timber_profiles_grouped_by_crown.push(
+                        timbers_grouped_by_face.push(
                             new ItemHashGroup(
                                 new TrapezoidalPrismCrown(parent.framework_timbers, parent),
                                 group.hash,
@@ -3761,7 +3758,7 @@
 
                         skeleton: skeleton,
                         timber_profiles_grouped_by_hash: timber_profiles_grouped_by_hash,
-                        timber_profiles_grouped_by_crown: timber_profiles_grouped_by_crown,
+                        timbers_grouped_by_face: timbers_grouped_by_face,
 
                         outer_faces: outer_faces,
                         outer_faces_grouped_by_hash: outer_faces_grouped_by_hash,

@@ -1145,12 +1145,6 @@ class Base3DGeometry {
         );
     }
 
-    static copy(obj, points) {
-        return new Base3DGeometry(
-            points || obj.points, obj.label, obj.color, obj.crown_index, obj.part
-        );
-    }
-
     compute_points_on_the_ground() {
     };
 
@@ -1339,7 +1333,7 @@ class Polygon3D extends Base3DGeometry {
     //
     // points are distributed counterclockwise
 
-    constructor(points, label, color, crown_index, part = null) {
+    constructor(points, label, color, crown_index, part = "") {
         // Call parent constructor
         super(points, label, color, crown_index);
         if (this.num_points < 3) {
@@ -1370,7 +1364,7 @@ class Polygon3D extends Base3DGeometry {
     }
 
     get is_bottom_part() {
-        return this.part == "bottom";
+        return this.part === "bottom";
     }
 
     set is_bottom_part(value) {
@@ -1378,7 +1372,7 @@ class Polygon3D extends Base3DGeometry {
     }
 
     get is_top_part() {
-        return this.part == "top";
+        return this.part === "top";
     }
 
     set is_top_part(value) {
@@ -2269,7 +2263,7 @@ class Zome {
 
             skeleton = null,
             timber_profiles_grouped_by_hash = null,
-            timber_profiles_grouped_by_crown = null,
+            timbers_grouped_by_face = null,
 
             outer_faces = null,
             outer_faces_grouped_by_hash = null,
@@ -2290,7 +2284,7 @@ class Zome {
 
         this.skeleton = skeleton || [];
         this.timber_profiles_grouped_by_hash = timber_profiles_grouped_by_hash || [];
-        this.timber_profiles_grouped_by_crown = timber_profiles_grouped_by_crown || [];
+        this.timbers_grouped_by_face = timbers_grouped_by_face || [];
 
         this.outer_faces = outer_faces || [];
         this.outer_faces_grouped_by_hash = outer_faces_grouped_by_hash || [];
