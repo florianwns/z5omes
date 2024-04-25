@@ -565,6 +565,20 @@ function check_is_coplanar(points) {
 }
 
 
+// --------------------------------
+// ========== 3D Helpers ==========
+// --------------------------------
+
+function clone_3D_obj(obj, translation_vec = [0, 0, 0]) {
+    if(!(obj instanceof THREE.Object3D)) return;
+
+    const cloned_obj = obj.clone();
+    cloned_obj.position.x += translation_vec[0];
+    cloned_obj.position.y += translation_vec[1];
+    cloned_obj.position.z += translation_vec[2];
+    return cloned_obj;
+}
+
 // -------------------------
 // ========== SVG ==========
 // -------------------------

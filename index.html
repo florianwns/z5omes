@@ -2342,11 +2342,11 @@
                     const exporter = new THREE.GLTFExporter();
 
                     // Because GLTF is in meters, convert millimeters to meters
-                    const resized_obj = this.compute_obj_to_export();
-                    resized_obj.scale.set(0.001, 0.001, 0.001);
+                    const obj_to_export = this.compute_obj_to_export();
+                    obj_to_export.scale.set(0.001, 0.001, 0.001);
 
                     exporter.parse(
-                        resized_obj,
+                        obj_to_export,
                         (res) => {
                             const str = JSON.stringify(res, null, 2);
                             const blob = new Blob([str], {type: 'text/plain'});
@@ -2378,36 +2378,73 @@
                     const label_meshes = new THREE.Group();
                     label_meshes.name = "labels";
 
-                    const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
+                    if (this.items_are_grouped) {
+                        const groups = eval(`ZOME.${this.type_of_3D_objects}`);
+                        let z_origin = 0;
+                        _.forIn(groups, group => {
+                            const item = group.item.put_on_the_ground();
 
-                    // Same as above but for spirals with geometry cloning for more efficiency
-                    for (let i = 0; i < items_3D.length; i++) {
-                        const item = items_3D[i];
-                        zome_meshes.add(item.mesh.clone());
+                            const boundaries = get_boundaries(item.edge_points.map(v => v.toArray()));
+                            const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
 
-                        if (this.draw_labels) {
-                            item.compute_label_mesh(font);
-                            if (item.label_mesh) {
-                                label_meshes.add(item.label_mesh.clone());
+                            // Compute a translation vec to align and spread items
+                            const translation_vec = [-x_min, -y_min, -z_min + z_origin];
+
+                            // Apply translation vector
+                            zome_meshes.add(
+                                clone_3D_obj(item.mesh, translation_vec)
+                            );
+
+                            // Add Label
+                            if (this.draw_labels) {
+                                item.compute_label_mesh(font);
+                                if (item.label_mesh) {
+                                    label_meshes.add(
+                                        clone_3D_obj(item.label_mesh, translation_vec)
+                                    );
+                                }
                             }
-                        }
 
-                        if (this.clone_and_rotate_items) {
-                            for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
-                                const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+                            // Increase origin on Z axis
+                            z_origin += depth + 50;
+                        });
+                    } else {
+                        const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
 
-                                if (spiral_index < this.num_spirals_to_display) {
-                                    const rotated_mesh = item.mesh.clone();
-                                    rotated_mesh.rotateY(rotation_angle);
-                                    zome_meshes.add(rotated_mesh);
+                        // Same as above but for spirals with geometry cloning for more efficiency
+                        for (let i = 0; i < items_3D.length; i++) {
+                            const item = items_3D[i];
+                            zome_meshes.add(
+                                clone_3D_obj(item.mesh)
+                            );
+
+                            if (this.draw_labels) {
+                                item.compute_label_mesh(font);
+                                if (item.label_mesh) {
+                                    label_meshes.add(
+                                        clone_3D_obj(item.label_mesh)
+                                    );
+                                }
+                            }
+
+                            if (this.clone_and_rotate_items) {
+                                for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
+                                    const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+
+                                    if (spiral_index < this.num_spirals_to_display) {
+                                        const rotated_mesh = clone_3D_obj(item.mesh);
+                                        rotated_mesh.rotateY(rotation_angle);
+                                        zome_meshes.add(rotated_mesh);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    let floor_3D = this.get_floor_3D();
-                    if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                        zome_meshes.add(floor_3D.mesh.clone());
+                        let floor_3D = this.get_floor_3D();
+                        if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
+                            zome_meshes.add(floor_3D.mesh.clone());
+                        }
+
                     }
 
                     obj_to_export.add(zome_meshes);
@@ -2496,9 +2533,11 @@
                             mesh_colors.push(...item.mesh_colors);
 
                             // Add Label
-                            item.compute_label_mesh(font, translation_vec);
+                            item.compute_label_mesh(font);
                             if (item.label_mesh) {
-                                meshes.labels.add(item.label_mesh);
+                                meshes.labels.add(
+                                    clone_3D_obj(item.label_mesh, translation_vec)
+                                );
                             }
 
                             // Increase origin on Z axis

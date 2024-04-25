@@ -1,6 +1,5 @@
 # TODO-LIST
-
-
+ 
 * [ ] AJouter un bouton pour faire une capture de la 3D
   https://discourse.threejs.org/t/how-to-save-rendering-scene-to-img/41858/2
   
