@@ -1,7 +1,12 @@
 # TODO-LIST
-
-* [ ] Measurements of collections
+ 
+* [ ] AJouter un bouton pour faire une capture de la 3D
+  https://discourse.threejs.org/t/how-to-save-rendering-scene-to-img/41858/2
   
+* [ ] Copier le hash des zome_faces dans inner 
+  outer faces pour éviter de le recalculer et du coup de recalculer toute la géometrie
+
+
 * [ ] Dessiner les crowns à plat en 2D avec les timbers profiles pour mieux comprendre le schéma de montage
 
 * [ ] Ajouter l'export ZIP (svgs) et PDF pour les figures des timber profiles
@@ -14,8 +19,8 @@
 
 * [ ] Ajouter les renforts en plus de la division des polygones
 
-* [ ] Ajouter le zomandala (Différent du mandala)
-  https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
+* [ ] Ajouter le zoflattened_faces (Différent du flattened_faces)
+  https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zoflattened_faces-sans-logiciel-ni-ordinateur.html
 
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
 
@@ -25,7 +30,7 @@
 * [ ] Renommer origami en 2D View
     * Mandala => All
     * Spiral =>
-    * Zomandala ?? à Ajouter
+    * Zoflattened_faces ?? à Ajouter
 
 
 * [ ] Corriger les points de la semelle de la méthode goodkarma

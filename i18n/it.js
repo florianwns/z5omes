@@ -13,10 +13,9 @@ const I18N_IT = {
         vertices: "Vertici",
         fullscreen: "Schermo intero",
         keyboard_shortcuts: "Tasti rapidi",
-        skeleton_3D: 'Scheletro 3D',
+        skeleton: 'Scheletro 3D',
         cover_3D: 'Copertura 3D',
-        mandala_3D: 'Mandala 3D',
-        mandala: 'Mandala',
+        flattened_faces: 'Mandala',
         spirals: 'Spirali',
         zome_made_with: "Questo zome è stato realizzato con",
 

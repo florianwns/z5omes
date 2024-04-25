@@ -13,10 +13,9 @@ const I18N_SV = {
         vertices: "Vertex",
         fullscreen: "Helskärm",
         keyboard_shortcuts: "Tangentbordsgenvägar",
-        skeleton_3D: "3D Stomme",
+        skeleton: "3D Stomme",
         cover_3D: "3D Cover",
-        mandala_3D: "3D Mandala",
-        mandala: "Mandala",
+        flattened_faces: "Mandala",
         spirals: "Spiraler",
         zome_made_with: "Den här zomen gjordes med",
 
