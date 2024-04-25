@@ -1,61 +1,9 @@
 # TODO-LIST
 
 
-at ground level
-
-
-
-Mandala est en fait : faces aplaties => flattened faces
-inner_faces : inner_faces_on_the_ground
-
-finir le compute boundaries
-et le fit_points(points, x_min, y_min, z_max)
-
-
 * [ ] AJouter un bouton pour faire une capture de la 3D
   https://discourse.threejs.org/t/how-to-save-rendering-scene-to-img/41858/2
   
-
-* On imagine moins de catégories pour la 3D
- 3D Framework 
- 3D Flatenned framework 
- 3D Timber Profiles
- 2D Mandala
-  
- Dans les vue du skeleton, un bouton pour afficher : 
-  les timbers profiles
-  les faces interne
-  les faces externes
- |<-    ->|   =
-
-cela risque d'alourdir la vue 3D 
-mais permettra de grandement mieux comprendre
-l'emboitement des faces et de la charpente
-
-On appliquer donc le quaternion des faces internes à l'ensemble du chose
-
-On va donc avoir un groupe d'objets 3D que nous allons mettre à plat
-avec un quaternion et une translation pour l'ensemble des objets.
-
-
-------
-
-
-Si le flattened faisait déjà le fit point 
-et qu'au lieu de fitted_points on ai un centered_points
-qui calcule les boundaries 
-  
-
-------
-
-* [ ] Ne pas créer d'objets flattened array, mais qu'ils soient généré 
-  par les collections au moment du process 3D
-  
-    ex : timber_profiles_grouped_by_hash + flatten => timber_profiles flatten
-    donc pas besoin de créer des objets inutilements.
-  
-    
-
 * [ ] Copier le hash des zome_faces dans inner 
   outer faces pour éviter de le recalculer et du coup de recalculer toute la géometrie
 
@@ -72,8 +20,8 @@ qui calcule les boundaries
 
 * [ ] Ajouter les renforts en plus de la division des polygones
 
-* [ ] Ajouter le zomandala (Différent du mandala)
-  https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zomandala-sans-logiciel-ni-ordinateur.html
+* [ ] Ajouter le zoflattened_faces (Différent du flattened_faces)
+  https://docplayer.fr/188531290-Calculer-un-zome-selon-la-methode-zoflattened_faces-sans-logiciel-ni-ordinateur.html
 
 * [ ] Comme pour les timbers profiles dessiner les losanges à plat en 3D
 
@@ -83,7 +31,7 @@ qui calcule les boundaries
 * [ ] Renommer origami en 2D View
     * Mandala => All
     * Spiral =>
-    * Zomandala ?? à Ajouter
+    * Zoflattened_faces ?? à Ajouter
 
 
 * [ ] Corriger les points de la semelle de la méthode goodkarma

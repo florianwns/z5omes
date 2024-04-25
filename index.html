@@ -532,12 +532,12 @@
                                             <option value="timber_profiles_grouped_by_crown"
                                                     x-text="i18n('crowns_of_timber_profiles')"></option>
                                             <option value="inner_faces_grouped_by_hash"
-                                                    x-text="i18n('flattened_inner_faces')"></option>
+                                                    x-text="i18n('inner_faces_on_the_ground')"></option>
                                             <option value="outer_faces_grouped_by_hash"
-                                                    x-text="i18n('flattened_outer_faces')"></option>
+                                                    x-text="i18n('outer_faces_on_the_ground')"></option>
 
-                                            <option value="mandala"
-                                                    x-text="i18n('mandala')"></option>
+                                            <option value="flattened_faces"
+                                                    x-text="i18n('flattened_faces')"></option>
                                         </select>
                                     </div>
 
@@ -707,17 +707,17 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('K')">K
                                                                 </button>
-                                                                <span x-text="i18n('flattened_outer_faces')"></span>
+                                                                <span x-text="i18n('outer_faces_on_the_ground')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('L')">L
                                                                 </button>
-                                                                <span x-text="i18n('flattened_inner_faces')"></span>
+                                                                <span x-text="i18n('inner_faces_on_the_ground')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('M')">U
                                                                 </button>
-                                                                <span x-text="i18n('mandala')"></span>
+                                                                <span x-text="i18n('flattened_faces')"></span>
                                                             </li>
                                                             <!-- Camera view -->
                                                             <li class="d-flex align-items-center mb-2">
@@ -1134,8 +1134,8 @@
                                     <div class="mb-2">
                                         <select class="form-select" aria-label="Kind of drawing"
                                                 x-model="kind_of_drawing">
-                                            <option selected value="mandala_faces" x-text="i18n('mandala')"></option>
-                                            <option value="spiral_faces" x-text="i18n('spirals')"></option>
+                                            <option selected value="flattened_zome" x-text="i18n('zome')"></option>
+                                            <option value="flattened_spirals" x-text="i18n('spirals')"></option>
                                         </select>
                                     </div>
 
@@ -1460,7 +1460,7 @@
 
                         // Get min max for front and bottom sides
                         _.forEach(side_names, (side_name, i) => {
-                            const side = prism.flatten_face(side_name, true, true, (i === 1) ? -TAU_Q : null);
+                            const side = prism.put_face_on_the_ground(side_name, true, true, (i === 1) ? -TAU_Q : null);
                             switch (i) {
                                 case 0:
                                 case 1:
@@ -1848,12 +1848,12 @@
                         : this.faces
                     const rows = new Array(row_faces.length);
                     _.forEach(row_faces, (face, i) => {
-                        const flattened_face = face.flatten_face("front", true);
-                        rows[i] = [flattened_face, [
-                            flattened_face.label,
+                        const face_on_the_ground = face.put_face_on_the_ground("front", true);
+                        rows[i] = [face_on_the_ground, [
+                            face_on_the_ground.label,
                             this.quantities[i] || 1,
-                            humanize_distance(flattened_face.width),
-                            humanize_distance(flattened_face.height),
+                            humanize_distance(face_on_the_ground.width),
+                            humanize_distance(face_on_the_ground.height),
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
                             humanize_angle(rad2deg(face.dihedral_angle)),
@@ -1907,7 +1907,7 @@
                 bulleted_list_colors: [],
                 zoom: 1,
                 num_col: 1,
-                kind_of_drawing: "mandala_faces",
+                kind_of_drawing: "flattened_zome",
                 draw_color: true,
                 draw_centroid: false,
                 paint_similar_pieces: true,
@@ -1985,7 +1985,7 @@
                     // Save document
                     doc.end();
 
-                    const filename = this.gen_filename("_flattened_faces.pdf");
+                    const filename = this.gen_filename(`_${this.kind_of_drawing}.pdf`);
                     stream.on('finish', function () {
                         const url = stream.toBlobURL("application/pdf");
                         download(filename, url);
@@ -1997,18 +1997,18 @@
                 download_svg() {
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
-                    const filename = this.gen_filename("_flattened_faces.svg");
+                    const filename = this.gen_filename(`_${this.kind_of_drawing}.svg`);
                     download(filename, window.URL.createObjectURL(blob));
                 },
                 process() {
                     // Init variables
                     pages = [];
                     switch (this.kind_of_drawing) {
-                        case 'spiral_faces':
-                            this.draw_spiral_faces();
+                        case 'flattened_spirals':
+                            this.draw_flattened_spirals();
                             break;
-                        case 'mandala_faces':
-                            this.draw_mandala_faces();
+                        case 'flattened_zome':
+                            this.draw_flattened_zome();
                             break;
                     }
 
@@ -2103,15 +2103,15 @@
                         svg_elements_per_page[iPa] = svg_elements;
                     });
                 },
-                draw_mandala_faces() {
-                    const mandala = ZOME.mandala;
+                draw_flattened_zome() {
+                    const flattened_faces = ZOME.flattened_faces;
 
                     // For each color, rotate piece around the origin
-                    const mandala_faces = [], O = [0, 0, 0];
-                    const incr_angle = mandala[0].angles[0];
+                    const flattened_zome = [], O = [0, 0, 0];
+                    const incr_angle = flattened_faces[0].angles[0];
                     for (let i = 0, rotation_angle = 0; i < ZOME.num_spirals; i++, rotation_angle += incr_angle) {
-                        _.forEach(mandala, (face) => {
-                            mandala_faces.push(
+                        _.forEach(flattened_faces, (face) => {
+                            flattened_zome.push(
                                 new Polygon3D(
                                     swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -rotation_angle, O)),
                                     face.label,
@@ -2124,18 +2124,18 @@
                         });
                     }
 
-                    if (mandala_faces.length > 0) {
-                        pages.push(mandala_faces);
+                    if (flattened_zome.length > 0) {
+                        pages.push(flattened_zome);
                     }
                 },
-                draw_spiral_faces() {
-                    const mandala = ZOME.mandala;
+                draw_flattened_spirals() {
+                    const flattened_faces = ZOME.flattened_faces;
 
                     // For each color, Add a page with outer_faces faces
                     for (let i = 0; i < ZOME.num_spirals; i++) {
-                        const colored_spiral_faces = [];
-                        _.forEach(mandala, (face) => {
-                            colored_spiral_faces.push(
+                        const colored_flattened_spirals = [];
+                        _.forEach(flattened_faces, (face) => {
+                            colored_flattened_spirals.push(
                                 new Polygon3D(
                                     swap_axes(face.points, "XZY"),
                                     face.label,
@@ -2145,7 +2145,7 @@
                                 )
                             );
                         });
-                        pages.push(colored_spiral_faces);
+                        pages.push(colored_flattened_spirals);
                     }
                 },
                 next_page() {
@@ -2475,7 +2475,7 @@
                         const groups = eval(`ZOME.${this.type_of_3D_objects}`);
                         let z_origin = 0;
                         _.forIn(groups, group => {
-                            const item = group.item.flatten();
+                            const item = group.item.put_on_the_ground();
 
                             const boundaries = get_boundaries(item.edge_points.map(v => v.toArray()));
                             const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
@@ -2672,7 +2672,7 @@
                             break;
                         case "m":
                         case "M":
-                            this.type_of_3D_objects = "mandala";
+                            this.type_of_3D_objects = "flattened_faces";
                             break;
                         case "t":
                         case "T":
@@ -3639,19 +3639,19 @@
                     });
 
                     // Build Mandala
-                    const mandala = new Array(zome_faces_3D.length);
+                    const flattened_faces = new Array(zome_faces_3D.length);
                     let last_pt = [0, 0, 0], before_last_pt, first_pt, second_pt;
                     let last_crown_index = null, rotation_angle = null;
                     for (let face_index = 0; face_index < num_zome_faces; face_index++) {
                         const face = zome_faces_3D[face_index];
-                        let flattened_face = face.flatten_face();
+                        let face_on_the_ground = face.put_face_on_the_ground();
 
                         // Move to Origin and rotate to match with previous piece
-                        let mandala_face_points = (second_pt && face.is_bottom_part)
-                            ? flattened_face.points.map(p => add(p, second_pt))
-                            : flattened_face.points.map(p => add(p, last_pt));
+                        let flattened_face_points = (second_pt && face.is_bottom_part)
+                            ? face_on_the_ground.points.map(p => add(p, second_pt))
+                            : face_on_the_ground.points.map(p => add(p, last_pt));
 
-                        second_pt = mandala_face_points[1];
+                        second_pt = flattened_face_points[1];
 
                         if (face_index > 0) {
                             if (!face.is_bottom_part) {
@@ -3664,22 +3664,22 @@
                                     rotation_angle = rotation_angle.reverse();
                                 }
 
-                                mandala_face_points = mandala_face_points.map(p => {
+                                flattened_face_points = flattened_face_points.map(p => {
                                     return rotate_point_around_y_axis(p, rotation_angle, last_pt);
                                 });
                             } else {
-                                mandala_face_points = mandala_face_points.map(p => {
+                                flattened_face_points = flattened_face_points.map(p => {
                                     return rotate_point_around_y_axis(p, rotation_angle, first_pt);
                                 });
                             }
                         }
 
-                        first_pt = mandala_face_points[0];
-                        last_pt = mandala_face_points[mandala_face_points.length - 1];
-                        before_last_pt = mandala_face_points[mandala_face_points.length - 2];
+                        first_pt = flattened_face_points[0];
+                        last_pt = flattened_face_points[flattened_face_points.length - 1];
+                        before_last_pt = flattened_face_points[flattened_face_points.length - 2];
 
                         // Swap y axis with z axis for 3D display
-                        mandala[face_index] = Polygon3D.copy(face, mandala_face_points);
+                        flattened_faces[face_index] = Polygon3D.copy(face, flattened_face_points);
                         last_crown_index = face.crown_index;
                     }
 
@@ -3702,7 +3702,7 @@
                         inner_faces_grouped_by_hash: inner_faces_grouped_by_hash,
                         inner_floor: inner_floor,
 
-                        mandala: mandala,
+                        flattened_faces: flattened_faces,
 
                         vanishing_lines: vanishing_lines,
                     });

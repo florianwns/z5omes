@@ -15,7 +15,7 @@ const I18N_SV = {
         keyboard_shortcuts: "Tangentbordsgenvägar",
         skeleton: "3D Stomme",
         cover_3D: "3D Cover",
-        mandala: "Mandala",
+        flattened_faces: "Mandala",
         spirals: "Spiraler",
         zome_made_with: "Den här zomen gjordes med",
 

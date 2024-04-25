@@ -15,7 +15,7 @@ const I18N_FR = {
         keyboard_shortcuts: "Raccourcis clavier",
         skeleton: 'Squelette 3D',
         cover_3D: 'Couverture 3D',
-        mandala: 'Mandala',
+        flattened_faces: 'Mandala',
         spirals: 'Spirales',
         zome_made_with: "Ce zome a été fabriqué avec",
 

@@ -512,10 +512,10 @@ function apply_3D_transformations(points, quaternion, translation) {
     return rotated_and_translated_points;
 }
 
-function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
-    // Flattens the 3D points with the pt2 at zero to 2D points
+function put_points_on_the_ground(points, pt1, pt2, pt3, horizontally = true) {
+    // Put 3D points on the ground with the pt2 at zero to 2D points
     // and the pt1 is aligned on x axis if horizontally is true, y axis otherwise
-    // Use quaternion method to flat points
+    // Use quaternion method to put points on the ground
 
     // Compute the angle/distances with the pt2 point
     const theta = angle_between_points(pt1, pt2, pt3);
@@ -539,8 +539,8 @@ function flatten_3D_points(points, pt1, pt2, pt3, horizontally = true) {
 
     // Apply quaternion and sub translation vec to planar the face
     const translation = new THREE.Vector3(...points[0]).applyQuaternion(quaternion);
-    const flattened_points = apply_3D_transformations(points, quaternion, translation);
-    return [flattened_points, quaternion, translation];
+    const points_on_the_ground = apply_3D_transformations(points, quaternion, translation);
+    return [points_on_the_ground, quaternion, translation];
 }
 
 function check_is_coplanar(points) {
@@ -912,7 +912,7 @@ class Base3DGeometry {
         }
 
         // Declare private variables use by getters for dynamic computing
-        this._flattened_points = null;
+        this._points_on_the_ground = null;
         this._quaternion = null;
         this._translation = null;
         this.reset_other_points();
@@ -1086,9 +1086,9 @@ class Base3DGeometry {
         return this._depth;
     }
 
-    get flattened_points() {
-        if (this._flattened_points === null) this.compute_flattened_points();
-        return this._flattened_points;
+    get points_on_the_ground() {
+        if (this._points_on_the_ground === null) this.compute_points_on_the_ground();
+        return this._points_on_the_ground;
     }
 
     get label_mesh() {
@@ -1137,7 +1137,7 @@ class Base3DGeometry {
         );
     }
 
-    compute_flattened_points() {
+    compute_points_on_the_ground() {
     };
 
     compute_label_mesh(font, translation_vec = [0, 0, 0]) {
@@ -1147,12 +1147,12 @@ class Base3DGeometry {
 
         // Get top face
         const side = "front";
-        const flattened_face = this.flatten_face(side);
+        const face_on_the_ground = this.put_face_on_the_ground(side);
 
-        if (flattened_face && flattened_face.label) {
-            const midpoints_item = new Polygon3D(flattened_face.midpoints);
+        if (face_on_the_ground && face_on_the_ground.label) {
+            const midpoints_item = new Polygon3D(face_on_the_ground.midpoints);
             const font_size = Math.min(midpoints_item.width, midpoints_item.depth) * 0.7;
-            const shapes = font.generateShapes(flattened_face.label, font_size);
+            const shapes = font.generateShapes(face_on_the_ground.label, font_size);
 
             const geometry = new THREE.ShapeGeometry(shapes);
             geometry.computeBoundingBox();
@@ -1161,7 +1161,7 @@ class Base3DGeometry {
 
             geometry.translate(xMid, yMid, 2);
             this._label_mesh = new THREE.Mesh(geometry, THREE_LABELS_MATERIAL);
-            this._label_mesh.name = flattened_face.label;
+            this._label_mesh.name = face_on_the_ground.label;
 
             const face = this.get_face(side);
 
@@ -1170,14 +1170,14 @@ class Base3DGeometry {
             this._label_mesh.rotateY(Math.PI);
             this._label_mesh.rotateX(TAU_Q);
 
-            const translation = sub(face.centroid, flattened_face.centroid);
-            const [x, y, z] = add(flattened_face.centroid, translation);
+            const translation = sub(face.centroid, face_on_the_ground.centroid);
+            const [x, y, z] = add(face_on_the_ground.centroid, translation);
 
             this._label_mesh.position.x = x + translation_vec[0];
             this._label_mesh.position.y = y + translation_vec[1];
             this._label_mesh.position.z = z + translation_vec[2];
             const quaternion = quaternion_from_points(
-                ...flattened_face.points.slice(0, 3),
+                ...face_on_the_ground.points.slice(0, 3),
                 ...face.points.slice(0, 3)
             )
             this._label_mesh.applyQuaternion(quaternion);
@@ -1288,12 +1288,12 @@ class Base3DGeometry {
         }
     }
 
-    flatten() {
-        return Base3DGeometry.copy(this, this.flattened_points);
+    put_on_the_ground() {
+        return Base3DGeometry.copy(this, this.points_on_the_ground);
     }
 
-    flatten_face(side = "front", swap_yz = false) {
-        return Base3DGeometry.copy(this, (swap_yz) ? swap_axes(this.flattened_points, "XZY") : this.flattened_points);
+    put_face_on_the_ground(side = "front", swap_yz = false) {
+        return Base3DGeometry.copy(this, (swap_yz) ? swap_axes(this.points_on_the_ground, "XZY") : this.points_on_the_ground);
     }
 
     filter_points_by_side(side, points) {
@@ -1405,18 +1405,18 @@ class Polygon3D extends Base3DGeometry {
         return this._radius;
     }
 
-    get flattened_points() {
-        if (this._flattened_points === null) this.compute_flattened_points();
-        return this._flattened_points;
+    get points_on_the_ground() {
+        if (this._points_on_the_ground === null) this.compute_points_on_the_ground();
+        return this._points_on_the_ground;
     }
 
     get translation() {
-        if (this._translation === null) this.compute_flattened_points();
+        if (this._translation === null) this.compute_points_on_the_ground();
         return this._translation;
     }
 
     get quaternion() {
-        if (this._quaternion === null) this.compute_flattened_points();
+        if (this._quaternion === null) this.compute_points_on_the_ground();
         return this._quaternion;
     }
 
@@ -1426,15 +1426,15 @@ class Polygon3D extends Base3DGeometry {
         );
     }
 
-    compute_flattened_points() {
+    compute_points_on_the_ground() {
         // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-        [this._flattened_points, this._quaternion, this._translation] = (this.is_bottom_part)
-            ? flatten_3D_points(
+        [this._points_on_the_ground, this._quaternion, this._translation] = (this.is_bottom_part)
+            ? put_points_on_the_ground(
                 this.points,
                 this.centroid, this.midpoints[this.num_points - 1], this.points[0],
                 false
             )
-            : flatten_3D_points(
+            : put_points_on_the_ground(
                 this.points,
                 this.centroid, this.points[0], this.points[1],
                 false
@@ -1448,12 +1448,12 @@ class Polygon3D extends Base3DGeometry {
         );
     }
 
-    flatten() {
-        return Polygon3D.copy(this, this.flattened_points);
+    put_on_the_ground() {
+        return Polygon3D.copy(this, this.points_on_the_ground);
     }
 
-    flatten_face(side = "front", swap_yz = false) {
-        return Polygon3D.copy(this, (swap_yz) ? swap_axes(this.flattened_points, "XZY") : this.flattened_points);
+    put_face_on_the_ground(side = "front", swap_yz = false) {
+        return Polygon3D.copy(this, (swap_yz) ? swap_axes(this.points_on_the_ground, "XZY") : this.points_on_the_ground);
     }
 
     compute_framework(
@@ -2067,10 +2067,10 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         );
     }
 
-    compute_flattened_points() {
+    compute_points_on_the_ground() {
         // Flattens point with the bottom side at zero
         const [A, B, D] = [this.points[0], this.points[1], this.points[3]];
-        [this._flattened_points, this._quaternion, this._translation] = flatten_3D_points(this.points, D, B, A, true);
+        [this._points_on_the_ground, this._quaternion, this._translation] = put_points_on_the_ground(this.points, D, B, A, true);
     }
 
     compute_mesh_colors() {
@@ -2130,44 +2130,44 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         );
     }
 
-    flatten() {
-        return TrapezoidalPrism.copy(this, this.flattened_points);
+    put_on_the_ground() {
+        return TrapezoidalPrism.copy(this, this.points_on_the_ground);
     }
 
-    flatten_face(side = "front", swap_yz = false, add_opposite_side = false, rotation_angle = null) {
+    put_face_on_the_ground(side = "front", swap_yz = false, add_opposite_side = false, rotation_angle = null) {
         // Flatten side (or pair of sides if add_opposite_side is true)
         // with three choices "front", "bottom" and "left";
         // Because svg display is different than three.js display, we reverse some axes.
-        let flattened_points;
+        let points_on_the_ground;
         switch (side) {
             case "front":
             case "back":
-                flattened_points = this.flattened_points
+                points_on_the_ground = this.points_on_the_ground
                 break;
             case "bottom":
             case "top":
-                flattened_points = swap_axes(this.flattened_points, "XZY").map(p => [p[0], p[1], -p[2]]);
+                points_on_the_ground = swap_axes(this.points_on_the_ground, "XZY").map(p => [p[0], p[1], -p[2]]);
                 break;
             case "left":
             case "right":
-                flattened_points = swap_axes(this.flattened_points, "YXZ");
+                points_on_the_ground = swap_axes(this.points_on_the_ground, "YXZ");
                 break;
         }
 
         if (swap_yz) {
-            flattened_points = swap_axes(flattened_points, "XZY");
+            points_on_the_ground = swap_axes(points_on_the_ground, "XZY");
         }
 
         if (rotation_angle !== null) {
-            flattened_points = rotate_points_around_z_axis(flattened_points, rotation_angle);
+            points_on_the_ground = rotate_points_around_z_axis(points_on_the_ground, rotation_angle);
         }
 
         const filtered_points = add_opposite_side
             ? [
-                ...this.filter_points_by_side(side, flattened_points),
-                ...this.filter_points_by_side(this.get_opposite_side(side), flattened_points)
+                ...this.filter_points_by_side(side, points_on_the_ground),
+                ...this.filter_points_by_side(this.get_opposite_side(side), points_on_the_ground)
             ]
-            : this.filter_points_by_side(side, flattened_points);
+            : this.filter_points_by_side(side, points_on_the_ground);
 
         return Polygon3D.copy(this, filtered_points);
     }
@@ -2198,14 +2198,14 @@ class TrapezoidalPrismCrown extends Base3DGeometryGroup {
         }
     }
 
-    flatten() {
-        const flattened_children = new Array(this.children.length)
+    put_on_the_ground() {
+        const children_on_the_ground = new Array(this.children.length)
         for (let i = 0; i < this.children.length; i++) {
             const item = this.children[i];
-            flattened_children[i] = item.apply_3D_transformations(this.parent.quaternion, this.parent.translation);
+            children_on_the_ground[i] = item.apply_3D_transformations(this.parent.quaternion, this.parent.translation);
         }
 
-        return TrapezoidalPrismCrown.copy(this, flattened_children, this.parent);
+        return TrapezoidalPrismCrown.copy(this, children_on_the_ground, this.parent);
     }
 }
 
@@ -2265,7 +2265,7 @@ class Zome {
             inner_faces_grouped_by_hash = null,
             inner_floor = null,
 
-            mandala = null,
+            flattened_faces = null,
             vanishing_lines = null
         }
     ) {
@@ -2286,7 +2286,7 @@ class Zome {
         this.inner_faces_grouped_by_hash = inner_faces_grouped_by_hash || [];
         this.inner_floor = inner_floor || null;
 
-        this.mandala = mandala || [];
+        this.flattened_faces = flattened_faces || [];
         this.vanishing_lines = vanishing_lines || [];
     }
 }
