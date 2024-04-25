@@ -2269,7 +2269,7 @@ class Zome {
 
             skeleton = null,
             timber_profiles_grouped_by_hash = null,
-            timber_profiles_grouped_by_crown = null,
+            timbers_grouped_by_face = null,
 
             outer_faces = null,
             outer_faces_grouped_by_hash = null,
@@ -2290,7 +2290,7 @@ class Zome {
 
         this.skeleton = skeleton || [];
         this.timber_profiles_grouped_by_hash = timber_profiles_grouped_by_hash || [];
-        this.timber_profiles_grouped_by_crown = timber_profiles_grouped_by_crown || [];
+        this.timbers_grouped_by_face = timbers_grouped_by_face || [];
 
         this.outer_faces = outer_faces || [];
         this.outer_faces_grouped_by_hash = outer_faces_grouped_by_hash || [];

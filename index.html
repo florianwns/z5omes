@@ -529,8 +529,8 @@
                                                     x-text="i18n('outer_faces')"></option>
                                             <option value="timber_profiles_grouped_by_hash"
                                                     x-text="i18n('timber_profiles')"></option>
-                                            <option value="timber_profiles_grouped_by_crown"
-                                                    x-text="i18n('crowns_of_timber_profiles')"></option>
+                                            <option value="timbers_grouped_by_face"
+                                                    x-text="i18n('timbers_in_each_face')"></option>
                                             <option value="inner_faces_grouped_by_hash"
                                                     x-text="i18n('inner_faces_on_the_ground')"></option>
                                             <option value="outer_faces_grouped_by_hash"
@@ -715,7 +715,7 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('C')">C
                                                                 </button>
-                                                                <span x-text="i18n('crowns_of_timber_profiles')"></span>
+                                                                <span x-text="i18n('timbers_in_each_face')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('K')">K
@@ -2713,7 +2713,7 @@
                             break;
                         case "c":
                         case "C":
-                            this.type_of_3D_objects = "timber_profiles_grouped_by_crown";
+                            this.type_of_3D_objects = "timbers_grouped_by_face";
                             break;
                         case "o":
                         case "O":
@@ -3695,10 +3695,10 @@
                     ] = arr_of_obj_groups;
 
                     // Create a fake group of crowns only for display
-                    const timber_profiles_grouped_by_crown = [];
+                    const timbers_grouped_by_face = [];
                     _.forIn(zome_faces_grouped_by_hash, group => {
                         const parent = group.item;
-                        timber_profiles_grouped_by_crown.push(
+                        timbers_grouped_by_face.push(
                             new ItemHashGroup(
                                 new TrapezoidalPrismCrown(parent.framework_timbers, parent),
                                 group.hash,
@@ -3761,7 +3761,7 @@
 
                         skeleton: skeleton,
                         timber_profiles_grouped_by_hash: timber_profiles_grouped_by_hash,
-                        timber_profiles_grouped_by_crown: timber_profiles_grouped_by_crown,
+                        timbers_grouped_by_face: timbers_grouped_by_face,
 
                         outer_faces: outer_faces,
                         outer_faces_grouped_by_hash: outer_faces_grouped_by_hash,
