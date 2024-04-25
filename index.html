@@ -690,11 +690,6 @@
                                                                 <span x-text="i18n('skeleton')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('T')">T
-                                                                </button>
-                                                                <span x-text="i18n('timber_profiles')"></span>
-                                                            </li>
-                                                            <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('O')">O
                                                                 </button>
                                                                 <span x-text="i18n('outer_faces')"></span>
@@ -705,17 +700,27 @@
                                                                 <span x-text="i18n('inner_faces')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('K')">K
+                                                                <button class="key me-2" @click="keydown('T')">T
                                                                 </button>
-                                                                <span x-text="i18n('outer_faces_on_the_ground')"></span>
+                                                                <span x-text="i18n('timber_profiles')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('L')">L
+                                                                <button class="key me-2" @click="keydown('C')">C
+                                                                </button>
+                                                                <span x-text="i18n('crowns_of_timber_profiles')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('K')">K
                                                                 </button>
                                                                 <span x-text="i18n('inner_faces_on_the_ground')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
-                                                                <button class="key me-2" @click="keydown('M')">U
+                                                                <button class="key me-2" @click="keydown('L')">L
+                                                                </button>
+                                                                <span x-text="i18n('outer_faces_on_the_ground')"></span>
+                                                            </li>
+                                                            <li class="d-flex align-items-center mb-2">
+                                                                <button class="key me-2" @click="keydown('F')">F
                                                                 </button>
                                                                 <span x-text="i18n('flattened_faces')"></span>
                                                             </li>
@@ -2672,6 +2677,8 @@
                             break;
                         case "m":
                         case "M":
+                        case "f":
+                        case "F":
                             this.type_of_3D_objects = "flattened_faces";
                             break;
                         case "t":
@@ -2680,6 +2687,8 @@
                             break;
                         case "s":
                         case "S":
+                        case "s":
+                        case "Z":
                             this.type_of_3D_objects = "skeleton";
                             break;
                         case "Down":
