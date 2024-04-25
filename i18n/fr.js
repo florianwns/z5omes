@@ -29,6 +29,7 @@ const I18N_FR = {
         zome_made_with: "Ce zome a été fabriqué avec",
         framework_customizer: "Personnalisation de la charpente",
         dihedral_angle: "Angle dièdre",
+        roof: "Toit",
 
         // Tooltips
         tooltip_display_help: "Afficher l'aide",
