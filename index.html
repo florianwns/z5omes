@@ -521,21 +521,23 @@
                                         <!-- Draw Zome Env/ Zome Skeleton/ Mandala -->
                                         <select class="form-select" aria-label="Type of 3D objects"
                                                 x-model="type_of_3D_objects">
-                                            <option selected value="skeleton_3D" x-text="i18n('skeleton_3D')"></option>
-                                            <option value="timber_profiles_3D"
-                                                    x-text="i18n('timber_profiles_3D')"></option>
-                                            <option value="inner_faces_3D"
-                                                    x-text="i18n('inner_faces_3D')"></option>
-                                            <option value="outer_faces_3D"
-                                                    x-text="i18n('outer_faces_3D')"></option>
-                                            <option value="flattened_inner_faces_3D"
-                                                    x-text="i18n('flattened_inner_faces_3D')"></option>
-                                            <option value="flattened_outer_faces_3D"
-                                                    x-text="i18n('flattened_outer_faces_3D')"></option>
-                                            <option value="skeleton_by_crowns_3D"
-                                                    x-text="i18n('skeleton_by_crowns_3D')"></option>
-                                            <option value="mandala_3D"
-                                                    x-text="i18n('mandala_3D')"></option>
+                                            <option selected value="skeleton"
+                                                    x-text="i18n('skeleton')"></option>
+                                            <option value="inner_faces"
+                                                    x-text="i18n('inner_faces')"></option>
+                                            <option value="outer_faces"
+                                                    x-text="i18n('outer_faces')"></option>
+                                            <option value="timber_profiles_grouped_by_hash"
+                                                    x-text="i18n('timber_profiles')"></option>
+                                            <option value="timber_profiles_grouped_by_crown"
+                                                    x-text="i18n('crowns_of_timber_profiles')"></option>
+                                            <option value="inner_faces_grouped_by_hash"
+                                                    x-text="i18n('flattened_inner_faces')"></option>
+                                            <option value="outer_faces_grouped_by_hash"
+                                                    x-text="i18n('flattened_outer_faces')"></option>
+
+                                            <option value="mandala"
+                                                    x-text="i18n('mandala')"></option>
                                         </select>
                                     </div>
 
@@ -565,7 +567,7 @@
                                                     <i class="fa"
                                                        :class="(draw_zome) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
                                                 </button>
-                                                <div class="mt-1" x-show="draw_zome && clone_and_rotate_mode">
+                                                <div class="mt-1" x-show="draw_zome && clone_and_rotate_items">
                                                     <button class="btn btn-sm btn-small-padding"
                                                             @click="num_spirals_to_display = Math.max(num_spirals_to_display - 1, 1)"
                                                             :class="(num_spirals_to_display <= 1) ? `btn-secondary` : `btn-primary`"
@@ -685,37 +687,37 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('S')">S
                                                                 </button>
-                                                                <span x-text="i18n('skeleton_3D')"></span>
+                                                                <span x-text="i18n('skeleton')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('T')">T
                                                                 </button>
-                                                                <span x-text="i18n('timber_profiles_3D')"></span>
+                                                                <span x-text="i18n('timber_profiles')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('O')">O
                                                                 </button>
-                                                                <span x-text="i18n('outer_faces_3D')"></span>
+                                                                <span x-text="i18n('outer_faces')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('I')">I
                                                                 </button>
-                                                                <span x-text="i18n('inner_faces_3D')"></span>
+                                                                <span x-text="i18n('inner_faces')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('K')">K
                                                                 </button>
-                                                                <span x-text="i18n('flattened_outer_faces_3D')"></span>
+                                                                <span x-text="i18n('flattened_outer_faces')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('L')">L
                                                                 </button>
-                                                                <span x-text="i18n('flattened_inner_faces_3D')"></span>
+                                                                <span x-text="i18n('flattened_inner_faces')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('M')">U
                                                                 </button>
-                                                                <span x-text="i18n('mandala_3D')"></span>
+                                                                <span x-text="i18n('mandala')"></span>
                                                             </li>
                                                             <!-- Camera view -->
                                                             <li class="d-flex align-items-center mb-2">
@@ -1227,9 +1229,9 @@
                     <!-- Select inner or outer faces -->
                     <select id="face-measurement-select" class="form-select mx-2" aria-label="Type of 3D objects"
                             x-model="type_of_3D_objects">
-                        <option selected value="inner_faces_3D"
+                        <option selected value="inner_faces"
                                 x-text="i18n('inner')"></option>
-                        <option value="outer_faces_3D"
+                        <option value="outer_faces"
                                 x-text="i18n('outer')"></option>
                     </select>
 
@@ -1436,7 +1438,7 @@
 
                 process() {
                     // Group prims by hash
-                    const skeleton_3D_collections = ZOME.skeleton_3D_collections;
+                    const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
 
                     // Clear content
                     this.timber_profile_container.innerHTML = "";
@@ -1451,9 +1453,9 @@
 
                     // Flatten side and define global boundaries
                     let all_labeled_sides = {};
-                    _.forIn(skeleton_3D_collections, collection => {
+                    _.forIn(timber_profiles_grouped_by_hash, group => {
                         // Take the first element of group
-                        const prism = collection.item;
+                        const prism = group.item;
                         all_labeled_sides[prism.label] = new Array(side_names.length);
 
                         // Get min max for front and bottom sides
@@ -1493,9 +1495,9 @@
                     const left_column_x_start = x_padding;
                     const right_column_x_start = left_column_x_start + left_column_width + 2 * x_padding;
 
-                    _.forIn(skeleton_3D_collections, collection => {
-                        // Take the item of collection
-                        const prism = collection.item;
+                    _.forIn(timber_profiles_grouped_by_hash, group => {
+                        // Take the item of group
+                        const prism = group.item;
                         const sides = all_labeled_sides[prism.label];
 
                         // Get sides of left and right columns
@@ -1571,7 +1573,7 @@
                                 count_text.setAttribute('font-size', `${title_font_size}`);
                                 count_text.setAttribute('font-weight', 'bold');
                                 count_text.setAttribute('fill', `${prism.color.hex}`);
-                                count_text.innerHTML = `X ${collection.count}`;
+                                count_text.innerHTML = `X ${group.count}`;
                                 svg_elements_with_priority.push([count_text, 5]);
                             }
 
@@ -1768,7 +1770,7 @@
                 faces: [],
                 quantities: [],
                 floor: null,
-                type_of_3D_objects: "inner_faces_3D",
+                type_of_3D_objects: "inner_faces",
                 total_number_of_faces: 0,
 
                 async init() {
@@ -1866,26 +1868,26 @@
                 process() {
                     // Add floor
                     switch (this.type_of_3D_objects) {
-                        case "inner_faces_3D":
-                            this.floor = ZOME.inner_floor_3D;
+                        case "inner_faces":
+                            this.floor = ZOME.inner_floor;
                             break;
-                        case "outer_faces_3D":
-                            this.floor = ZOME.outer_floor_3D;
+                        case "outer_faces":
+                            this.floor = ZOME.outer_floor;
                             break;
                     }
 
                     // Add faces
-                    const collections = eval(`ZOME.${this.type_of_3D_objects}_collections`);
-                    const num_items = Object.keys(collections).length;
+                    const groups = eval(`ZOME.${this.type_of_3D_objects}_grouped_by_hash`);
+                    const num_items = Object.keys(groups).length;
                     this.faces = new Array(num_items);
                     this.quantities = new Array(num_items);
 
                     this.total_number_of_faces = 0;
                     let face_index = 0;
-                    _.forIn(collections, collection => {
-                        this.faces[face_index] = collection.item;
-                        this.quantities[face_index] = collection.count;
-                        this.total_number_of_faces += collection.count;
+                    _.forIn(groups, group => {
+                        this.faces[face_index] = group.item;
+                        this.quantities[face_index] = group.count;
+                        this.total_number_of_faces += group.count;
                         face_index++;
                     });
                 },
@@ -2102,13 +2104,13 @@
                     });
                 },
                 draw_mandala_faces() {
-                    const mandala_3D = ZOME.mandala_3D;
+                    const mandala = ZOME.mandala;
 
                     // For each color, rotate piece around the origin
                     const mandala_faces = [], O = [0, 0, 0];
-                    const incr_angle = mandala_3D[0].angles[0];
+                    const incr_angle = mandala[0].angles[0];
                     for (let i = 0, rotation_angle = 0; i < ZOME.num_spirals; i++, rotation_angle += incr_angle) {
-                        _.forEach(mandala_3D, (face) => {
+                        _.forEach(mandala, (face) => {
                             mandala_faces.push(
                                 new Polygon3D(
                                     swap_axes(face.points, "XZY").map(p => rotate_point_around_z_axis(p, -rotation_angle, O)),
@@ -2127,12 +2129,12 @@
                     }
                 },
                 draw_spiral_faces() {
-                    const mandala_3D = ZOME.mandala_3D;
+                    const mandala = ZOME.mandala;
 
-                    // For each color, Add a page with outer_faces_3D faces
+                    // For each color, Add a page with outer_faces faces
                     for (let i = 0; i < ZOME.num_spirals; i++) {
                         const colored_spiral_faces = [];
-                        _.forEach(mandala_3D, (face) => {
+                        _.forEach(mandala, (face) => {
                             colored_spiral_faces.push(
                                 new Polygon3D(
                                     swap_axes(face.points, "XZY"),
@@ -2203,7 +2205,7 @@
                 last_num_spirals: 1,
                 is_spinning: false,
                 speed: 0.001,
-                type_of_3D_objects: "skeleton_3D",
+                type_of_3D_objects: "skeleton",
 
                 draw_zome: true,
                 draw_labels: true,
@@ -2301,16 +2303,12 @@
                     });
                 },
 
-                get clone_and_rotate_mode() {
-                    switch (this.type_of_3D_objects) {
-                        case "timber_profiles_3D" :
-                        case "skeleton_by_crowns_3D":
-                        case "flattened_outer_faces_3D" :
-                        case "flattened_inner_faces_3D" :
-                            return false;
-                        default:
-                            return true;
-                    }
+                get clone_and_rotate_items() {
+                    return !this.items_are_grouped;
+                },
+
+                get items_are_grouped() {
+                    return this.type_of_3D_objects.includes("grouped_by")
                 },
 
                 auto_size() {
@@ -2389,7 +2387,7 @@
                             }
                         }
 
-                        if (this.clone_and_rotate_mode) {
+                        if (this.clone_and_rotate_items) {
                             for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
                                 const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
 
@@ -2453,7 +2451,7 @@
                     // Display switch buttons
                     this.show_vanishing_lines_toggle_btn = ZOME.vanishing_lines
                         && ZOME.vanishing_lines.length > 0
-                        && this.type_of_3D_objects === "skeleton_3D";
+                        && this.type_of_3D_objects === "skeleton";
 
                     // Display vanishing lines
                     {
@@ -2471,18 +2469,49 @@
                     }
 
                     // Build 3D faces and edges
-                    const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
-
                     const mesh_points = [], mesh_colors = [], edge_points = [];
-                    for (let i = 0; i < items_3D.length; i++) {
-                        const item = items_3D[i];
-                        mesh_points.push(...item.mesh_points);
-                        mesh_colors.push(...item.mesh_colors);
-                        edge_points.push(...item.edge_points);
 
-                        item.compute_label_mesh(font);
-                        if (item.label_mesh) meshes.labels.add(item.label_mesh);
+                    if (this.items_are_grouped) {
+                        const groups = eval(`ZOME.${this.type_of_3D_objects}`);
+                        let z_origin = 0;
+                        _.forIn(groups, group => {
+                            const item = group.item.flatten();
+
+                            const boundaries = get_boundaries(item.edge_points.map(v => v.toArray()));
+                            const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
+
+                            // Compute a translation vec to align and spread items
+                            const translation_vec = [-x_min, -y_min, -z_min + z_origin];
+
+                            // Apply translation vector
+                            mesh_points.push(...item.mesh_points.map(v => new THREE.Vector3(...add(v.toArray(), translation_vec))));
+                            edge_points.push(...item.edge_points.map(v => new THREE.Vector3(...add(v.toArray(), translation_vec))));
+
+                            // Add colors
+                            mesh_colors.push(...item.mesh_colors);
+
+                            // Add Label
+                            item.compute_label_mesh(font, translation_vec);
+                            if (item.label_mesh) {
+                                meshes.labels.add(item.label_mesh);
+                            }
+
+                            // Increase origin on Z axis
+                            z_origin += depth + 50;
+                        });
+                    } else {
+                        const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
+                        for (let i = 0; i < items_3D.length; i++) {
+                            const item = items_3D[i];
+                            mesh_points.push(...item.mesh_points);
+                            mesh_colors.push(...item.mesh_colors);
+                            edge_points.push(...item.edge_points);
+
+                            item.compute_label_mesh(font);
+                            if (item.label_mesh) meshes.labels.add(item.label_mesh);
+                        }
                     }
+
 
                     // Build mesh and edge geometries
                     const mesh_geometry = new THREE.BufferGeometry().setFromPoints(mesh_points);
@@ -2497,7 +2526,7 @@
                     meshes.edges.add(edges);
 
                     // Clone meshes and rotate them around Y Axes
-                    if (this.clone_and_rotate_mode) {
+                    if (this.clone_and_rotate_items) {
                         for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
                             const angle = ZOME.rotation_angles[spiral_index].rad;
 
@@ -2547,11 +2576,11 @@
 
                 get_floor_3D() {
                     switch (this.type_of_3D_objects) {
-                        case "inner_faces_3D":
-                            return ZOME.inner_floor_3D;
-                        case "outer_faces_3D":
-                        case "skeleton_3D":
-                            return ZOME.outer_floor_3D;
+                        case "inner_faces":
+                            return ZOME.inner_floor;
+                        case "outer_faces":
+                        case "skeleton":
+                            return ZOME.outer_floor;
                     }
                     return null
                 },
@@ -2617,13 +2646,17 @@
                         case " ":
                             this.is_spinning = !this.is_spinning;
                             break;
+                        case "c":
+                        case "C":
+                            this.type_of_3D_objects = "timber_profiles_grouped_by_crown";
+                            break;
                         case "o":
                         case "O":
-                            this.type_of_3D_objects = "outer_faces_3D";
+                            this.type_of_3D_objects = "outer_faces";
                             break;
                         case "i":
                         case "I":
-                            this.type_of_3D_objects = "inner_faces_3D";
+                            this.type_of_3D_objects = "inner_faces";
                             break;
                         case "h":
                         case "H":
@@ -2631,23 +2664,23 @@
                             break;
                         case "l":
                         case "L":
-                            this.type_of_3D_objects = "flattened_outer_faces_3D";
+                            this.type_of_3D_objects = "outer_faces_grouped_by_hash";
                             break;
                         case "k":
                         case "K":
-                            this.type_of_3D_objects = "flattened_inner_faces_3D";
+                            this.type_of_3D_objects = "inner_faces_grouped_by_hash";
                             break;
                         case "m":
                         case "M":
-                            this.type_of_3D_objects = "mandala_3D";
+                            this.type_of_3D_objects = "mandala";
                             break;
                         case "t":
                         case "T":
-                            this.type_of_3D_objects = "timber_profiles_3D";
+                            this.type_of_3D_objects = "timber_profiles_grouped_by_hash";
                             break;
                         case "s":
                         case "S":
-                            this.type_of_3D_objects = "skeleton_3D";
+                            this.type_of_3D_objects = "skeleton";
                             break;
                         case "Down":
                         case "ArrowDown":
@@ -3385,9 +3418,9 @@
                     const num_zome_faces = zome_faces_3D.length
 
                     // Build Outer/Inner faces
-                    const outer_faces_3D = new Array(num_zome_faces),
-                        inner_faces_3D = new Array(num_zome_faces);
-                    const skeleton_3D = [], vanishing_lines = [];
+                    const outer_faces = new Array(num_zome_faces),
+                        inner_faces = new Array(num_zome_faces);
+                    const skeleton = [], vanishing_lines = [];
 
                     // Compute vanishing pt
                     const vanishing_pt = [0, this.params.z_vanishing_point_in_mm, 0];
@@ -3425,7 +3458,7 @@
                         );
 
                         // Add timbers to skeleton 3D
-                        skeleton_3D.push(...face.framework_timbers);
+                        skeleton.push(...face.framework_timbers);
 
                         // Add vanishing lines for the GoodKarma and Beveled methods
                         if (ASSEMBLY_METHOD < 2) {
@@ -3433,8 +3466,8 @@
                         }
 
                         const inner_face_points = face.framework_inner_points;
-                        inner_faces_3D[face_index] = Polygon3D.copy(face, inner_face_points);
-                        inner_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
+                        inner_faces[face_index] = Polygon3D.copy(face, inner_face_points);
+                        inner_faces[face_index].dihedral_angle = face.dihedral_angle;
 
                         // Add roof overflow points on outer face
                         const outer_face_points = face.framework_outer_points;
@@ -3460,8 +3493,8 @@
                             outer_face.points = points_with_overflow;
                         }
 
-                        outer_faces_3D[face_index] = outer_face;
-                        outer_faces_3D[face_index].dihedral_angle = face.dihedral_angle;
+                        outer_faces[face_index] = outer_face;
+                        outer_faces[face_index].dihedral_angle = face.dihedral_angle;
 
                         // Footing parameters computing
                         // On the two last crown, check if points are far enough
@@ -3516,7 +3549,7 @@
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
 
                             // Add Footing timber to the global skeleton
-                            skeleton_3D.push(timber_prism);
+                            skeleton.push(timber_prism);
                         }
 
                         // Add points for outer floor
@@ -3537,34 +3570,34 @@
                     // Remove duplicates and create floors ⬢
                     outer_floor_points = _.uniqWith(outer_floor_points, are_points_equal);
                     inner_floor_points = _.uniqWith(inner_floor_points, are_points_equal);
-                    const outer_floor_3D = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, FLOOR_CHAR) : null;
-                    const inner_floor_3D = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, FLOOR_CHAR) : null;
+                    const outer_floor = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, FLOOR_CHAR) : null;
+                    const inner_floor = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, FLOOR_CHAR) : null;
 
                     const obj_3D_to_label = [
-                        skeleton_3D,
-                        outer_faces_3D,
-                        inner_faces_3D,
+                        skeleton,
+                        outer_faces,
+                        inner_faces,
                         zome_faces_3D,
                     ];
 
                     // Group items by hash
-                    const arr_of_obj_collections = new Array(obj_3D_to_label.length);
+                    const arr_of_obj_groups = new Array(obj_3D_to_label.length);
                     for (let i = 0; i < obj_3D_to_label.length; i++) {
                         const obj_3D = obj_3D_to_label[i];
-                        arr_of_obj_collections[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
+                        arr_of_obj_groups[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
                             // Update label of each member
                             for (let j = 1; j < group.length; j++) {
                                 group[j].label = group[0].label;
                             }
-                            return new ItemHashCollection(group[0], hash, group.length * N);
+                            return new ItemHashGroup(group[0], hash, group.length * N);
                         });
                     }
 
                     // 🎨 Add colors to items and build rotated colors
                     let rotated_colors = {};
-                    _.forIn(arr_of_obj_collections, (obj_collections, i) => {
+                    _.forIn(arr_of_obj_groups, (obj_groups, i) => {
                         // Get hash group
-                        const hashes = obj_collections.map(collection => collection.hash);
+                        const hashes = obj_groups.map(group => group.hash);
                         const num_hashes = hashes.length;
 
                         // Associates a hash to a color
@@ -3586,22 +3619,27 @@
 
                     // Unpack variables
                     const [
-                        skeleton_3D_collections,
-                        outer_faces_3D_collections,
-                        inner_faces_3D_collections,
-                        zome_faces_3D_collections,
-                    ] = arr_of_obj_collections;
+                        timber_profiles_grouped_by_hash,
+                        outer_faces_grouped_by_hash,
+                        inner_faces_grouped_by_hash,
+                        zome_faces_grouped_by_hash,
+                    ] = arr_of_obj_groups;
 
-                    const skeleton_by_crowns_3D = [];
-                    _.forIn(zome_faces_3D_collections, collection => {
-                        const parent = collection.item;
-                        skeleton_by_crowns_3D.push(
-                            new TrapezoidalPrismCrown(parent.framework_timbers, parent).flatten()
-                        )
+                    // Create a fake group of crowns only for display
+                    const timber_profiles_grouped_by_crown = [];
+                    _.forIn(zome_faces_grouped_by_hash, group => {
+                        const parent = group.item;
+                        timber_profiles_grouped_by_crown.push(
+                            new ItemHashGroup(
+                                new TrapezoidalPrismCrown(parent.framework_timbers, parent),
+                                group.hash,
+                                group.count
+                            )
+                        );
                     });
 
                     // Build Mandala
-                    const mandala_3D = new Array(zome_faces_3D.length);
+                    const mandala = new Array(zome_faces_3D.length);
                     let last_pt = [0, 0, 0], before_last_pt, first_pt, second_pt;
                     let last_crown_index = null, rotation_angle = null;
                     for (let face_index = 0; face_index < num_zome_faces; face_index++) {
@@ -3641,72 +3679,30 @@
                         before_last_pt = mandala_face_points[mandala_face_points.length - 2];
 
                         // Swap y axis with z axis for 3D display
-                        mandala_3D[face_index] = Polygon3D.copy(face, mandala_face_points);
+                        mandala[face_index] = Polygon3D.copy(face, mandala_face_points);
                         last_crown_index = face.crown_index;
                     }
-
-                    // Flatten collections
-                    const [
-                        timber_profiles_3D,
-                        flattened_outer_faces_3D,
-                        flattened_inner_faces_3D,
-                    ] = _.map(arr_of_obj_collections, collections => {
-                        // Compute num of item and create an array from that num
-                        const num_items = Object.keys(collections).length;
-                        const flattened_collection = new Array(num_items);
-
-                        // Initiate variables and iterates through collections
-                        let z_origin = 0, item_index = 0;
-                        _.forIn(collections, collection => {
-                            // Retrieve the item from collection and flatten it
-                            const item = collection.item.flatten();
-                            const is_prism = item instanceof TrapezoidalPrism;
-
-                            const fitted_points = item.fitted_points;
-                            const translated_points = new Array(item.num_points);
-                            for (let i = 0; i < fitted_points.length; i++) {
-                                translated_points[i] = add(fitted_points[i], [0, 0, z_origin]);
-                            }
-
-                            if (is_prism) {
-                                flattened_collection[item_index] = TrapezoidalPrism.copy(item, translated_points);
-                            } else {
-                                flattened_collection[item_index] = Polygon3D.copy(item, translated_points);
-                            }
-
-                            // Add space between items and increment item index
-                            z_origin += flattened_collection[item_index].depth + 100;
-                            item_index++;
-                        });
-                        return flattened_collection;
-                    });
-
-                    console.log(skeleton_by_crowns_3D);
 
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num_spirals: N,
 
-                        assembly_method: ASSEMBLY_METHOD,
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
 
-                        skeleton_3D: skeleton_3D,
-                        skeleton_3D_collections: skeleton_3D_collections,
-                        skeleton_by_crowns_3D: skeleton_by_crowns_3D,
+                        skeleton: skeleton,
+                        timber_profiles_grouped_by_hash: timber_profiles_grouped_by_hash,
+                        timber_profiles_grouped_by_crown: timber_profiles_grouped_by_crown,
 
-                        outer_faces_3D: outer_faces_3D,
-                        outer_floor_3D: outer_floor_3D,
-                        outer_faces_3D_collections: outer_faces_3D_collections,
+                        outer_faces: outer_faces,
+                        outer_faces_grouped_by_hash: outer_faces_grouped_by_hash,
+                        outer_floor: outer_floor,
 
-                        inner_faces_3D: inner_faces_3D,
-                        inner_floor_3D: inner_floor_3D,
-                        inner_faces_3D_collections: inner_faces_3D_collections,
+                        inner_faces: inner_faces,
+                        inner_faces_grouped_by_hash: inner_faces_grouped_by_hash,
+                        inner_floor: inner_floor,
 
-                        timber_profiles_3D: timber_profiles_3D,
-                        mandala_3D: mandala_3D,
-                        flattened_outer_faces_3D: flattened_outer_faces_3D,
-                        flattened_inner_faces_3D: flattened_inner_faces_3D,
+                        mandala: mandala,
 
                         vanishing_lines: vanishing_lines,
                     });

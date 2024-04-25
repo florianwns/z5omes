@@ -1,10 +1,26 @@
 # TODO-LIST
 
+
+at ground level
+
+
+
+Mandala est en fait : faces aplaties => flattened faces
+inner_faces : inner_faces_on_the_ground
+
+finir le compute boundaries
+et le fit_points(points, x_min, y_min, z_max)
+
+
+* [ ] AJouter un bouton pour faire une capture de la 3D
+  https://discourse.threejs.org/t/how-to-save-rendering-scene-to-img/41858/2
+  
+
 * On imagine moins de catégories pour la 3D
- Skeleton
- Flattened Skeleton 
- Timber Profiles
- Mandala
+ 3D Framework 
+ 3D Flatenned framework 
+ 3D Timber Profiles
+ 2D Mandala
   
  Dans les vue du skeleton, un bouton pour afficher : 
   les timbers profiles
@@ -35,7 +51,7 @@ qui calcule les boundaries
 * [ ] Ne pas créer d'objets flattened array, mais qu'ils soient généré 
   par les collections au moment du process 3D
   
-    ex : skeleton_3D_collections + flatten => timber_profiles_3D flatten
+    ex : timber_profiles_grouped_by_hash + flatten => timber_profiles flatten
     donc pas besoin de créer des objets inutilements.
   
     

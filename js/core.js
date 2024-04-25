@@ -320,6 +320,49 @@ function intersect(p, v, q, u) {
     return add(p, mul(v, t));
 }
 
+function get_boundaries(points) {
+    // Compute boundaries
+    let x_max = Number.MIN_VALUE;
+    let y_max = Number.MIN_VALUE;
+    let z_max = Number.MIN_VALUE;
+    let x_min = Number.MAX_VALUE;
+    let y_min = Number.MAX_VALUE;
+    let z_min = Number.MAX_VALUE;
+
+    for (let i = 0; i < points.length; i++) {
+        const cur_point = points[i];
+        const [x, y, z] = cur_point;
+
+        // Save Boundaries
+        if (x < x_min) x_min = x;
+        if (x > x_max) x_max = x;
+        if (y < y_min) y_min = y;
+        if (y > y_max) y_max = y;
+        if (z < z_min) z_min = z;
+        if (z > z_max) z_max = z;
+    }
+
+    // Compute width and height from 2D boundaries
+    const width = Math.abs(x_max - x_min);      // X Axis
+    const height = Math.abs(y_max - y_min);     // Y Axis
+    const depth = Math.abs(z_max - z_min);      // Z AXis
+
+    return [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth];
+}
+
+function fit_points(points, x_min = 0, y_min = 0, z_min = 0) {
+    const fitted_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        fitted_points[i] = [
+            point[0] - x_min,
+            point[1] - y_min,
+            point[2] - z_min
+        ];
+    }
+    return fitted_points;
+}
+
 function acos(k) {
     // Add limit to acos to avoid NaN errors
     // See : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Math/acos
@@ -1077,17 +1120,15 @@ class Base3DGeometry {
     get fitted_points() {
         // Adjust the points so the minimum values end up at zero
         if (this._fitted_points === null) {
-            this._fitted_points = new Array(this.num_points);
-            for (let i = 0; i < this.num_points; i++) {
-                const point = this.points[i];
-                this._fitted_points[i] = [
-                    point[0] - this.x_min,
-                    point[1] - this.y_min,
-                    point[2] - this.z_min
-                ];
-            }
+            this._fitted_points = fit_points(this.points, this.x_min, this.y_min, this.z_min);
         }
         return this._fitted_points
+    }
+
+    static copy(obj, points) {
+        return new Base3DGeometry(
+            points || obj.points, obj.label, obj.color, obj.crown_index, obj.part
+        );
     }
 
     static copy(obj, points) {
@@ -1099,7 +1140,7 @@ class Base3DGeometry {
     compute_flattened_points() {
     };
 
-    compute_label_mesh(font) {
+    compute_label_mesh(font, translation_vec = [0, 0, 0]) {
         if (this._label_mesh !== null || !this.label || !font) {
             return;
         }
@@ -1132,9 +1173,9 @@ class Base3DGeometry {
             const translation = sub(face.centroid, flattened_face.centroid);
             const [x, y, z] = add(flattened_face.centroid, translation);
 
-            this._label_mesh.position.x = x;
-            this._label_mesh.position.y = y;
-            this._label_mesh.position.z = z;
+            this._label_mesh.position.x = x + translation_vec[0];
+            this._label_mesh.position.y = y + translation_vec[1];
+            this._label_mesh.position.z = z + translation_vec[2];
             const quaternion = quaternion_from_points(
                 ...flattened_face.points.slice(0, 3),
                 ...face.points.slice(0, 3)
@@ -1216,30 +1257,17 @@ class Base3DGeometry {
 
     compute_boundaries() {
         // Compute boundaries
-        this._x_max = Number.MIN_VALUE;
-        this._y_max = Number.MIN_VALUE;
-        this._z_max = Number.MIN_VALUE;
-        this._x_min = Number.MAX_VALUE;
-        this._y_min = Number.MAX_VALUE;
-        this._z_min = Number.MAX_VALUE;
-
-        for (let i = 0; i < this.num_points; i++) {
-            const cur_point = this.points[i];
-            const [x, y, z] = cur_point;
-
-            // Save Boundaries
-            if (x < this._x_min) this._x_min = x;
-            if (x > this._x_max) this._x_max = x;
-            if (y < this._y_min) this._y_min = y;
-            if (y > this._y_max) this._y_max = y;
-            if (z < this._z_min) this._z_min = z;
-            if (z > this._z_max) this._z_max = z;
-        }
-
-        // Compute width and height from 2D boundaries
-        this._width = Math.abs(this._x_max - this._x_min);      // X Axis
-        this._height = Math.abs(this._y_max - this._y_min);     // Y Axis
-        this._depth = Math.abs(this._z_max - this._z_min);      // Z AXis
+        [
+            this._x_min,
+            this._x_max,
+            this._y_min,
+            this._y_max,
+            this._z_min,
+            this._z_max,
+            this._width,
+            this._height,
+            this._depth,
+        ] = get_boundaries(this.points);
     }
 
     compute_meshes() {
@@ -1258,12 +1286,6 @@ class Base3DGeometry {
             this._bounding_box = new THREE.Box3();
             this._bounding_box.copy(this._mesh.geometry.boundingBox);
         }
-    }
-
-    static copy(obj, points) {
-        return new Base3DGeometry(
-            points || obj.points, obj.label, obj.color, obj.crown_index, obj.part
-        );
     }
 
     flatten() {
@@ -2132,7 +2154,7 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
                 break;
         }
 
-        if(swap_yz){
+        if (swap_yz) {
             flattened_points = swap_axes(flattened_points, "XZY");
         }
 
@@ -2165,13 +2187,13 @@ class TrapezoidalPrismCrown extends Base3DGeometryGroup {
         );
     }
 
-    compute_label_mesh(font) {
+    compute_label_mesh(font, translation_vec = [0, 0, 0]) {
         this._label_mesh = new THREE.Group();
         this._label_mesh.name = this.parent.label;
 
         for (let i = 0; i < this.children.length; i++) {
             const item = this.children[i];
-            item.compute_label_mesh(font)
+            item.compute_label_mesh(font, translation_vec)
             this._label_mesh.add(item.label_mesh);
         }
     }
@@ -2215,7 +2237,7 @@ class Angle {
     }
 }
 
-class ItemHashCollection {
+class ItemHashGroup {
     constructor(item, hash, count = 1) {
         this.item = item;
         this.hash = hash;
@@ -2228,53 +2250,43 @@ class Zome {
         {
             num_spirals = null,
 
-            assembly_method = null,
             rotation_angles = null,
             rotated_colors = null,
 
-            skeleton_3D = null,
-            skeleton_3D_collections = null,
-            skeleton_by_crowns_3D = null,
+            skeleton = null,
+            timber_profiles_grouped_by_hash = null,
+            timber_profiles_grouped_by_crown = null,
 
-            outer_faces_3D = null,
-            outer_floor_3D = null,
-            outer_faces_3D_collections = null,
+            outer_faces = null,
+            outer_faces_grouped_by_hash = null,
+            outer_floor = null,
 
-            inner_faces_3D = null,
-            inner_floor_3D = null,
-            inner_faces_3D_collections = null,
+            inner_faces = null,
+            inner_faces_grouped_by_hash = null,
+            inner_floor = null,
 
-            timber_profiles_3D = null,
-            mandala_3D = null,
-            flattened_outer_faces_3D = null,
-            flattened_inner_faces_3D = null,
-
+            mandala = null,
             vanishing_lines = null
         }
     ) {
         this.num_spirals = num_spirals || 0;
 
-        this.assembly_method = assembly_method || 0;
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
 
-        this.skeleton_3D = skeleton_3D || [];
-        this.skeleton_3D_collections = skeleton_3D_collections || [];
-        this.skeleton_by_crowns_3D = skeleton_by_crowns_3D || [];
+        this.skeleton = skeleton || [];
+        this.timber_profiles_grouped_by_hash = timber_profiles_grouped_by_hash || [];
+        this.timber_profiles_grouped_by_crown = timber_profiles_grouped_by_crown || [];
 
-        this.outer_faces_3D = outer_faces_3D || [];
-        this.outer_floor_3D = outer_floor_3D || null;
-        this.outer_faces_3D_collections = outer_faces_3D_collections || [];
+        this.outer_faces = outer_faces || [];
+        this.outer_faces_grouped_by_hash = outer_faces_grouped_by_hash || [];
+        this.outer_floor = outer_floor || null;
 
-        this.inner_faces_3D = inner_faces_3D || [];
-        this.inner_floor_3D = inner_floor_3D || null;
-        this.inner_faces_3D_collections = inner_faces_3D_collections || [];
+        this.inner_faces = inner_faces || [];
+        this.inner_faces_grouped_by_hash = inner_faces_grouped_by_hash || [];
+        this.inner_floor = inner_floor || null;
 
-        this.timber_profiles_3D = timber_profiles_3D || [];
-        this.mandala_3D = mandala_3D || [];
-        this.flattened_outer_faces_3D = flattened_outer_faces_3D || [];
-        this.flattened_inner_faces_3D = flattened_inner_faces_3D || [];
-
+        this.mandala = mandala || [];
         this.vanishing_lines = vanishing_lines || [];
     }
 }
