@@ -21,7 +21,7 @@ const I18N_EN = {
         outer_faces_on_the_ground: "Outer faces on the ground",
         inner_faces_on_the_ground: "Inner faces on the ground",
         timber_profiles: "Timber profiles",
-        timbers_in_each_face: "Timbers in each face",
+        timbers_of_each_face: "Timbers of each face",
         profile: "profile",
         spirals: "Spirals",
         flattened_zome: "Flattened zome",

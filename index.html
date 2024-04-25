@@ -530,7 +530,7 @@
                                             <option value="timber_profiles_grouped_by_hash"
                                                     x-text="i18n('timber_profiles')"></option>
                                             <option value="timbers_grouped_by_face"
-                                                    x-text="i18n('timbers_in_each_face')"></option>
+                                                    x-text="i18n('timbers_of_each_face')"></option>
                                             <option value="inner_faces_grouped_by_hash"
                                                     x-text="i18n('inner_faces_on_the_ground')"></option>
                                             <option value="outer_faces_grouped_by_hash"
@@ -715,7 +715,7 @@
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('C')">C
                                                                 </button>
-                                                                <span x-text="i18n('timbers_in_each_face')"></span>
+                                                                <span x-text="i18n('timbers_of_each_face')"></span>
                                                             </li>
                                                             <li class="d-flex align-items-center mb-2">
                                                                 <button class="key me-2" @click="keydown('K')">K
@@ -2868,10 +2868,7 @@
                     this.save_params(false);
 
                     // Add shape parameter listeners
-                    const zome_param_keys = Object.keys(this.params).filter(el => {
-                        return el !== 'language';
-                    });
-
+                    const zome_param_keys = Object.keys(this.params);
                     _.forEach(zome_param_keys, key => {
                         this.$watch(`params.${key}`, (value) => {
                             this.clamp(key, value);
