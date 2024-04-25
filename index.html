@@ -542,8 +542,8 @@
                                     </div>
 
                                     <!-- Canvas for Zome 3D rendering -->
-                                    <div x-ref="canvas_3D_container" class="position-relative">
-                                        <div x-ref="canvas_3D" style="min-height:500px; cursor: move;"
+                                    <div x-ref="rendering_container_3D" class="position-relative">
+                                        <div x-ref="canvas_container_3D" style="min-height:500px; cursor: move;"
                                              :style="(is_fullscreen)? `height:100%;` : `height:500px;`"
                                              class="shadow bg-dark rounded mb-2 overflow-hidden">
                                         </div>
@@ -649,6 +649,14 @@
                                         </div>
 
                                         <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
+                                            <!-- Capture image -->
+                                            <button class="btn btn-primary"
+                                                    @click="capture"
+                                                    data-bs-toggle="tooltip"
+                                                    :title="i18n('tooltip_download_3D_view_in_png_format')">
+                                                <i class="fa fa-camera-retro"></i>
+                                            </button>
+
                                             <!-- Keyboard shortcuts -->
                                             <div class="btn btn-primary p-0"
                                                  data-bs-toggle="modal"
@@ -2194,7 +2202,7 @@
         Alpine.data('renderer_3D', () => {
             // Three JS Objects
             let scene, camera, renderer, controls,
-                canvas, font;
+                canvas, canvas_container, font;
 
             const meshes = {
                 "axes": null,
@@ -2259,12 +2267,17 @@
                     }
 
                     // Set Canvas Parameters
-                    canvas = this.$refs.canvas_3D;
-                    const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
+                    canvas_container = this.$refs.canvas_container_3D;
+                    const [width, height] = [canvas_container.offsetWidth, canvas_container.offsetHeight]
 
-                    // Renderer
-                    renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
-                    canvas.appendChild(renderer.domElement);
+                    // Renderer canvas
+                    renderer = new THREE.WebGLRenderer({
+                        alpha: true,
+                        antialias: true,
+                        preserveDrawingBuffer: true,
+                    });
+                    canvas = renderer.domElement
+                    canvas_container.appendChild(canvas);
 
                     // Scene
                     scene = new THREE.Scene();
@@ -2316,8 +2329,16 @@
                     return this.type_of_3D_objects.includes("grouped_by")
                 },
 
+                capture(){
+                    if(!canvas) return;
+
+                    // here is the most important part because if you dont replace you will get a DOM 18 exception.
+                    const img_url = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+                    const filename = this.gen_filename(`_${this.type_of_3D_objects}_3D_view.png`);
+                    download(filename, img_url);
+                },
                 auto_size() {
-                    const [width, height] = [canvas.offsetWidth, canvas.offsetHeight]
+                    const [width, height] = [canvas_container.offsetWidth, canvas_container.offsetHeight]
                     if (width > 0 && height > 0) {
                         camera.aspect = width / height;
                         camera.updateProjectionMatrix();
@@ -2326,7 +2347,7 @@
                 },
                 toggle_fullscreen() {
                     if (this.can_use_screenfull) {
-                        screenfull.toggle(this.$refs.canvas_3D_container);
+                        screenfull.toggle(this.$refs.rendering_container_3D);
                     }
                 },
                 download_ply() {
