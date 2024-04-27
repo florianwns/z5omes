@@ -1,10 +1,6 @@
 # TODO-LIST
 
 * [ ] Changer l'aide du kite ratio car ce n'est pas exactement ça
-  
-* [ ] Créer un premier tutoriel expliquant l'ensemble des paramètres du logiciel en français
-
-* [ ] Créer un second
 
 * [ ] Mettre à jour les autres traductions avec les termes manquants
   * [x] Français 
