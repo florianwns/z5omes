@@ -2,8 +2,6 @@
 
 * [ ] Changer l'aide du kite ratio car ce n'est pas exactement ça
 
-* [x] Ajouter l'angle des cales pour la méthode
-  
 * [ ] Mettre à jour les autres traductions avec les termes manquants
   * [x] Français 
   * [ ] Espagnol
