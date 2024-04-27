@@ -1834,6 +1834,10 @@
                     obj += `# ${this.i18n('widest_diameter_of_faces')} : ${this.widest_diameter_of_faces}\n`;
                     obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
                     obj += hr;
+                    obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
+                    obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
+                    obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
+                    obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
                     _.forEach(rows, row => {
@@ -1848,8 +1852,9 @@
                         this.i18n('width'),
                         this.i18n('height'),
                         this.i18n('edges'),            // CCW Edges
-                        this.i18n('angles'),           // CCW Angles
+                        this.i18n('face_angles'),           // CCW Angles
                         this.i18n('dihedral_angle'),   // Dihedral angle with plane above
+                        this.i18n('wedge_angle'),      // Wedge angle for Xpansion method
                         this.i18n('slope_angle'),
                         this.i18n('area'),
                         this.i18n('diameter'),
@@ -1870,6 +1875,7 @@
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
                             humanize_angle(rad2deg(face.dihedral_angle)),
+                            humanize_angle(rad2deg(face.dihedral_angle > 0 ? Math.PI - face.dihedral_angle : 0)),
                             humanize_angle(rad2deg(face.normalized_slope)),
                             humanize_area(face.area),
                             humanize_distance(face.diameter),
