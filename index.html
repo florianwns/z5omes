@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.10b05" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.10b06" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -417,7 +417,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.10b05</span>
+                              style="font-size: 10px; top:0px">v1.0.10b06</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1411,15 +1411,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.10b05"></script>
-<script src="i18n/en.js?v=1.0.10b05"></script>
-<script src="i18n/it.js?v=1.0.10b05"></script>
-<script src="i18n/fr.js?v=1.0.10b05"></script>
-<script src="i18n/pl.js?v=1.0.10b05"></script>
-<script src="i18n/sv.js?v=1.0.10b05"></script>
+<script src="i18n/es.js?v=1.0.10b06"></script>
+<script src="i18n/en.js?v=1.0.10b06"></script>
+<script src="i18n/it.js?v=1.0.10b06"></script>
+<script src="i18n/fr.js?v=1.0.10b06"></script>
+<script src="i18n/pl.js?v=1.0.10b06"></script>
+<script src="i18n/sv.js?v=1.0.10b06"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.10b05"></script>
+<script src="js/core.js?v=1.0.10b06"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1575,7 +1575,7 @@
                                 side_title.setAttribute('font-size', `${title_font_size}`);
                                 side_title.setAttribute('style', 'text-transform: capitalize');
 
-                                side_title.innerHTML = `${side_names[i]}`;
+                                side_title.innerHTML = `${this.i18n(side_names[i])}`;
                                 svg_elements_with_priority.push([side_title, 5]);
                             }
                             if (i === 0) {
@@ -1834,6 +1834,10 @@
                     obj += `# ${this.i18n('widest_diameter_of_faces')} : ${this.widest_diameter_of_faces}\n`;
                     obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
                     obj += hr;
+                    obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
+                    obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
+                    obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
+                    obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
                     _.forEach(rows, row => {
@@ -1848,8 +1852,9 @@
                         this.i18n('width'),
                         this.i18n('height'),
                         this.i18n('edges'),            // CCW Edges
-                        this.i18n('angles'),           // CCW Angles
+                        this.i18n('face_angles'),           // CCW Angles
                         this.i18n('dihedral_angle'),   // Dihedral angle with plane above
+                        this.i18n('wedge_angle'),      // Wedge angle for Xpansion method
                         this.i18n('slope_angle'),
                         this.i18n('area'),
                         this.i18n('diameter'),
@@ -1870,6 +1875,7 @@
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
                             humanize_arr(unique_arr(_.map(face.angles, a => humanize_angle(rad2deg(a))))),
                             humanize_angle(rad2deg(face.dihedral_angle)),
+                            humanize_angle(rad2deg(face.dihedral_angle > 0 ? Math.PI - face.dihedral_angle : 0)),
                             humanize_angle(rad2deg(face.normalized_slope)),
                             humanize_area(face.area),
                             humanize_distance(face.diameter),
@@ -3327,10 +3333,8 @@
                     const ASSEMBLY_METHOD = this.params.assembly_method;
                     const ASSEMBLY_DIRECTION = this.constrained_assembly_direction;
                     const XPANSION_DIRECTION = this.params.xpansion_direction;
-                    const OUTWARD_EXPANSION = ASSEMBLY_METHOD === 2 || XPANSION_DIRECTION === -1;
                     const BINDU_RATIOS = str_to_numbers(this.params.bindu_ratios_str);
                     const face_divisions_bitwise_flags = str_to_numbers(this.params.face_divisions_by_crowns_str);
-
 
                     // Constants
                     const M = N - 1;

@@ -835,7 +835,7 @@ function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
 function humanize_angle(a, num_digits = FLOAT_2_STR_PRECISION) {
     // Helper to display angle in degrees
 
-    return !isNaN(a) ? a.toFixed(num_digits) + "°" : "";
+    return !isNaN(a) && a > 0 ? a.toFixed(num_digits) + "°" : "";
 }
 
 function humanize_arr(arr, unit = "") {
