@@ -30,6 +30,12 @@ const I18N_EN = {
         framework_customizer: "Framework customizer",
         dihedral_angle: "Dihedral Angle",
         roof: "Roof",
+        left: "left",
+        right: "right",
+        top: "top",
+        bottom: "bottom",
+        front: "front",
+        back: "back",
 
         // Tooltips
         tooltip_display_help: "Display help",

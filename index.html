@@ -1575,7 +1575,7 @@
                                 side_title.setAttribute('font-size', `${title_font_size}`);
                                 side_title.setAttribute('style', 'text-transform: capitalize');
 
-                                side_title.innerHTML = `${side_names[i]}`;
+                                side_title.innerHTML = `${this.i18n(side_names[i])}`;
                                 svg_elements_with_priority.push([side_title, 5]);
                             }
                             if (i === 0) {

@@ -30,6 +30,12 @@ const I18N_FR = {
         framework_customizer: "Personnalisation de la charpente",
         dihedral_angle: "Angle dièdre",
         roof: "Toit",
+        left: "gauche",
+        right: "droite",
+        top: "dessus",
+        bottom: "dessous",
+        front: "devant",
+        back: "derrière",
 
         // Tooltips
         tooltip_display_help: "Afficher l'aide",
