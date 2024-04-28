@@ -63,6 +63,16 @@ I relied on several libraries.
 > * [AlpineJS](https://alpinejs.dev/) : A very good minimal framework for composing behavior directly in HTML.
 > * [Flag-Icons](https://github.com/lipis/flag-icons) : For flag languages
 
+
+## Zome designed with Z5omes
+
+> <b>2024/04/27 | Designed by Andre Dengin</b>
+> 
+> ![signed by Andre Dengin](/img/20240427_by_andre_dengin_#1.jpg)
+> ![signed by Andre Dengin](/img/20240427_by_andre_dengin_#2.jpg)
+> ![signed by Andre Dengin](/img/20240427_by_andre_dengin_#3.jpg)
+
+
 ## Thanks To :
 
 This project would never have been possible without the valuable support of a few people. 
