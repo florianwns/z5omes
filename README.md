@@ -1,5 +1,7 @@
-![logo of Z5omes.](/img/logo_zome.png)
 
+<center>
+    <img src="/img/logo_zome.png" height="150">
+</center>
 
 # Z5omes | A Zome Maker
 
@@ -39,7 +41,9 @@ https://florianwns.github.io/z5omes/
 If you have any requests/questions, see any bugs,
 ✍ feel free to write an issue.
 
-![Screenshot of Z5omes.](/img/screenshot.png)
+<center>
+    <img src="/img/screenshot.png" height="200">
+</center>
 
 ## 🌎 Translations
 
@@ -70,13 +74,13 @@ I relied on several libraries.
 
 <table>
   <tr>
-    <td valign="top">
+    <td valign="middle">
         <img src="/img/designed_with/20240427_by_andre_dengin_1.jpg " width="100" height="100">
     </td>
-    <td valign="top">
+    <td valign="middle">
         <img src="/img/designed_with/20240427_by_andre_dengin_2.jpg " width="100" height="100">
     </td>
-    <td valign="top">
+    <td valign="middle">
         <img src="/img/designed_with/20240427_by_andre_dengin_3.jpg " width="100" height="100">
     </td>
   </tr>
