@@ -68,9 +68,9 @@ I relied on several libraries.
 
 <b>2024/04/27 | Designed by Andre Dengin</b>
 
-![](/img/designed_with/20240427_by_andre_dengin_1.jpg | width=200)
-![](/img/designed_with/20240427_by_andre_dengin_2.jpg | width=200)
-![](/img/designed_with/20240427_by_andre_dengin_3.jpg | width=200)
+<img src="/img/designed_with/20240427_by_andre_dengin_1.jpg " width="100" height="100">
+<img src="/img/designed_with/20240427_by_andre_dengin_2.jpg " width="100" height="100">
+<img src="/img/designed_with/20240427_by_andre_dengin_3.jpg " width="100" height="100">
 
 
 ## Thanks To :
