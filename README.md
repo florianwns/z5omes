@@ -68,9 +68,9 @@ I relied on several libraries.
 
 > <b>2024/04/27 | Designed by Andre Dengin</b>
 > 
-> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_#1.jpg)
-> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_#2.jpg)
-> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_#3.jpg)
+> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_%231.jpg)
+> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_%232.jpg)
+> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_%233.jpg)
 
 
 ## Thanks To :
