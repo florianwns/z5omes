@@ -1,8 +1,6 @@
-
-<center>
-    <img src="/img/logo_zome.png" height="150">
-</center>
-
+<p align="center">
+<img src="/img/logo_zome.png" height="150">
+</p>
 # Z5omes | A Zome Maker
 
 <b>Z5omes</b> allows you to create 3D models for free.
@@ -41,9 +39,9 @@ https://florianwns.github.io/z5omes/
 If you have any requests/questions, see any bugs,
 ✍ feel free to write an issue.
 
-<center>
+<p align="center">
     <img src="/img/screenshot.png" height="200">
-</center>
+</p>
 
 ## 🌎 Translations
 
