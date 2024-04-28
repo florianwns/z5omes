@@ -66,11 +66,11 @@ I relied on several libraries.
 
 ## Zome designed with Z5omes
 
-> <b>2024/04/27 | Designed by Andre Dengin</b>
-> 
-> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_1.jpg)
-> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_2.jpg)
-> ![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_3.jpg)
+<b>2024/04/27 | Designed by Andre Dengin</b>
+
+![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_1.jpg)
+![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_2.jpg)
+![Designed by Andre Dengin](/img/designed_with/20240427_by_andre_dengin_3.jpg)
 
 
 ## Thanks To :
