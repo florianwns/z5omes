@@ -12,7 +12,7 @@ To make your own Zome, please check the online app [here](https://florianwns.git
 
 <br>
 <p align="center">
-    <img src="/img/screenshot.png" height="200">
+    <img src="/ressources/gif%20z5omes/z5omes%20v1.0.10b03.gif" height="200">
 </p>
 <br>
 
