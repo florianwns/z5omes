@@ -1,6 +1,7 @@
 <p align="center">
-<img src="/img/logo_zome.png" height="150">
+<img src="/img/z5omes_title.png" height="119">
 </p>
+
 # Z5omes | A Zome Maker
 
 <b>Z5omes</b> allows you to create 3D models for free.
