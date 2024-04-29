@@ -549,7 +549,7 @@
                                              class="shadow bg-dark rounded mb-2 overflow-hidden">
                                         </div>
 
-                                        <div class="position-absolute end-0 bottom-0 p-2 d-flex flex-column gap-3">
+                                        <div class="position-absolute end-0 bottom-0 p-2 d-grid flex-column gap-3">
                                             <!-- Draw Labels -->
                                             <button class="btn btn-primary"
                                                     @click="draw_labels = !draw_labels"
@@ -649,7 +649,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="position-absolute start-0 bottom-0 p-2 d-flex flex-column gap-3">
+                                        <div class="position-absolute start-0 bottom-0 p-2 d-grid flex-column gap-3">
                                             <!-- Capture image -->
                                             <button class="btn btn-primary"
                                                     @click="capture"
@@ -786,7 +786,7 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="py-2 px-0 d-flex flex-column gap-3">
+                                <div class="py-2 px-0 d-flex flex-column">
                                     <div class="d-none">
                                         <!-- Set ids to SVG symbols -->
                                         <svg xmlns="http://www.w3.org/2000/svg">
@@ -880,8 +880,8 @@
                                         </svg>
                                     </div>
 
-                                    <div class="gap-3 row align-items-center m-auto">
-                                        <div class="col-md d-flex">
+                                    <div class="gap-3 d-grid d-md-flex align-items-center m-auto">
+                                        <div class="me-3 d-flex">
                                             <div class="w-auto mx-auto input-group input-group-sm"
                                                  style="min-width:180px">
                                                 <button class="btn btn-primary text-start" type="button"
@@ -899,7 +899,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md text-center">
+                                        <div class="me-3 text-center">
                                             <div id="btn-rhombus-types-group"
                                                  class="btn-group bg-white" role="group"
                                                  aria-label="Toggle button group">
@@ -953,7 +953,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md d-flex">
+                                        <div class="d-flex">
                                             <div class="w-auto mx-auto input-group input-group-sm "
                                                  style="min-width:180px"
                                                  :class="(can_use_bindu_ratio)? '': 'invisible'">
