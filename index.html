@@ -244,7 +244,7 @@
             </div>
 
             <div class="text-muted small aligned-form">
-                <!-- Height of Zome -->
+                <!-- Zome Height before generating the timbers -->
                 <div x-show="params.help_is_displayed">
                     <b>ZH</b> :
                     <span x-text="i18n('help_zh_param')"></span>
@@ -255,9 +255,9 @@
                     ZH
                     </span>
                     <input class="form-control form-range" min="100" max="10000" step="10" type="range"
-                           x-model.number="params.zome_height_in_mm" x-ref="zome_height_in_mm_slider">
+                           x-model.number="params.zome_height_before_generating_timbers_in_mm" x-ref="zome_height_before_generating_timbers_in_mm_slider">
                     <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="zome_height">
+                           x-model.lazy.number="zome_height_before_generating_timbers">
                 </div>
 
                 <!-- Timber width -->
@@ -2335,8 +2335,8 @@
                     return this.type_of_3D_objects.includes("grouped_by")
                 },
 
-                capture(){
-                    if(!canvas) return;
+                capture() {
+                    if (!canvas) return;
 
                     // here is the most important part because if you dont replace you will get a DOM 18 exception.
                     const img_url = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
@@ -2796,7 +2796,7 @@
 
                     // Framework Parameters
                     measuring_unit: "cm",                               // Measuring unit by default is cm
-                    zome_height_in_mm: WORLD_HEIGHT,                    // Height in mm
+                    zome_height_before_generating_timbers_in_mm: WORLD_HEIGHT,    // Height in mm
                     timber_width_in_mm: 60,                             // Timber width in mm
                     timber_thickness_in_mm: 40,                         // Timber thickness in mm
                     z_vanishing_point_in_mm: null,
@@ -2818,10 +2818,12 @@
                 },
                 params_backup: null,
 
-                show_splash_screen: true,
+                // Height Ratio properties
+                suggested_height_ratio: null,       // Value to magnetize zome to the nearest cut
+
+                // Selected Crown properties
                 num_crowns: 1,
                 selected_crown: 1,
-
                 face_divisions_by_crowns: [],
                 num_points_per_crown: [],
                 selected_face_divisions_bitwise_flag: 0,
@@ -2829,8 +2831,10 @@
                 crown_of_framework_timbers_is_valid: true,
                 selected_bindu_ratio: 1,
 
+
+                // Common properties
+                show_splash_screen: true,
                 is_computing: true,
-                suggested_height_ratio: null,       // Value to magnetize the zome to the nearest cut
                 colors: [],
                 i18n_dictionary: {},
 
@@ -2880,6 +2884,14 @@
                             this.clamp(key, value);
                             this.__make_zome();
                         });
+                    });
+
+                    this.$watch("max_timber_width", () => {
+                        this.clamp("timber_width_in_mm", this.params.timber_width_in_mm);
+                    });
+
+                    this.$watch("max_timber_thickness", () => {
+                        this.clamp("timber_thickness_in_mm", this.params.timber_thickness_in_mm);
                     });
 
                     // Constrains the assembly direction depending on assembly method
@@ -2942,11 +2954,11 @@
 
                     // Refresh data related to the height
                     // if you change the zome height
-                    this.$watch("params.zome_height_in_mm", () => {
+                    this.$watch("params.zome_height_before_generating_timbers_in_mm", () => {
                         this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
                     });
 
-                    _.forEach(["height_ratio", "zome_height_in_mm"], key => {
+                    _.forEach(["height_ratio", "zome_height_before_generating_timbers_in_mm"], key => {
                         this.$watch(`params.${key}`, () => {
                             this.clamp("z_vanishing_point_in_mm", this.zome_centroid);
                         });
@@ -3132,11 +3144,11 @@
                         this.params.kite_ratio = 1
                     }
                 },
-                get zome_height() {
-                    return from_mm(this.params.zome_height_in_mm, this.params.measuring_unit);
+                get zome_height_before_generating_timbers() {
+                    return to_decimal(from_mm(this.params.zome_height_before_generating_timbers_in_mm, this.params.measuring_unit));
                 },
-                set zome_height(value) {
-                    this.clamp("zome_height_in_mm", to_mm(value, this.params.measuring_unit));
+                set zome_height_before_generating_timbers(value) {
+                    this.clamp("zome_height_before_generating_timbers_in_mm", to_mm(value, this.params.measuring_unit));
                 },
                 get timber_width() {
                     return to_decimal(from_mm(this.params.timber_width_in_mm, this.params.measuring_unit));
@@ -3160,23 +3172,23 @@
                     this.clamp("timber_thickness_in_mm", to_mm(value, this.params.measuring_unit));
                 },
                 get max_timber_thickness() {
-                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.params.num_spirals)), FLOAT_2_STR_PRECISION);
+                    return to_decimal(this.first_crown_radius * Math.sin(Math.PI / (this.params.num_spirals)));
                 },
                 set z_vanishing_point(value) {
                     this.clamp("z_vanishing_point_in_mm", to_mm(value, this.params.measuring_unit));
                 },
                 get z_vanishing_point() {
-                    return to_decimal(from_mm(this.params.z_vanishing_point_in_mm, this.params.measuring_unit), FLOAT_PRECISION);
+                    return to_decimal(from_mm(this.params.z_vanishing_point_in_mm, this.params.measuring_unit));
                 },
                 get zome_centroid() {
                     // vertical center of entire zome
-                    return Math.max(0, this.params.zome_height_in_mm - this.params.zome_height_in_mm / this.params.height_ratio / 2);
+                    return Math.max(0, this.params.zome_height_before_generating_timbers_in_mm - this.params.zome_height_before_generating_timbers_in_mm / this.params.height_ratio / 2);
                 },
                 get min_z_vanishing_point() {
-                    return (this.params.height_ratio > 0.75) ? this.params.zome_height_in_mm * 0.25 : 0;
+                    return (this.params.height_ratio > 0.75) ? this.params.zome_height_before_generating_timbers_in_mm * 0.25 : 0;
                 },
                 get max_z_vanishing_point() {
-                    return this.params.zome_height_in_mm * 0.75;
+                    return this.params.zome_height_before_generating_timbers_in_mm * 0.75;
                 },
                 get is_vanishing_centered() {
                     return to_decimal(this.params.z_vanishing_point_in_mm) === to_decimal(this.zome_centroid);
@@ -3187,7 +3199,7 @@
                     }
                 },
                 get total_height() {
-                    return this.params.zome_height_in_mm / this.params.height_ratio;
+                    return this.params.zome_height_before_generating_timbers_in_mm / this.params.height_ratio;
                 },
                 get k_sum() {
                     return this.is_rhombus ? this.params.num_spirals : (1 - Math.pow(this.params.kite_ratio, this.params.num_spirals)) / (1 - this.params.kite_ratio);
@@ -3216,7 +3228,6 @@
                 get constrained_assembly_direction() {
                     return this.params.assembly_direction % this.num_assembly_directions;
                 },
-
                 set constrained_assembly_direction(value) {
                     this.params.assembly_direction = value % this.num_assembly_directions;
                 },
@@ -3325,7 +3336,7 @@
                     // Config Parameters
                     const N = this.params.num_spirals;
                     const K = this.params.kite_ratio;
-                    const ZOME_HEIGHT = this.params.zome_height_in_mm;
+                    const ZOME_HEIGHT_BEFORE_GENERATING_TIMBERS = this.params.zome_height_before_generating_timbers_in_mm;
                     const TIMBER_WIDTH = this.params.timber_width_in_mm;
                     const TIMBER_THICKNESS = this.params.timber_thickness_in_mm;
 
@@ -3341,7 +3352,7 @@
                     const TOTAL_HEIGHT = this.total_height;
 
                     // First Point at the top
-                    this.add_vertex(vertices, [0, ZOME_HEIGHT, 0]);
+                    this.add_vertex(vertices, [0, ZOME_HEIGHT_BEFORE_GENERATING_TIMBERS, 0]);
 
                     // First crown properties
                     const first_crown_radius = this.first_crown_radius;
@@ -3363,7 +3374,7 @@
                         rotation_angles[i] = new Angle(i * INCR_RAD);
                         A = [
                             first_crown_radius * rotation_angles[i].sin,
-                            Math.max(0, ZOME_HEIGHT - first_crown_height),
+                            Math.max(0, ZOME_HEIGHT_BEFORE_GENERATING_TIMBERS - first_crown_height),
                             first_crown_radius * rotation_angles[i].cos
                         ];
                         this.add_vertex(vertices, A);
@@ -3459,7 +3470,7 @@
                         dist_to_ground = Math.abs(y);
                         if (dist_to_ground < closest_dist_to_ground) {
                             closest_dist_to_ground = dist_to_ground;
-                            this.suggested_height_ratio = this.to_suggested_height_ratio(y, ZOME_HEIGHT, TOTAL_HEIGHT);
+                            this.suggested_height_ratio = this.to_suggested_height_ratio(y, ZOME_HEIGHT_BEFORE_GENERATING_TIMBERS, TOTAL_HEIGHT);
                         }
                     }
 
@@ -3498,7 +3509,6 @@
                     // Variables for Footing building
                     let lowest_vertical_position = Number.MAX_VALUE,
                         footing_params = [];
-
 
                     // Compute dihedral angles
                     for (let face_index = 0; face_index < num_zome_faces; face_index++) {
@@ -3643,14 +3653,13 @@
                     const outer_floor = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, FLOOR_CHAR) : null;
                     const inner_floor = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, FLOOR_CHAR) : null;
 
+                    // Group items by hash
                     const obj_3D_to_label = [
                         skeleton,
                         outer_faces,
                         inner_faces,
                         zome_faces_3D,
                     ];
-
-                    // Group items by hash
                     const arr_of_obj_groups = new Array(obj_3D_to_label.length);
                     for (let i = 0; i < obj_3D_to_label.length; i++) {
                         const obj_3D = obj_3D_to_label[i];

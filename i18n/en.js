@@ -96,7 +96,7 @@ const I18N_EN = {
         help_kr_param: "Ratio of the length of the lower edges to that of the upper edges of a rhombus",
         help_set_rhombus_param: "Set to rhombus (equilateral)",
         help_painting_param: "Painting faces with the same labels or painting spirals in different colors",
-        help_zh_param: "Height of the visible part of the zome before xpansion (outwards/inwards)",
+        help_zh_param: "Height of the visible part of the zome before generating the timbers",
         help_tw_param: "Width of timbers",
         help_tt_param: "Thickness of timbers",
         help_am_param: "From left to right :",
@@ -105,7 +105,7 @@ const I18N_EN = {
         help_am_param_3: "Assembly direction : Clockwise, Counterclockwise or Symmetry Axis (SemiCone)",
         help_vp_param: "Height of vanishing point (used to build 'GoodKarma' and 'Beveled' methods)",
         help_zc_param: "Place the vanishing point at the centroid of the entire zome",
-        help_ft_param: "Add a footing based on the half of timber width",
+        help_ft_param: "Add a footing based on the timber width",
         help_ro_param: "Roof overflow",
 
         // Measurements table

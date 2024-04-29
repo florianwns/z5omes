@@ -570,7 +570,7 @@ function check_is_coplanar(points) {
 // --------------------------------
 
 function clone_3D_obj(obj, translation_vec = [0, 0, 0]) {
-    if(!(obj instanceof THREE.Object3D)) return;
+    if (!(obj instanceof THREE.Object3D)) return;
 
     const cloned_obj = obj.clone();
     cloned_obj.position.x += translation_vec[0];
@@ -2059,6 +2059,10 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         }
 
         // Add children
+        this.init_children();
+    }
+
+    init_children() {
         this._children = [
             this.get_face("top"),
             this.get_face("bottom"),

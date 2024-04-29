@@ -96,7 +96,7 @@ const I18N_FR = {
         help_kr_param: "Rapport de la longueur des bords inférieurs sur celle des bords supérieurs d'un losange",
         help_set_rhombus_param: "Règler sur losange (équilatéral)",
         help_painting_param: "Peindre les faces avec les mêmes étiquettes ou peindre les spirales avec des couleurs différentes",
-        help_zh_param: "Hauteur de la partie visible du zome avant expansion (vers l'extérieur/intérieur)",
+        help_zh_param: "Hauteur de la partie visible du zome avant génération des montants",
         help_tw_param: "Largeur des montants",
         help_tt_param: "Profondeur des montants",
         help_am_param: "De gauche à droite :",
@@ -105,7 +105,7 @@ const I18N_FR = {
         help_am_param_3: "Direction de l'assemblage : Sens horaire, anti-horaire ou axe de symétrie (SemiCone)",
         help_vp_param: "Hauteur du point de fuite (utilisé pour construire les méthodes 'GoodKarma' et 'Beveled')",
         help_zc_param: "Mettre le point de fuite au centre de gravité du zome entier",
-        help_ft_param: "Ajoute une semelle basée sur la moitié de la largeur des montants",
+        help_ft_param: "Ajoute une semelle basée sur la largeur des montants",
         help_ro_param: "Débordement du toit",
 
         // Measurements table
