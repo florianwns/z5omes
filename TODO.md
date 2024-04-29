@@ -1,6 +1,5 @@
 # TODO-LIST
-
-
+ 
 * [ ] Changer l'aide du kite ratio car ce n'est pas exactement ça
 
 * [ ] Mettre à jour les autres traductions avec les termes manquants

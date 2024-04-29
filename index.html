@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.10b07" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.10b08" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -418,7 +418,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.10b07</span>
+                              style="font-size: 10px; top:0px">v1.0.10b08</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1441,15 +1441,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.10b07"></script>
-<script src="i18n/en.js?v=1.0.10b07"></script>
-<script src="i18n/it.js?v=1.0.10b07"></script>
-<script src="i18n/fr.js?v=1.0.10b07"></script>
-<script src="i18n/pl.js?v=1.0.10b07"></script>
-<script src="i18n/sv.js?v=1.0.10b07"></script>
+<script src="i18n/es.js?v=1.0.10b08"></script>
+<script src="i18n/en.js?v=1.0.10b08"></script>
+<script src="i18n/it.js?v=1.0.10b08"></script>
+<script src="i18n/fr.js?v=1.0.10b08"></script>
+<script src="i18n/pl.js?v=1.0.10b08"></script>
+<script src="i18n/sv.js?v=1.0.10b08"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.10b07"></script>
+<script src="js/core.js?v=1.0.10b08"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1868,13 +1868,19 @@
                     obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
                     obj += `# https://florianwns.github.io/z5omes/\n`;
                     obj += hr;
+                    obj += `# ${this.i18n('actual_zome_height')} : ${this.actual_zome_height}\n`;
+                    obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
+                    obj += `# ${this.i18n('floor_radius')} : ${this.floor_radius}\n`;
+                    obj += hr;
+                    obj += `# ${this.i18n('num_of_different_faces')} : ${this.num_of_different_faces}\n`;
                     obj += `# ${this.i18n('total_number_of_faces')} : ${this.total_number_of_faces}\n`;
                     obj += `# ${this.i18n('widest_radius_of_faces')} : ${this.widest_radius_of_faces}\n`;
                     obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
                     obj += hr;
-                    obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
-                    obj += `# ${this.i18n('floor_radius')} : ${this.floor_radius}\n`;
-                    obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
+                    obj += `# ${this.i18n('num_of_different_timbers')} : ${this.num_of_different_timbers}\n`;
+                    obj += `# ${this.i18n('total_number_of_timbers')} : ${this.total_number_of_timbers}\n`;
+                    obj += `# ${this.i18n('timber_lengths')} : ${this.timber_lengths}\n`;
+                    obj += `# ${this.i18n('total_length_of_timbers')} : ${this.total_length_of_timbers}\n`;
                     obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
                     const rows = this.table_rows;
@@ -3728,8 +3734,8 @@
                     });
 
                     // Remove duplicates and create floors ⬢
-                    outer_floor_points = _.uniqWith(outer_floor_points, are_points_equal);
-                    inner_floor_points = _.uniqWith(inner_floor_points, are_points_equal);
+                    outer_floor_points = _.uniqWith(outer_floor_points, are_points_far_enough);
+                    inner_floor_points = _.uniqWith(inner_floor_points, are_points_far_enough);
                     const outer_floor = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, FLOOR_CHAR) : null;
                     const inner_floor = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, FLOOR_CHAR) : null;
 
