@@ -1,5 +1,6 @@
 # TODO-LIST
 
+
 * [ ] Changer l'aide du kite ratio car ce n'est pas exactement ça
 
 * [ ] Mettre à jour les autres traductions avec les termes manquants
@@ -20,8 +21,8 @@
   
 * [ ] Ajouter les renforts en plus de la division des polygones... cossu
 
-* [ ] Corriger bug sur les vues de côtés haut bas quand on se déplace dans la caméra. -> resetter avant de faire les vue
-  de côté
+* [ ] Corriger bug sur les vues de côtés haut bas quand on se déplace dans la caméra. -> 
+  resetter avant de faire les vue de côté
 
 * [ ] Corriger les points de la semelle de la méthode goodkarma
     * Sans doute dû aux inner/outer faces qui sont mal calculées pour le goodkarma
@@ -29,3 +30,5 @@
 * [ ] Ajouter les languettes pour l'origami, et coller les pointes du zome.
 
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
+
+

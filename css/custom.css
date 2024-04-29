@@ -67,6 +67,16 @@ body:after {
     --bs-aspect-ratio: calc(29.7 / 21 * 100%);
 }
 
+.list-group.small li {
+    padding: 6px 12px !important;
+    font-size: 0.95em;
+}
+
+.list-group.small .badge {
+    font-size: 0.9em;
+    padding: 3px 6px;
+}
+
 .small .badge {
     font-size: 0.9em;
 }
