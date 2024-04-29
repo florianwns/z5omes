@@ -1357,7 +1357,6 @@ class Polygon3D extends Base3DGeometry {
 
         this._plane = null;
         this._radius = null;
-        this._diameter = null;
         this._framework_timbers = null;
         this._framework_outer_points = null;
         this._framework_inner_points = null;
@@ -1397,13 +1396,6 @@ class Polygon3D extends Base3DGeometry {
 
     get framework_inner_points() {
         return this._framework_inner_points;
-    }
-
-    get diameter() {
-        if (this._diameter === null) {
-            this._diameter = 2 * this.radius;
-        }
-        return this._diameter;
     }
 
     get radius() {
@@ -2062,6 +2054,12 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         this.init_children();
     }
 
+    static copy(obj, points) {
+        return new TrapezoidalPrism(
+            points || obj.points, obj.label, obj.color, obj.crown_index
+        );
+    }
+
     init_children() {
         this._children = [
             this.get_face("top"),
@@ -2071,12 +2069,6 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
             this.get_face("front"),
             this.get_face("back"),
         ];
-    }
-
-    static copy(obj, points) {
-        return new TrapezoidalPrism(
-            points || obj.points, obj.label, obj.color, obj.crown_index
-        );
     }
 
     compute_points_on_the_ground() {

@@ -255,7 +255,8 @@
                     ZH
                     </span>
                     <input class="form-control form-range" min="100" max="10000" step="10" type="range"
-                           x-model.number="params.zome_height_before_generating_timbers_in_mm" x-ref="zome_height_before_generating_timbers_in_mm_slider">
+                           x-model.number="params.zome_height_before_generating_timbers_in_mm"
+                           x-ref="zome_height_before_generating_timbers_in_mm_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="zome_height_before_generating_timbers">
                 </div>
@@ -1241,7 +1242,7 @@
 
                     <!-- Select inner or outer faces -->
                     <select id="face-measurement-select" class="form-select mx-2" aria-label="Type of 3D objects"
-                            x-model="type_of_3D_objects">
+                            x-model="type_of_faces">
                         <option selected value="inner_faces"
                                 x-text="i18n('inner')"></option>
                         <option value="outer_faces"
@@ -1267,15 +1268,39 @@
                 </div>
 
                 <div class="row justify-content-between">
-                    <div class="col-md-6 col-xl-5 mt-2">
+                    <div class="col-md-12 col-lg-4 mt-2">
+                        <p x-text="i18n('zome')" class="text-secondary m-1 up-first"></p>
                         <ul class="list-group small">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('actual_zome_height')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="actual_zome_height"></span>
+                            </li>
+                            <li x-show.important="has_floor"
+                                class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('floor_area')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
+                            </li>
+                            <li x-show.important="has_floor"
+                                class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('floor_radius')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="floor_radius"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mt-2">
+                        <p x-text="i18n('faces')" class="text-secondary m-1 up-first"></p>
+                        <ul class="list-group small">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('num_of_different_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="num_of_different_faces"></span>
+                            </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span x-text="i18n('total_number_of_faces')"></span>
                                 <span class="badge bg-info rounded-pill" x-text="total_number_of_faces"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('widest_diameter_of_faces')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="widest_diameter_of_faces"></span>
+                                <span x-text="i18n('widest_radius_of_faces')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="widest_radius_of_faces"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span x-text="i18n('total_area_of_faces')"></span>
@@ -1283,19 +1308,24 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="col-md-6 col-xl-5 mt-2" x-show.important="has_floor">
+                    <div class="col-md-6 col-lg-4 mt-2">
+                        <p x-text="i18n('timbers')" class="text-secondary m-1 up-first"></p>
                         <ul class="list-group small">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_perimeter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_perimeter"></span>
+                                <span x-text="i18n('num_of_different_timbers')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="num_of_different_timbers"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_diameter')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_diameter"></span>
+                                <span x-text="i18n('total_number_of_timbers')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="total_number_of_timbers"></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
+                                <span x-text="i18n('timber_lengths')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="timber_lengths"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span x-text="i18n('total_length_of_timbers')"></span>
+                                <span class="badge bg-info rounded-pill" x-text="total_length_of_timbers"></span>
                             </li>
                         </ul>
                     </div>
@@ -1780,34 +1810,43 @@
 
         Alpine.data('face_measurements', () => {
             return {
+                // Zome properties
+                actual_zome_height: 0,
+
+                // Faces properties
+                type_of_faces: "inner_faces",
                 faces: [],
-                quantities: [],
+                face_quantities: [],
                 floor: null,
-                type_of_3D_objects: "inner_faces",
                 total_number_of_faces: 0,
+                num_of_different_faces: 0,
+
+                // Timber properties
+                total_number_of_timbers: 0,
+                num_of_different_timbers: 0,
+                timber_lengths: 0,
+                total_length_of_timbers: 0,
 
                 async init() {
-                    ["type_of_3D_objects"].forEach(
+                    ["type_of_faces"].forEach(
                         (key) => this.$watch(key, () => {
-                            this.process();
+                            this.compute_faces();
                         })
                     );
                 },
-
                 get has_floor() {
                     return this.floor !== null;
                 },
-                get widest_diameter_of_faces() {
-                    const value = _.reduce(this.faces, (res, p) => Math.max(res, p.diameter), Number.MIN_VALUE);
+                get widest_radius_of_faces() {
+                    const value = _.reduce(this.faces, (res, p) => Math.max(res, p.radius), Number.MIN_VALUE);
                     return humanize_distance(value);
                 },
                 get total_area_of_faces() {
                     const value = _.reduce(this.faces, (res, p) => res + p.area * ZOME.num_spirals, 0);
                     return humanize_area(value);
                 },
-
-                get floor_diameter() {
-                    const value = this.floor ? this.floor.diameter : 0;
+                get floor_radius() {
+                    const value = this.floor ? this.floor.radius : 0;
                     return humanize_distance(value);
                 },
                 get floor_area() {
@@ -1818,7 +1857,6 @@
                     const value = this.floor ? this.floor.perimeter : 0
                     return humanize_distance(value);
                 },
-
                 download_tsv() {
                     this.download_csv("\t", "tsv");
                 },
@@ -1831,11 +1869,11 @@
                     obj += `# https://florianwns.github.io/z5omes/\n`;
                     obj += hr;
                     obj += `# ${this.i18n('total_number_of_faces')} : ${this.total_number_of_faces}\n`;
-                    obj += `# ${this.i18n('widest_diameter_of_faces')} : ${this.widest_diameter_of_faces}\n`;
+                    obj += `# ${this.i18n('widest_radius_of_faces')} : ${this.widest_radius_of_faces}\n`;
                     obj += `# ${this.i18n('total_area_of_faces')} : ${this.total_area_of_faces}\n`;
                     obj += hr;
                     obj += `# ${this.i18n('floor_perimeter')} : ${this.floor_perimeter}\n`;
-                    obj += `# ${this.i18n('floor_diameter')} : ${this.floor_diameter}\n`;
+                    obj += `# ${this.i18n('floor_radius')} : ${this.floor_radius}\n`;
                     obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
                     obj += hr;
                     obj += _.join(this.table_column_names, sep) + "\n"
@@ -1857,7 +1895,7 @@
                         this.i18n('wedge_angle'),      // Wedge angle for Xpansion method
                         this.i18n('slope_angle'),
                         this.i18n('area'),
-                        this.i18n('diameter'),
+                        this.i18n('radius'),
                     ]
                 },
                 get table_rows() {
@@ -1869,7 +1907,7 @@
                         const face_on_the_ground = face.put_face_on_the_ground("front", true);
                         rows[i] = [face_on_the_ground, [
                             face_on_the_ground.label,
-                            this.quantities[i] || 1,
+                            this.face_quantities[i] || 1,
                             humanize_distance(face_on_the_ground.width),
                             humanize_distance(face_on_the_ground.height),
                             humanize_arr(unique_arr(_.map(face.edge_distances, v => humanize_distance(v)))),
@@ -1878,15 +1916,53 @@
                             humanize_angle(rad2deg(face.dihedral_angle > 0 ? Math.PI - face.dihedral_angle : 0)),
                             humanize_angle(rad2deg(face.normalized_slope)),
                             humanize_area(face.area),
-                            humanize_distance(face.diameter),
+                            humanize_distance(face.radius),
                         ]];
                     });
                     return rows;
                 },
 
                 process() {
+                    const skeleton = ZOME.skeleton;
+
+                    // Compute Zome Height
+                    let zome_y_min = Number.MAX_VALUE, zome_y_max = Number.MIN_VALUE;
+                    for (let timber_index = 0; timber_index < skeleton.length; timber_index++) {
+                        const timber = skeleton[timber_index];
+                        timber.compute_boundaries();
+                        if (timber.y_min < zome_y_min) zome_y_min = timber.y_min;
+                        if (timber.y_max > zome_y_max) zome_y_max = timber.y_max;
+                    }
+                    this.actual_zome_height = humanize_distance(zome_y_max - zome_y_min);
+
+                    let max_timber_length = Number.MIN_VALUE,
+                        min_timber_length = Number.MAX_VALUE,
+                        total_length_of_timbers = 0,
+                        total_number_of_timbers = 0;
+
+                    const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
+                    const num_items = Object.keys(timber_profiles_grouped_by_hash).length;
+
+                    _.forIn(timber_profiles_grouped_by_hash, group => {
+                        const timber = group.item;
+                        const timber_width = timber.put_on_the_ground().width;
+                        if (timber_width > max_timber_length) max_timber_length = timber_width;
+                        if (timber_width < min_timber_length) min_timber_length = timber_width;
+
+                        total_length_of_timbers += timber_width * group.count;
+                        total_number_of_timbers += group.count;
+                    });
+
+                    this.total_length_of_timbers = humanize_distance(total_length_of_timbers);
+                    this.timber_lengths = `[${humanize_distance(min_timber_length)}, ${humanize_distance(max_timber_length)}]`;
+                    this.num_of_different_timbers = num_items;
+                    this.total_number_of_timbers = total_number_of_timbers;
+
+                    this.compute_faces();
+                },
+                compute_faces() {
                     // Add floor
-                    switch (this.type_of_3D_objects) {
+                    switch (this.type_of_faces) {
                         case "inner_faces":
                             this.floor = ZOME.inner_floor;
                             break;
@@ -1896,19 +1972,23 @@
                     }
 
                     // Add faces
-                    const groups = eval(`ZOME.${this.type_of_3D_objects}_grouped_by_hash`);
+                    const groups = eval(`ZOME.${this.type_of_faces}_grouped_by_hash`);
                     const num_items = Object.keys(groups).length;
                     this.faces = new Array(num_items);
-                    this.quantities = new Array(num_items);
+                    this.face_quantities = new Array(num_items);
+                    this.num_of_different_faces = num_items;
+                    let total_number_of_faces = 0;
 
-                    this.total_number_of_faces = 0;
                     let face_index = 0;
                     _.forIn(groups, group => {
                         this.faces[face_index] = group.item;
-                        this.quantities[face_index] = group.count;
-                        this.total_number_of_faces += group.count;
+                        this.face_quantities[face_index] = group.count;
+                        total_number_of_faces += group.count;
                         face_index++;
                     });
+
+                    this.total_number_of_faces = total_number_of_faces;
+
                 },
             };
         });
