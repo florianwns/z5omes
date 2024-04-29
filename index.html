@@ -3734,8 +3734,8 @@
                     });
 
                     // Remove duplicates and create floors ⬢
-                    outer_floor_points = _.uniqWith(outer_floor_points, are_points_equal);
-                    inner_floor_points = _.uniqWith(inner_floor_points, are_points_equal);
+                    outer_floor_points = _.uniqWith(outer_floor_points, are_points_far_enough);
+                    inner_floor_points = _.uniqWith(inner_floor_points, are_points_far_enough);
                     const outer_floor = (outer_floor_points.length >= 3) ? new Polygon3D(outer_floor_points, FLOOR_CHAR) : null;
                     const inner_floor = (inner_floor_points.length >= 3) ? new Polygon3D(inner_floor_points, FLOOR_CHAR) : null;
 

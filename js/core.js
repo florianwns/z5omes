@@ -155,6 +155,10 @@ function are_points_equal(p1, p2) {
     return x1 === x2 && y1 === y2 && z1 === z2;
 }
 
+function are_points_far_enough(p1, p2, min_distance = 1) {
+    return dist(p1, p2) < min_distance;
+}
+
 function round_values(pt, num_digits = FLOAT_PRECISION) {
     const rounded_pt = new Array(pt.length);
     for (let i = 0; i < pt.length; i++) {
