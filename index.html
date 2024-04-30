@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.10b08" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.10b09" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -406,7 +406,7 @@
 
     <div class="auto-shift position-relative">
         <div class="container-xl row m-auto" style="max-width: 980px;">
-            <div class="col mb-3 mt-3">
+            <div class="col mb-3 mt-3 px-1">
                 <div class="d-flex align-items-center">
                     <a href="https://florianwns.github.io/z5omes/"
                        class="text-decoration-none me-auto d-flex align-items-center position-relative">
@@ -418,7 +418,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.10b08</span>
+                              style="font-size: 10px; top:0px">v1.0.10b09</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -482,10 +482,10 @@
                         <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                              tabindex="0" x-data="renderer_3D" @resize.window="__auto_size"
                              @zome-is-made.window="__process">
-                            <div class="d-flex justify-content-center">
-                                <div style="width:calc(100% - 72px); max-width: 800px;" class="position-relative">
+                            <div class="d-flex justify-content-left justify-content-lg-center">
+                                <div style="width:calc(100% - 36px); max-width:850px;" class="position-relative">
                                     <!-- Export to -->
-                                    <div x-show="draw_zome" class="ps-2 absolute-top-right-48">
+                                    <div x-show="draw_zome" class="ps-2 absolute-top-right-48" style="top:48px;">
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
@@ -1123,7 +1123,7 @@
                         <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
                              tabindex="0"
                              x-data="renderer_a4" @zome-is-made.window="process">
-                            <div class="d-flex justify-content-center m-auto" style="max-width: calc(100% - 72px); ">
+                            <div id="renderer_a4_container" class="d-flex justify-content-center" style="max-width: calc(100% - 36px); ">
                                 <div class="position-relative">
                                     <!-- Export to -->
                                     <div class="ps-2 absolute-top-right-48" style="top:48px;">
@@ -1229,170 +1229,170 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
-                <hr>
+                <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
+                    <hr>
 
-                <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="text-secondary mt-4 mb-4 me-2">
-                        <i class="fa-solid fa-ruler-triangle me-1"></i>
-                        <span x-text="i18n('measurements')"></span>
-                    </h5>
+                    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
+                        <h5 class="text-secondary mt-4 mb-4 me-2">
+                            <i class="fa-solid fa-ruler-triangle me-1"></i>
+                            <span x-text="i18n('measurements')"></span>
+                        </h5>
 
-                    <!-- Select inner or outer faces -->
-                    <select id="face-measurement-select" class="form-select mx-2" aria-label="Type of 3D objects"
-                            x-model="type_of_faces">
-                        <option selected value="inner_faces"
-                                x-text="i18n('inner')"></option>
-                        <option value="outer_faces"
-                                x-text="i18n('outer')"></option>
-                    </select>
+                        <!-- Select inner or outer faces -->
+                        <select id="face-measurement-select" class="form-select mx-2" aria-label="Type of 3D objects"
+                                style="max-width:200px"
+                                x-model="type_of_faces">
+                            <option selected value="inner_faces"
+                                    x-text="i18n('inner')"></option>
+                            <option value="outer_faces"
+                                    x-text="i18n('outer')"></option>
+                        </select>
 
-                    <!-- TSV and CSV Button -->
-                    <div>
-                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                              :title="i18n('tooltip_export_2_format', 'TSV')"
-                              @click="download_tsv()">
-                            <i class="fa-solid fa-file"></i>
-                            <span class="fa-icon-file-type">TSV</span>
-                        </span>
-                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
-                              title="Export to CSV format"
-                              :title="i18n('tooltip_export_2_format', 'CSV')"
-                              @click="download_csv()">
-                            <i class="fa-solid fa-file"></i>
-                            <span class="fa-icon-file-type">CSV</span>
-                        </span>
+                        <!-- TSV and CSV Button -->
+                        <div>
+                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                                  :title="i18n('tooltip_export_2_format', 'TSV')"
+                                  @click="download_tsv()">
+                                <i class="fa-solid fa-file"></i>
+                                <span class="fa-icon-file-type">TSV</span>
+                            </span>
+                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                                  title="Export to CSV format"
+                                  :title="i18n('tooltip_export_2_format', 'CSV')"
+                                  @click="download_csv()">
+                                <i class="fa-solid fa-file"></i>
+                                <span class="fa-icon-file-type">CSV</span>
+                            </span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="row justify-content-between">
-                    <div class="col-md-12 col-lg-4 mt-2">
-                        <p x-text="i18n('zome')" class="text-secondary m-1 up-first"></p>
-                        <ul class="list-group small">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('actual_zome_height')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="actual_zome_height"></span>
-                            </li>
-                            <li x-show.important="has_floor"
-                                class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_area')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
-                            </li>
-                            <li x-show.important="has_floor"
-                                class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('floor_radius')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="floor_radius"></span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6 col-lg-4 mt-2">
-                        <p x-text="i18n('faces')" class="text-secondary m-1 up-first"></p>
-                        <ul class="list-group small">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('num_of_different_faces')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="num_of_different_faces"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('total_number_of_faces')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="total_number_of_faces"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('widest_radius_of_faces')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="widest_radius_of_faces"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('total_area_of_faces')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="total_area_of_faces"></span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6 col-lg-4 mt-2">
-                        <p x-text="i18n('timbers')" class="text-secondary m-1 up-first"></p>
-                        <ul class="list-group small">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('num_of_different_timbers')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="num_of_different_timbers"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('total_number_of_timbers')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="total_number_of_timbers"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('timber_lengths')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="timber_lengths"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span x-text="i18n('total_length_of_timbers')"></span>
-                                <span class="badge bg-info rounded-pill" x-text="total_length_of_timbers"></span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-12 mt-3 mb-5">
-                        <div class="table-responsive border border-bottom-0 bg-white rounded">
-                            <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
-                                <thead class="bg-info text-white">
-                                <tr>
-                                    <th></th>
-                                    <template x-for="(obj, i) in table_column_names" :key="i">
-                                        <th x-text="obj"></th>
-                                    </template>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <template x-for="(row, i) in table_rows" :key="i">
-                                    <tr class="align-middle">
-                                        <td>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                                 :fill="row[0].color.hex">
-                                                <polygon :points="row[0].resize_points_2D(32)"/>
-                                            </svg>
-                                        </td>
-                                        <template x-for="(value, j) in row[1]" :key="j">
-                                            <td x-text="value"></td>
+                    <div class="row justify-content-center">
+                        <div class="col-md-12 col-lg-4 mt-2 mx-auto" style="max-width:500px">
+                            <p x-text="i18n('zome')" class="text-secondary m-1 up-first"></p>
+                            <ul class="list-group small">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('actual_zome_height')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="actual_zome_height"></span>
+                                </li>
+                                <li x-show.important="has_floor"
+                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('floor_area')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="floor_area"></span>
+                                </li>
+                                <li x-show.important="has_floor"
+                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('floor_radius')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="floor_radius"></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mt-2 mx-auto" style="max-width:500px">
+                            <p x-text="i18n('faces')" class="text-secondary m-1 up-first"></p>
+                            <ul class="list-group small">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('num_of_different_faces')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="num_of_different_faces"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('total_number_of_faces')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="total_number_of_faces"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('widest_radius_of_faces')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="widest_radius_of_faces"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('total_area_of_faces')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="total_area_of_faces"></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mt-2 mx-auto" style="max-width:500px">
+                            <p x-text="i18n('timbers')" class="text-secondary m-1 up-first"></p>
+                            <ul class="list-group small">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('num_of_different_timbers')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="num_of_different_timbers"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('total_number_of_timbers')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="total_number_of_timbers"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('timber_lengths')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="timber_lengths"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span x-text="i18n('total_length_of_timbers')"></span>
+                                    <span class="badge bg-info rounded-pill" x-text="total_length_of_timbers"></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-12 mt-5 mb-5">
+                            <div class="table-responsive border border-bottom-0 bg-white rounded">
+                                <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
+                                    <thead class="bg-info text-white">
+                                    <tr>
+                                        <th></th>
+                                        <template x-for="(obj, i) in table_column_names" :key="i">
+                                            <th x-text="obj"></th>
                                         </template>
                                     </tr>
-                                </template>
-                                </tbody>
-                                <tfoot>
-                                </tfoot>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                    <template x-for="(row, i) in table_rows" :key="i">
+                                        <tr class="align-middle">
+                                            <td>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                                     :fill="row[0].color.hex">
+                                                    <polygon :points="row[0].resize_points_2D(32)"/>
+                                                </svg>
+                                            </td>
+                                            <template x-for="(value, j) in row[1]" :key="j">
+                                                <td x-text="value"></td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                    </tbody>
+                                    <tfoot>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
-                <hr>
-                <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="text-secondary mt-4 mb-4 me-auto">
-                        <i class="fa-solid fa-frame rotate-45 me-1"></i>
-                        <span x-text="i18n('framework')" class="up-first"></span>
-                    </h5>
+                <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
+                    <hr>
+                    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
+                        <h5 class="text-secondary mt-4 mb-4 me-2">
+                            <i class="fa-solid fa-frame rotate-45 me-1"></i>
+                            <span x-text="i18n('framework')" class="up-first"></span>
+                        </h5>
 
-                    <!-- ZIP Button -->
-                    <!--                    <div>-->
-                    <!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
-                    <!--                              :title="i18n('tooltip_export_2_format', 'ZIP')"-->
-                    <!--                              @click="download_zip()">-->
-                    <!--                            <i class="fa-solid fa-file"></i>-->
-                    <!--                            <span class="fa-icon-file-type">ZIP</span>-->
-                    <!--                        </span>-->
-                    <!--                    </div>-->
-                </div>
+                        <!-- ZIP Button -->
+                        <!--                    <div>-->
+                        <!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
+                        <!--                              :title="i18n('tooltip_export_2_format', 'ZIP')"-->
+                        <!--                              @click="download_zip()">-->
+                        <!--                            <i class="fa-solid fa-file"></i>-->
+                        <!--                            <span class="fa-icon-file-type">ZIP</span>-->
+                        <!--                        </span>-->
+                        <!--                    </div>-->
+                    </div>
 
-                <div class="row">
-                    <div class="overflow-scroll">
-                        <div class="mx-auto" style="width:800px;">
-                            <div class="bg-white rounded border position-relative"
-                                 x-ref="timber_profile_container">
+                    <div class="row">
+                        <div class="overflow-scroll">
+                            <div class="mx-auto" style="width:800px;">
+                                <div class="bg-white rounded border position-relative"
+                                     x-ref="timber_profile_container">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -1441,15 +1441,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.10b08"></script>
-<script src="i18n/en.js?v=1.0.10b08"></script>
-<script src="i18n/it.js?v=1.0.10b08"></script>
-<script src="i18n/fr.js?v=1.0.10b08"></script>
-<script src="i18n/pl.js?v=1.0.10b08"></script>
-<script src="i18n/sv.js?v=1.0.10b08"></script>
+<script src="i18n/es.js?v=1.0.10b09"></script>
+<script src="i18n/en.js?v=1.0.10b09"></script>
+<script src="i18n/it.js?v=1.0.10b09"></script>
+<script src="i18n/fr.js?v=1.0.10b09"></script>
+<script src="i18n/pl.js?v=1.0.10b09"></script>
+<script src="i18n/sv.js?v=1.0.10b09"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.10b08"></script>
+<script src="js/core.js?v=1.0.10b09"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>

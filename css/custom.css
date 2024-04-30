@@ -320,3 +320,14 @@ svg.svg_rhombus_customizer use.clickable:hover {
 #svg_rhombus_customizer use.selected {
     stroke: #0B5ED7 !important;
 }
+
+#renderer_a4_container{
+    margin: auto;
+}
+
+@media screen and (max-width: 420px){
+    #renderer_a4_container{
+        margin: 0!important;
+    }
+}
+
