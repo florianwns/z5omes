@@ -1233,7 +1233,7 @@
                 <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
                     <hr>
 
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
                         <h5 class="text-secondary mt-4 mb-4 me-2">
                             <i class="fa-solid fa-ruler-triangle me-1"></i>
                             <span x-text="i18n('measurements')"></span>
@@ -1241,6 +1241,7 @@
 
                         <!-- Select inner or outer faces -->
                         <select id="face-measurement-select" class="form-select mx-2" aria-label="Type of 3D objects"
+                                style="max-width:200px"
                                 x-model="type_of_faces">
                             <option selected value="inner_faces"
                                     x-text="i18n('inner')"></option>
@@ -1266,8 +1267,8 @@
                         </div>
                     </div>
 
-                    <div class="row justify-content-between">
-                        <div class="col-md-12 col-lg-4 mt-2">
+                    <div class="row justify-content-center">
+                        <div class="col-md-12 col-lg-4 mt-2 mx-auto" style="max-width:500px">
                             <p x-text="i18n('zome')" class="text-secondary m-1 up-first"></p>
                             <ul class="list-group small">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -1286,7 +1287,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-md-6 col-lg-4 mt-2">
+                        <div class="col-md-6 col-lg-4 mt-2 mx-auto" style="max-width:500px">
                             <p x-text="i18n('faces')" class="text-secondary m-1 up-first"></p>
                             <ul class="list-group small">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -1307,7 +1308,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-md-6 col-lg-4 mt-2">
+                        <div class="col-md-6 col-lg-4 mt-2 mx-auto" style="max-width:500px">
                             <p x-text="i18n('timbers')" class="text-secondary m-1 up-first"></p>
                             <ul class="list-group small">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -1328,7 +1329,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-12 mt-3 mb-5">
+                        <div class="col-12 mt-5 mb-5">
                             <div class="table-responsive border border-bottom-0 bg-white rounded">
                                 <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
                                     <thead class="bg-info text-white">
@@ -1364,8 +1365,8 @@
 
                 <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
                     <hr>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <h5 class="text-secondary mt-4 mb-4 me-auto">
+                    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
+                        <h5 class="text-secondary mt-4 mb-4 me-2">
                             <i class="fa-solid fa-frame rotate-45 me-1"></i>
                             <span x-text="i18n('framework')" class="up-first"></span>
                         </h5>
