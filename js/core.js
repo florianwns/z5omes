@@ -1346,7 +1346,7 @@ class Polygon3D extends Base3DGeometry {
         }
 
         // Check coplanarity
-        if (DEBUG) {
+        if (DEBUG && this.num_points <= 5) {
             this.is_coplanar = this.num_points === 3 || check_is_coplanar(this.points);
             if (!this.is_coplanar) {
                 console.warn(`The polygon ${this.label || ''} is not coplanar`, this.points);
