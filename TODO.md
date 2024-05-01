@@ -1,5 +1,7 @@
 # TODO-LIST
  
+* [x] Les pieces du beleved 'semicone' symetriques ne doivent pas être identiques.
+  - revoir le hash en utilisant les angles signés peut être
 
 * [ ] Changer l'aide du kite ratio 
   car ce n'est pas exactement ça

@@ -456,6 +456,23 @@ function rotate_points_around_z_axis(points, angle) {
 }
 
 
+function rotate_points_around_x_axis(points, angle) {
+    const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
+    const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
+
+    // Rotate 2D points around z axis
+    const rotated_points = new Array(points.length);
+    for (let i = 0; i < points.length; i++) {
+        const [x, y, z] = points[i];
+        rotated_points[i] = [
+            x,
+            y * cos_theta - z * sin_theta,
+            y * sin_theta + z * cos_theta,
+        ];
+    }
+    return rotated_points;
+}
+
 function rotate_point_around_y_axis(vec, angle, origin = [0, 0, 0]) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
@@ -752,22 +769,6 @@ function points_to_graph(points) {
     return graph;
 }
 
-function compute_hash_from_geometry(area, angles, edge_distances) {
-    // Sort parameters to compare symmetric geometry
-    const hash_parameters = {
-        area: to_decimal_str(area, FLOAT_2_STR_PRECISION),
-        angles: _.sortBy(
-            _.map(angles, (a) => to_decimal_str(a, FLOAT_2_STR_PRECISION))
-        ),
-        edge_distances: _.sortBy(
-            _.map(edge_distances, (d) => to_decimal_str(d, FLOAT_2_STR_PRECISION))
-        ),
-    };
-
-    // Sort parameters to compare geometries
-    return encode_params(hash_parameters);
-}
-
 // -----------------------------
 // ========== Helpers ==========
 // -----------------------------
@@ -1020,8 +1021,38 @@ class Base3DGeometry {
 
     get hash() {
         if (this._hash === null) {
-            // Compute hash to compare polygons
-            this._hash = compute_hash_from_geometry(this.area, this.angles, this.edge_distances);
+            // Put object on the ground
+            const fitted_points = this.put_on_the_ground().fitted_points;
+
+            const all_points = [...fitted_points.map(
+                p => numbers_2_str(round_values(p, FLOAT_2_STR_PRECISION))
+            )];
+
+            // Rotate it at 180 degrees on XYZ axes
+            const rotation_funcs = [
+                rotate_points_around_x_axis,
+                rotate_points_around_y_axis,
+                rotate_points_around_z_axis,
+            ];
+
+            for (let i = 0; i < rotation_funcs.length; i++) {
+                let reversed_fitted_point = rotation_funcs[i](
+                    fitted_points, Math.PI
+                );
+                const boundaries = get_boundaries(reversed_fitted_point);
+                const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
+                reversed_fitted_point = fit_points(reversed_fitted_point, x_min, y_min, z_min).map(
+                    p => numbers_2_str(round_values(p, FLOAT_2_STR_PRECISION))
+                );
+                all_points.push(...reversed_fitted_point)
+            }
+
+            const hash_parameters = {
+                all_points: _.sortBy(all_points),
+            };
+
+            // Sort parameters to compare geometries
+            this._hash = encode_params(hash_parameters);
         }
         return this._hash;
     }
