@@ -1364,13 +1364,7 @@
                 </div>
 
                 <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
-                    <hr>
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
-                        <h5 class="text-secondary mt-4 mb-4 me-2">
-                            <i class="fa-solid fa-frame rotate-45 me-1"></i>
-                            <span x-text="i18n('framework')" class="up-first"></span>
-                        </h5>
-
                         <!-- ZIP Button -->
                         <!--                    <div>-->
                         <!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
@@ -1382,11 +1376,30 @@
                         <!--                    </div>-->
                     </div>
 
-                    <div class="row">
-                        <div class="table-responsive">
-                            <div class="mx-auto" style="width:800px;">
-                                <div class="bg-white rounded border position-relative"
-                                     x-ref="timber_profile_container">
+                    <div class="table-responsive-lg">
+                        <div class="gap-3 d-flex flex-column flex-lg-row justify-content-center">
+                            <div class="mx-auto" style="width:300px!important">
+                                <div class="bg-white rounded border"
+                                     x-ref="timbers_grouped_by_face_svg_container">
+                                    <div class="sticky-lg-top  bg-white" style="z-index:1050">A</div>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <div class="sticky-lg-top bg-white" style="z-index:1051">B</div>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <br>
+                                    <div class="sticky-lg-top  bg-white" style="z-index:1052">C</div>
+                                </div>
+                            </div>
+                            <div class="mx-auto" style="width:800px!important">
+                                <div class="bg-white rounded border"
+                                     x-ref="timber_profiles_svg_container">
                                 </div>
                             </div>
                         </div>
@@ -1474,9 +1487,9 @@
 
         Alpine.data('framework_measurements', () => {
             return {
-                timber_profile_container: null,
+                timber_profiles_svg_container: null,
                 async init() {
-                    this.timber_profile_container = this.$refs.timber_profile_container;
+                    this.timber_profiles_svg_container = this.$refs.timber_profiles_svg_container;
                 },
 
                 process() {
@@ -1484,7 +1497,7 @@
                     const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
 
                     // Clear content
-                    this.timber_profile_container.innerHTML = "";
+                    this.timber_profiles_svg_container.innerHTML = "";
 
                     // Define sides
                     const side_names = ["left", "left", "front", "bottom"];
@@ -1519,7 +1532,7 @@
                     });
 
                     // Font size depends on container width
-                    const svg_width = this.timber_profile_container.parentNode.offsetWidth;
+                    const svg_width = this.timber_profiles_svg_container.parentNode.offsetWidth;
                     const title_font_size = 14;
                     const x_padding = 40;
                     const font_size = 12;
@@ -1801,7 +1814,7 @@
                             svg.appendChild(item[0]);
                         });
 
-                        this.timber_profile_container.appendChild(svg);
+                        this.timber_profiles_svg_container.appendChild(svg);
                     });
                 },
             };

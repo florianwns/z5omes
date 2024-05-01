@@ -15,6 +15,10 @@ body:after {
     transform: rotate(-45deg);
 }
 
+
+.container-xl{
+    max-width: 1150px!important;
+}
 #title img {
     filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, .2));
 }
@@ -321,13 +325,12 @@ svg.svg_rhombus_customizer use.clickable:hover {
     stroke: #0B5ED7 !important;
 }
 
-#renderer_a4_container{
+#renderer_a4_container {
     margin: auto;
 }
 
-@media screen and (max-width: 420px){
-    #renderer_a4_container{
-        margin: 0!important;
+@media screen and (max-width: 420px) {
+    #renderer_a4_container {
+        margin: 0 !important;
     }
 }
-
