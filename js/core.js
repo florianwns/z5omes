@@ -1525,7 +1525,7 @@ class Polygon3D extends Base3DGeometry {
                 const cur_2_prev_vec = sub(prev_pt, cur_pt);
 
                 const midpoint = face.midpoints[i];
-                const mid_2_vanishing_vec = sub(vanishing_pt, midpoint)
+                const mid_2_vanishing_vec = sub(vanishing_pt, midpoint);
 
                 switch (assembly_method) {
                     case 0: // GoodKarma
@@ -1613,7 +1613,7 @@ class Polygon3D extends Base3DGeometry {
                 );
             }
 
-            // Build the prism and outer/inner faces
+            // Build the prism and outer/inner face points
             for (let i = 0; i < face.num_points; i++) {
                 const next_index = face.next_indexes[i];
                 const prev_index = face.prev_indexes[i];
@@ -1651,10 +1651,11 @@ class Polygon3D extends Base3DGeometry {
 
                 // Compute planes to find intersection points
                 horizontal_proj_vec = horizontal_proj_vecs[i];
-                const along_plane = wall_planes[i]
+                const along_plane = wall_planes[i];
                 const midpoint_with_vertical_proj = plan_intersection(
                     width_offset_pt, horizontal_proj_vec, along_plane
                 )
+
 
                 // A, B, C, D is the top part (trapezoid) of the timber
                 A = plan_intersection(midpoint, sec_2_cur_vec, planes[0]);
@@ -1662,11 +1663,27 @@ class Polygon3D extends Base3DGeometry {
                 C = plan_intersection(midpoint, cur_2_sec_vec, planes[2])
                 D = plan_intersection(thickness_offset_pt, cur_2_sec_vec, planes[3])
 
-                // E, F, G, H is the bottom part (trapezoid) of the timber
-                E = plan_intersection(midpoint_with_vertical_proj, sec_2_cur_vec, planes[0]);
-                F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
-                G = plan_intersection(midpoint_with_vertical_proj, cur_2_sec_vec, planes[2]);
-                H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
+                // Specific computing for beveled with semicone direction
+                if (assembly_method === 1 && assembly_direction === 2) {
+                    // Compute a bottom wall plane
+                    const bottom_plane = points_2_plane(
+                        width_offset_pt,
+                        midpoint_with_vertical_proj,
+                        point_to(width_offset_pt, cur_2_sec_vec, 100),
+                    );
+
+                    // Follow vanishing points to compute E and G points
+                    E = plan_intersection(A, sub(vanishing_pt, A), bottom_plane);
+                    F = plan_intersection(width_offset_pt, sec_2_cur_vec, points_2_plane(A, B, E));
+                    G = plan_intersection(C, sub(vanishing_pt, C), bottom_plane);
+                    H = plan_intersection(width_offset_pt, cur_2_sec_vec, points_2_plane(C, D, G));
+                } else {
+                    // E, F, G, H is the bottom part (trapezoid) of the timber
+                    E = plan_intersection(midpoint_with_vertical_proj, sec_2_cur_vec, planes[0]);
+                    F = plan_intersection(width_offset_pt, sec_2_cur_vec, planes[1]);
+                    G = plan_intersection(midpoint_with_vertical_proj, cur_2_sec_vec, planes[2]);
+                    H = plan_intersection(width_offset_pt, cur_2_sec_vec, planes[3]);
+                }
 
                 // Reverse top and bottom sides depends on the xpansion direction
                 if (outward_xpansion) {

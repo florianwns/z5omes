@@ -3304,11 +3304,6 @@
                     return screenfull && screenfull.isEnabled && !IS_MOBILE;
                 },
                 get num_assembly_directions() {
-                    // Constrains the assembly direction depending
-                    // on assembly method to avoid not coplanar polygon on beveled method
-                    if (this.params.assembly_method === 1) {
-                        return 2;
-                    }
                     return ASSEMBLY_DIRECTIONS.length;
                 },
                 get constrained_assembly_direction() {
