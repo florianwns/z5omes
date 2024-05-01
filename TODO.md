@@ -1,8 +1,8 @@
 # TODO-LIST
  
-* [ ] Supprimer le padding gauche pour les mobiles 
-  au niveau de la vue 3D et de l'origami
-  
+* [x] Les pieces du beleved 'semicone' symetriques ne doivent pas être identiques.
+  - revoir le hash en utilisant les angles signés peut être
+
 * [ ] Changer l'aide du kite ratio 
   car ce n'est pas exactement ça
 
@@ -11,7 +11,9 @@
   * [ ] Espagnol
 
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
-
+  D'abord essayer de remettre l'assemble semicone pour le beveled
+  et comprendre ce qu'il se passe.
+  
 * [ ] Dessiner les crowns à plat en 2D avec les timbers profiles 
   pour mieux comprendre le schéma de montage
 
