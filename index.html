@@ -1380,15 +1380,13 @@
 
                     <div class="table-responsive-lg">
                         <div class="gap-3 d-flex flex-column flex-lg-row justify-content-center">
-                            <div class="mx-auto" style="width:300px!important">
-                                <div class="bg-white rounded border"
-                                     x-ref="timbers_grouped_by_face_svg_container">
-                                </div>
+                            <div class="mx-auto" style="width:300px!important"
+                                 id="timbers_grouped_by_face_svg_container">
+                                <div class="bg-white rounded border"></div>
                             </div>
-                            <div class="mx-auto" style="width:800px!important">
-                                <div class="bg-white rounded border"
-                                     x-ref="timber_profiles_svg_container">
-                                </div>
+                            <div class="mx-auto" style="width:800px!important"
+                                 id="timber_profiles_svg_container">
+                                <div class="bg-white rounded border"></div>
                             </div>
                         </div>
                     </div>
@@ -1498,8 +1496,8 @@
                     this.text_padding = this.font_size / 1.5;
 
                     // Get ref elements
-                    this.timber_profiles_svg_container = this.$refs.timber_profiles_svg_container;
-                    this.timbers_grouped_by_face_svg_container = this.$refs.timbers_grouped_by_face_svg_container;
+                    this.timber_profiles_svg_container = document.getElementById('timber_profiles_svg_container').getElementsByTagName('div')[0];
+                    this.timbers_grouped_by_face_svg_container = document.getElementById('timbers_grouped_by_face_svg_container').getElementsByTagName('div')[0];
                 },
                 process() {
                     this.compute_drawing_of_timbers_grouped_by_face();
@@ -1853,7 +1851,10 @@
                     const available_width = svg_width - 2 * this.x_padding;
                     const pixel_ratio = available_width / max_width;
 
-                    for (item_index = 0; item_index < num_items; item_index++) {
+                    item_index = 0;
+                    const draw_y_start = 2 * this.y_padding;
+
+                    _.forIn(timbers_grouped_by_face, group => {
                         // Take the item and compute height
                         const item = items_put_on_the_ground[item_index]
                         const svg_height = item.depth * pixel_ratio + 3 * this.y_padding;
@@ -1866,9 +1867,10 @@
                         let svg_elements_with_priority = [];
 
                         const num_children = item.children.length;
+                        const x_padding = (svg_width - (item.width * pixel_ratio)) / 2;
+
                         for(let child_index = 0; child_index < num_children; child_index++){
                             const face = item.children[child_index].get_face("front");
-                            console.log(item.label, face.label);
 
                             // fit points
                             const fitted_points = swap_axes(
@@ -1876,11 +1878,12 @@
                                 "XZY"
                             );
                             const drawing_points = fitted_points.map(p => [
-                                p[0] * pixel_ratio,
-                                p[1] * pixel_ratio,
+                                x_padding + p[0] * pixel_ratio,
+                                draw_y_start + p[1] * pixel_ratio,
                                 0,
                             ]);
 
+                            // Add count text
                             const front_points_2D = convert_3D_to_2D(drawing_points);
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             polygon_front.setAttribute('points', `${front_points_2D}`);
@@ -1891,13 +1894,40 @@
                             svg_elements_with_priority.push([polygon_front, 10]);
                         }
 
+                        // Add count text
+                        const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        count_text.setAttribute('x', `${svg_width - this.x_padding}`);
+                        count_text.setAttribute('y', `${this.y_padding}`);
+                        count_text.setAttribute('text-anchor', 'end');
+                        count_text.setAttribute('font-size', `${this.title_font_size}`);
+                        count_text.setAttribute('font-weight', 'bold');
+                        count_text.setAttribute('fill', `${item.color.hex}`);
+                        count_text.innerHTML = `X ${group.count}`;
+                        svg_elements_with_priority.push([count_text, 5]);
+
+                        // Add label title vertically at the left of the svg
+                        const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        label_title.setAttribute('x', `${(this.x_padding - this.font_size) / 2}`);
+                        label_title.setAttribute('y', `${svg_height / 2}`);
+                        label_title.setAttribute('text-anchor', 'middle');
+                        label_title.setAttribute('alignment-baseline', 'center');
+                        label_title.setAttribute('font-size', `${this.title_font_size}`);
+                        label_title.setAttribute('writing-mode', 'vertical-lr');
+                        label_title.setAttribute('font-weight', 'bold');
+                        label_title.setAttribute('fill', `${item.color.hex}`);
+                        label_title.setAttribute('style', 'text-transform: capitalize');
+
+                        label_title.innerHTML = `${this.i18n('face')} ${item.label}`;
+                        svg_elements_with_priority.push([label_title, 25]);
+
                         // Sort svg elements by priority
                         const svg_elements_sorted_by_priority = _.sortBy(svg_elements_with_priority, item => item[1]);
                         _.forEach(svg_elements_sorted_by_priority, item => {
                             svg.appendChild(item[0]);
                         });
                         this.timbers_grouped_by_face_svg_container.appendChild(svg);
-                    }
+                        item_index++;
+                    });
                 },
             };
         });
