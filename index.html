@@ -1576,18 +1576,17 @@
                         let svg_elements_with_priority = [];
 
                         // Add label title vertically at the left of the svg
-                        const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        label_title.setAttribute('x', `${(this.x_padding - this.font_size) / 2}`);
-                        label_title.setAttribute('y', `${svg_height / 2}`);
+                        const label_title = svg_text(`${this.i18n('profile')} ${prism.label}`,
+                            (this.x_padding - this.font_size) / 2,
+                            svg_height / 2,
+                            this.title_font_size,
+                            prism.color.hex,
+                        );
                         label_title.setAttribute('text-anchor', 'middle');
                         label_title.setAttribute('alignment-baseline', 'center');
-                        label_title.setAttribute('font-size', `${this.title_font_size}`);
                         label_title.setAttribute('writing-mode', 'vertical-lr');
                         label_title.setAttribute('font-weight', 'bold');
-                        label_title.setAttribute('fill', `${prism.color.hex}`);
                         label_title.setAttribute('style', 'text-transform: capitalize');
-
-                        label_title.innerHTML = `${this.i18n('profile')} ${prism.label}`;
                         svg_elements_with_priority.push([label_title, 25]);
 
                         // Draw sides
@@ -1611,26 +1610,25 @@
                                 : right_column_x_start + column_padding;
 
                             if (i !== 1) {
-                                const side_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                side_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
-                                side_title.setAttribute('y', `${line_y_start + this.y_padding}`);
+                                const side_title = svg_text(this.i18n(side_names[i]),
+                                    column_x_start + drawing_width / 2,
+                                    line_y_start + this.y_padding,
+                                    this.title_font_size,
+                                );
                                 side_title.setAttribute('text-anchor', 'middle');
                                 side_title.setAttribute('alignment-baseline', 'center');
-                                side_title.setAttribute('font-size', `${this.title_font_size}`);
                                 side_title.setAttribute('style', 'text-transform: capitalize');
-
-                                side_title.innerHTML = `${this.i18n(side_names[i])}`;
                                 svg_elements_with_priority.push([side_title, 5]);
                             }
                             if (i === 0) {
-                                const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                count_text.setAttribute('x', `${svg_width - this.x_padding}`);
-                                count_text.setAttribute('y', `${line_y_start + this.y_padding}`);
+                                const count_text = svg_text(`X ${group.count}`,
+                                    svg_width - this.x_padding,
+                                    line_y_start + this.y_padding,
+                                    this.title_font_size,
+                                    prism.color.hex
+                                )
                                 count_text.setAttribute('text-anchor', 'end');
-                                count_text.setAttribute('font-size', `${this.title_font_size}`);
                                 count_text.setAttribute('font-weight', 'bold');
-                                count_text.setAttribute('fill', `${prism.color.hex}`);
-                                count_text.innerHTML = `X ${group.count}`;
                                 svg_elements_with_priority.push([count_text, 5]);
                             }
 
@@ -1650,21 +1648,12 @@
 
                             const front_points_3D = drawing_points.slice(0, 4);
                             const front_points_2D = convert_3D_to_2D(front_points_3D);
-                            const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_front.setAttribute('points', `${front_points_2D}`);
-                            polygon_front.setAttribute('stroke', 'black');
-                            polygon_front.setAttribute('stroke-width', `${this.stroke_width}px`);
-                            polygon_front.setAttribute('fill-opacity', "0.7");
-                            polygon_front.setAttribute('fill', prism.color.hex);
+                            const polygon_front = svg_polygon(front_points_2D, this.stroke_width, prism.color.hex, 0.7);
                             svg_elements_with_priority.push([polygon_front, 10]);
 
                             const behind_points_2D = convert_3D_to_2D(drawing_points.slice(4, 8));
-                            const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_behind.setAttribute('points', `${behind_points_2D}`);
-                            polygon_behind.setAttribute('stroke', 'black');
+                            const polygon_behind = svg_polygon(behind_points_2D, this.stroke_width, prism.color.hex);
                             polygon_behind.setAttribute('stroke-dasharray', this.stroke_dash_arr);
-                            polygon_behind.setAttribute('stroke-width', `${this.stroke_width}px`);
-                            polygon_behind.setAttribute('fill', prism.color.hex);
                             svg_elements_with_priority.push([polygon_behind, 9]);
 
 
@@ -1718,30 +1707,25 @@
                                 if (!rounded_xs.includes(rounded_x)) {
                                     const is_boundary = rounded_x === 0 || rounded_x === Math.round(side.width);
 
-                                    const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                    measurement_text.setAttribute('x', p[0]);
-                                    measurement_text.setAttribute('text-anchor', 'middle');
-
                                     // Avoid overlapping text
                                     const side_text_padding = (j < 4) ? this.text_padding : this.text_padding * 3;
-                                    (real_pt[1] < side.height / 2)
-                                        ? measurement_text.setAttribute('y', `${p[1] - side_text_padding}`)
-                                        : measurement_text.setAttribute('y', `${p[1] + this.font_size + side_text_padding}`);
-
-                                    measurement_text.setAttribute('font-size', `${this.font_size}`);
+                                    const measurement_text = svg_text(rounded_x,
+                                        p[0],
+                                        (real_pt[1] < side.height / 2)
+                                            ? p[1] - side_text_padding
+                                            : p[1] + this.font_size + side_text_padding,
+                                        this.font_size,
+                                    );
+                                    measurement_text.setAttribute('text-anchor', 'middle');
                                     measurement_text.setAttribute('font-weight', (is_boundary) ? 'bold' : 'normal');
                                     measurement_text.setAttribute('stroke', 'white');
                                     measurement_text.setAttribute('paint-order', 'stroke');
-
-                                    measurement_text.innerHTML = `${rounded_x}`;
-
                                     svg_elements_with_priority.push([measurement_text, 20]);
 
                                     // add the rounded value to avoid multiple texts
                                     rounded_xs.push(rounded_x);
                                 }
                             });
-
 
                             // Compute angles
                             //    [0, 1, 2, 3, 4, 5, 6, 7]
@@ -1791,19 +1775,15 @@
                                 // Do not display angle if 0
                                 if (to_decimal(theta, 1) === 0) return;
 
-                                const [x, y] = text_pos;
-                                const angle_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                angle_text.setAttribute('x', `${x}`);
-                                angle_text.setAttribute('y', `${y}`);
+                                const theta_deg = humanize_angle(rad2deg(theta));
+                                const angle_text = svg_text(`${icon}${theta_deg}`,
+                                    ...text_pos,
+                                    this.font_size, color
+                                );
                                 angle_text.setAttribute('text-anchor', anchor);
-                                angle_text.setAttribute('font-size', `${this.font_size}`);
-                                angle_text.setAttribute('fill', color);
                                 angle_text.setAttribute('stroke', 'white');
                                 angle_text.setAttribute('stroke-width', '2px');
                                 angle_text.setAttribute('paint-order', 'stroke');
-
-                                const theta_deg = humanize_angle(rad2deg(theta));
-                                angle_text.innerHTML = `${icon}${theta_deg}`;
                                 svg_elements_with_priority.push([angle_text, 21]);
                             });
 
@@ -1869,7 +1849,7 @@
                         const num_children = item.children.length;
                         const x_padding = (svg_width - (item.width * pixel_ratio)) / 2;
 
-                        for(let child_index = 0; child_index < num_children; child_index++){
+                        for (let child_index = 0; child_index < num_children; child_index++) {
                             const face = item.children[child_index].get_face("front");
 
                             // fit points
@@ -1885,39 +1865,33 @@
 
                             // Add count text
                             const front_points_2D = convert_3D_to_2D(drawing_points);
-                            const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_front.setAttribute('points', `${front_points_2D}`);
-                            polygon_front.setAttribute('stroke', 'black');
-                            polygon_front.setAttribute('stroke-width', `${this.stroke_width}px`);
-                            polygon_front.setAttribute('fill-opacity', "0.7");
-                            polygon_front.setAttribute('fill', face.color.hex);
+                            const polygon_front = svg_polygon(front_points_2D, this.stroke_width, face.color.hex, 0.7);
                             svg_elements_with_priority.push([polygon_front, 10]);
                         }
 
                         // Add count text
-                        const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        count_text.setAttribute('x', `${svg_width - this.x_padding}`);
-                        count_text.setAttribute('y', `${this.y_padding}`);
+                        const count_text = svg_text(`X ${group.count}`,
+                            svg_width - this.x_padding,
+                            this.y_padding,
+                            this.title_font_size,
+                            item.color.hex,
+                        );
                         count_text.setAttribute('text-anchor', 'end');
-                        count_text.setAttribute('font-size', `${this.title_font_size}`);
                         count_text.setAttribute('font-weight', 'bold');
-                        count_text.setAttribute('fill', `${item.color.hex}`);
-                        count_text.innerHTML = `X ${group.count}`;
                         svg_elements_with_priority.push([count_text, 5]);
 
                         // Add label title vertically at the left of the svg
-                        const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        label_title.setAttribute('x', `${(this.x_padding - this.font_size) / 2}`);
-                        label_title.setAttribute('y', `${svg_height / 2}`);
+                        const label_title = svg_text(`${this.i18n('face')} ${item.label}`,
+                            (this.x_padding - this.font_size) / 2,
+                            svg_height / 2,
+                            this.title_font_size,
+                            item.color.hex,
+                        );
                         label_title.setAttribute('text-anchor', 'middle');
                         label_title.setAttribute('alignment-baseline', 'center');
-                        label_title.setAttribute('font-size', `${this.title_font_size}`);
                         label_title.setAttribute('writing-mode', 'vertical-lr');
                         label_title.setAttribute('font-weight', 'bold');
-                        label_title.setAttribute('fill', `${item.color.hex}`);
                         label_title.setAttribute('style', 'text-transform: capitalize');
-
-                        label_title.innerHTML = `${this.i18n('face')} ${item.label}`;
                         svg_elements_with_priority.push([label_title, 25]);
 
                         // Sort svg elements by priority
@@ -2302,16 +2276,13 @@
                         const svg_elements = new Array(num_elements);
                         iF = 0;
                         _.forEach(page, face => {
-                            const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
                             points = face.points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
                             ]);
-                            el.setAttribute('points', `${points}`);
-                            el.setAttribute('stroke', 'black');
-                            el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', this.draw_color ? face.color.hex : 'transparent');
+
+                            const el = svg_polygon(points, 0.1, this.draw_color ? face.color.hex : 'transparent');
                             svg_elements[iF] = el;
                             iF++
                             if (this.draw_centroid) {
@@ -2326,13 +2297,12 @@
                         });
 
                         // Add Text
-                        const el = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        const el = svg_text(`Page ${iPa + 1}/${pages.length}`,
+                            210 - border,
+                            297 - border,
+                            6
+                        );
                         el.setAttribute('text-anchor', 'end');
-                        el.setAttribute('x', (210 - border).toString());
-                        el.setAttribute('y', (297 - border).toString());
-                        el.setAttribute('font-family', "Verdana")
-                        el.setAttribute('font-size', "6px")
-                        el.innerHTML = `Page ${iPa + 1}/${pages.length}`;
                         svg_elements[iF] = el;
 
                         // Add color of the first piece to bulleted list
