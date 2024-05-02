@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.11b01" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.11b02" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -418,7 +418,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.11b01</span>
+                              style="font-size: 10px; top:0px">v1.0.11b02</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1122,8 +1122,9 @@
                         </div>
                         <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
                              tabindex="0"
-                             x-data="renderer_a4" @zome-is-made.window="process">
-                            <div id="renderer_a4_container" class="d-flex justify-content-center" style="max-width: calc(100% - 36px); ">
+                             x-data="renderer_a4" @zome-is-made.window="__process">
+                            <div id="renderer_a4_container" class="d-flex justify-content-center"
+                                 style="max-width: calc(100% - 36px); ">
                                 <div class="position-relative">
                                     <!-- Export to -->
                                     <div class="ps-2 absolute-top-right-48" style="top:48px;">
@@ -1230,7 +1231,7 @@
                     </div>
                 </div>
 
-                <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
+                <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="__process">
                     <hr>
 
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
@@ -1331,7 +1332,8 @@
                         </div>
                         <div class="col-12 mt-5 mb-5">
                             <div class="table-responsive border border-bottom-0 bg-white rounded">
-                                <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
+                                <table x-ref="dim-table"
+                                       class="table text-center table-sm small table-striped-order m-0">
                                     <thead class="bg-info text-white">
                                     <tr>
                                         <th></th>
@@ -1363,14 +1365,8 @@
                     </div>
                 </div>
 
-                <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
-                    <hr>
+                <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="__process">
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
-                        <h5 class="text-secondary mt-4 mb-4 me-2">
-                            <i class="fa-solid fa-frame rotate-45 me-1"></i>
-                            <span x-text="i18n('framework')" class="up-first"></span>
-                        </h5>
-
                         <!-- ZIP Button -->
                         <!--                    <div>-->
                         <!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
@@ -1382,12 +1378,13 @@
                         <!--                    </div>-->
                     </div>
 
-                    <div class="row">
-                        <div class="overflow-scroll">
-                            <div class="mx-auto" style="width:800px;">
-                                <div class="bg-white rounded border position-relative"
-                                     x-ref="timber_profile_container">
-                                </div>
+                    <div class="table-responsive-lg">
+                        <div class="gap-3 d-flex flex-column flex-lg-row justify-content-center">
+                            <div class="mx-auto" id="timbers_grouped_by_face_svg_container">
+                                <div class="bg-white rounded border"></div>
+                            </div>
+                            <div class="mx-auto" id="timber_profiles_svg_container">
+                                <div class="bg-white rounded border"></div>
                             </div>
                         </div>
                     </div>
@@ -1441,20 +1438,19 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.11b01"></script>
-<script src="i18n/en.js?v=1.0.11b01"></script>
-<script src="i18n/it.js?v=1.0.11b01"></script>
-<script src="i18n/fr.js?v=1.0.11b01"></script>
-<script src="i18n/pl.js?v=1.0.11b01"></script>
-<script src="i18n/sv.js?v=1.0.11b01"></script>
+<script src="i18n/es.js?v=1.0.11b02"></script>
+<script src="i18n/en.js?v=1.0.11b02"></script>
+<script src="i18n/it.js?v=1.0.11b02"></script>
+<script src="i18n/fr.js?v=1.0.11b02"></script>
+<script src="i18n/pl.js?v=1.0.11b02"></script>
+<script src="i18n/sv.js?v=1.0.11b02"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.11b01"></script>
+<script src="js/core.js?v=1.0.11b02"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
 
-<!-- Custom Javascript -->
 <script type="text/javascript">
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
@@ -1474,27 +1470,52 @@
 
         Alpine.data('framework_measurements', () => {
             return {
-                timber_profile_container: null,
+                timber_profiles_svg_container: null,
+                timbers_grouped_by_face_svg_container: null,
+
+                // Properties
+                title_font_size: 14,
+                x_padding: 40,
+                font_size: 12,
+                stroke_dash_arr: '2, 2',
+
+                // Dynamic properties
+                y_padding: 1,
+                stroke_width: 1,
+                text_padding: 1,
+
+                __process: null,
                 async init() {
-                    this.timber_profile_container = this.$refs.timber_profile_container;
+                    this.__process = _.debounce(this.process, 1);
+
+                    // Init dynamic properties
+                    this.y_padding = this.font_size * 4;
+                    this.stroke_width = this.font_size / 10;
+                    this.text_padding = this.font_size / 1.5;
+
+                    // Get ref elements
+                    this.timber_profiles_svg_container = document.getElementById('timber_profiles_svg_container').getElementsByTagName('div')[0];
+                    this.timbers_grouped_by_face_svg_container = document.getElementById('timbers_grouped_by_face_svg_container').getElementsByTagName('div')[0];
+                },
+                process() {
+                    this.compute_drawing_of_timbers_grouped_by_face();
+                    this.compute_drawing_of_timber_profiles();
                 },
 
-                process() {
-                    // Group prims by hash
+                compute_drawing_of_timber_profiles() {
                     const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
 
                     // Clear content
-                    this.timber_profile_container.innerHTML = "";
+                    this.timber_profiles_svg_container.innerHTML = "";
 
                     // Define sides
                     const side_names = ["left", "left", "front", "bottom"];
 
                     // Reset boundaries
-                    let max_height = Number.MIN_VALUE,
-                        left_column_max_width = Number.MIN_VALUE,
+                    let left_column_max_width = Number.MIN_VALUE,
                         right_column_max_width = Number.MIN_VALUE;
 
-                    // Flatten side and define global boundaries
+                    // Put side on the ground and define global boundaries
                     let all_labeled_sides = {};
                     _.forIn(timber_profiles_grouped_by_hash, group => {
                         // Take the first element of group
@@ -1513,30 +1534,21 @@
                                     if (side.width > right_column_max_width) right_column_max_width = side.width;
                                     break;
                             }
-                            if (side.height > max_height) max_height = side.height;
                             all_labeled_sides[prism.label][i] = side;
                         });
                     });
 
-                    // Font size depends on container width
-                    const svg_width = this.timber_profile_container.parentNode.offsetWidth;
-                    const title_font_size = 14;
-                    const x_padding = 40;
-                    const font_size = 12;
-                    const y_padding = font_size * 4;
-
-                    const stroke_width = font_size / 10;
-                    const text_padding = font_size / 1.5;
-                    const stroke_dash_arr = '2, 2';
+                    // Get container width
+                    const svg_width = this.timber_profiles_svg_container.parentNode.offsetWidth;
 
                     // Compute column width
-                    const available_width = svg_width - 4 * x_padding;
+                    const available_width = svg_width - 4 * this.x_padding;
                     const left_column_width = available_width / 6;
                     const right_column_width = left_column_width * 5;
                     const pixel_ratio = left_column_width / left_column_max_width;
 
-                    const left_column_x_start = x_padding;
-                    const right_column_x_start = left_column_x_start + left_column_width + 2 * x_padding;
+                    const left_column_x_start = this.x_padding;
+                    const right_column_x_start = left_column_x_start + left_column_width + 2 * this.x_padding;
 
                     _.forIn(timber_profiles_grouped_by_hash, group => {
                         // Take the item of group
@@ -1548,7 +1560,7 @@
 
                         // Compute sum of side heights of the right column (front and bottom). same as left column
                         const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height * pixel_ratio, 0);
-                        const svg_height = sum_side_height + 6 * y_padding;
+                        const svg_height = sum_side_height + 6 * this.y_padding;
 
                         let draw_y_start, draw_y_end,
                             vertical_line_start, vertical_line_end;
@@ -1562,18 +1574,17 @@
                         let svg_elements_with_priority = [];
 
                         // Add label title vertically at the left of the svg
-                        const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        label_title.setAttribute('x', `${(x_padding - font_size) / 2}`);
-                        label_title.setAttribute('y', `${svg_height / 2}`);
+                        const label_title = svg_text(`${this.i18n('profile')} ${prism.label}`,
+                            (this.x_padding - this.font_size) / 2,
+                            svg_height / 2,
+                            this.title_font_size,
+                            prism.color.hex,
+                        );
                         label_title.setAttribute('text-anchor', 'middle');
                         label_title.setAttribute('alignment-baseline', 'center');
-                        label_title.setAttribute('font-size', `${title_font_size}`);
                         label_title.setAttribute('writing-mode', 'vertical-lr');
                         label_title.setAttribute('font-weight', 'bold');
-                        label_title.setAttribute('fill', `${prism.color.hex}`);
                         label_title.setAttribute('style', 'text-transform: capitalize');
-
-                        label_title.innerHTML = `${this.i18n('profile')} ${prism.label}`;
                         svg_elements_with_priority.push([label_title, 25]);
 
                         // Draw sides
@@ -1581,7 +1592,7 @@
                             // Compute y start
                             const line_y_start = (i % 2 === 0)
                                 ? 0
-                                : draw_y_end + y_padding;
+                                : draw_y_end + this.y_padding;
 
                             const column_width = (i < 2) ? left_column_width : right_column_width;
 
@@ -1597,31 +1608,30 @@
                                 : right_column_x_start + column_padding;
 
                             if (i !== 1) {
-                                const side_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                side_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
-                                side_title.setAttribute('y', `${line_y_start + y_padding}`);
+                                const side_title = svg_text(this.i18n(side_names[i]),
+                                    column_x_start + drawing_width / 2,
+                                    line_y_start + this.y_padding,
+                                    this.title_font_size,
+                                );
                                 side_title.setAttribute('text-anchor', 'middle');
                                 side_title.setAttribute('alignment-baseline', 'center');
-                                side_title.setAttribute('font-size', `${title_font_size}`);
                                 side_title.setAttribute('style', 'text-transform: capitalize');
-
-                                side_title.innerHTML = `${this.i18n(side_names[i])}`;
                                 svg_elements_with_priority.push([side_title, 5]);
                             }
                             if (i === 0) {
-                                const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                count_text.setAttribute('x', `${svg_width - x_padding}`);
-                                count_text.setAttribute('y', `${line_y_start + y_padding}`);
+                                const count_text = svg_text(`X ${group.count}`,
+                                    svg_width - this.x_padding,
+                                    line_y_start + this.y_padding,
+                                    this.title_font_size,
+                                    prism.color.hex
+                                )
                                 count_text.setAttribute('text-anchor', 'end');
-                                count_text.setAttribute('font-size', `${title_font_size}`);
                                 count_text.setAttribute('font-weight', 'bold');
-                                count_text.setAttribute('fill', `${prism.color.hex}`);
-                                count_text.innerHTML = `X ${group.count}`;
                                 svg_elements_with_priority.push([count_text, 5]);
                             }
 
                             // compute y start for the right side
-                            draw_y_start = line_y_start + 2 * y_padding;
+                            draw_y_start = line_y_start + 2 * this.y_padding;
                             draw_y_end = draw_y_start + side.height * pixel_ratio;
 
                             // fit points
@@ -1636,23 +1646,27 @@
 
                             const front_points_3D = drawing_points.slice(0, 4);
                             const front_points_2D = convert_3D_to_2D(front_points_3D);
-                            const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_front.setAttribute('points', `${front_points_2D}`);
-                            polygon_front.setAttribute('stroke', 'black');
-                            polygon_front.setAttribute('stroke-width', `${stroke_width}px`);
-                            polygon_front.setAttribute('fill-opacity', "0.7");
-                            polygon_front.setAttribute('fill', prism.color.hex);
+                            const polygon_front = svg_polygon(front_points_2D, this.stroke_width, prism.color.hex, 0.7);
                             svg_elements_with_priority.push([polygon_front, 10]);
 
                             const behind_points_2D = convert_3D_to_2D(drawing_points.slice(4, 8));
-                            const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                            polygon_behind.setAttribute('points', `${behind_points_2D}`);
-                            polygon_behind.setAttribute('stroke', 'black');
-                            polygon_behind.setAttribute('stroke-dasharray', stroke_dash_arr);
-                            polygon_behind.setAttribute('stroke-width', `${stroke_width}px`);
-                            polygon_behind.setAttribute('fill', prism.color.hex);
+                            const polygon_behind = svg_polygon(behind_points_2D, this.stroke_width, prism.color.hex);
+                            polygon_behind.setAttribute('stroke-dasharray', this.stroke_dash_arr);
                             svg_elements_with_priority.push([polygon_behind, 9]);
 
+                            // Add label of the polygon
+                            const centroid = average(drawing_points);
+                            const side_label = svg_text(`${side.label}`,
+                                centroid[0],
+                                centroid[1],
+                                this.title_font_size,
+                                'white',
+                            );
+                            side_label.setAttribute('text-anchor', 'middle');
+                            side_label.setAttribute('alignment-baseline', 'center');
+                            side_label.setAttribute('font-weight', 'bold');
+                            add_stroke_behind(side_label, 3 * this.stroke_width);
+                            svg_elements_with_priority.push([side_label, 15]);
 
                             // Add dotted line at the center to show
                             // that it's a truncated view of the timber profile
@@ -1671,7 +1685,7 @@
                                     dotted_line_at_the_center.setAttribute('stroke', 'white');
                                     dotted_line_at_the_center.setAttribute('stroke-opacity', '0.5');
                                     dotted_line_at_the_center.setAttribute('stroke-dasharray', '5 5');
-                                    dotted_line_at_the_center.setAttribute('stroke-width', `${2 * stroke_width}px`);
+                                    dotted_line_at_the_center.setAttribute('stroke-width', `${2 * this.stroke_width}px`);
                                     svg_elements_with_priority.push([dotted_line_at_the_center, 12]);
                                 }
                             }
@@ -1694,8 +1708,8 @@
                                     vertical_line.setAttribute('y2', `${vertical_line_end}`);
                                     vertical_line.setAttribute('stroke', 'black');
                                     vertical_line.setAttribute('stroke-opacity', '0.5');
-                                    vertical_line.setAttribute('stroke-dasharray', stroke_dash_arr);
-                                    vertical_line.setAttribute('stroke-width', `${stroke_width}px`);
+                                    vertical_line.setAttribute('stroke-dasharray', this.stroke_dash_arr);
+                                    vertical_line.setAttribute('stroke-width', `${this.stroke_width}px`);
                                     svg_elements_with_priority.push([vertical_line, 11]);
                                 }
 
@@ -1704,23 +1718,19 @@
                                 if (!rounded_xs.includes(rounded_x)) {
                                     const is_boundary = rounded_x === 0 || rounded_x === Math.round(side.width);
 
-                                    const measurement_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                    measurement_text.setAttribute('x', p[0]);
-                                    measurement_text.setAttribute('text-anchor', 'middle');
-
                                     // Avoid overlapping text
-                                    const side_text_padding = (j < 4) ? text_padding : text_padding * 3;
-                                    (real_pt[1] < side.height / 2)
-                                        ? measurement_text.setAttribute('y', `${p[1] - side_text_padding}`)
-                                        : measurement_text.setAttribute('y', `${p[1] + font_size + side_text_padding}`);
-
-                                    measurement_text.setAttribute('font-size', `${font_size}`);
+                                    const side_text_padding = (j < 4) ? this.text_padding : this.text_padding * 3;
+                                    const measurement_text = svg_text(rounded_x,
+                                        p[0],
+                                        (real_pt[1] < side.height / 2)
+                                            ? p[1] - side_text_padding
+                                            : p[1] + this.font_size + side_text_padding,
+                                        this.font_size,
+                                    );
+                                    measurement_text.setAttribute('text-anchor', 'middle');
                                     measurement_text.setAttribute('font-weight', (is_boundary) ? 'bold' : 'normal');
                                     measurement_text.setAttribute('stroke', 'white');
                                     measurement_text.setAttribute('paint-order', 'stroke');
-
-                                    measurement_text.innerHTML = `${rounded_x}`;
-
                                     svg_elements_with_priority.push([measurement_text, 20]);
 
                                     // add the rounded value to avoid multiple texts
@@ -1728,15 +1738,14 @@
                                 }
                             });
 
-
                             // Compute angles
                             //    [0, 1, 2, 3, 4, 5, 6, 7]
                             const [a, b, c, d] = drawing_points;                // with z axis equals to 0
                             const [A, B, C, D, E, F, G, H] = fitted_points;
 
                             const base_plane = points_2_plane(A, B, C);
-                            const y_shift_bottom = [0, font_size * 1.25, 0],
-                                y_shift_up = [0, -font_size * 0.5, 0];
+                            const y_shift_bottom = [0, this.font_size * 1.25, 0],
+                                y_shift_up = [0, -this.font_size * 0.5, 0];
 
                             const angles_params = (i < 2)
                                 ? [
@@ -1777,19 +1786,15 @@
                                 // Do not display angle if 0
                                 if (to_decimal(theta, 1) === 0) return;
 
-                                const [x, y] = text_pos;
-                                const angle_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                angle_text.setAttribute('x', `${x}`);
-                                angle_text.setAttribute('y', `${y}`);
+                                const theta_deg = humanize_angle(rad2deg(theta));
+                                const angle_text = svg_text(`${icon}${theta_deg}`,
+                                    ...text_pos,
+                                    this.font_size, color
+                                );
                                 angle_text.setAttribute('text-anchor', anchor);
-                                angle_text.setAttribute('font-size', `${font_size}`);
-                                angle_text.setAttribute('fill', color);
                                 angle_text.setAttribute('stroke', 'white');
                                 angle_text.setAttribute('stroke-width', '2px');
                                 angle_text.setAttribute('paint-order', 'stroke');
-
-                                const theta_deg = humanize_angle(rad2deg(theta));
-                                angle_text.innerHTML = `${icon}${theta_deg}`;
                                 svg_elements_with_priority.push([angle_text, 21]);
                             });
 
@@ -1801,12 +1806,130 @@
                             svg.appendChild(item[0]);
                         });
 
-                        this.timber_profile_container.appendChild(svg);
+                        this.timber_profiles_svg_container.appendChild(svg);
+                    });
+                },
+
+
+                compute_drawing_of_timbers_grouped_by_face() {
+                    const timbers_grouped_by_face = ZOME.timbers_grouped_by_face;
+
+                    // Clear content
+                    this.timbers_grouped_by_face_svg_container.innerHTML = "";
+
+                    // Reset boundaries
+                    let max_width = Number.MIN_VALUE;
+
+                    // Put item on the ground and define global boundaries
+                    const num_items = Object.keys(timbers_grouped_by_face).length;
+                    const items_put_on_the_ground = new Array(num_items);
+                    let item_index = 0;
+                    _.forIn(timbers_grouped_by_face, group => {
+                        // Take the first element of group and put it on the ground
+                        const item = group.item.put_on_the_ground();
+                        item.compute_boundaries();
+
+                        if (item.width > max_width) max_width = item.width;
+
+                        items_put_on_the_ground[item_index] = item;
+                        item_index++;
+                    });
+
+                    // Get container width
+                    const svg_width = this.timbers_grouped_by_face_svg_container.parentNode.offsetWidth;
+
+                    // Compute column width
+                    const available_width = svg_width - 2 * this.x_padding;
+                    const pixel_ratio = available_width / max_width;
+
+                    item_index = 0;
+                    const draw_y_start = 2 * this.y_padding;
+
+                    _.forIn(timbers_grouped_by_face, group => {
+                        // Take the item and compute height
+                        const item = items_put_on_the_ground[item_index]
+                        const svg_height = item.depth * pixel_ratio + 3 * this.y_padding;
+
+                        // Draw one svg for all sides
+                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                        svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
+
+                        let svg_elements_with_priority = [];
+
+                        const num_children = item.children.length;
+                        const x_padding = (svg_width - (item.width * pixel_ratio)) / 2;
+
+                        for (let child_index = 0; child_index < num_children; child_index++) {
+                            const face = item.children[child_index].get_face("front");
+
+                            // fit points
+                            const fitted_points = swap_axes(
+                                fit_points(face.points, item.x_min, item.y_min, item.z_min),
+                                "XZY"
+                            );
+                            const drawing_points = fitted_points.map(p => [
+                                x_padding + p[0] * pixel_ratio,
+                                draw_y_start + p[1] * pixel_ratio,
+                                0,
+                            ]);
+
+                            // Draw polygons
+                            const front_points_2D = convert_3D_to_2D(drawing_points);
+                            const polygon_front = svg_polygon(front_points_2D, this.stroke_width, face.color.hex, 0.7);
+                            svg_elements_with_priority.push([polygon_front, 10]);
+
+                            // Add label of the polygon
+                            const centroid = sub(face.centroid, [item.x_min, item.y_min, item.z_min]);
+                            const face_label = svg_text(`${face.label}`,
+                                x_padding + centroid[0] * pixel_ratio,
+                                draw_y_start + centroid[2] * pixel_ratio, // swap Y <-> Z
+                                this.title_font_size * 0.9,
+                                'white',
+                            );
+                            face_label.setAttribute('text-anchor', 'middle');
+                            face_label.setAttribute('alignment-baseline', 'center');
+                            face_label.setAttribute('font-weight', 'bold');
+                            add_stroke_behind(face_label, 3 * this.stroke_width);
+                            svg_elements_with_priority.push([face_label, 15]);
+                        }
+
+                        // Add count text
+                        const count_text = svg_text(`X ${group.count}`,
+                            svg_width - this.x_padding,
+                            this.y_padding,
+                            this.title_font_size,
+                            item.color.hex,
+                        );
+                        count_text.setAttribute('text-anchor', 'end');
+                        count_text.setAttribute('font-weight', 'bold');
+                        svg_elements_with_priority.push([count_text, 5]);
+
+                        // Add label title vertically at the left of the svg
+                        const label_title = svg_text(`${this.i18n('face')} ${item.label}`,
+                            (this.x_padding - this.font_size) / 2,
+                            svg_height / 2,
+                            this.title_font_size,
+                            item.color.hex,
+                        );
+                        label_title.setAttribute('text-anchor', 'middle');
+                        label_title.setAttribute('alignment-baseline', 'center');
+                        label_title.setAttribute('writing-mode', 'vertical-lr');
+                        label_title.setAttribute('font-weight', 'bold');
+                        label_title.setAttribute('style', 'text-transform: capitalize');
+                        svg_elements_with_priority.push([label_title, 25]);
+
+                        // Sort svg elements by priority
+                        const svg_elements_sorted_by_priority = _.sortBy(svg_elements_with_priority, item => item[1]);
+                        _.forEach(svg_elements_sorted_by_priority, item => {
+                            svg.appendChild(item[0]);
+                        });
+                        this.timbers_grouped_by_face_svg_container.appendChild(svg);
+                        item_index++;
                     });
                 },
             };
         });
-
 
         Alpine.data('face_measurements', () => {
             return {
@@ -1827,7 +1950,11 @@
                 timber_lengths: 0,
                 total_length_of_timbers: 0,
 
+                __process: null,
+
                 async init() {
+                    this.__process = _.debounce(this.process, 1);
+
                     ["type_of_faces"].forEach(
                         (key) => this.$watch(key, () => {
                             this.compute_faces();
@@ -2017,13 +2144,16 @@
                 draw_centroid: false,
                 paint_similar_pieces: true,
 
+                __process: null,
+
                 // 2D Rendering Parameters
                 init() {
                     this.A4_sheet = this.$refs.A4_sheet;
+                    this.__process = _.debounce(this.process, 1);
 
                     // Add listeners
                     _.forEach(["kind_of_drawing", "paint_similar_pieces"], key => this.$watch(key, () => {
-                            this.process();
+                            this.__process();
                         })
                     );
 
@@ -2171,16 +2301,13 @@
                         const svg_elements = new Array(num_elements);
                         iF = 0;
                         _.forEach(page, face => {
-                            const el = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             const [xMin, yMin, width, height] = page_bounds[iPa];
                             points = face.points.map(p => [
                                 (p[0] - xMin - width / 2) * pixel_ratio + center[0],
                                 (p[1] - yMin - height / 2) * pixel_ratio + center[1],
                             ]);
-                            el.setAttribute('points', `${points}`);
-                            el.setAttribute('stroke', 'black');
-                            el.setAttribute('stroke-width', '0.1px');
-                            el.setAttribute('fill', this.draw_color ? face.color.hex : 'transparent');
+
+                            const el = svg_polygon(points, 0.1, this.draw_color ? face.color.hex : 'transparent');
                             svg_elements[iF] = el;
                             iF++
                             if (this.draw_centroid) {
@@ -2195,13 +2322,12 @@
                         });
 
                         // Add Text
-                        const el = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        const el = svg_text(`Page ${iPa + 1}/${pages.length}`,
+                            210 - border,
+                            297 - border,
+                            6
+                        );
                         el.setAttribute('text-anchor', 'end');
-                        el.setAttribute('x', (210 - border).toString());
-                        el.setAttribute('y', (297 - border).toString());
-                        el.setAttribute('font-family', "Verdana")
-                        el.setAttribute('font-size', "6px")
-                        el.innerHTML = `Page ${iPa + 1}/${pages.length}`;
                         svg_elements[iF] = el;
 
                         // Add color of the first piece to bulleted list
@@ -2497,11 +2623,8 @@
                         _.forIn(groups, group => {
                             const item = group.item.put_on_the_ground();
 
-                            const boundaries = get_boundaries(item.edge_points.map(v => v.toArray()));
-                            const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
-
                             // Compute a translation vec to align and spread items
-                            const translation_vec = [-x_min, -y_min, -z_min + z_origin];
+                            const translation_vec = [-item.x_min, -item.y_min, -item.z_min + z_origin];
 
                             // Apply translation vector
                             zome_meshes.add(
@@ -2519,7 +2642,7 @@
                             }
 
                             // Increase origin on Z axis
-                            z_origin += depth + 50;
+                            z_origin += item.depth + 50;
                         });
                     } else {
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -2632,11 +2755,8 @@
                         _.forIn(groups, group => {
                             const item = group.item.put_on_the_ground();
 
-                            const boundaries = get_boundaries(item.edge_points.map(v => v.toArray()));
-                            const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
-
                             // Compute a translation vec to align and spread items
-                            const translation_vec = [-x_min, -y_min, -z_min + z_origin];
+                            const translation_vec = [-item.x_min, -item.y_min, -item.z_min + z_origin];
 
                             // Apply translation vector
                             mesh_points.push(...item.mesh_points.map(v => new THREE.Vector3(...add(v.toArray(), translation_vec))));
@@ -2654,7 +2774,7 @@
                             }
 
                             // Increase origin on Z axis
-                            z_origin += depth + 50;
+                            z_origin += item.depth + 50;
                         });
                     } else {
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -3791,7 +3911,7 @@
                         const parent = group.item;
                         timbers_grouped_by_face.push(
                             new ItemHashGroup(
-                                new TrapezoidalPrismCrown(parent.framework_timbers, parent),
+                                new Base3DGeometryCrown(parent.framework_timbers, parent),
                                 group.hash,
                                 group.count
                             )
@@ -3886,6 +4006,7 @@
         });
     });
 </script>
+<!-- Custom Javascript -->
 </body>
 </html>
 

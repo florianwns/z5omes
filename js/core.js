@@ -608,6 +608,31 @@ function circle_path(cx, cy, r) {
     return 'M ' + cx + ' ' + cy + ' m -' + r + ', 0 a ' + r + ',' + r + ' 0 1,1 ' + (r * 2) + ',0 a ' + r + ',' + r + ' 0 1,1 -' + (r * 2) + ',0';
 }
 
+function svg_polygon(points, stroke_width = 2, fill_color="#000000", fill_opacity='1'){
+    const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    polygon.setAttribute('points', `${points}`);
+    polygon.setAttribute('stroke', 'black');
+    polygon.setAttribute('stroke-width', `${stroke_width}`);
+    polygon.setAttribute('fill-opacity', `${fill_opacity}`);
+    polygon.setAttribute('fill', fill_color);
+    return polygon
+}
+
+function svg_text(txt = "", x = 0, y = 0, font_size = 12, fill_color="#000000"){
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute('x', `${x}`);
+    text.setAttribute('y', `${y}`);
+    text.setAttribute('font-size', `${font_size}`);
+    text.setAttribute('fill', `${fill_color}`);
+    text.innerHTML = `${txt}`;
+    return text;
+}
+
+function add_stroke_behind(el, stroke_width = 2, stroke_color='black'){
+    el.setAttribute('stroke', stroke_color);
+    el.setAttribute('stroke-width', `${stroke_width}px`);
+    el.setAttribute('paint-order', 'stroke');
+}
 
 // ---------------------------------
 // ========== Conversions ==========
@@ -1310,7 +1335,11 @@ class Base3DGeometry {
             this._width,
             this._height,
             this._depth,
-        ] = get_boundaries(this.points);
+        ] = get_boundaries(
+            (this.points && this.points.length > 3)
+                ? this.points
+                : this.edge_points.map(v => v.toArray()) // If no points, try with edge points... tricks for children
+        );
     }
 
     compute_meshes() {
@@ -2230,7 +2259,7 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
 }
 
 
-class TrapezoidalPrismCrown extends Base3DGeometryGroup {
+class Base3DGeometryCrown extends Base3DGeometryGroup {
     constructor(children, parent) {
         // Call parent constructor
         super(children, null, parent.label, parent.color, parent.crown_index);
@@ -2238,7 +2267,7 @@ class TrapezoidalPrismCrown extends Base3DGeometryGroup {
     }
 
     static copy(obj, children) {
-        return new TrapezoidalPrismCrown(
+        return new Base3DGeometryCrown(
             children || obj.children, obj.parent, obj.points, obj.label, obj.color, obj.crown_index
         );
     }
@@ -2261,7 +2290,7 @@ class TrapezoidalPrismCrown extends Base3DGeometryGroup {
             children_on_the_ground[i] = item.apply_3D_transformations(this.parent.quaternion, this.parent.translation);
         }
 
-        return TrapezoidalPrismCrown.copy(this, children_on_the_ground, this.parent);
+        return Base3DGeometryCrown.copy(this, children_on_the_ground, this.parent);
     }
 }
 
