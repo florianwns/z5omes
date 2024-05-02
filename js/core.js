@@ -627,6 +627,13 @@ function svg_text(txt = "", x = 0, y = 0, font_size = 12, fill_color="#000000"){
     text.innerHTML = `${txt}`;
     return text;
 }
+
+function add_stroke_behind(el, stroke_width = 2, stroke_color='black'){
+    el.setAttribute('stroke', stroke_color);
+    el.setAttribute('stroke-width', `${stroke_width}px`);
+    el.setAttribute('paint-order', 'stroke');
+}
+
 // ---------------------------------
 // ========== Conversions ==========
 // ---------------------------------

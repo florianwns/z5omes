@@ -361,12 +361,12 @@ svg.svg_rhombus_customizer use.clickable:hover {
 
 @media print {
     #timber_profiles_svg_container  {
-        width: 100vw!important;
+        width: 95vw!important;
         page-break-before: always !important;
     }
 
     #timbers_grouped_by_face_svg_container{
-        width: 37.5vw!important;
+        width: 60vw!important;
         page-break-after: always !important;
     }
 

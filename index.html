@@ -1654,6 +1654,19 @@
                             polygon_behind.setAttribute('stroke-dasharray', this.stroke_dash_arr);
                             svg_elements_with_priority.push([polygon_behind, 9]);
 
+                            // Add label of the polygon
+                            const centroid = average(drawing_points);
+                            const side_label = svg_text(`${side.label}`,
+                                centroid[0],
+                                centroid[1],
+                                this.title_font_size,
+                                'white',
+                            );
+                            side_label.setAttribute('text-anchor', 'middle');
+                            side_label.setAttribute('alignment-baseline', 'center');
+                            side_label.setAttribute('font-weight', 'bold');
+                            add_stroke_behind(side_label, 3 * this.stroke_width);
+                            svg_elements_with_priority.push([side_label, 15]);
 
                             // Add dotted line at the center to show
                             // that it's a truncated view of the timber profile
@@ -1861,10 +1874,24 @@
                                 0,
                             ]);
 
-                            // Add count text
+                            // Draw polygons
                             const front_points_2D = convert_3D_to_2D(drawing_points);
                             const polygon_front = svg_polygon(front_points_2D, this.stroke_width, face.color.hex, 0.7);
                             svg_elements_with_priority.push([polygon_front, 10]);
+
+                            // Add label of the polygon
+                            const centroid = sub(face.centroid, [item.x_min, item.y_min, item.z_min]);
+                            const face_label = svg_text(`${face.label}`,
+                                x_padding + centroid[0] * pixel_ratio,
+                                draw_y_start + centroid[2] * pixel_ratio, // swap Y <-> Z
+                                this.title_font_size * 0.9,
+                                'white',
+                            );
+                            face_label.setAttribute('text-anchor', 'middle');
+                            face_label.setAttribute('alignment-baseline', 'center');
+                            face_label.setAttribute('font-weight', 'bold');
+                            add_stroke_behind(face_label, 3 * this.stroke_width);
+                            svg_elements_with_priority.push([face_label, 15]);
                         }
 
                         // Add count text
