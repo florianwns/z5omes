@@ -334,3 +334,18 @@ svg.svg_rhombus_customizer use.clickable:hover {
         margin: 0 !important;
     }
 }
+
+
+div[x-ref='timbers_grouped_by_face_svg_container'] > svg,
+div[x-ref='timber_profiles_svg_container'] > svg {
+    margin:0!important;
+    margin-bottom: 0.5rem!important;
+    border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color)!important;
+}
+
+
+div[x-ref='timbers_grouped_by_face_svg_container'] > svg:last-child,
+div[x-ref='timber_profiles_svg_container'] > svg:last-child {
+    margin-bottom: 0!important;
+    border-bottom: none!important;
+}

@@ -1123,7 +1123,8 @@
                         <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
                              tabindex="0"
                              x-data="renderer_a4" @zome-is-made.window="__process">
-                            <div id="renderer_a4_container" class="d-flex justify-content-center" style="max-width: calc(100% - 36px); ">
+                            <div id="renderer_a4_container" class="d-flex justify-content-center"
+                                 style="max-width: calc(100% - 36px); ">
                                 <div class="position-relative">
                                     <!-- Export to -->
                                     <div class="ps-2 absolute-top-right-48" style="top:48px;">
@@ -1331,7 +1332,8 @@
                         </div>
                         <div class="col-12 mt-5 mb-5">
                             <div class="table-responsive border border-bottom-0 bg-white rounded">
-                                <table x-ref="dim-table" class="table text-center table-sm small table-striped-order m-0">
+                                <table x-ref="dim-table"
+                                       class="table text-center table-sm small table-striped-order m-0">
                                     <thead class="bg-info text-white">
                                     <tr>
                                         <th></th>
@@ -1453,7 +1455,6 @@
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
 
-<!-- Custom Javascript -->
 <script type="text/javascript">
     // Import i18n Dictionaries
     const I18_DEFAULT_LANGUAGE = "en";
@@ -1475,19 +1476,37 @@
             return {
                 timber_profiles_svg_container: null,
                 timbers_grouped_by_face_svg_container: null,
+
+                // Properties
+                title_font_size: 14,
+                x_padding: 40,
+                font_size: 12,
+                stroke_dash_arr: '2, 2',
+
+                // Dynamic properties
+                y_padding: 1,
+                stroke_width: 1,
+                text_padding: 1,
+
                 __process: null,
-                
                 async init() {
                     this.__process = _.debounce(this.process, 1);
+
+                    // Init dynamic properties
+                    this.y_padding = this.font_size * 4;
+                    this.stroke_width = this.font_size / 10;
+                    this.text_padding = this.font_size / 1.5;
+
+                    // Get ref elements
                     this.timber_profiles_svg_container = this.$refs.timber_profiles_svg_container;
+                    this.timbers_grouped_by_face_svg_container = this.$refs.timbers_grouped_by_face_svg_container;
                 },
-                process(){
+                process() {
                     this.compute_drawing_of_timbers_grouped_by_face();
                     this.compute_drawing_of_timber_profiles();
                 },
-                
+
                 compute_drawing_of_timber_profiles() {
-                    // Group prims by hash
                     const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
 
                     // Clear content
@@ -1497,11 +1516,10 @@
                     const side_names = ["left", "left", "front", "bottom"];
 
                     // Reset boundaries
-                    let max_height = Number.MIN_VALUE,
-                        left_column_max_width = Number.MIN_VALUE,
+                    let left_column_max_width = Number.MIN_VALUE,
                         right_column_max_width = Number.MIN_VALUE;
 
-                    // Flatten side and define global boundaries
+                    // Put side on the ground and define global boundaries
                     let all_labeled_sides = {};
                     _.forIn(timber_profiles_grouped_by_hash, group => {
                         // Take the first element of group
@@ -1520,30 +1538,21 @@
                                     if (side.width > right_column_max_width) right_column_max_width = side.width;
                                     break;
                             }
-                            if (side.height > max_height) max_height = side.height;
                             all_labeled_sides[prism.label][i] = side;
                         });
                     });
 
-                    // Font size depends on container width
+                    // Get container width
                     const svg_width = this.timber_profiles_svg_container.parentNode.offsetWidth;
-                    const title_font_size = 14;
-                    const x_padding = 40;
-                    const font_size = 12;
-                    const y_padding = font_size * 4;
-
-                    const stroke_width = font_size / 10;
-                    const text_padding = font_size / 1.5;
-                    const stroke_dash_arr = '2, 2';
 
                     // Compute column width
-                    const available_width = svg_width - 4 * x_padding;
+                    const available_width = svg_width - 4 * this.x_padding;
                     const left_column_width = available_width / 6;
                     const right_column_width = left_column_width * 5;
                     const pixel_ratio = left_column_width / left_column_max_width;
 
-                    const left_column_x_start = x_padding;
-                    const right_column_x_start = left_column_x_start + left_column_width + 2 * x_padding;
+                    const left_column_x_start = this.x_padding;
+                    const right_column_x_start = left_column_x_start + left_column_width + 2 * this.x_padding;
 
                     _.forIn(timber_profiles_grouped_by_hash, group => {
                         // Take the item of group
@@ -1555,7 +1564,7 @@
 
                         // Compute sum of side heights of the right column (front and bottom). same as left column
                         const sum_side_height = _.reduce(right_column_sides, (res, side) => res + side.height * pixel_ratio, 0);
-                        const svg_height = sum_side_height + 6 * y_padding;
+                        const svg_height = sum_side_height + 6 * this.y_padding;
 
                         let draw_y_start, draw_y_end,
                             vertical_line_start, vertical_line_end;
@@ -1570,11 +1579,11 @@
 
                         // Add label title vertically at the left of the svg
                         const label_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        label_title.setAttribute('x', `${(x_padding - font_size) / 2}`);
+                        label_title.setAttribute('x', `${(this.x_padding - this.font_size) / 2}`);
                         label_title.setAttribute('y', `${svg_height / 2}`);
                         label_title.setAttribute('text-anchor', 'middle');
                         label_title.setAttribute('alignment-baseline', 'center');
-                        label_title.setAttribute('font-size', `${title_font_size}`);
+                        label_title.setAttribute('font-size', `${this.title_font_size}`);
                         label_title.setAttribute('writing-mode', 'vertical-lr');
                         label_title.setAttribute('font-weight', 'bold');
                         label_title.setAttribute('fill', `${prism.color.hex}`);
@@ -1588,7 +1597,7 @@
                             // Compute y start
                             const line_y_start = (i % 2 === 0)
                                 ? 0
-                                : draw_y_end + y_padding;
+                                : draw_y_end + this.y_padding;
 
                             const column_width = (i < 2) ? left_column_width : right_column_width;
 
@@ -1606,10 +1615,10 @@
                             if (i !== 1) {
                                 const side_title = document.createElementNS("http://www.w3.org/2000/svg", "text");
                                 side_title.setAttribute('x', `${column_x_start + drawing_width / 2}`);
-                                side_title.setAttribute('y', `${line_y_start + y_padding}`);
+                                side_title.setAttribute('y', `${line_y_start + this.y_padding}`);
                                 side_title.setAttribute('text-anchor', 'middle');
                                 side_title.setAttribute('alignment-baseline', 'center');
-                                side_title.setAttribute('font-size', `${title_font_size}`);
+                                side_title.setAttribute('font-size', `${this.title_font_size}`);
                                 side_title.setAttribute('style', 'text-transform: capitalize');
 
                                 side_title.innerHTML = `${this.i18n(side_names[i])}`;
@@ -1617,10 +1626,10 @@
                             }
                             if (i === 0) {
                                 const count_text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                                count_text.setAttribute('x', `${svg_width - x_padding}`);
-                                count_text.setAttribute('y', `${line_y_start + y_padding}`);
+                                count_text.setAttribute('x', `${svg_width - this.x_padding}`);
+                                count_text.setAttribute('y', `${line_y_start + this.y_padding}`);
                                 count_text.setAttribute('text-anchor', 'end');
-                                count_text.setAttribute('font-size', `${title_font_size}`);
+                                count_text.setAttribute('font-size', `${this.title_font_size}`);
                                 count_text.setAttribute('font-weight', 'bold');
                                 count_text.setAttribute('fill', `${prism.color.hex}`);
                                 count_text.innerHTML = `X ${group.count}`;
@@ -1628,7 +1637,7 @@
                             }
 
                             // compute y start for the right side
-                            draw_y_start = line_y_start + 2 * y_padding;
+                            draw_y_start = line_y_start + 2 * this.y_padding;
                             draw_y_end = draw_y_start + side.height * pixel_ratio;
 
                             // fit points
@@ -1646,7 +1655,7 @@
                             const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             polygon_front.setAttribute('points', `${front_points_2D}`);
                             polygon_front.setAttribute('stroke', 'black');
-                            polygon_front.setAttribute('stroke-width', `${stroke_width}px`);
+                            polygon_front.setAttribute('stroke-width', `${this.stroke_width}px`);
                             polygon_front.setAttribute('fill-opacity', "0.7");
                             polygon_front.setAttribute('fill', prism.color.hex);
                             svg_elements_with_priority.push([polygon_front, 10]);
@@ -1655,8 +1664,8 @@
                             const polygon_behind = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
                             polygon_behind.setAttribute('points', `${behind_points_2D}`);
                             polygon_behind.setAttribute('stroke', 'black');
-                            polygon_behind.setAttribute('stroke-dasharray', stroke_dash_arr);
-                            polygon_behind.setAttribute('stroke-width', `${stroke_width}px`);
+                            polygon_behind.setAttribute('stroke-dasharray', this.stroke_dash_arr);
+                            polygon_behind.setAttribute('stroke-width', `${this.stroke_width}px`);
                             polygon_behind.setAttribute('fill', prism.color.hex);
                             svg_elements_with_priority.push([polygon_behind, 9]);
 
@@ -1678,7 +1687,7 @@
                                     dotted_line_at_the_center.setAttribute('stroke', 'white');
                                     dotted_line_at_the_center.setAttribute('stroke-opacity', '0.5');
                                     dotted_line_at_the_center.setAttribute('stroke-dasharray', '5 5');
-                                    dotted_line_at_the_center.setAttribute('stroke-width', `${2 * stroke_width}px`);
+                                    dotted_line_at_the_center.setAttribute('stroke-width', `${2 * this.stroke_width}px`);
                                     svg_elements_with_priority.push([dotted_line_at_the_center, 12]);
                                 }
                             }
@@ -1701,8 +1710,8 @@
                                     vertical_line.setAttribute('y2', `${vertical_line_end}`);
                                     vertical_line.setAttribute('stroke', 'black');
                                     vertical_line.setAttribute('stroke-opacity', '0.5');
-                                    vertical_line.setAttribute('stroke-dasharray', stroke_dash_arr);
-                                    vertical_line.setAttribute('stroke-width', `${stroke_width}px`);
+                                    vertical_line.setAttribute('stroke-dasharray', this.stroke_dash_arr);
+                                    vertical_line.setAttribute('stroke-width', `${this.stroke_width}px`);
                                     svg_elements_with_priority.push([vertical_line, 11]);
                                 }
 
@@ -1716,12 +1725,12 @@
                                     measurement_text.setAttribute('text-anchor', 'middle');
 
                                     // Avoid overlapping text
-                                    const side_text_padding = (j < 4) ? text_padding : text_padding * 3;
+                                    const side_text_padding = (j < 4) ? this.text_padding : this.text_padding * 3;
                                     (real_pt[1] < side.height / 2)
                                         ? measurement_text.setAttribute('y', `${p[1] - side_text_padding}`)
-                                        : measurement_text.setAttribute('y', `${p[1] + font_size + side_text_padding}`);
+                                        : measurement_text.setAttribute('y', `${p[1] + this.font_size + side_text_padding}`);
 
-                                    measurement_text.setAttribute('font-size', `${font_size}`);
+                                    measurement_text.setAttribute('font-size', `${this.font_size}`);
                                     measurement_text.setAttribute('font-weight', (is_boundary) ? 'bold' : 'normal');
                                     measurement_text.setAttribute('stroke', 'white');
                                     measurement_text.setAttribute('paint-order', 'stroke');
@@ -1742,8 +1751,8 @@
                             const [A, B, C, D, E, F, G, H] = fitted_points;
 
                             const base_plane = points_2_plane(A, B, C);
-                            const y_shift_bottom = [0, font_size * 1.25, 0],
-                                y_shift_up = [0, -font_size * 0.5, 0];
+                            const y_shift_bottom = [0, this.font_size * 1.25, 0],
+                                y_shift_up = [0, -this.font_size * 0.5, 0];
 
                             const angles_params = (i < 2)
                                 ? [
@@ -1789,7 +1798,7 @@
                                 angle_text.setAttribute('x', `${x}`);
                                 angle_text.setAttribute('y', `${y}`);
                                 angle_text.setAttribute('text-anchor', anchor);
-                                angle_text.setAttribute('font-size', `${font_size}`);
+                                angle_text.setAttribute('font-size', `${this.font_size}`);
                                 angle_text.setAttribute('fill', color);
                                 angle_text.setAttribute('stroke', 'white');
                                 angle_text.setAttribute('stroke-width', '2px');
@@ -1812,9 +1821,83 @@
                     });
                 },
 
-               
-                compute_drawing_of_timbers_grouped_by_face(){
 
+                compute_drawing_of_timbers_grouped_by_face() {
+                    const timbers_grouped_by_face = ZOME.timbers_grouped_by_face;
+
+                    // Clear content
+                    this.timbers_grouped_by_face_svg_container.innerHTML = "";
+
+                    // Reset boundaries
+                    let max_width = Number.MIN_VALUE;
+
+                    // Put item on the ground and define global boundaries
+                    const num_items = Object.keys(timbers_grouped_by_face).length;
+                    const items_put_on_the_ground = new Array(num_items);
+                    let item_index = 0;
+                    _.forIn(timbers_grouped_by_face, group => {
+                        // Take the first element of group and put it on the ground
+                        const item = group.item.put_on_the_ground();
+                        item.compute_boundaries();
+
+                        if (item.width > max_width) max_width = item.width;
+
+                        items_put_on_the_ground[item_index] = item;
+                        item_index++;
+                    });
+
+                    // Get container width
+                    const svg_width = this.timbers_grouped_by_face_svg_container.parentNode.offsetWidth;
+
+                    // Compute column width
+                    const available_width = svg_width - 2 * this.x_padding;
+                    const pixel_ratio = available_width / max_width;
+
+                    for (item_index = 0; item_index < num_items; item_index++) {
+                        // Take the item and compute height
+                        const item = items_put_on_the_ground[item_index]
+                        const svg_height = item.depth * pixel_ratio + 3 * this.y_padding;
+
+                        // Draw one svg for all sides
+                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                        svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
+
+                        let svg_elements_with_priority = [];
+
+                        const num_children = item.children.length;
+                        for(let child_index = 0; child_index < num_children; child_index++){
+                            const face = item.children[child_index].get_face("front");
+                            console.log(item.label, face.label);
+
+                            // fit points
+                            const fitted_points = swap_axes(
+                                fit_points(face.points, item.x_min, item.y_min, item.z_min),
+                                "XZY"
+                            );
+                            const drawing_points = fitted_points.map(p => [
+                                p[0] * pixel_ratio,
+                                p[1] * pixel_ratio,
+                                0,
+                            ]);
+
+                            const front_points_2D = convert_3D_to_2D(drawing_points);
+                            const polygon_front = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            polygon_front.setAttribute('points', `${front_points_2D}`);
+                            polygon_front.setAttribute('stroke', 'black');
+                            polygon_front.setAttribute('stroke-width', `${this.stroke_width}px`);
+                            polygon_front.setAttribute('fill-opacity', "0.7");
+                            polygon_front.setAttribute('fill', face.color.hex);
+                            svg_elements_with_priority.push([polygon_front, 10]);
+                        }
+
+                        // Sort svg elements by priority
+                        const svg_elements_sorted_by_priority = _.sortBy(svg_elements_with_priority, item => item[1]);
+                        _.forEach(svg_elements_sorted_by_priority, item => {
+                            svg.appendChild(item[0]);
+                        });
+                        this.timbers_grouped_by_face_svg_container.appendChild(svg);
+                    }
                 },
             };
         });
@@ -2515,11 +2598,8 @@
                         _.forIn(groups, group => {
                             const item = group.item.put_on_the_ground();
 
-                            const boundaries = get_boundaries(item.edge_points.map(v => v.toArray()));
-                            const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
-
                             // Compute a translation vec to align and spread items
-                            const translation_vec = [-x_min, -y_min, -z_min + z_origin];
+                            const translation_vec = [-item.x_min, -item.y_min, -item.z_min + z_origin];
 
                             // Apply translation vector
                             zome_meshes.add(
@@ -2537,7 +2617,7 @@
                             }
 
                             // Increase origin on Z axis
-                            z_origin += depth + 50;
+                            z_origin += item.depth + 50;
                         });
                     } else {
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -2650,11 +2730,8 @@
                         _.forIn(groups, group => {
                             const item = group.item.put_on_the_ground();
 
-                            const boundaries = get_boundaries(item.edge_points.map(v => v.toArray()));
-                            const [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth] = boundaries;
-
                             // Compute a translation vec to align and spread items
-                            const translation_vec = [-x_min, -y_min, -z_min + z_origin];
+                            const translation_vec = [-item.x_min, -item.y_min, -item.z_min + z_origin];
 
                             // Apply translation vector
                             mesh_points.push(...item.mesh_points.map(v => new THREE.Vector3(...add(v.toArray(), translation_vec))));
@@ -2672,7 +2749,7 @@
                             }
 
                             // Increase origin on Z axis
-                            z_origin += depth + 50;
+                            z_origin += item.depth + 50;
                         });
                     } else {
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -3809,7 +3886,7 @@
                         const parent = group.item;
                         timbers_grouped_by_face.push(
                             new ItemHashGroup(
-                                new TrapezoidalPrismCrown(parent.framework_timbers, parent),
+                                new Base3DGeometryCrown(parent.framework_timbers, parent),
                                 group.hash,
                                 group.count
                             )
@@ -3904,6 +3981,7 @@
         });
     });
 </script>
+<!-- Custom Javascript -->
 </body>
 </html>
 
