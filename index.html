@@ -1122,7 +1122,7 @@
                         </div>
                         <div class="tab-pane" id="nav-print" role="tabpanel" aria-labelledby="nav-print-tab"
                              tabindex="0"
-                             x-data="renderer_a4" @zome-is-made.window="process">
+                             x-data="renderer_a4" @zome-is-made.window="__process">
                             <div id="renderer_a4_container" class="d-flex justify-content-center" style="max-width: calc(100% - 36px); ">
                                 <div class="position-relative">
                                     <!-- Export to -->
@@ -1230,7 +1230,7 @@
                     </div>
                 </div>
 
-                <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="process">
+                <div class="col-12 break-before" x-data="face_measurements" @zome-is-made.window="__process">
                     <hr>
 
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
@@ -1363,7 +1363,7 @@
                     </div>
                 </div>
 
-                <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="process">
+                <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="__process">
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
                         <!-- ZIP Button -->
                         <!--                    <div>-->
@@ -1381,20 +1381,6 @@
                             <div class="mx-auto" style="width:300px!important">
                                 <div class="bg-white rounded border"
                                      x-ref="timbers_grouped_by_face_svg_container">
-                                    <div class="sticky-lg-top  bg-white" style="z-index:1050">A</div>
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <div class="sticky-lg-top bg-white" style="z-index:1051">B</div>
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <div class="sticky-lg-top  bg-white" style="z-index:1052">C</div>
                                 </div>
                             </div>
                             <div class="mx-auto" style="width:800px!important">
@@ -1488,11 +1474,19 @@
         Alpine.data('framework_measurements', () => {
             return {
                 timber_profiles_svg_container: null,
+                timbers_grouped_by_face_svg_container: null,
+                __process: null,
+                
                 async init() {
+                    this.__process = _.debounce(this.process, 1);
                     this.timber_profiles_svg_container = this.$refs.timber_profiles_svg_container;
                 },
-
-                process() {
+                process(){
+                    this.compute_drawing_of_timbers_grouped_by_face();
+                    this.compute_drawing_of_timber_profiles();
+                },
+                
+                compute_drawing_of_timber_profiles() {
                     // Group prims by hash
                     const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
 
@@ -1817,9 +1811,13 @@
                         this.timber_profiles_svg_container.appendChild(svg);
                     });
                 },
+
+               
+                compute_drawing_of_timbers_grouped_by_face(){
+
+                },
             };
         });
-
 
         Alpine.data('face_measurements', () => {
             return {
@@ -1840,7 +1838,11 @@
                 timber_lengths: 0,
                 total_length_of_timbers: 0,
 
+                __process: null,
+
                 async init() {
+                    this.__process = _.debounce(this.process, 1);
+
                     ["type_of_faces"].forEach(
                         (key) => this.$watch(key, () => {
                             this.compute_faces();
@@ -2030,13 +2032,16 @@
                 draw_centroid: false,
                 paint_similar_pieces: true,
 
+                __process: null,
+
                 // 2D Rendering Parameters
                 init() {
                     this.A4_sheet = this.$refs.A4_sheet;
+                    this.__process = _.debounce(this.process, 1);
 
                     // Add listeners
                     _.forEach(["kind_of_drawing", "paint_similar_pieces"], key => this.$watch(key, () => {
-                            this.process();
+                            this.__process();
                         })
                     );
 
