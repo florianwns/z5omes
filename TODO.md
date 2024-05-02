@@ -1,11 +1,8 @@
 # TODO-LIST
 
-* [ ] Dessiner les crowns à plat en 2D avec les timbers profiles
-  pour mieux comprendre le schéma de montage
-
-  - Utiliser la css sticky pour afficher les crowns à côté des timbers profiles
-  - utiliser un Z-index incrementé pour eviter d'utiliser js pour détache l'element sticky
-
+* [ ] Essayer de decaler l'écriture du label 
+  pour eviter les chevauchement au maximum
+  
 * [ ] Changer l'aide du kite ratio 
   car ce n'est pas exactement ça
 
