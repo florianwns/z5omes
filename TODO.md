@@ -1,5 +1,6 @@
 # TODO-LIST
 
+* [ ] Faire une video du mode hors connexion 
 
 * [ ] Regler le soucis de freezing 3D. cf animate / render
   
