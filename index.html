@@ -2520,6 +2520,9 @@
                     // Add controls
                     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+                    // Add a limit to avoid that the zome disappears when you scroll too far
+                    controls.maxDistance = 15000;
+
                     // Add (x, y, z) Axes
                     meshes.axes = new THREE.AxesHelper(WORLD_HEIGHT);
                     meshes.axes.visible = this.draw_axes;
