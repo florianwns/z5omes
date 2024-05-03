@@ -1,5 +1,11 @@
 # TODO-LIST
 
+* [ ] Faire une video mode hors connexion 
+  ou réfléchir à faire un soft hors connexion.
+  
+  https://blog.stephcrown.com/how-to-make-your-web-app-work-offline-with-just-html-css-and-javascript#heading-progressive-web-apps-pwa
+  http://diveintohtml5.info/offline.html
+  
 
 * [ ] Regler le soucis de freezing 3D. cf animate / render
   
