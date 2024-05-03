@@ -41,6 +41,8 @@ const I18N_EN = {
         bottom: "bottom",
         front: "front",
         back: "back",
+        not_allowed: 'Not Allowed',
+        valid: 'Valid',
 
         // Tooltips
         tooltip_display_help: "Display help",
