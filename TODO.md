@@ -1,5 +1,8 @@
 # TODO-LIST
 
+
+* [ ] Regler le soucis de freezing 3D. cf animate / render
+  
 * [ ] Essayer de decaler l'écriture du label 
   pour eviter les chevauchement au maximum
   
@@ -14,9 +17,6 @@
   D'abord essayer de remettre l'assemble semicone pour le beveled
   et comprendre ce qu'il se passe.
   
-* [ ] Auto fit 3D sur l'élement
-  https://discourse.threejs.org/t/camera-zoom-to-fit-object/936/2
-
 * [ ] Ajouter le bounding box sur le selected crown et mettre un bouton d'affichage
   seulement sur les faces et le squelette
 

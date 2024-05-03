@@ -2453,10 +2453,15 @@
                 is_fullscreen: false,
                 __auto_size: null,
                 __process: null,
+                __move: null,
+
+                is_rendering: false,
+                autofit_has_been_triggered: false,
 
                 init() {
                     this.__auto_size = _.debounce(this.auto_size, 1);
                     this.__process = _.debounce(this.process, 1);
+                    this.__move = _.debounce(this.move, 1);
 
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
@@ -2529,15 +2534,18 @@
 
                     scene.add(meshes.axes);
 
-                    this.reset();
+                    this.__move(this.home);
                     this.auto_size()
                     this.animate()
 
-                    // use font loader to print 3D labels
-                    const loader = new THREE.FontLoader();
+                    // Add listeners
                     const self = this;
+
+                    // Use font loader to print 3D labels
+                    const loader = new THREE.FontLoader();
                     loader.load('webfonts/roboto_black.typeface.json', function (loaded_font) {
                         font = loaded_font;
+                        self.is_rendering = true;
                         self.$dispatch('zome-renderer-is-ready');
                     });
                 },
@@ -2852,6 +2860,11 @@
                     scene.add(meshes.edges);
                     scene.add(meshes.labels);
                     this.set_visibility("labels", this.draw_labels);
+
+                    if(!this.autofit_has_been_triggered){
+                        this.autofit_has_been_triggered = true;
+                        this.move(this.home);
+                    }
                 },
 
                 get_floor_3D() {
@@ -2864,22 +2877,43 @@
                     }
                     return null
                 },
+                get bounding_box(){
+                    // Get bounding box of zome - this will be used to setup controls and camera
+                    let boundingBox = null;
+                    if (meshes.zome instanceof THREE.Group) {
+                        boundingBox = new THREE.Box3();
+                        boundingBox.setFromObject(meshes.zome);
+                    }
+                    return boundingBox;
+                },
+                get zome_size(){
+                    return (this.bounding_box instanceof THREE.Box3)
+                        ? this.bounding_box.getSize()
+                        : new THREE.Vector3(WORLD_HEIGHT, WORLD_HEIGHT, WORLD_HEIGHT);
+                },
+                get zome_height(){
+                    return this.zome_size.y;
+                },
                 get right() {
-                    return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
+                    return new THREE.Vector3(this.zome_height * 1.5, this.zome_height * 0.5, 0);
                 },
                 get left() {
-                    return new THREE.Vector3(0, WORLD_HEIGHT * 0.5, WORLD_HEIGHT * 1.5);
+                    return new THREE.Vector3(0, this.zome_height * 0.5, this.zome_height * 1.5);
                 },
                 get down() {
-                    return new THREE.Vector3(0, -WORLD_HEIGHT * 2, 0);
+                    return new THREE.Vector3(0, -this.zome_height * 2, 0);
                 },
                 get up() {
-                    return new THREE.Vector3(0, WORLD_HEIGHT * 2, 0);
+                    return new THREE.Vector3(0, this.zome_height * 2, 0);
                 },
                 get home() {
-                    const axis = new THREE.Vector3(0, 1, 0);
-                    const angle = Math.PI / 4;
-                    return this.left.applyAxisAngle(axis, angle);
+                    return new THREE.Vector3(this.zome_height * 1.05, this.zome_height * 0.5, this.zome_height * 1.05);
+                },
+                move(v) {
+                    controls.reset();
+                    controls.target.set(0, this.zome_height / 2.5, 0);
+                    camera.position.copy(v);
+                    controls.update();
                 },
                 set_visibility(key, value) {
                     if (meshes.hasOwnProperty(key) && meshes[key].hasOwnProperty("visible")) {
@@ -2892,22 +2926,14 @@
                     }
                 },
                 render() {
-                    renderer.render(scene, camera)
+                    if (this.is_rendering) {
+                        renderer.render(scene, camera)
+                    }
                 },
                 animate() {
                     this.update()
+                    requestAnimationFrame(() => this.animate());
                     this.render()
-                    requestAnimationFrame(this.animate.bind(this));
-                },
-                move(v) {
-                    camera.position.copy(v);
-                    controls.update();
-                },
-                reset() {
-                    this.speed = 0.001;
-                    controls.reset();
-                    controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
-                    controls.update();
                 },
                 increase_speed() {
                     this.speed += 0.001;
@@ -2940,7 +2966,7 @@
                             break;
                         case "h":
                         case "H":
-                            this.reset();
+                            this.move(this.home);
                             break;
                         case "l":
                         case "L":
