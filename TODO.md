@@ -1,11 +1,11 @@
 # TODO-LIST
 
-* [ ] Dessiner les crowns à plat en 2D avec les timbers profiles
-  pour mieux comprendre le schéma de montage
 
-  - Utiliser la css sticky pour afficher les crowns à côté des timbers profiles
-  - utiliser un Z-index incrementé pour eviter d'utiliser js pour détache l'element sticky
-
+* [ ] Regler le soucis de freezing 3D. cf animate / render
+  
+* [ ] Essayer de decaler l'écriture du label 
+  pour eviter les chevauchement au maximum
+  
 * [ ] Changer l'aide du kite ratio 
   car ce n'est pas exactement ça
 
@@ -17,9 +17,6 @@
   D'abord essayer de remettre l'assemble semicone pour le beveled
   et comprendre ce qu'il se passe.
   
-* [ ] Auto fit 3D sur l'élement
-  https://discourse.threejs.org/t/camera-zoom-to-fit-object/936/2
-
 * [ ] Ajouter le bounding box sur le selected crown et mettre un bouton d'affichage
   seulement sur les faces et le squelette
 

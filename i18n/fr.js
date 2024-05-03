@@ -41,6 +41,8 @@ const I18N_FR = {
         bottom: "dessous",
         front: "devant",
         back: "derrière",
+        not_allowed: 'Interdit',
+        valid: 'Valide',
 
         // Tooltips
         tooltip_display_help: "Afficher l'aide",

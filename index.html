@@ -20,7 +20,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.11b02" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.11b03" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -418,7 +418,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.11b02</span>
+                              style="font-size: 10px; top:0px">v1.0.11b03</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1438,15 +1438,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.11b02"></script>
-<script src="i18n/en.js?v=1.0.11b02"></script>
-<script src="i18n/it.js?v=1.0.11b02"></script>
-<script src="i18n/fr.js?v=1.0.11b02"></script>
-<script src="i18n/pl.js?v=1.0.11b02"></script>
-<script src="i18n/sv.js?v=1.0.11b02"></script>
+<script src="i18n/es.js?v=1.0.11b03"></script>
+<script src="i18n/en.js?v=1.0.11b03"></script>
+<script src="i18n/it.js?v=1.0.11b03"></script>
+<script src="i18n/fr.js?v=1.0.11b03"></script>
+<script src="i18n/pl.js?v=1.0.11b03"></script>
+<script src="i18n/sv.js?v=1.0.11b03"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.11b02"></script>
+<script src="js/core.js?v=1.0.11b03"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -2453,10 +2453,15 @@
                 is_fullscreen: false,
                 __auto_size: null,
                 __process: null,
+                __move: null,
+
+                is_rendering: false,
+                autofit_has_been_triggered: false,
 
                 init() {
                     this.__auto_size = _.debounce(this.auto_size, 1);
                     this.__process = _.debounce(this.process, 1);
+                    this.__move = _.debounce(this.move, 1);
 
                     // Add listeners
                     this.$el.addEventListener("keydown", e => this.keydown(e.key) && e.preventDefault(), false);
@@ -2520,21 +2525,27 @@
                     // Add controls
                     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+                    // Add a limit to avoid that the zome disappears when you scroll too far
+                    controls.maxDistance = 15000;
+
                     // Add (x, y, z) Axes
                     meshes.axes = new THREE.AxesHelper(WORLD_HEIGHT);
                     meshes.axes.visible = this.draw_axes;
 
                     scene.add(meshes.axes);
 
-                    this.reset();
+                    this.__move(this.home);
                     this.auto_size()
                     this.animate()
 
-                    // use font loader to print 3D labels
-                    const loader = new THREE.FontLoader();
+                    // Add listeners
                     const self = this;
+
+                    // Use font loader to print 3D labels
+                    const loader = new THREE.FontLoader();
                     loader.load('webfonts/roboto_black.typeface.json', function (loaded_font) {
                         font = loaded_font;
+                        self.is_rendering = true;
                         self.$dispatch('zome-renderer-is-ready');
                     });
                 },
@@ -2849,6 +2860,11 @@
                     scene.add(meshes.edges);
                     scene.add(meshes.labels);
                     this.set_visibility("labels", this.draw_labels);
+
+                    if(!this.autofit_has_been_triggered){
+                        this.autofit_has_been_triggered = true;
+                        this.move(this.home);
+                    }
                 },
 
                 get_floor_3D() {
@@ -2861,22 +2877,43 @@
                     }
                     return null
                 },
+                get bounding_box(){
+                    // Get bounding box of zome - this will be used to setup controls and camera
+                    let boundingBox = null;
+                    if (meshes.zome instanceof THREE.Group) {
+                        boundingBox = new THREE.Box3();
+                        boundingBox.setFromObject(meshes.zome);
+                    }
+                    return boundingBox;
+                },
+                get zome_size(){
+                    return (this.bounding_box instanceof THREE.Box3)
+                        ? this.bounding_box.getSize()
+                        : new THREE.Vector3(WORLD_HEIGHT, WORLD_HEIGHT, WORLD_HEIGHT);
+                },
+                get zome_height(){
+                    return this.zome_size.y;
+                },
                 get right() {
-                    return new THREE.Vector3(WORLD_HEIGHT * 1.5, WORLD_HEIGHT * 0.5, 0);
+                    return new THREE.Vector3(this.zome_height * 1.5, this.zome_height * 0.5, 0);
                 },
                 get left() {
-                    return new THREE.Vector3(0, WORLD_HEIGHT * 0.5, WORLD_HEIGHT * 1.5);
+                    return new THREE.Vector3(0, this.zome_height * 0.5, this.zome_height * 1.5);
                 },
                 get down() {
-                    return new THREE.Vector3(0, -WORLD_HEIGHT * 2, 0);
+                    return new THREE.Vector3(0, -this.zome_height * 2, 0);
                 },
                 get up() {
-                    return new THREE.Vector3(0, WORLD_HEIGHT * 2, 0);
+                    return new THREE.Vector3(0, this.zome_height * 2, 0);
                 },
                 get home() {
-                    const axis = new THREE.Vector3(0, 1, 0);
-                    const angle = Math.PI / 4;
-                    return this.left.applyAxisAngle(axis, angle);
+                    return new THREE.Vector3(this.zome_height * 1.05, this.zome_height * 0.5, this.zome_height * 1.05);
+                },
+                move(v) {
+                    controls.reset();
+                    controls.target.set(0, this.zome_height / 2.5, 0);
+                    camera.position.copy(v);
+                    controls.update();
                 },
                 set_visibility(key, value) {
                     if (meshes.hasOwnProperty(key) && meshes[key].hasOwnProperty("visible")) {
@@ -2889,22 +2926,14 @@
                     }
                 },
                 render() {
-                    renderer.render(scene, camera)
+                    if (this.is_rendering) {
+                        renderer.render(scene, camera)
+                    }
                 },
                 animate() {
                     this.update()
+                    requestAnimationFrame(() => this.animate());
                     this.render()
-                    requestAnimationFrame(this.animate.bind(this));
-                },
-                move(v) {
-                    camera.position.copy(v);
-                    controls.update();
-                },
-                reset() {
-                    this.speed = 0.001;
-                    controls.reset();
-                    controls.target.set(0, WORLD_HEIGHT / 2.5, 0);
-                    controls.update();
                 },
                 increase_speed() {
                     this.speed += 0.001;
@@ -2937,7 +2966,7 @@
                             break;
                         case "h":
                         case "H":
-                            this.reset();
+                            this.move(this.home);
                             break;
                         case "l":
                         case "L":
