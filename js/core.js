@@ -66,7 +66,6 @@ check_is_mobile = function () {
 
 const IS_MOBILE = check_is_mobile();
 
-
 // --------------------------------
 // ========== URL Params ==========
 // --------------------------------
@@ -882,7 +881,7 @@ function unique_arr(arr) {
 
 
 function save_as(blob, filename) {
-    download(filename, window.URL.createObjectURL(blob));
+    download(filename, URL.createObjectURL(blob));
 }
 
 function download(filename, href) {

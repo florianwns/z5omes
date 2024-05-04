@@ -1259,13 +1259,15 @@
 
                         <!-- TSV and CSV Button -->
                         <div>
-                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                  data-bs-toggle="tooltip"
                                   :title="i18n('tooltip_export_2_format', 'TSV')"
                                   @click="download_tsv()">
                                 <i class="fa-solid fa-file"></i>
                                 <span class="fa-icon-file-type">TSV</span>
                             </span>
-                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"
+                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                  data-bs-toggle="tooltip"
                                   title="Export to CSV format"
                                   :title="i18n('tooltip_export_2_format', 'CSV')"
                                   @click="download_csv()">
@@ -1373,16 +1375,18 @@
                 </div>
 
                 <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="__process">
-                    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between">
+                    <div class="d-flex flex-column flex-sm-row align-items-center mb-3 ustify-content-between">
+                        <span class="me-auto"></span>
                         <!-- ZIP Button -->
-                        <!--                    <div>-->
-                        <!--                        <span class="text-primary btn btn-sm fs-2 px-2 position-relative" data-bs-toggle="tooltip"-->
-                        <!--                              :title="i18n('tooltip_export_2_format', 'ZIP')"-->
-                        <!--                              @click="download_zip()">-->
-                        <!--                            <i class="fa-solid fa-file"></i>-->
-                        <!--                            <span class="fa-icon-file-type">ZIP</span>-->
-                        <!--                        </span>-->
-                        <!--                    </div>-->
+                        <div>
+                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                  data-bs-toggle="tooltip"
+                                  :title="i18n('tooltip_export_2_format', 'ZIP')"
+                                  @click="download_zip()">
+                                <i class="fa-solid fa-file"></i>
+                                <span class="fa-icon-file-type">ZIP</span>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="table-responsive-lg">
@@ -1444,6 +1448,9 @@
 <!-- Screenfull -->
 <script src="js/screenfull.min.js"></script>
 
+<!-- JSZip -->
+<script src="js/jszip.min.js"></script>
+
 <!-- i18n Dictionaries -->
 <script src="i18n/es.js?v=1.0.11b06"></script>
 <script src="i18n/en.js?v=1.0.11b06"></script>
@@ -1504,11 +1511,37 @@
                     this.timber_profiles_svg_container = document.getElementById('timber_profiles_svg_container').getElementsByTagName('div')[0];
                     this.timbers_grouped_by_face_svg_container = document.getElementById('timbers_grouped_by_face_svg_container').getElementsByTagName('div')[0];
                 },
+                get_labels(){
+                    return [
+                        ...ZOME.timbers_grouped_by_face,
+                        ...ZOME.timber_profiles_grouped_by_hash,
+                    ].map(group => group.item.label);
+                },
+                get_svg_elements(){
+                    return [
+                        ...this.timbers_grouped_by_face_svg_container.getElementsByTagName('svg'),
+                        ...this.timber_profiles_svg_container.getElementsByTagName('svg'),
+                    ];
+                },
+                download_zip(){
+                    const zip = new JSZip();
+                    const svg_elements = this.get_svg_elements();
+                    const labels = this.get_labels();
+                    for(let i = 0; i < svg_elements.length; i++){
+                        const svg = svg_elements[i].outerHTML;
+                        const blob = new Blob([svg.toString()]);
+                        zip.file(`${labels[i]}.svg`, blob);
+                    }
+
+                    const filename = this.gen_filename(`_drawing.zip`);
+                    zip.generateAsync({type:"blob"}).then(function(content) {
+                        save_as(content, filename);
+                    });
+                },
                 process() {
                     this.compute_drawing_of_timbers_grouped_by_face();
                     this.compute_drawing_of_timber_profiles();
                 },
-
                 compute_drawing_of_timber_profiles() {
                     const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
 
@@ -1576,7 +1609,6 @@
                         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
                         svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
-                        svg.setAttribute('class', "m-2 border-bottom");
 
                         let svg_elements_with_priority = [];
 
@@ -1819,7 +1851,6 @@
                         this.timber_profiles_svg_container.appendChild(svg);
                     });
                 },
-
 
                 compute_drawing_of_timbers_grouped_by_face() {
                     const timbers_grouped_by_face = ZOME.timbers_grouped_by_face;
@@ -2247,7 +2278,7 @@
                     const svg = this.A4_sheet.outerHTML;
                     const blob = new Blob([svg.toString()]);
                     const filename = this.gen_filename(`_${this.kind_of_drawing}.svg`);
-                    download(filename, window.URL.createObjectURL(blob));
+                    download(filename, URL.createObjectURL(blob));
                 },
                 process() {
                     // Init variables
@@ -2616,7 +2647,7 @@
                             const blob = new Blob([str], {type: 'text/plain'});
 
                             const filename = this.gen_filename(`_${this.type_of_3D_objects}.gltf`);
-                            download(filename, window.URL.createObjectURL(blob));
+                            download(filename, URL.createObjectURL(blob));
                         },
                         (error) => console.error(error),
                         {binary: false},
@@ -2628,7 +2659,7 @@
                     const blob = new Blob([str], {type: 'text/plain'});
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
-                    download(filename, window.URL.createObjectURL(blob));
+                    download(filename, URL.createObjectURL(blob));
                 },
 
                 compute_obj_to_export() {
