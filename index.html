@@ -3601,6 +3601,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
+                        midpoint, bindu_point,
                         dist_to_ground, y, face, face_label;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
@@ -3646,20 +3647,22 @@
                             A = vertices[iA];
                             B = vertices[iB];
                             C = vertices[iC];
+                            midpoint = get_midpoint(B, C);
 
                             // Compute the new point to close diamond/kite face
-                            D = add(A, mul(sub(get_midpoint(B, C), A), 1 + K));
+                            D = add(A, mul(sub(midpoint, A), 1 + K));
 
                             const bindu_ratio = BINDU_RATIOS[crown_index] || 1;
                             const apply_bindu_ratio = bindu_ratio !== 1;
 
                             // Apply the bindu ratio
                             if (apply_bindu_ratio) {
-                                D = [
+                                bindu_point = [
                                     D[0] * bindu_ratio,
                                     D[1],
                                     D[2] * bindu_ratio
                                 ];
+                                D = point_to(midpoint, sub(bindu_point, midpoint), dist(midpoint, D));
                             }
 
                             // Draw the second part of shape while D is higher than the ground
