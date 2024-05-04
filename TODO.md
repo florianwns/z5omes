@@ -1,7 +1,5 @@
 # TODO-LIST
 
-* [ ] Faire une video du mode hors connexion 
-
 * [ ] Regler le soucis de freezing 3D. cf animate / render
   
 * [ ] Essayer de decaler l'écriture du label 
@@ -27,10 +25,6 @@
   car le montant du haut du triangle bas rentre dans le montant bas du triangle haut 
   
 * [ ] Ajouter les renforts en plus de la division des polygones... cossu
-
-* [ ] vue 3D : Corriger bug sur les vues de côtés haut bas
-  quand on se déplace dans la caméra. -> 
-  resetter avant de faire les vue de côté
 
 * [ ] Corriger les points de la semelle de la méthode GoodKarma
     * Sans doute dû aux inner/outer faces qui sont mal calculées pour le goodkarma

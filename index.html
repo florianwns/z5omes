@@ -8,12 +8,12 @@
           content="Z5omes allows you to create 3D models for free. You can now create your models in GoodKarma and Semicone (Axis of symmetry) and export them in STL (sketchup import: mm unit, inverted YZ), OBJ or other formats.">
 
     <!-- Mobile Capability -->
-    <meta name="application-name" content="Z5omes" />
-    <link rel="manifest" href="manifest.json?v=1.0.11b05" />
+    <meta name="application-name" content="Z5omes"/>
+    <link rel="manifest" href="manifest.json?v=1.0.11b06"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="img/icons/apple-touch-icon.png">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.11b05" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.11b06" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -425,7 +425,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.11b05</span>
+                              style="font-size: 10px; top:0px">v1.0.11b06</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1445,15 +1445,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.11b05"></script>
-<script src="i18n/en.js?v=1.0.11b05"></script>
-<script src="i18n/it.js?v=1.0.11b05"></script>
-<script src="i18n/fr.js?v=1.0.11b05"></script>
-<script src="i18n/pl.js?v=1.0.11b05"></script>
-<script src="i18n/sv.js?v=1.0.11b05"></script>
+<script src="i18n/es.js?v=1.0.11b06"></script>
+<script src="i18n/en.js?v=1.0.11b06"></script>
+<script src="i18n/it.js?v=1.0.11b06"></script>
+<script src="i18n/fr.js?v=1.0.11b06"></script>
+<script src="i18n/pl.js?v=1.0.11b06"></script>
+<script src="i18n/sv.js?v=1.0.11b06"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.11b05"></script>
+<script src="js/core.js?v=1.0.11b06"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1581,18 +1581,17 @@
                         let svg_elements_with_priority = [];
 
                         // Add label title vertically at the left of the svg
+                        const text_color = prism.color.add(0, -10, -10).hex;
                         const label_title = svg_text(`${this.i18n('profile')} ${prism.label}`,
-                            (this.x_padding - this.font_size) / 2,
-                            svg_height / 2,
+                            this.x_padding,
+                            this.y_padding,
                             this.title_font_size,
-                            prism.color.hex,
+                            text_color,
                         );
-                        label_title.setAttribute('text-anchor', 'middle');
-                        label_title.setAttribute('alignment-baseline', 'center');
-                        label_title.setAttribute('writing-mode', 'vertical-lr');
+                        label_title.setAttribute('text-anchor', 'start');
                         label_title.setAttribute('font-weight', 'bold');
                         label_title.setAttribute('style', 'text-transform: capitalize');
-                        svg_elements_with_priority.push([label_title, 25]);
+                        svg_elements_with_priority.push([label_title, 19]);
 
                         // Draw sides
                         _.forEach(sides, (side, i) => {
@@ -1614,7 +1613,7 @@
                                 ? left_column_x_start + column_padding
                                 : right_column_x_start + column_padding;
 
-                            if (i !== 1) {
+                            if (i !== 0) {
                                 const side_title = svg_text(this.i18n(side_names[i]),
                                     column_x_start + drawing_width / 2,
                                     line_y_start + this.y_padding,
@@ -1630,7 +1629,7 @@
                                     svg_width - this.x_padding,
                                     line_y_start + this.y_padding,
                                     this.title_font_size,
-                                    prism.color.hex
+                                    text_color
                                 )
                                 count_text.setAttribute('text-anchor', 'end');
                                 count_text.setAttribute('font-weight', 'bold');
@@ -1662,7 +1661,7 @@
                             svg_elements_with_priority.push([polygon_behind, 9]);
 
                             // Add label of the polygon
-                            const centroid = average(drawing_points);
+                            const centroid = average(front_points_3D);
                             const side_label = svg_text(`${side.label}`,
                                 centroid[0],
                                 centroid[1],
@@ -1754,36 +1753,38 @@
                             const y_shift_bottom = [0, this.font_size * 1.25, 0],
                                 y_shift_up = [0, -this.font_size * 0.5, 0];
 
+                            const red = "#d00f0f";
+                            const blue = "#12b2b7";
                             const angles_params = (i < 2)
                                 ? [
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, F), points_2_plane(B, C, G))),
-                                        point_between(b, c, dist(b, c) / 2), 'middle', 'red', '∠'
+                                        point_between(c, b, dist(b, c) / 3), 'middle', red, '∠'
                                     ],
                                 ] : [
                                     [
                                         Math.abs(TAU_Q - angle_between_points(A, B, C)),
-                                        point_between(b, a, dist(b, a) / 6), 'end', 'red', '∠'
+                                        point_between(b, a, dist(b, a) / 5), 'middle', red, '∠'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_points(D, C, B)),
-                                        point_between(c, d, dist(d, c) / 6), 'start', 'red', '∠'
+                                        point_between(c, d, dist(d, c) / 5), 'middle', red, '∠'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))),
-                                        point_between(b, a, dist(b, a) / 2), 'middle', 'blue', '∟'
+                                        point_between(b, a, dist(b, a) / 2), 'middle', blue, '∟'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))),
-                                        point_between(c, d, dist(d, c) / 2), 'middle', 'blue', '∟'
+                                        point_between(c, d, dist(d, c) / 2), 'middle', blue, '∟'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))),
-                                        add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', 'blue', '∟'
+                                        add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', blue, '∟'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))),
-                                        add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)), 'middle', 'blue', '∟'
+                                        add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)), 'middle', blue, '∟'
                                     ],
                                 ];
 
@@ -1802,7 +1803,7 @@
                                 );
                                 angle_text.setAttribute('text-anchor', anchor);
                                 angle_text.setAttribute('stroke', 'white');
-                                angle_text.setAttribute('stroke-width', '2px');
+                                angle_text.setAttribute('stroke-width', '4px');
                                 angle_text.setAttribute('paint-order', 'stroke');
                                 svg_elements_with_priority.push([angle_text, 21]);
                             });
@@ -1848,11 +1849,11 @@
                     const svg_width = this.timbers_grouped_by_face_svg_container.parentNode.offsetWidth;
 
                     // Compute column width
-                    const available_width = svg_width - 2 * this.x_padding;
+                    const available_width = svg_width - this.x_padding / 2;
                     const pixel_ratio = available_width / max_width;
 
                     item_index = 0;
-                    const draw_y_start = 2 * this.y_padding;
+                    const draw_y_start = this.y_padding * 1.5;
 
                     _.forIn(timbers_grouped_by_face, group => {
                         // Take the item and compute height
@@ -1889,26 +1890,32 @@
                             svg_elements_with_priority.push([polygon_front, 10]);
 
                             // Add label of the polygon
-                            const centroid = sub(face.centroid, [item.x_min, item.y_min, item.z_min]);
+                            const label_position = get_midpoint(face.centroid,
+                                get_midpoint(face.points[0], face.points[2]),
+                            );
+                            const x = x_padding + (label_position[0] - item.x_min) * pixel_ratio;
+                            const y = draw_y_start + (label_position[2] - item.z_min) * pixel_ratio; // swap Y <-> Z
                             const face_label = svg_text(`${face.label}`,
-                                x_padding + centroid[0] * pixel_ratio,
-                                draw_y_start + centroid[2] * pixel_ratio, // swap Y <-> Z
+                                x, y,
                                 this.title_font_size * 0.9,
                                 'white',
                             );
                             face_label.setAttribute('text-anchor', 'middle');
-                            face_label.setAttribute('alignment-baseline', 'center');
+                            face_label.setAttribute('alignment-baseline', 'middle');
                             face_label.setAttribute('font-weight', 'bold');
+
+
                             add_stroke_behind(face_label, 3 * this.stroke_width);
                             svg_elements_with_priority.push([face_label, 15]);
                         }
 
                         // Add count text
+                        const text_color = item.color.add(0, -10, -10).hex;
                         const count_text = svg_text(`X ${group.count}`,
                             svg_width - this.x_padding,
                             this.y_padding,
                             this.title_font_size,
-                            item.color.hex,
+                            text_color,
                         );
                         count_text.setAttribute('text-anchor', 'end');
                         count_text.setAttribute('font-weight', 'bold');
@@ -1916,17 +1923,15 @@
 
                         // Add label title vertically at the left of the svg
                         const label_title = svg_text(`${this.i18n('face')} ${item.label}`,
-                            (this.x_padding - this.font_size) / 2,
-                            svg_height / 2,
+                            this.x_padding,
+                            this.y_padding,
                             this.title_font_size,
-                            item.color.hex,
+                            text_color,
                         );
-                        label_title.setAttribute('text-anchor', 'middle');
-                        label_title.setAttribute('alignment-baseline', 'center');
-                        label_title.setAttribute('writing-mode', 'vertical-lr');
+                        label_title.setAttribute('text-anchor', 'start');
                         label_title.setAttribute('font-weight', 'bold');
                         label_title.setAttribute('style', 'text-transform: capitalize');
-                        svg_elements_with_priority.push([label_title, 25]);
+                        svg_elements_with_priority.push([label_title, 19]);
 
                         // Sort svg elements by priority
                         const svg_elements_sorted_by_priority = _.sortBy(svg_elements_with_priority, item => item[1]);
@@ -2870,7 +2875,7 @@
                     scene.add(meshes.labels);
                     this.set_visibility("labels", this.draw_labels);
 
-                    if(!this.autofit_has_been_triggered){
+                    if (!this.autofit_has_been_triggered) {
                         this.autofit_has_been_triggered = true;
                         this.move(this.home);
                     }
@@ -2886,7 +2891,7 @@
                     }
                     return null
                 },
-                get bounding_box(){
+                get bounding_box() {
                     // Get bounding box of zome - this will be used to setup controls and camera
                     let boundingBox = null;
                     if (meshes.zome instanceof THREE.Group) {
@@ -2895,12 +2900,12 @@
                     }
                     return boundingBox;
                 },
-                get zome_size(){
+                get zome_size() {
                     return (this.bounding_box instanceof THREE.Box3)
                         ? this.bounding_box.getSize()
                         : new THREE.Vector3(WORLD_HEIGHT, WORLD_HEIGHT, WORLD_HEIGHT);
                 },
-                get zome_height(){
+                get zome_height() {
                     return this.zome_size.y;
                 },
                 get right() {
