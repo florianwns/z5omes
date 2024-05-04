@@ -608,7 +608,7 @@ function circle_path(cx, cy, r) {
     return 'M ' + cx + ' ' + cy + ' m -' + r + ', 0 a ' + r + ',' + r + ' 0 1,1 ' + (r * 2) + ',0 a ' + r + ',' + r + ' 0 1,1 -' + (r * 2) + ',0';
 }
 
-function svg_polygon(points, stroke_width = 2, fill_color="#000000", fill_opacity='1'){
+function svg_polygon(points, stroke_width = 2, fill_color = "#000000", fill_opacity = '1') {
     const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     polygon.setAttribute('points', `${points}`);
     polygon.setAttribute('stroke', 'black');
@@ -618,7 +618,7 @@ function svg_polygon(points, stroke_width = 2, fill_color="#000000", fill_opacit
     return polygon
 }
 
-function svg_text(txt = "", x = 0, y = 0, font_size = 12, fill_color="#000000"){
+function svg_text(txt = "", x = 0, y = 0, font_size = 12, fill_color = "#000000") {
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute('x', `${x}`);
     text.setAttribute('y', `${y}`);
@@ -628,7 +628,7 @@ function svg_text(txt = "", x = 0, y = 0, font_size = 12, fill_color="#000000"){
     return text;
 }
 
-function add_stroke_behind(el, stroke_width = 2, stroke_color='black'){
+function add_stroke_behind(el, stroke_width = 2, stroke_color = 'black') {
     el.setAttribute('stroke', stroke_color);
     el.setAttribute('stroke-width', `${stroke_width}px`);
     el.setAttribute('paint-order', 'stroke');
@@ -920,6 +920,14 @@ class Color {
         // Magic colors, with index and array length
         const hue_angle = (index % arr_length) * TAU / arr_length;
         return Color.from_angles(hue_angle, TAU_Q / 2);
+    }
+
+    add(hue = 0, saturation = 0, lightness = 0) {
+        return new Color(
+            this.hue + hue,
+            this.saturation + saturation,
+            this.lightness + lightness,
+        );
     }
 }
 

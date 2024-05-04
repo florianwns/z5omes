@@ -348,23 +348,18 @@ svg.svg_rhombus_customizer use.clickable:hover {
 #timbers_grouped_by_face_svg_container > div > svg,
 #timber_profiles_svg_container > div > svg {
     margin: 0 !important;
-    margin-bottom: 0.5rem !important;
     border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
 }
 
 #timbers_grouped_by_face_svg_container > div > svg:last-child,
 #timber_profiles_svg_container > div > svg:last-child {
-    margin-bottom: 0 !important;
     border-bottom: none !important;
 }
 
 
 @media print {
-
-
     #timbers_grouped_by_face_svg_container > div > svg,
     #timber_profiles_svg_container > div > svg {
-        margin-bottom: 0 !important;
         border-bottom: none !important;
         page-break-after: always !important;
     }
