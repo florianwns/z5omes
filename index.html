@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes" />
-    <link rel="manifest" href="manifest.json?v=1.0.11b04" />
+    <link rel="manifest" href="manifest.json?v=1.0.11b05" />
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.11b04" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.11b05" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -425,7 +425,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.11b04</span>
+                              style="font-size: 10px; top:0px">v1.0.11b05</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -974,7 +974,7 @@
                                                        @dblclick="selected_bindu_ratio = 1"
                                                        x-model.number="selected_bindu_ratio"
                                                        id="selected_bindu_ratio_slider">
-                                                <input class="form-control" step="0.05" type="number"
+                                                <input class="form-control" step="0.01" type="number"
                                                        style="max-width: 63px"
                                                        x-model.lazy.number="selected_bindu_ratio">
                                             </div>
@@ -1445,15 +1445,15 @@
 <script src="js/screenfull.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.11b04"></script>
-<script src="i18n/en.js?v=1.0.11b04"></script>
-<script src="i18n/it.js?v=1.0.11b04"></script>
-<script src="i18n/fr.js?v=1.0.11b04"></script>
-<script src="i18n/pl.js?v=1.0.11b04"></script>
-<script src="i18n/sv.js?v=1.0.11b04"></script>
+<script src="i18n/es.js?v=1.0.11b05"></script>
+<script src="i18n/en.js?v=1.0.11b05"></script>
+<script src="i18n/it.js?v=1.0.11b05"></script>
+<script src="i18n/fr.js?v=1.0.11b05"></script>
+<script src="i18n/pl.js?v=1.0.11b05"></script>
+<script src="i18n/sv.js?v=1.0.11b05"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.11b04"></script>
+<script src="js/core.js?v=1.0.11b05"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -3601,6 +3601,7 @@
                     let fipc, ficc, k, u,
                         iB, iA, iC, iD, iE, iF,
                         A, B, C, D, E, F, G, H,
+                        midpoint, bindu_point,
                         dist_to_ground, y, face, face_label;
                     let last_is_truncated = false;
                     let closest_dist_to_ground = Number.MAX_VALUE;
@@ -3646,20 +3647,22 @@
                             A = vertices[iA];
                             B = vertices[iB];
                             C = vertices[iC];
+                            midpoint = get_midpoint(B, C);
 
                             // Compute the new point to close diamond/kite face
-                            D = add(A, mul(sub(get_midpoint(B, C), A), 1 + K));
+                            D = add(A, mul(sub(midpoint, A), 1 + K));
 
                             const bindu_ratio = BINDU_RATIOS[crown_index] || 1;
                             const apply_bindu_ratio = bindu_ratio !== 1;
 
                             // Apply the bindu ratio
                             if (apply_bindu_ratio) {
-                                D = [
+                                bindu_point = [
                                     D[0] * bindu_ratio,
                                     D[1],
                                     D[2] * bindu_ratio
                                 ];
+                                D = point_to(midpoint, sub(bindu_point, midpoint), dist(midpoint, D));
                             }
 
                             // Draw the second part of shape while D is higher than the ground
