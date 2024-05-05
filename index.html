@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.11b08"/>
+    <link rel="manifest" href="manifest.json?v=1.0.11b09"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.11b08" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.11b09" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -425,7 +425,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.11b08</span>
+                              style="font-size: 10px; top:0px">v1.0.11b09</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1375,9 +1375,9 @@
                 </div>
 
                 <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="__process">
-                    <div class="d-flex flex-column flex-sm-row align-items-center mb-3 ustify-content-between">
+                    <div class="d-flex flex-column flex-sm-row align-items-center mb-3 justify-content-between">
                         <span class="me-auto"></span>
-                        <!-- ZIP Button -->
+                        <!-- ZIP and Print Buttons -->
                         <div>
                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                   data-bs-toggle="tooltip"
@@ -1386,10 +1386,6 @@
                                 <i class="fa-solid fa-file"></i>
                                 <span class="fa-icon-file-type">ZIP</span>
                             </span>
-                        </div>
-
-                        <!-- Print Button -->
-                        <div>
                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                   data-bs-toggle="tooltip"
                                   :title="i18n('print')"
@@ -1462,15 +1458,15 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.11b08"></script>
-<script src="i18n/en.js?v=1.0.11b08"></script>
-<script src="i18n/it.js?v=1.0.11b08"></script>
-<script src="i18n/fr.js?v=1.0.11b08"></script>
-<script src="i18n/pl.js?v=1.0.11b08"></script>
-<script src="i18n/sv.js?v=1.0.11b08"></script>
+<script src="i18n/es.js?v=1.0.11b09"></script>
+<script src="i18n/en.js?v=1.0.11b09"></script>
+<script src="i18n/it.js?v=1.0.11b09"></script>
+<script src="i18n/fr.js?v=1.0.11b09"></script>
+<script src="i18n/pl.js?v=1.0.11b09"></script>
+<script src="i18n/sv.js?v=1.0.11b09"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.11b08"></script>
+<script src="js/core.js?v=1.0.11b09"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1556,21 +1552,23 @@
                     const css_style = `
                     <style>
                     @media print {
-                        .drawing-2D{
-                            display: flex;
-                            justify-content: center;
-                            text-align: center;
-                            margin: 0!important;
-                            width: 100vw!important;
-                            height: 100vh!important;
-                            page-break-before: always!important;;
-                        }
-                        .drawing-2D > svg{
-                            margin: auto!important;
-                            width: auto!important;
-                            max-width: 100%!important;
-                            height: auto!important;
-                            max-height: 100%!important;
+                        @supports (height: 100dvh) {
+                            .drawing-2D{
+                                display: flex;
+                                justify-content: center;
+                                text-align: center;
+                                margin: 0!important;
+                                width: 100dvw!important;
+                                height: 100dvh!important;
+                                page-break-before: always!important;
+                            }
+                            .drawing-2D > svg{
+                                margin: auto!important;
+                                width: auto!important;
+                                max-width: 100%!important;
+                                height: auto!important;
+                                max-height: 100%!important;
+                            }
                         }
                     }
                     </style>`;
