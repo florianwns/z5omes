@@ -1533,7 +1533,7 @@
                         zip.file(`${labels[i]}.svg`, blob);
                     }
 
-                    const filename = this.gen_filename(`_drawing.zip`);
+                    const filename = this.gen_filename(`_2D_Drawings.zip`);
                     zip.generateAsync({type:"blob"}).then(function(content) {
                         save_as(content, filename);
                     });
