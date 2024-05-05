@@ -1556,21 +1556,23 @@
                     const css_style = `
                     <style>
                     @media print {
-                        .drawing-2D{
-                            display: flex;
-                            justify-content: center;
-                            text-align: center;
-                            margin: 0!important;
-                            width: 100vw!important;
-                            height: 100vh!important;
-                            page-break-before: always!important;;
-                        }
-                        .drawing-2D > svg{
-                            margin: auto!important;
-                            width: auto!important;
-                            max-width: 100%!important;
-                            height: auto!important;
-                            max-height: 100%!important;
+                        @supports (height: 100dvh) {
+                            .drawing-2D{
+                                display: flex;
+                                justify-content: center;
+                                text-align: center;
+                                margin: 0!important;
+                                width: 100dvw!important;
+                                height: 100dvh!important;
+                                page-break-before: always!important;
+                            }
+                            .drawing-2D > svg{
+                                margin: auto!important;
+                                width: auto!important;
+                                max-width: 100%!important;
+                                height: auto!important;
+                                max-height: 100%!important;
+                            }
                         }
                     }
                     </style>`;
