@@ -18,9 +18,7 @@
   
 * [ ] Ajouter le bounding box sur le selected crown et mettre un bouton d'affichage
   seulement sur les faces et le squelette
-
-* [ ] Ajouter l'export ZIP (des SVG) et PDF pour les figures des timber profiles
-
+  
 * [ ] Revoir la méthode d'expansion quand le bindu est supérieur à 1, 
   car le montant du haut du triangle bas rentre dans le montant bas du triangle haut 
   
