@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.12b01"/>
+    <link rel="manifest" href="manifest.json?v=1.0.12b02"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.12b01" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.12b02" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -166,9 +166,8 @@
                     </div>
                     <div class="input-group input-group-sm mb-3">
                         <button class="btn btn-primary text-start" type="button"
-                                :class="(use_bindu_ratio) ? 'disabled' : 'btn-primary'"
                                 data-bs-toggle="tooltip" :title="i18n('help_hr_param')"
-                                @click="params.use_hr_mode = (use_bindu_ratio) ? true : !params.use_hr_mode">
+                                @click="params.use_hr_mode = !params.use_hr_mode">
                             HR
                         </button>
                         <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
@@ -223,7 +222,7 @@
                             @click="params.angle_unit = (params.angle_unit == 'tan') ? 'deg': 'tan'"
                             x-text="(params.angle_unit == 'tan') ? 'F' : 'Θ'">
                     </button>
-                    <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
+                    <input class="form-control form-range" min="20" max="80" step="0.01" type="range"
                            x-model.number="params.theta_deg" x-ref="theta_deg_slider">
                     <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
                     <select class="form-select unit-select" aria-label="Angle unit"
@@ -428,7 +427,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.12b01</span>
+                              style="font-size: 10px; top:0px">v1.0.12b02</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -973,7 +972,7 @@
                                                     <i class="fa fa-mosque"></i>
                                                 </button>
                                                 <input class="form-control form-range"
-                                                       min="0.75" max="1.25" step="0.01" type="range"
+                                                       min="0.50" max="1.50" step="0.01" type="range"
                                                        @dblclick="selected_bindu_ratio = 1"
                                                        x-model.number="selected_bindu_ratio"
                                                        id="selected_bindu_ratio_slider">
@@ -1461,15 +1460,15 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.12b01"></script>
-<script src="i18n/en.js?v=1.0.12b01"></script>
-<script src="i18n/it.js?v=1.0.12b01"></script>
-<script src="i18n/fr.js?v=1.0.12b01"></script>
-<script src="i18n/pl.js?v=1.0.12b01"></script>
-<script src="i18n/sv.js?v=1.0.12b01"></script>
+<script src="i18n/es.js?v=1.0.12b02"></script>
+<script src="i18n/en.js?v=1.0.12b02"></script>
+<script src="i18n/it.js?v=1.0.12b02"></script>
+<script src="i18n/fr.js?v=1.0.12b02"></script>
+<script src="i18n/pl.js?v=1.0.12b02"></script>
+<script src="i18n/sv.js?v=1.0.12b02"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.12b01"></script>
+<script src="js/core.js?v=1.0.12b02"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -3221,10 +3220,6 @@
                         this.clamp("timber_width_in_mm", this.params.timber_width_in_mm);
                     });
 
-                    this.$watch("use_bindu_ratio", () => {
-                        this.params.use_hr_mode = true;
-                    });
-
                     this.$watch("max_timber_thickness", () => {
                         this.clamp("timber_thickness_in_mm", this.params.timber_thickness_in_mm);
                     });
@@ -3369,13 +3364,6 @@
                     const bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     bindu_ratios[this.selected_crown - 1] = this.selected_bindu_ratio;
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
-                },
-                get use_bindu_ratio(){
-                    const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
-                    for (let i = 0; i < current_bindu_ratios.length; i++) {
-                        if(current_bindu_ratios[i] !== 1) return true;
-                    }
-                    return false;
                 },
                 is_framework_timber_selected(svg_index = 0) {
                     const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
@@ -3768,7 +3756,9 @@
                                     D[1],
                                     D[2] * bindu_ratio
                                 ];
-                                D = point_to(midpoint, sub(bindu_point, midpoint), dist(midpoint, D));
+                                D = bindu_point;
+                                // Keep the same edge size
+                                // D = point_to(midpoint, sub(bindu_point, midpoint), dist(midpoint, D));
                             }
 
                             // Draw the second part of shape while D is higher than the ground
