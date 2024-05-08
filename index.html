@@ -166,9 +166,8 @@
                     </div>
                     <div class="input-group input-group-sm mb-3">
                         <button class="btn btn-primary text-start" type="button"
-                                :class="(use_bindu_ratio) ? 'disabled' : 'btn-primary'"
                                 data-bs-toggle="tooltip" :title="i18n('help_hr_param')"
-                                @click="params.use_hr_mode = (use_bindu_ratio) ? true : !params.use_hr_mode">
+                                @click="params.use_hr_mode = !params.use_hr_mode">
                             HR
                         </button>
                         <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
@@ -3221,10 +3220,6 @@
                         this.clamp("timber_width_in_mm", this.params.timber_width_in_mm);
                     });
 
-                    this.$watch("use_bindu_ratio", () => {
-                        this.params.use_hr_mode = true;
-                    });
-
                     this.$watch("max_timber_thickness", () => {
                         this.clamp("timber_thickness_in_mm", this.params.timber_thickness_in_mm);
                     });
@@ -3369,13 +3364,6 @@
                     const bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     bindu_ratios[this.selected_crown - 1] = this.selected_bindu_ratio;
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
-                },
-                get use_bindu_ratio(){
-                    const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
-                    for (let i = 0; i < current_bindu_ratios.length; i++) {
-                        if(current_bindu_ratios[i] !== 1) return true;
-                    }
-                    return false;
                 },
                 is_framework_timber_selected(svg_index = 0) {
                     const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
