@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.12b01"/>
+<!--    <link rel="manifest" href="manifest.json?v=1.0.12b01"/>-->
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -223,7 +223,7 @@
                             @click="params.angle_unit = (params.angle_unit == 'tan') ? 'deg': 'tan'"
                             x-text="(params.angle_unit == 'tan') ? 'F' : 'Θ'">
                     </button>
-                    <input class="form-control form-range" min="30" max="70" step="0.01" type="range"
+                    <input class="form-control form-range" min="20" max="80" step="0.01" type="range"
                            x-model.number="params.theta_deg" x-ref="theta_deg_slider">
                     <input class="form-control" type="number" step="0.01" x-model.lazy.number="theta">
                     <select class="form-select unit-select" aria-label="Angle unit"
@@ -973,7 +973,7 @@
                                                     <i class="fa fa-mosque"></i>
                                                 </button>
                                                 <input class="form-control form-range"
-                                                       min="0.75" max="1.25" step="0.01" type="range"
+                                                       min="0.50" max="1.50" step="0.01" type="range"
                                                        @dblclick="selected_bindu_ratio = 1"
                                                        x-model.number="selected_bindu_ratio"
                                                        id="selected_bindu_ratio_slider">
@@ -3768,7 +3768,9 @@
                                     D[1],
                                     D[2] * bindu_ratio
                                 ];
-                                D = point_to(midpoint, sub(bindu_point, midpoint), dist(midpoint, D));
+                                D = bindu_point;
+                                // Keep the same edge size
+                                // D = point_to(midpoint, sub(bindu_point, midpoint), dist(midpoint, D));
                             }
 
                             // Draw the second part of shape while D is higher than the ground
