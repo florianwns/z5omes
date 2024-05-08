@@ -1,16 +1,16 @@
 # TODO-LIST
 
-* [ ] Regler le soucis de freezing 3D. cf animate / render
-  
-* [ ] Essayer de decaler l'écriture du label 
-  pour eviter les chevauchement au maximum
-  
+* [x] Implémenter le bindu vertical. c'est génial !! 
+
+
+* [ ] Ajouter différent paramètre en gardant la même méthode de calcul
+
 * [ ] Changer l'aide du kite ratio 
   car ce n'est pas exactement ça
 
 * [ ] Mettre à jour les autres traductions avec les termes manquants
   * [x] Français 
-  * [ ] Espagnol
+  * [ ] Espagnol ... Demande faites à Carlos
 
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
   D'abord essayer de remettre l'assemble semicone pour le beveled
