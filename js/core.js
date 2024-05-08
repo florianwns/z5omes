@@ -1342,11 +1342,7 @@ class Base3DGeometry {
             this._width,
             this._height,
             this._depth,
-        ] = get_boundaries(
-            (this.points && this.points.length > 3)
-                ? this.points
-                : this.edge_points.map(v => v.toArray()) // If no points, try with edge points... tricks for children
-        );
+        ] = get_boundaries(this.points);
     }
 
     compute_meshes() {
@@ -2065,6 +2061,11 @@ class Base3DGeometryGroup extends Base3DGeometry {
 
         // Empty children
         this._children = children || [];
+
+        // Compute point from edge points... tricks for children
+        if (this.num_points === 0) {
+            this.points = this.edge_points.map(v => v.toArray());
+        }
     }
 
     get children() {
@@ -2146,6 +2147,20 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         return new TrapezoidalPrism(
             points || obj.points, obj.label, obj.color, obj.crown_index
         );
+    }
+
+    set_label(label) {
+        this.label = label;
+        for (let i = 0; i < this.children.length; i++) {
+            this.children[i].label = label;
+        }
+    }
+
+    set_color(color) {
+        this.color = color;
+        for (let i = 0; i < this.children.length; i++) {
+            this.children[i].color = color;
+        }
     }
 
     init_children() {
@@ -2267,16 +2282,36 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
 
 
 class Base3DGeometryCrown extends Base3DGeometryGroup {
-    constructor(children, parent) {
+    constructor(parent, linked_faces, children, points, label, color, crown_index) {
         // Call parent constructor
-        super(children, null, parent.label, parent.color, parent.crown_index);
+        super(children, null, label, color, crown_index);
+
         this.parent = parent;
+        this.linked_faces = linked_faces;
     }
 
     static copy(obj, children) {
         return new Base3DGeometryCrown(
-            children || obj.children, obj.parent, obj.points, obj.label, obj.color, obj.crown_index
+            obj.parent, obj.linked_faces,
+            children || obj.children,
+            obj.points, obj.label, obj.color, obj.crown_index
         );
+    }
+
+    set_label(label) {
+        this.label = label;
+        this.parent.label = label;
+        for (let i = 0; i < this.linked_faces.length; i++) {
+            this.linked_faces[i].label = label;
+        }
+    }
+
+    set_color(color) {
+        this.color = color;
+        this.parent.color = color;
+        for (let i = 0; i < this.linked_faces.length; i++) {
+            this.linked_faces[i].color = color;
+        }
     }
 
     compute_label_mesh(font, translation_vec = [0, 0, 0]) {
@@ -2297,7 +2332,7 @@ class Base3DGeometryCrown extends Base3DGeometryGroup {
             children_on_the_ground[i] = item.apply_3D_transformations(this.parent.quaternion, this.parent.translation);
         }
 
-        return Base3DGeometryCrown.copy(this, children_on_the_ground, this.parent);
+        return Base3DGeometryCrown.copy(this, children_on_the_ground);
     }
 }
 

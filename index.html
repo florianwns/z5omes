@@ -166,8 +166,9 @@
                     </div>
                     <div class="input-group input-group-sm mb-3">
                         <button class="btn btn-primary text-start" type="button"
+                                :class="(use_bindu_ratio) ? 'disabled' : 'btn-primary'"
                                 data-bs-toggle="tooltip" :title="i18n('help_hr_param')"
-                                @click="params.use_hr_mode = !params.use_hr_mode">
+                                @click="params.use_hr_mode = (use_bindu_ratio) ? true : !params.use_hr_mode">
                             HR
                         </button>
                         <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
@@ -1920,8 +1921,6 @@
                     _.forIn(timbers_grouped_by_face, group => {
                         // Take the first element of group and put it on the ground
                         const item = group.item.put_on_the_ground();
-                        item.compute_boundaries();
-
                         if (item.width > max_width) max_width = item.width;
 
                         items_put_on_the_ground[item_index] = item;
@@ -2159,7 +2158,6 @@
                     let zome_y_min = Number.MAX_VALUE, zome_y_max = Number.MIN_VALUE;
                     for (let timber_index = 0; timber_index < skeleton.length; timber_index++) {
                         const timber = skeleton[timber_index];
-                        timber.compute_boundaries();
                         if (timber.y_min < zome_y_min) zome_y_min = timber.y_min;
                         if (timber.y_max > zome_y_max) zome_y_max = timber.y_max;
                     }
@@ -3163,7 +3161,6 @@
                 crown_of_framework_timbers_is_valid: true,
                 selected_bindu_ratio: 1,
 
-
                 // Common properties
                 show_splash_screen: true,
                 is_computing: true,
@@ -3220,6 +3217,10 @@
 
                     this.$watch("max_timber_width", () => {
                         this.clamp("timber_width_in_mm", this.params.timber_width_in_mm);
+                    });
+
+                    this.$watch("use_bindu_ratio", () => {
+                        this.params.use_hr_mode = true;
                     });
 
                     this.$watch("max_timber_thickness", () => {
@@ -3358,6 +3359,13 @@
                     const bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     bindu_ratios[this.selected_crown - 1] = this.selected_bindu_ratio;
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
+                },
+                get use_bindu_ratio(){
+                    const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
+                    for (let i = 0; i < current_bindu_ratios.length; i++) {
+                        if(current_bindu_ratios[i] !== 1) return true;
+                    }
+                    return false;
                 },
                 get can_use_bindu_ratio() {
                     return this.num_points_of_selected_crown !== 3
@@ -3830,7 +3838,8 @@
 
                     // Build Outer/Inner faces
                     const outer_faces = new Array(num_zome_faces),
-                        inner_faces = new Array(num_zome_faces);
+                        inner_faces = new Array(num_zome_faces),
+                        skeleton_crowns = new Array(num_zome_faces);
                     const skeleton = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -3934,6 +3943,20 @@
                             // Add Footing params to build prism later with the lowest_vertical_position variable
                             footing_params.push([B, D, F, H]);
                         }
+
+                        // Add skeleton crown
+                        skeleton_crowns[face_index] = new Base3DGeometryCrown(
+                            face,
+                            [
+                                inner_faces[face_index],
+                                outer_faces[face_index],
+                            ],
+                            face.framework_timbers,
+                            null,
+                            face.label,
+                            face.color,
+                            face.crown_index,
+                        );
                     }
 
                     // Build Footing timbers
@@ -3986,17 +4009,16 @@
                     // Group items by hash
                     const obj_3D_to_label = [
                         skeleton,
-                        outer_faces,
-                        inner_faces,
-                        zome_faces_3D,
+                        skeleton_crowns,
                     ];
+
                     const arr_of_obj_groups = new Array(obj_3D_to_label.length);
                     for (let i = 0; i < obj_3D_to_label.length; i++) {
                         const obj_3D = obj_3D_to_label[i];
                         arr_of_obj_groups[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
                             // Update label of each member
                             for (let j = 1; j < group.length; j++) {
-                                group[j].label = group[0].label;
+                                group[j].set_label(group[0].label);
                             }
                             return new ItemHashGroup(group[0], hash, group.length * N);
                         });
@@ -4019,7 +4041,7 @@
 
                         // Paint rotated_colors if you decide to paint spiral colors
                         _.forEach(obj_3D_to_label[i], item => {
-                            item.color = hash_to_color[item.hash];
+                            item.set_color(hash_to_color[item.hash]);
                             if (!rotated_colors.hasOwnProperty(item.color.hex)) {
                                 rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.normalized_slope));
                             }
@@ -4029,23 +4051,27 @@
                     // Unpack variables
                     const [
                         timber_profiles_grouped_by_hash,
-                        outer_faces_grouped_by_hash,
-                        inner_faces_grouped_by_hash,
-                        zome_faces_grouped_by_hash,
+                        timbers_grouped_by_face,
                     ] = arr_of_obj_groups;
 
-                    // Create a fake group of crowns only for display
-                    const timbers_grouped_by_face = [];
-                    _.forIn(zome_faces_grouped_by_hash, group => {
-                        const parent = group.item;
-                        timbers_grouped_by_face.push(
-                            new ItemHashGroup(
-                                new Base3DGeometryCrown(parent.framework_timbers, parent),
-                                group.hash,
-                                group.count
-                            )
+                    const num_faces_grouped_by_hash = timbers_grouped_by_face.length;
+                    const outer_faces_grouped_by_hash = new Array(num_faces_grouped_by_hash);
+                    const inner_faces_grouped_by_hash = new Array(num_faces_grouped_by_hash);
+                    for (let hash_group_index = 0; hash_group_index < num_faces_grouped_by_hash; hash_group_index++) {
+                        const hash_group = timbers_grouped_by_face[hash_group_index];
+
+                        inner_faces_grouped_by_hash[hash_group_index] = new ItemHashGroup(
+                            hash_group.item.linked_faces[0],
+                            hash_group.hash,
+                            hash_group.count,
+                        )
+
+                        outer_faces_grouped_by_hash[hash_group_index] = new ItemHashGroup(
+                            hash_group.item.linked_faces[1],
+                            hash_group.hash,
+                            hash_group.count,
                         );
-                    });
+                    }
 
                     // Build Mandala
                     const flattened_faces = new Array(zome_faces_3D.length);
