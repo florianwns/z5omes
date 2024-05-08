@@ -1433,16 +1433,16 @@ class Polygon3D extends Base3DGeometry {
         return this.part === "bottom";
     }
 
-    set is_bottom_part(value) {
-        this.part = (value === true) ? "bottom" : null;
-    }
-
     get is_top_part() {
         return this.part === "top";
     }
 
-    set is_top_part(value) {
-        this.part = (value === true) ? "top" : null;
+    get is_left_part() {
+        return this.part === "left";
+    }
+
+    get is_right_part() {
+        return this.part === "right";
     }
 
     get plane() {
@@ -1495,17 +1495,33 @@ class Polygon3D extends Base3DGeometry {
 
     compute_points_on_the_ground() {
         // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-        [this._points_on_the_ground, this._quaternion, this._translation] = (this.is_bottom_part)
-            ? put_points_on_the_ground(
-                this.points,
-                this.centroid, this.midpoints[this.num_points - 1], this.points[0],
-                false
-            )
-            : put_points_on_the_ground(
-                this.points,
-                this.centroid, this.points[0], this.points[1],
-                false
-            );
+        let A, B, C;
+        switch(this.part){
+            case "left":
+                [A, B, C] = [this.midpoints[this.num_points - 1], this.points[0], this.points[1]];
+                break;
+            case "right":
+                const D = this.midpoints[this.num_points - 1];
+                [A, B, C] = [
+                    this.points[0],
+                    D,
+                    point_to(D, sub(D, this.points[1]), dist(D, this.points[1]))
+                ];
+                break;
+            case "bottom":
+                [A, B, C] = [this.centroid, this.midpoints[this.num_points - 1], this.points[0]];
+                break;
+            case "top":
+            default:
+                [A, B, C] = [this.centroid, this.points[0], this.points[1]]
+                break;
+        }
+
+        [this._points_on_the_ground, this._quaternion, this._translation] = put_points_on_the_ground(
+            this.points,
+            A, B, C,
+            false
+        );
     }
 
     apply_3D_transformations(quaternion, translation) {

@@ -354,6 +354,7 @@
                         </span>
                         <input class="form-control form-range" :min="min_z_vanishing_point" :max="max_z_vanishing_point"
                                step="1" type="range" x-model.number="params.z_vanishing_point_in_mm"
+                               @dblclick="is_vanishing_centered = true"
                                x-ref="z_vanishing_point_in_mm_slider">
                         <input class="form-control" step="1" type="number"
                                x-model.lazy.number="z_vanishing_point">
@@ -404,6 +405,7 @@
                     RO
                     </span>
                     <input class="form-control form-range" min="0" max="1000" step="1" type="range"
+                           @dblclick="params.roof_overflow_in_mm = 0"
                            x-model.number="params.roof_overflow_in_mm" x-ref="roof_overflow_in_mm_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="roof_overflow">
@@ -3340,13 +3342,21 @@
                     this.selected_face_divisions_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
                     this.num_points_of_selected_crown = this.num_points_per_crown[this.selected_crown - 1] || 4;
                 },
+                get can_use_bindu_ratio() {
+                    return this.num_points_of_selected_crown !== 3
+                        &&  [SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(
+                            this.selected_face_divisions_bitwise_flag
+                        );
+                },
                 init_bindu_ratios() {
                     const face_divisions_by_crowns = str_to_numbers(this.params.face_divisions_by_crowns_str);
                     const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     const bindu_ratios = new Array(this.num_crowns);
                     for (let i = 0; i < this.num_crowns; i++) {
                         const can_use_bindu_ratio = this.num_points_per_crown[i] !== 3
-                            && face_divisions_by_crowns[i] === SVG_HORIZONTAL_BAR_BITWISE_FLAG
+                            && [SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(
+                                face_divisions_by_crowns[i]
+                            );
                         bindu_ratios[i] = (can_use_bindu_ratio) ? current_bindu_ratios[i] || 1 : 1;
                     }
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
@@ -3366,10 +3376,6 @@
                         if(current_bindu_ratios[i] !== 1) return true;
                     }
                     return false;
-                },
-                get can_use_bindu_ratio() {
-                    return this.num_points_of_selected_crown !== 3
-                        && this.selected_face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG;
                 },
                 is_framework_timber_selected(svg_index = 0) {
                     const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
@@ -3643,19 +3649,23 @@
                     vertices.push(p);
                     return vertices.length - 1;
                 },
-                add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags) {
+                add_face(zome_faces_3D, face, face_divisions_bitwise_flags, apply_bindu_ratio = false) {
                     if (apply_bindu_ratio) {
-                        // If we apply the bindu ratio, we split face in two parts (top and bottom)
-                        const faces = face.split(SVG_HORIZONTAL_BAR_BITWISE_FLAG);
-                        faces[0].is_top_part = true;
+                        // If we apply the bindu ratio, we split face in two parts
+                        const face_divisions_bitwise_flag = face_divisions_bitwise_flags[zome_faces_3D.length];
+                        const faces = face.split(face_divisions_bitwise_flag);
+                        const horizontal_split = face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG;
+
+                        faces[0].part = (horizontal_split) ? "top" : "left";
                         zome_faces_3D.push(faces[0]);
 
                         // The bottom face have a new label, flag the bottom part
                         faces[1].label = ALPHABET[zome_faces_3D.length];
-                        faces[1].is_bottom_part = true;
+                        faces[1].part = (horizontal_split) ? "bottom" : "right";
                         zome_faces_3D.push(faces[1]);
 
-                        // Then we insert an empty bitwise flag for the bottom part... not perfect but it's working
+                        // Then we reset bitwise flags... not perfect but it's working
+                        face_divisions_bitwise_flags[zome_faces_3D.length - 2] = 0;
                         face_divisions_bitwise_flags.splice(zome_faces_3D.length - 1, 0, 0);
                     } else {
                         zome_faces_3D.push(face);
@@ -3772,7 +3782,7 @@
                                 // Add only the first piece
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, D, C], face_label, null, crown_index);
-                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags);
+                                    this.add_face(zome_faces_3D, face, face_divisions_bitwise_flags, apply_bindu_ratio);
                                     num_points_per_crown[crown_index] = face.num_points;
                                 }
 
@@ -3794,7 +3804,7 @@
                                 // Add Truncated Kite
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, E, F, C], face_label, null, crown_index);
-                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags);
+                                    this.add_face(zome_faces_3D, face, face_divisions_bitwise_flags, apply_bindu_ratio);
                                     num_points_per_crown[crown_index] = face.num_points;
                                 }
                                 // Add last triangles to close it after if needed
@@ -3825,7 +3835,7 @@
                             // Add triangle to faces
                             face_label = ALPHABET[zome_faces_3D.length]
                             face = new Polygon3D([A, B, C], face_label, null, crown_index);
-                            this.add_face(zome_faces_3D, face, false, face_divisions_bitwise_flags);
+                            this.add_face(zome_faces_3D, face, face_divisions_bitwise_flags);
                             num_points_per_crown[crown_index] = face.num_points;
                             crown_index++;
                         }
@@ -3896,20 +3906,60 @@
                             && ROOF_OVERFLOW_DISTANCE > 0       // if there is not a minimal distance
                             && !face.is_top_part                // and not on top part of divided face (bindu option)
                         ) {
-                            const bottom_index = Math.floor(face.num_points / 2);
-                            const vertical_vec = sub(outer_face.points[bottom_index], outer_face.centroid)
-                            const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
-                            const points_with_overflow = [];
-
-                            for (let i = 0; i < outer_face.num_points; i++) {
-                                const normal_pt = outer_face.points[i];
-                                const pt_with_overflow = add(outer_face.points[i], overflow_delta);
-
-                                if (i < bottom_index) points_with_overflow.push(normal_pt);
-                                if (!(i === 0 && face.num_points === 4)) points_with_overflow.push(pt_with_overflow);
-                                if (i > bottom_index) points_with_overflow.push(normal_pt);
+                            switch(face.part){
+                                case "left":
+                                    {
+                                        const vertical_vec = sub(
+                                            outer_face.points[2],
+                                            outer_face.midpoints[outer_face.num_points - 1],
+                                        );
+                                        const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                                        const points_with_overflow = [];
+                                        for (let i = 0; i < outer_face.num_points; i++) {
+                                            const normal_pt = outer_face.points[i];
+                                            const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+                                            if(i <= 1) points_with_overflow.push(normal_pt)
+                                            if(i >= 1) points_with_overflow.push(pt_with_overflow)
+                                        }
+                                        outer_face.points = points_with_overflow;
+                                    }
+                                    break;
+                                case "right":
+                                    {
+                                        const vertical_vec = sub(
+                                            outer_face.points[0],
+                                            outer_face.midpoints[outer_face.num_points - 1],
+                                        );
+                                        const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                                        const points_with_overflow = [];
+                                        for (let i = 0; i < outer_face.num_points; i++) {
+                                            const normal_pt = outer_face.points[i];
+                                            const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+                                            if(i <= 1) points_with_overflow.push(pt_with_overflow)
+                                            if(i >= 1) points_with_overflow.push(normal_pt)
+                                        }
+                                        outer_face.points = points_with_overflow;
+                                    }
+                                    break;
+                                case "top":
+                                case "bottom":
+                                default:
+                                    {
+                                        const bottom_index = Math.floor(face.num_points / 2);
+                                        const vertical_vec = sub(outer_face.points[bottom_index], outer_face.centroid)
+                                        const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                                        const points_with_overflow = [];
+                                        for (let i = 0; i < outer_face.num_points; i++) {
+                                            const normal_pt = outer_face.points[i];
+                                            const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+                                            if (i < bottom_index) points_with_overflow.push(normal_pt);
+                                            if (!(i === 0 && face.num_points === 4)) points_with_overflow.push(pt_with_overflow);
+                                            if (i > bottom_index) points_with_overflow.push(normal_pt);
+                                        }
+                                        outer_face.points = points_with_overflow;
+                                    }
+                                    break;
                             }
-                            outer_face.points = points_with_overflow;
                         }
 
                         outer_faces[face_index] = outer_face;
