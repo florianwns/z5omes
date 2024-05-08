@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.11b09"/>
+    <link rel="manifest" href="manifest.json?v=1.0.12b01"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.11b09" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.12b01" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -166,8 +166,9 @@
                     </div>
                     <div class="input-group input-group-sm mb-3">
                         <button class="btn btn-primary text-start" type="button"
+                                :class="(use_bindu_ratio) ? 'disabled' : 'btn-primary'"
                                 data-bs-toggle="tooltip" :title="i18n('help_hr_param')"
-                                @click="params.use_hr_mode = !params.use_hr_mode">
+                                @click="params.use_hr_mode = (use_bindu_ratio) ? true : !params.use_hr_mode">
                             HR
                         </button>
                         <input class="form-control form-range" max="1" min="0" step="0.0000001" type="range"
@@ -353,6 +354,7 @@
                         </span>
                         <input class="form-control form-range" :min="min_z_vanishing_point" :max="max_z_vanishing_point"
                                step="1" type="range" x-model.number="params.z_vanishing_point_in_mm"
+                               @dblclick="is_vanishing_centered = true"
                                x-ref="z_vanishing_point_in_mm_slider">
                         <input class="form-control" step="1" type="number"
                                x-model.lazy.number="z_vanishing_point">
@@ -403,6 +405,7 @@
                     RO
                     </span>
                     <input class="form-control form-range" min="0" max="1000" step="1" type="range"
+                           @dblclick="params.roof_overflow_in_mm = 0"
                            x-model.number="params.roof_overflow_in_mm" x-ref="roof_overflow_in_mm_slider">
                     <input class="form-control" step="1" type="number"
                            x-model.lazy.number="roof_overflow">
@@ -425,7 +428,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.11b09</span>
+                              style="font-size: 10px; top:0px">v1.0.12b01</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1458,15 +1461,15 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.11b09"></script>
-<script src="i18n/en.js?v=1.0.11b09"></script>
-<script src="i18n/it.js?v=1.0.11b09"></script>
-<script src="i18n/fr.js?v=1.0.11b09"></script>
-<script src="i18n/pl.js?v=1.0.11b09"></script>
-<script src="i18n/sv.js?v=1.0.11b09"></script>
+<script src="i18n/es.js?v=1.0.12b01"></script>
+<script src="i18n/en.js?v=1.0.12b01"></script>
+<script src="i18n/it.js?v=1.0.12b01"></script>
+<script src="i18n/fr.js?v=1.0.12b01"></script>
+<script src="i18n/pl.js?v=1.0.12b01"></script>
+<script src="i18n/sv.js?v=1.0.12b01"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.11b09"></script>
+<script src="js/core.js?v=1.0.12b01"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1920,8 +1923,6 @@
                     _.forIn(timbers_grouped_by_face, group => {
                         // Take the first element of group and put it on the ground
                         const item = group.item.put_on_the_ground();
-                        item.compute_boundaries();
-
                         if (item.width > max_width) max_width = item.width;
 
                         items_put_on_the_ground[item_index] = item;
@@ -2159,7 +2160,6 @@
                     let zome_y_min = Number.MAX_VALUE, zome_y_max = Number.MIN_VALUE;
                     for (let timber_index = 0; timber_index < skeleton.length; timber_index++) {
                         const timber = skeleton[timber_index];
-                        timber.compute_boundaries();
                         if (timber.y_min < zome_y_min) zome_y_min = timber.y_min;
                         if (timber.y_max > zome_y_max) zome_y_max = timber.y_max;
                     }
@@ -3163,7 +3163,6 @@
                 crown_of_framework_timbers_is_valid: true,
                 selected_bindu_ratio: 1,
 
-
                 // Common properties
                 show_splash_screen: true,
                 is_computing: true,
@@ -3220,6 +3219,10 @@
 
                     this.$watch("max_timber_width", () => {
                         this.clamp("timber_width_in_mm", this.params.timber_width_in_mm);
+                    });
+
+                    this.$watch("use_bindu_ratio", () => {
+                        this.params.use_hr_mode = true;
                     });
 
                     this.$watch("max_timber_thickness", () => {
@@ -3339,13 +3342,21 @@
                     this.selected_face_divisions_bitwise_flag = bitwise_flags[this.selected_crown - 1] || 0;
                     this.num_points_of_selected_crown = this.num_points_per_crown[this.selected_crown - 1] || 4;
                 },
+                get can_use_bindu_ratio() {
+                    return this.num_points_of_selected_crown !== 3
+                        &&  [SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(
+                            this.selected_face_divisions_bitwise_flag
+                        );
+                },
                 init_bindu_ratios() {
                     const face_divisions_by_crowns = str_to_numbers(this.params.face_divisions_by_crowns_str);
                     const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
                     const bindu_ratios = new Array(this.num_crowns);
                     for (let i = 0; i < this.num_crowns; i++) {
                         const can_use_bindu_ratio = this.num_points_per_crown[i] !== 3
-                            && face_divisions_by_crowns[i] === SVG_HORIZONTAL_BAR_BITWISE_FLAG
+                            && [SVG_HORIZONTAL_BAR_BITWISE_FLAG, SVG_VERTICAL_BAR_BITWISE_FLAG].includes(
+                                face_divisions_by_crowns[i]
+                            );
                         bindu_ratios[i] = (can_use_bindu_ratio) ? current_bindu_ratios[i] || 1 : 1;
                     }
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
@@ -3359,9 +3370,12 @@
                     bindu_ratios[this.selected_crown - 1] = this.selected_bindu_ratio;
                     this.params.bindu_ratios_str = numbers_2_str(bindu_ratios);
                 },
-                get can_use_bindu_ratio() {
-                    return this.num_points_of_selected_crown !== 3
-                        && this.selected_face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG;
+                get use_bindu_ratio(){
+                    const current_bindu_ratios = str_to_numbers(this.params.bindu_ratios_str);
+                    for (let i = 0; i < current_bindu_ratios.length; i++) {
+                        if(current_bindu_ratios[i] !== 1) return true;
+                    }
+                    return false;
                 },
                 is_framework_timber_selected(svg_index = 0) {
                     const framework_timber_crown = this.face_divisions_by_crowns[this.selected_crown - 1];
@@ -3635,19 +3649,23 @@
                     vertices.push(p);
                     return vertices.length - 1;
                 },
-                add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags) {
+                add_face(zome_faces_3D, face, face_divisions_bitwise_flags, apply_bindu_ratio = false) {
                     if (apply_bindu_ratio) {
-                        // If we apply the bindu ratio, we split face in two parts (top and bottom)
-                        const faces = face.split(SVG_HORIZONTAL_BAR_BITWISE_FLAG);
-                        faces[0].is_top_part = true;
+                        // If we apply the bindu ratio, we split face in two parts
+                        const face_divisions_bitwise_flag = face_divisions_bitwise_flags[zome_faces_3D.length];
+                        const faces = face.split(face_divisions_bitwise_flag);
+                        const horizontal_split = face_divisions_bitwise_flag === SVG_HORIZONTAL_BAR_BITWISE_FLAG;
+
+                        faces[0].part = (horizontal_split) ? "top" : "left";
                         zome_faces_3D.push(faces[0]);
 
                         // The bottom face have a new label, flag the bottom part
                         faces[1].label = ALPHABET[zome_faces_3D.length];
-                        faces[1].is_bottom_part = true;
+                        faces[1].part = (horizontal_split) ? "bottom" : "right";
                         zome_faces_3D.push(faces[1]);
 
-                        // Then we insert an empty bitwise flag for the bottom part... not perfect but it's working
+                        // Then we reset bitwise flags... not perfect but it's working
+                        face_divisions_bitwise_flags[zome_faces_3D.length - 2] = 0;
                         face_divisions_bitwise_flags.splice(zome_faces_3D.length - 1, 0, 0);
                     } else {
                         zome_faces_3D.push(face);
@@ -3764,7 +3782,7 @@
                                 // Add only the first piece
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, D, C], face_label, null, crown_index);
-                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags);
+                                    this.add_face(zome_faces_3D, face, face_divisions_bitwise_flags, apply_bindu_ratio);
                                     num_points_per_crown[crown_index] = face.num_points;
                                 }
 
@@ -3786,7 +3804,7 @@
                                 // Add Truncated Kite
                                 if (spiral_index === 0) {
                                     face = new Polygon3D([A, B, E, F, C], face_label, null, crown_index);
-                                    this.add_face(zome_faces_3D, face, apply_bindu_ratio, face_divisions_bitwise_flags);
+                                    this.add_face(zome_faces_3D, face, face_divisions_bitwise_flags, apply_bindu_ratio);
                                     num_points_per_crown[crown_index] = face.num_points;
                                 }
                                 // Add last triangles to close it after if needed
@@ -3817,7 +3835,7 @@
                             // Add triangle to faces
                             face_label = ALPHABET[zome_faces_3D.length]
                             face = new Polygon3D([A, B, C], face_label, null, crown_index);
-                            this.add_face(zome_faces_3D, face, false, face_divisions_bitwise_flags);
+                            this.add_face(zome_faces_3D, face, face_divisions_bitwise_flags);
                             num_points_per_crown[crown_index] = face.num_points;
                             crown_index++;
                         }
@@ -3830,7 +3848,8 @@
 
                     // Build Outer/Inner faces
                     const outer_faces = new Array(num_zome_faces),
-                        inner_faces = new Array(num_zome_faces);
+                        inner_faces = new Array(num_zome_faces),
+                        skeleton_crowns = new Array(num_zome_faces);
                     const skeleton = [], vanishing_lines = [];
 
                     // Compute vanishing pt
@@ -3887,20 +3906,60 @@
                             && ROOF_OVERFLOW_DISTANCE > 0       // if there is not a minimal distance
                             && !face.is_top_part                // and not on top part of divided face (bindu option)
                         ) {
-                            const bottom_index = Math.floor(face.num_points / 2);
-                            const vertical_vec = sub(outer_face.points[bottom_index], outer_face.centroid)
-                            const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
-                            const points_with_overflow = [];
-
-                            for (let i = 0; i < outer_face.num_points; i++) {
-                                const normal_pt = outer_face.points[i];
-                                const pt_with_overflow = add(outer_face.points[i], overflow_delta);
-
-                                if (i < bottom_index) points_with_overflow.push(normal_pt);
-                                if (!(i === 0 && face.num_points === 4)) points_with_overflow.push(pt_with_overflow);
-                                if (i > bottom_index) points_with_overflow.push(normal_pt);
+                            switch(face.part){
+                                case "left":
+                                    {
+                                        const vertical_vec = sub(
+                                            outer_face.points[2],
+                                            outer_face.midpoints[outer_face.num_points - 1],
+                                        );
+                                        const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                                        const points_with_overflow = [];
+                                        for (let i = 0; i < outer_face.num_points; i++) {
+                                            const normal_pt = outer_face.points[i];
+                                            const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+                                            if(i <= 1) points_with_overflow.push(normal_pt)
+                                            if(i >= 1) points_with_overflow.push(pt_with_overflow)
+                                        }
+                                        outer_face.points = points_with_overflow;
+                                    }
+                                    break;
+                                case "right":
+                                    {
+                                        const vertical_vec = sub(
+                                            outer_face.points[0],
+                                            outer_face.midpoints[outer_face.num_points - 1],
+                                        );
+                                        const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                                        const points_with_overflow = [];
+                                        for (let i = 0; i < outer_face.num_points; i++) {
+                                            const normal_pt = outer_face.points[i];
+                                            const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+                                            if(i <= 1) points_with_overflow.push(pt_with_overflow)
+                                            if(i >= 1) points_with_overflow.push(normal_pt)
+                                        }
+                                        outer_face.points = points_with_overflow;
+                                    }
+                                    break;
+                                case "top":
+                                case "bottom":
+                                default:
+                                    {
+                                        const bottom_index = Math.floor(face.num_points / 2);
+                                        const vertical_vec = sub(outer_face.points[bottom_index], outer_face.centroid)
+                                        const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
+                                        const points_with_overflow = [];
+                                        for (let i = 0; i < outer_face.num_points; i++) {
+                                            const normal_pt = outer_face.points[i];
+                                            const pt_with_overflow = add(outer_face.points[i], overflow_delta);
+                                            if (i < bottom_index) points_with_overflow.push(normal_pt);
+                                            if (!(i === 0 && face.num_points === 4)) points_with_overflow.push(pt_with_overflow);
+                                            if (i > bottom_index) points_with_overflow.push(normal_pt);
+                                        }
+                                        outer_face.points = points_with_overflow;
+                                    }
+                                    break;
                             }
-                            outer_face.points = points_with_overflow;
                         }
 
                         outer_faces[face_index] = outer_face;
@@ -3934,6 +3993,20 @@
                             // Add Footing params to build prism later with the lowest_vertical_position variable
                             footing_params.push([B, D, F, H]);
                         }
+
+                        // Add skeleton crown
+                        skeleton_crowns[face_index] = new Base3DGeometryCrown(
+                            face,
+                            [
+                                inner_faces[face_index],
+                                outer_faces[face_index],
+                            ],
+                            face.framework_timbers,
+                            null,
+                            face.label,
+                            face.color,
+                            face.crown_index,
+                        );
                     }
 
                     // Build Footing timbers
@@ -3986,17 +4059,16 @@
                     // Group items by hash
                     const obj_3D_to_label = [
                         skeleton,
-                        outer_faces,
-                        inner_faces,
-                        zome_faces_3D,
+                        skeleton_crowns,
                     ];
+
                     const arr_of_obj_groups = new Array(obj_3D_to_label.length);
                     for (let i = 0; i < obj_3D_to_label.length; i++) {
                         const obj_3D = obj_3D_to_label[i];
                         arr_of_obj_groups[i] = _.map(_.groupBy(obj_3D, item => item.hash), (group, hash) => {
                             // Update label of each member
                             for (let j = 1; j < group.length; j++) {
-                                group[j].label = group[0].label;
+                                group[j].set_label(group[0].label);
                             }
                             return new ItemHashGroup(group[0], hash, group.length * N);
                         });
@@ -4019,7 +4091,7 @@
 
                         // Paint rotated_colors if you decide to paint spiral colors
                         _.forEach(obj_3D_to_label[i], item => {
-                            item.color = hash_to_color[item.hash];
+                            item.set_color(hash_to_color[item.hash]);
                             if (!rotated_colors.hasOwnProperty(item.color.hex)) {
                                 rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.normalized_slope));
                             }
@@ -4029,23 +4101,27 @@
                     // Unpack variables
                     const [
                         timber_profiles_grouped_by_hash,
-                        outer_faces_grouped_by_hash,
-                        inner_faces_grouped_by_hash,
-                        zome_faces_grouped_by_hash,
+                        timbers_grouped_by_face,
                     ] = arr_of_obj_groups;
 
-                    // Create a fake group of crowns only for display
-                    const timbers_grouped_by_face = [];
-                    _.forIn(zome_faces_grouped_by_hash, group => {
-                        const parent = group.item;
-                        timbers_grouped_by_face.push(
-                            new ItemHashGroup(
-                                new Base3DGeometryCrown(parent.framework_timbers, parent),
-                                group.hash,
-                                group.count
-                            )
+                    const num_faces_grouped_by_hash = timbers_grouped_by_face.length;
+                    const outer_faces_grouped_by_hash = new Array(num_faces_grouped_by_hash);
+                    const inner_faces_grouped_by_hash = new Array(num_faces_grouped_by_hash);
+                    for (let hash_group_index = 0; hash_group_index < num_faces_grouped_by_hash; hash_group_index++) {
+                        const hash_group = timbers_grouped_by_face[hash_group_index];
+
+                        inner_faces_grouped_by_hash[hash_group_index] = new ItemHashGroup(
+                            hash_group.item.linked_faces[0],
+                            hash_group.hash,
+                            hash_group.count,
+                        )
+
+                        outer_faces_grouped_by_hash[hash_group_index] = new ItemHashGroup(
+                            hash_group.item.linked_faces[1],
+                            hash_group.hash,
+                            hash_group.count,
                         );
-                    });
+                    }
 
                     // Build Mandala
                     const flattened_faces = new Array(zome_faces_3D.length);

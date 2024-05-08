@@ -43,6 +43,7 @@ const I18N_FR = {
         back: "derrière",
         not_allowed: 'Interdit',
         valid: 'Valide',
+        print: 'Imprimer',
 
         // Tooltips
         tooltip_display_help: "Afficher l'aide",

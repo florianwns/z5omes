@@ -1342,11 +1342,7 @@ class Base3DGeometry {
             this._width,
             this._height,
             this._depth,
-        ] = get_boundaries(
-            (this.points && this.points.length > 3)
-                ? this.points
-                : this.edge_points.map(v => v.toArray()) // If no points, try with edge points... tricks for children
-        );
+        ] = get_boundaries(this.points);
     }
 
     compute_meshes() {
@@ -1437,16 +1433,16 @@ class Polygon3D extends Base3DGeometry {
         return this.part === "bottom";
     }
 
-    set is_bottom_part(value) {
-        this.part = (value === true) ? "bottom" : null;
-    }
-
     get is_top_part() {
         return this.part === "top";
     }
 
-    set is_top_part(value) {
-        this.part = (value === true) ? "top" : null;
+    get is_left_part() {
+        return this.part === "left";
+    }
+
+    get is_right_part() {
+        return this.part === "right";
     }
 
     get plane() {
@@ -1499,17 +1495,33 @@ class Polygon3D extends Base3DGeometry {
 
     compute_points_on_the_ground() {
         // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
-        [this._points_on_the_ground, this._quaternion, this._translation] = (this.is_bottom_part)
-            ? put_points_on_the_ground(
-                this.points,
-                this.centroid, this.midpoints[this.num_points - 1], this.points[0],
-                false
-            )
-            : put_points_on_the_ground(
-                this.points,
-                this.centroid, this.points[0], this.points[1],
-                false
-            );
+        let A, B, C;
+        switch(this.part){
+            case "left":
+                [A, B, C] = [this.midpoints[this.num_points - 1], this.points[0], this.points[1]];
+                break;
+            case "right":
+                const D = this.midpoints[this.num_points - 1];
+                [A, B, C] = [
+                    this.points[0],
+                    D,
+                    point_to(D, sub(D, this.points[1]), dist(D, this.points[1]))
+                ];
+                break;
+            case "bottom":
+                [A, B, C] = [this.centroid, this.midpoints[this.num_points - 1], this.points[0]];
+                break;
+            case "top":
+            default:
+                [A, B, C] = [this.centroid, this.points[0], this.points[1]]
+                break;
+        }
+
+        [this._points_on_the_ground, this._quaternion, this._translation] = put_points_on_the_ground(
+            this.points,
+            A, B, C,
+            false
+        );
     }
 
     apply_3D_transformations(quaternion, translation) {
@@ -2065,6 +2077,11 @@ class Base3DGeometryGroup extends Base3DGeometry {
 
         // Empty children
         this._children = children || [];
+
+        // Compute point from edge points... tricks for children
+        if (this.num_points === 0) {
+            this.points = this.edge_points.map(v => v.toArray());
+        }
     }
 
     get children() {
@@ -2146,6 +2163,20 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         return new TrapezoidalPrism(
             points || obj.points, obj.label, obj.color, obj.crown_index
         );
+    }
+
+    set_label(label) {
+        this.label = label;
+        for (let i = 0; i < this.children.length; i++) {
+            this.children[i].label = label;
+        }
+    }
+
+    set_color(color) {
+        this.color = color;
+        for (let i = 0; i < this.children.length; i++) {
+            this.children[i].color = color;
+        }
     }
 
     init_children() {
@@ -2267,16 +2298,36 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
 
 
 class Base3DGeometryCrown extends Base3DGeometryGroup {
-    constructor(children, parent) {
+    constructor(parent, linked_faces, children, points, label, color, crown_index) {
         // Call parent constructor
-        super(children, null, parent.label, parent.color, parent.crown_index);
+        super(children, null, label, color, crown_index);
+
         this.parent = parent;
+        this.linked_faces = linked_faces;
     }
 
     static copy(obj, children) {
         return new Base3DGeometryCrown(
-            children || obj.children, obj.parent, obj.points, obj.label, obj.color, obj.crown_index
+            obj.parent, obj.linked_faces,
+            children || obj.children,
+            obj.points, obj.label, obj.color, obj.crown_index
         );
+    }
+
+    set_label(label) {
+        this.label = label;
+        this.parent.label = label;
+        for (let i = 0; i < this.linked_faces.length; i++) {
+            this.linked_faces[i].label = label;
+        }
+    }
+
+    set_color(color) {
+        this.color = color;
+        this.parent.color = color;
+        for (let i = 0; i < this.linked_faces.length; i++) {
+            this.linked_faces[i].color = color;
+        }
     }
 
     compute_label_mesh(font, translation_vec = [0, 0, 0]) {
@@ -2297,7 +2348,7 @@ class Base3DGeometryCrown extends Base3DGeometryGroup {
             children_on_the_ground[i] = item.apply_3D_transformations(this.parent.quaternion, this.parent.translation);
         }
 
-        return Base3DGeometryCrown.copy(this, children_on_the_ground, this.parent);
+        return Base3DGeometryCrown.copy(this, children_on_the_ground);
     }
 }
 
