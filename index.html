@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.12b03"/>
+    <link rel="manifest" href="manifest.json?v=1.0.12b04"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.12b03" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.12b04" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -427,7 +427,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.12b03</span>
+                              style="font-size: 10px; top:0px">v1.0.12b04</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -545,7 +545,6 @@
                                                     x-text="i18n('inner_faces_on_the_ground')"></option>
                                             <option value="outer_faces_grouped_by_hash"
                                                     x-text="i18n('outer_faces_on_the_ground')"></option>
-
                                             <option value="flattened_faces"
                                                     x-text="i18n('flattened_faces')"></option>
                                         </select>
@@ -1460,15 +1459,15 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.12b03"></script>
-<script src="i18n/en.js?v=1.0.12b03"></script>
-<script src="i18n/it.js?v=1.0.12b03"></script>
-<script src="i18n/fr.js?v=1.0.12b03"></script>
-<script src="i18n/pl.js?v=1.0.12b03"></script>
-<script src="i18n/sv.js?v=1.0.12b03"></script>
+<script src="i18n/es.js?v=1.0.12b04"></script>
+<script src="i18n/en.js?v=1.0.12b04"></script>
+<script src="i18n/it.js?v=1.0.12b04"></script>
+<script src="i18n/fr.js?v=1.0.12b04"></script>
+<script src="i18n/pl.js?v=1.0.12b04"></script>
+<script src="i18n/sv.js?v=1.0.12b04"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.12b03"></script>
+<script src="js/core.js?v=1.0.12b04"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -2435,7 +2434,11 @@
 
                     // For each color, rotate piece around the origin
                     const flattened_zome = [], O = [0, 0, 0];
-                    const incr_angle = flattened_faces[0].angles[0];
+                    const first_face = flattened_faces[0];
+                    const incr_angle = first_face.is_left_part
+                        ? first_face.angles[0] * 2
+                        : first_face.angles[0];
+
                     for (let i = 0, rotation_angle = 0; i < ZOME.num_spirals; i++, rotation_angle += incr_angle) {
                         _.forEach(flattened_faces, (face) => {
                             flattened_zome.push(
