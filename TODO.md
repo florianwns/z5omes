@@ -1,8 +1,5 @@
 # TODO-LIST
 
-* [x] Implémenter le bindu vertical. c'est génial !! 
-
-
 * [ ] Ajouter différent paramètre en gardant la même méthode de calcul
 
 * [ ] Changer l'aide du kite ratio 
