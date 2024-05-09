@@ -3915,16 +3915,17 @@
                                     break;
                                 case "right": {
                                     const vertical_vec = sub(
-                                        outer_face.points[0],
-                                        outer_face.midpoints[outer_face.num_points - 1],
+                                        outer_face.points[1],
+                                        outer_face.midpoints[0],
                                     );
                                     const overflow_delta = point_to([0, 0, 0], vertical_vec, ROOF_OVERFLOW_DISTANCE);
                                     const points_with_overflow = [];
                                     for (let i = 0; i < outer_face.num_points; i++) {
                                         const normal_pt = outer_face.points[i];
                                         const pt_with_overflow = add(outer_face.points[i], overflow_delta);
-                                        if (i <= 1) points_with_overflow.push(pt_with_overflow)
-                                        if (i >= 1) points_with_overflow.push(normal_pt)
+                                        if (i < 1) points_with_overflow.push(normal_pt)
+                                        if (i >= 1) points_with_overflow.push(pt_with_overflow)
+                                        if (i > 1) points_with_overflow.push(normal_pt)
                                     }
                                     outer_face.points = points_with_overflow;
                                 }
