@@ -545,7 +545,6 @@
                                                     x-text="i18n('inner_faces_on_the_ground')"></option>
                                             <option value="outer_faces_grouped_by_hash"
                                                     x-text="i18n('outer_faces_on_the_ground')"></option>
-
                                             <option value="flattened_faces"
                                                     x-text="i18n('flattened_faces')"></option>
                                         </select>
@@ -2435,7 +2434,11 @@
 
                     // For each color, rotate piece around the origin
                     const flattened_zome = [], O = [0, 0, 0];
-                    const incr_angle = flattened_faces[0].angles[0];
+                    const first_face = flattened_faces[0];
+                    const incr_angle = first_face.is_left_part
+                        ? first_face.angles[0] * 2
+                        : first_face.angles[0];
+
                     for (let i = 0, rotation_angle = 0; i < ZOME.num_spirals; i++, rotation_angle += incr_angle) {
                         _.forEach(flattened_faces, (face) => {
                             flattened_zome.push(
