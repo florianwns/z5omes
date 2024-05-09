@@ -1496,7 +1496,7 @@ class Polygon3D extends Base3DGeometry {
     compute_points_on_the_ground() {
         // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
         let A, B, C;
-        switch(this.part){
+        switch (this.part) {
             case "left":
                 [A, B, C] = [this.midpoints[this.num_points - 1], this.points[0], this.points[1]];
                 break;
