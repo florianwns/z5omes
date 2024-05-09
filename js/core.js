@@ -1501,11 +1501,11 @@ class Polygon3D extends Base3DGeometry {
                 [A, B, C] = [this.midpoints[this.num_points - 1], this.points[0], this.points[1]];
                 break;
             case "right":
-                const D = this.midpoints[this.num_points - 1];
+                const D = this.midpoints[0];
                 [A, B, C] = [
-                    this.points[0],
                     D,
-                    point_to(D, sub(D, this.points[1]), dist(D, this.points[1]))
+                    this.points[0],
+                    point_to(D, sub(D, this.points[2]), dist(D, this.points[2]))
                 ];
                 break;
             case "bottom":
@@ -1882,18 +1882,18 @@ class Polygon3D extends Base3DGeometry {
                     midpoint = get_midpoint(this.points[1], this.points[2]);
                     return [
                         Polygon3D.copy(this, [this.points[0], this.points[1], midpoint]),
-                        Polygon3D.copy(this, [midpoint, this.points[2], this.points[0]]),
+                        Polygon3D.copy(this, [this.points[0], midpoint, this.points[2]]),
                     ];
                 case 4:
                     return [
                         Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2]]),
-                        Polygon3D.copy(this, [this.points[2], this.points[3], this.points[0]]),
+                        Polygon3D.copy(this, [this.points[0], this.points[2], this.points[3]]),
                     ];
                 case 5:
                     midpoint = get_midpoint(this.points[2], this.points[3]);
                     return [
                         Polygon3D.copy(this, [this.points[0], this.points[1], this.points[2], midpoint]),
-                        Polygon3D.copy(this, [midpoint, this.points[3], this.points[4], this.points[0]]),
+                        Polygon3D.copy(this, [this.points[0], midpoint, this.points[3], this.points[4]]),
                     ];
             }
         }
