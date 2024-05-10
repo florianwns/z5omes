@@ -2166,14 +2166,8 @@
                 process() {
                     const skeleton = ZOME.skeleton;
 
-                    // Compute Zome Height
-                    let zome_y_min = Number.MAX_VALUE, zome_y_max = Number.MIN_VALUE;
-                    for (let timber_index = 0; timber_index < skeleton.length; timber_index++) {
-                        const timber = skeleton[timber_index];
-                        if (timber.y_min < zome_y_min) zome_y_min = timber.y_min;
-                        if (timber.y_max > zome_y_max) zome_y_max = timber.y_max;
-                    }
-                    this.actual_zome_height = humanize_distance(zome_y_max - zome_y_min);
+                    // Get Zome Height
+                    this.actual_zome_height = humanize_distance(ZOME.height);
 
                     let max_timber_length = Number.MIN_VALUE,
                         min_timber_length = Number.MAX_VALUE,
@@ -2798,9 +2792,7 @@
                         }
                     }
 
-                    const bounding_box = new THREE.Box3();
-                    bounding_box.setFromObject(zome_meshes);
-                    const delta_y = bounding_box.min.y;
+                    const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
 
                     // Add zome reflection
                     if(this.clone_and_rotate_items && this.add_zome_reflection){
@@ -2969,11 +2961,7 @@
                         }
                     }
 
-                    const bounding_box = this.bounding_box;
-                    let delta_y = 0;
-                    if(bounding_box instanceof THREE.Box3){
-                        delta_y = bounding_box.min.y;
-                    }
+                    const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
 
                     // Add zome reflection
                     if(this.clone_and_rotate_items && this.add_zome_reflection){
@@ -4237,9 +4225,19 @@
                         flattened_faces[face_index] = Polygon3D.copy(face, flattened_points);
                     }
 
+                    // Compute Zome Height
+                    let zome_y_min = Number.MAX_VALUE, zome_y_max = Number.MIN_VALUE;
+                    for (let timber_index = 0; timber_index < skeleton.length; timber_index++) {
+                        const timber = skeleton[timber_index];
+                        if (timber.y_min < zome_y_min) zome_y_min = timber.y_min;
+                        if (timber.y_max > zome_y_max) zome_y_max = timber.y_max;
+                    }
+
                     // Save Zome and dispatch it
                     ZOME = new Zome({
                         num_spirals: N,
+                        y_min: zome_y_min,
+                        y_max: zome_y_max,
 
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
