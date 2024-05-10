@@ -71,6 +71,7 @@ const I18N_FR = {
         tooltip_increase_spiral_rotations: "Augmenter les rotations de spirales",
         tooltip_add_floor: "Ajouter le sol",
         tooltip_draw_vanishing_lines: "Dessiner les lignes de fuite",
+        tooltip_add_zome_reflection: "Ajouter le reflet du zome",
         tooltip_draw_axes: "Dessiner les axes 3D",
         tooltip_draw_labels: "Dessiner les étiquettes",
         tooltip_spin: "Rotation on/off",

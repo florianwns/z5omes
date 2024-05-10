@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.12b04"/>
+    <link rel="manifest" href="manifest.json?v=1.0.12b05"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.12b04" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.12b05" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -262,10 +262,10 @@
                     ZH
                     </span>
                     <input class="form-control form-range" min="100" max="10000" step="10" type="range"
-                           x-model.number="params.zome_height_before_generating_timbers_in_mm"
-                           x-ref="zome_height_before_generating_timbers_in_mm_slider">
+                           x-model.number="params.zome_height_in_mm"
+                           x-ref="zome_height_in_mm_slider">
                     <input class="form-control" step="1" type="number"
-                           x-model.lazy.number="zome_height_before_generating_timbers">
+                           x-model.lazy.number="zome_height">
                 </div>
 
                 <!-- Timber width -->
@@ -427,7 +427,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.12b04</span>
+                              style="font-size: 10px; top:0px">v1.0.12b05</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -626,6 +626,18 @@
                                                     data-bs-toggle="tooltip"
                                                     :title="i18n('tooltip_inversion_Y_Z_axes')">
                                                 <small>Y⬄Z</small>
+                                            </button>
+
+                                            <!-- Zome reflection -->
+                                            <button x-show="clone_and_rotate_items"
+                                                    class="btn px-0 position-relative btn-primary"
+                                                    @click="add_zome_reflection = !add_zome_reflection"
+                                                    :class="(add_zome_reflection) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip"
+                                                    :title="i18n('tooltip_add_zome_reflection')">
+                                                <i class="fa fa-caret-up position-absolute top-0 start-50 translate-middle-x"></i>
+                                                <i class="fa fa-caret-down position-absolute bottom-0 start-50 translate-middle-x"></i>
+                                                <i class="fa fa-horizontal-rule"></i>
                                             </button>
 
                                             <!-- Spin on/off -->
@@ -1459,15 +1471,15 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.12b04"></script>
-<script src="i18n/en.js?v=1.0.12b04"></script>
-<script src="i18n/it.js?v=1.0.12b04"></script>
-<script src="i18n/fr.js?v=1.0.12b04"></script>
-<script src="i18n/pl.js?v=1.0.12b04"></script>
-<script src="i18n/sv.js?v=1.0.12b04"></script>
+<script src="i18n/es.js?v=1.0.12b05"></script>
+<script src="i18n/en.js?v=1.0.12b05"></script>
+<script src="i18n/it.js?v=1.0.12b05"></script>
+<script src="i18n/fr.js?v=1.0.12b05"></script>
+<script src="i18n/pl.js?v=1.0.12b05"></script>
+<script src="i18n/sv.js?v=1.0.12b05"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.12b04"></script>
+<script src="js/core.js?v=1.0.12b05"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -2548,6 +2560,7 @@
                 show_add_floor_btn: false,
 
                 inverse_Y_Z_axes: false,
+                add_zome_reflection: false,
 
                 is_fullscreen: false,
                 __auto_size: null,
@@ -2574,7 +2587,7 @@
                     this.num_spirals_to_display = this.params.num_spirals;
                     this.last_num_spirals = this.params.num_spirals;
 
-                    ["num_spirals_to_display", "inverse_Y_Z_axes", "add_floor", "type_of_3D_objects"].forEach(
+                    ["num_spirals_to_display", "add_zome_reflection", "inverse_Y_Z_axes", "add_floor", "type_of_3D_objects"].forEach(
                         (key) => this.$watch(key, () => {
                             this.__process();
                         })
@@ -2709,7 +2722,8 @@
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
-                    const str = exporter.parse(meshes.zome);
+                    const obj_to_export = this.compute_obj_to_export();
+                    const str = exporter.parse(obj_to_export);
                     const blob = new Blob([str], {type: 'text/plain'});
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
@@ -2760,9 +2774,18 @@
                         // Same as above but for spirals with geometry cloning for more efficiency
                         for (let i = 0; i < items_3D.length; i++) {
                             const item = items_3D[i];
-                            zome_meshes.add(
-                                clone_3D_obj(item.mesh)
-                            );
+                            for (let spiral_index = 0; spiral_index < ZOME.num_spirals; spiral_index++) {
+                                const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+
+                                if (spiral_index < this.num_spirals_to_display) {
+                                    const rotated_mesh = clone_3D_obj(item.mesh);
+                                    rotated_mesh.traverse(o => {
+                                        o.name = `${o.name}_${spiral_index + 1}`;
+                                    });
+                                    rotated_mesh.rotateY(rotation_angle);
+                                    zome_meshes.add(rotated_mesh);
+                                }
+                            }
 
                             if (this.draw_labels) {
                                 item.compute_label_mesh(font);
@@ -2772,33 +2795,44 @@
                                     );
                                 }
                             }
-
-                            if (this.clone_and_rotate_items) {
-                                for (let spiral_index = 1; spiral_index < ZOME.num_spirals; spiral_index++) {
-                                    const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
-
-                                    if (spiral_index < this.num_spirals_to_display) {
-                                        const rotated_mesh = clone_3D_obj(item.mesh);
-                                        rotated_mesh.rotateY(rotation_angle);
-                                        zome_meshes.add(rotated_mesh);
-                                    }
-                                }
-                            }
                         }
-
-                        let floor_3D = this.get_floor_3D();
-                        if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                            zome_meshes.add(floor_3D.mesh.clone());
-                        }
-
                     }
 
+                    const bounding_box = new THREE.Box3();
+                    bounding_box.setFromObject(zome_meshes);
+                    const delta_y = bounding_box.min.y;
+
+                    // Add zome reflection
+                    if(this.clone_and_rotate_items && this.add_zome_reflection){
+                        const mirror_vec = new THREE.Vector3(1, -1, 1);
+                        const num_children = zome_meshes.children.length;
+                        for(let i = 0; i < num_children; i++){
+                            const cloned_child = clone_3D_obj(zome_meshes.children[i]);
+                            cloned_child.scale.multiply(mirror_vec);
+                            cloned_child.translateY(2 * delta_y);
+                            cloned_child.traverse(o => {
+                                o.name = `${o.name}_reflection`;
+                            });
+                            zome_meshes.add(cloned_child);
+                        }
+                    }
+
+                    let floor_3D = this.get_floor_3D();
+                    if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
+                        zome_meshes.add(clone_3D_obj(floor_3D.mesh));
+                    }
                     obj_to_export.add(zome_meshes);
                     obj_to_export.add(label_meshes);
 
+                    // Inverse Y and Z axes
                     if (this.inverse_Y_Z_axes) {
+                        obj_to_export.translateZ(-delta_y)
                         obj_to_export.rotateX(TAU_Q);
+                        obj_to_export.rotateY(-TAU_Q);
+                    }else{
+                        obj_to_export.translateY(-delta_y)
                     }
+                    obj_to_export.updateMatrixWorld(true);
                     return obj_to_export;
                 },
 
@@ -2828,7 +2862,6 @@
                     meshes.labels = new THREE.Group();
                     meshes.labels.name = "labels";
                 },
-
 
                 process() {
                     this.clear();
@@ -2899,13 +2932,13 @@
                         }
                     }
 
-
                     // Build mesh and edge geometries
                     const mesh_geometry = new THREE.BufferGeometry().setFromPoints(mesh_points);
                     mesh_geometry.setAttribute('color', new THREE.Float32BufferAttribute(mesh_colors, 3));
                     mesh_geometry.computeVertexNormals()
                     let mesh = new THREE.Mesh(mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
-                    mesh.name = 'Item 1';
+                    const item_type = this.clone_and_rotate_items ? 'Spiral' : 'Item';
+                    mesh.name = `${item_type} 1`;
                     meshes.zome.add(mesh)
 
                     const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points);
@@ -2923,7 +2956,7 @@
                                 rotated_mesh_geometry.rotateY(angle);
 
                                 const rotated_mesh = new THREE.Mesh(rotated_mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
-                                rotated_mesh.name = `Item ${spiral_index + 1}`;
+                                rotated_mesh.name = `${item_type} ${spiral_index + 1}`;
                                 meshes.zome.add(rotated_mesh)
                             }
 
@@ -2936,6 +2969,26 @@
                         }
                     }
 
+                    const bounding_box = this.bounding_box;
+                    let delta_y = 0;
+                    if(bounding_box instanceof THREE.Box3){
+                        delta_y = bounding_box.min.y;
+                    }
+
+                    // Add zome reflection
+                    if(this.clone_and_rotate_items && this.add_zome_reflection){
+                        const mirror_vec = new THREE.Vector3(1, -1, 1);
+                        _.forEach(meshes, (mesh, name) => {
+                            // Don't clone axes
+                            if (["axes", "vanishing_lines", "labels"].includes(name)) return;
+
+                            const cloned_mesh = clone_3D_obj(mesh);
+                            cloned_mesh.scale.multiply(mirror_vec);
+                            cloned_mesh.translateY(2 * delta_y)
+                            mesh.add(cloned_mesh);
+                        });
+                    }
+
                     // Add floor
                     let floor_3D = this.get_floor_3D()
                     this.show_add_floor_btn = floor_3D != null;
@@ -2945,12 +2998,17 @@
                     }
 
                     // Inverse Y and Z axes
-                    if (this.inverse_Y_Z_axes) {
-                        _.forEach(meshes, (value, key) => {
-                            if (key == "axes") return;
-                            value.rotateX(TAU_Q);
-                        });
-                    }
+                    _.forEach(meshes, (mesh, name) => {
+                        // Don't rotate axes
+                        if (name == "axes") return;
+                        if (this.inverse_Y_Z_axes) {
+                            mesh.translateZ(-delta_y)
+                            mesh.rotateX(TAU_Q);
+                            mesh.rotateY(-TAU_Q);
+                        }else{
+                            mesh.translateY(-delta_y)
+                        }
+                    });
 
                     // Add the final obj mesh to the scene
                     scene.add(meshes.zome);
@@ -2969,21 +3027,21 @@
                 get_floor_3D() {
                     switch (this.type_of_3D_objects) {
                         case "inner_faces":
+                        case "skeleton":
                             return ZOME.inner_floor;
                         case "outer_faces":
-                        case "skeleton":
                             return ZOME.outer_floor;
                     }
                     return null
                 },
                 get bounding_box() {
                     // Get bounding box of zome - this will be used to setup controls and camera
-                    let boundingBox = null;
+                    let bounding_box = null;
                     if (meshes.zome instanceof THREE.Group) {
-                        boundingBox = new THREE.Box3();
-                        boundingBox.setFromObject(meshes.zome);
+                        bounding_box = new THREE.Box3();
+                        bounding_box.setFromObject(meshes.zome);
                     }
-                    return boundingBox;
+                    return bounding_box;
                 },
                 get zome_size() {
                     return (this.bounding_box instanceof THREE.Box3)
@@ -3130,7 +3188,7 @@
 
                     // Framework Parameters
                     measuring_unit: "cm",                               // Measuring unit by default is cm
-                    zome_height_before_generating_timbers_in_mm: WORLD_HEIGHT,    // Height in mm
+                    zome_height_in_mm: WORLD_HEIGHT,    // Height in mm
                     timber_width_in_mm: 60,                             // Timber width in mm
                     timber_thickness_in_mm: 40,                         // Timber thickness in mm
                     z_vanishing_point_in_mm: null,
@@ -3287,11 +3345,11 @@
 
                     // Refresh data related to the height
                     // if you change the zome height
-                    this.$watch("params.zome_height_before_generating_timbers_in_mm", () => {
+                    this.$watch("params.zome_height_in_mm", () => {
                         this.clamp("z_vanishing_point_in_mm", this.z_vanishing_point_in_mm);
                     });
 
-                    _.forEach(["height_ratio", "zome_height_before_generating_timbers_in_mm"], key => {
+                    _.forEach(["height_ratio", "zome_height_in_mm"], key => {
                         this.$watch(`params.${key}`, () => {
                             this.clamp("z_vanishing_point_in_mm", this.zome_centroid);
                         });
@@ -3481,11 +3539,11 @@
                         this.params.kite_ratio = 1
                     }
                 },
-                get zome_height_before_generating_timbers() {
-                    return to_decimal(from_mm(this.params.zome_height_before_generating_timbers_in_mm, this.params.measuring_unit));
+                get zome_height() {
+                    return to_decimal(from_mm(this.params.zome_height_in_mm, this.params.measuring_unit));
                 },
-                set zome_height_before_generating_timbers(value) {
-                    this.clamp("zome_height_before_generating_timbers_in_mm", to_mm(value, this.params.measuring_unit));
+                set zome_height(value) {
+                    this.clamp("zome_height_in_mm", to_mm(value, this.params.measuring_unit));
                 },
                 get timber_width() {
                     return to_decimal(from_mm(this.params.timber_width_in_mm, this.params.measuring_unit));
@@ -3519,13 +3577,13 @@
                 },
                 get zome_centroid() {
                     // vertical center of entire zome
-                    return Math.max(0, this.params.zome_height_before_generating_timbers_in_mm - this.params.zome_height_before_generating_timbers_in_mm / this.params.height_ratio / 2);
+                    return this.params.zome_height_in_mm - this.zome_total_height_in_mm / 2;
                 },
                 get min_z_vanishing_point() {
-                    return (this.params.height_ratio > 0.75) ? this.params.zome_height_before_generating_timbers_in_mm * 0.25 : 0;
+                    return this.params.zome_height_in_mm - this.zome_total_height_in_mm * 0.95;
                 },
                 get max_z_vanishing_point() {
-                    return this.params.zome_height_before_generating_timbers_in_mm * 0.75;
+                    return this.params.zome_height_in_mm - this.zome_total_height_in_mm * 0.05;
                 },
                 get is_vanishing_centered() {
                     return to_decimal(this.params.z_vanishing_point_in_mm) === to_decimal(this.zome_centroid);
@@ -3535,15 +3593,15 @@
                         this.params.z_vanishing_point_in_mm = this.zome_centroid;
                     }
                 },
-                get total_height() {
-                    return this.params.zome_height_before_generating_timbers_in_mm / this.params.height_ratio;
+                get zome_total_height_in_mm() {
+                    return this.params.zome_height_in_mm / this.params.height_ratio;
                 },
                 get k_sum() {
                     return this.is_rhombus ? this.params.num_spirals : (1 - Math.pow(this.params.kite_ratio, this.params.num_spirals)) / (1 - this.params.kite_ratio);
                 },
                 // First crown properties
                 get first_edge() {
-                    return this.total_height / (this.k_sum * Math.cos(deg2rad(this.params.theta_deg)));
+                    return this.zome_total_height_in_mm / (this.k_sum * Math.cos(deg2rad(this.params.theta_deg)));
                 },
                 get first_crown_radius() {
                     return this.first_edge * Math.sin(deg2rad(this.params.theta_deg));
@@ -3672,7 +3730,7 @@
                     // Config Parameters
                     const N = this.params.num_spirals;
                     const K = this.params.kite_ratio;
-                    const ZOME_HEIGHT_BEFORE_GENERATING_TIMBERS = this.params.zome_height_before_generating_timbers_in_mm;
+                    const ZOME_HEIGHT_BEFORE_GENERATING_TIMBERS = this.params.zome_height_in_mm;
                     const TIMBER_WIDTH = this.params.timber_width_in_mm;
                     const TIMBER_THICKNESS = this.params.timber_thickness_in_mm;
 
@@ -3685,7 +3743,7 @@
 
                     // Constants
                     const M = N - 1;
-                    const TOTAL_HEIGHT = this.total_height;
+                    const TOTAL_HEIGHT = this.zome_total_height_in_mm;
 
                     // First Point at the top
                     this.add_vertex(vertices, [0, ZOME_HEIGHT_BEFORE_GENERATING_TIMBERS, 0]);

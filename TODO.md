@@ -1,5 +1,9 @@
 # TODO-LIST
 
+* [x] Remettre le Zome au niveau zero avec le bouding box
+
+* [x] Ajouter un option de mirroir
+
 * [ ] Ajouter différent paramètre en gardant la même méthode de calcul
 
 * [ ] Changer l'aide du kite ratio 

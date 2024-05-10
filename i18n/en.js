@@ -71,6 +71,7 @@ const I18N_EN = {
         tooltip_increase_spiral_rotations: "Increase spiral rotations",
         tooltip_add_floor: "Add floor",
         tooltip_draw_vanishing_lines: "Draw vanishing lines",
+        tooltip_add_zome_reflection: "Add the zome reflection",
         tooltip_draw_axes: "Draw 3D axes",
         tooltip_draw_labels: "Draw labels",
         tooltip_spin: "Spin on/off",
