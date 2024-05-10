@@ -2392,6 +2392,8 @@ class Zome {
     constructor(
         {
             num_spirals = null,
+            y_min = null,
+            y_max = null,
 
             rotation_angles = null,
             rotated_colors = null,
@@ -2413,6 +2415,10 @@ class Zome {
         }
     ) {
         this.num_spirals = num_spirals || 0;
+
+        this.y_min = y_min || 0;
+        this.y_max = y_max || 0;
+        this.height = this.y_max - this.y_min;
 
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
