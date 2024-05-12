@@ -28,7 +28,7 @@ const I18N_ES = {
         face: "Cara",
         spirals: 'Espirales',
         flattened_zome: "Zome aplanado (Flattened)",
-        flattened_faces: "Caras aplandas (Flattened)",
+        flattened_faces: "Caras aplanadas (Flattened)",
         zome_made_with: "Este Zome fue echo con",
         framework_customizer: "Personalizador de estructura",
         dihedral_angle: "Ángulo Dihedral",
@@ -60,7 +60,7 @@ const I18N_ES = {
         tooltip_export_2_format: "Exportar al formato $1",
         tooltip_draw_face_colors: "Dibujar colores de cara",
         tooltip_draw_face_centroids: "Dibujar centroides de cara",
-        tooltip_split_drawing: "Dividir el dibujo en varias hojas A4 para exportalo a PDF",
+        tooltip_split_drawing: "Dividir el dibujo en varias hojas A4 para exportarlo a PDF",
         tooltip_customize_framework: "Personalizar estructura",
         tooltip_show_keyboard_shortcuts: "Mostrar atajos de teclado",
         tooltip_download_3D_view_in_png_format: "Capturar vista 3D y exportar a PNG",
@@ -113,7 +113,7 @@ const I18N_ES = {
         help_vp_param: "Altura del punto de convergencia (utilizado para construir métodos 'GoodKarma' y 'Beveled')",
         help_zc_param: "Colocar el punto de convergencia en el centroide de todo el zome",
         help_ft_param: "Agregar base según ancho de vigas (madera)",
-        help_ro_param: "Derbordamiento del techo",
+        help_ro_param: "Desbordamiento del techo",
 
         // Measurements table
         measurements: "Mediciones",
