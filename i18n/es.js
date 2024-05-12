@@ -118,7 +118,7 @@ const I18N_ES = {
         // Measurements table
         measurements: "Mediciones",
         id: "Id",
-        quantity: "Catidad",
+        quantity: "Cantidad",
         width: "Ancho",
         height: "Altura",
         edges: "Bordes",
