@@ -4112,7 +4112,6 @@
                     }
 
                     // 🎨 Add colors to items and build rotated colors
-                    let rotated_colors = {};
                     _.forIn(arr_of_obj_groups, (obj_groups, i) => {
                         // Get hash group
                         const hashes = obj_groups.map(group => group.hash);
@@ -4126,14 +4125,19 @@
                             }
                         });
 
-                        // Paint rotated_colors if you decide to paint spiral colors
                         _.forEach(obj_3D_to_label[i], item => {
                             item.set_color(hash_to_color[item.hash]);
-                            if (!rotated_colors.hasOwnProperty(item.color.hex)) {
-                                rotated_colors[item.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, item.normalized_slope));
-                            }
                         });
                     });
+
+                    // Compute rotated_colors if you decide to paint spiral colors in the 2D drawing
+                    let rotated_colors = {};
+                    for (let face_index = 0; face_index < num_zome_faces; face_index++) {
+                        const face = zome_faces_3D[face_index];
+                        if (!rotated_colors.hasOwnProperty(face.color.hex)) {
+                            rotated_colors[face.color.hex] = _.map(rotation_angles, a => Color.from_angles(a.rad, face.normalized_slope));
+                        }
+                    }
 
                     // Unpack variables
                     const [
