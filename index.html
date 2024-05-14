@@ -2692,7 +2692,20 @@
                     this.export_to(THREE.STLExporter, "stl");
                 },
                 download_obj() {
-                    this.export_to(THREE.OBJExporter, "obj");
+                    const exporter = new THREE.OBJExporter();
+                    const obj_to_export = this.compute_obj_to_export();
+
+                    const filename = this.gen_filename(`_${this.type_of_3D_objects}`);
+                    const obj_filename = `${filename}.obj`;
+                    const mtl_filename = `${filename}.mtl`;
+
+                    const data = exporter.parse(obj_to_export, mtl_filename);
+
+                    const obj_blob = new Blob([data.obj], {type: 'text/plain'});
+                    download(obj_filename, URL.createObjectURL(obj_blob));
+
+                    const mtl_blob = new Blob([data.mtl], {type: 'text/plain'});
+                    download(mtl_filename, URL.createObjectURL(mtl_blob));
                 },
                 download_gltf() {
                     const exporter = new THREE.GLTFExporter();
@@ -3679,8 +3692,8 @@
                         .replaceAll('-', '')
                         .replaceAll('T', '_')
                         .replaceAll(':', '')
-                        .slice(0, 9);
-                    return `Z5omes_${date_str}N${this.params.num_spirals}${small_hash(this.params)}${suffix}`
+                        .slice(0, 15);
+                    return `Z5omes_${date_str}_N${this.params.num_spirals}${small_hash(this.params)}${suffix}`
                 },
                 add_vertex(vertices, p) {
                     vertices.push(p);
