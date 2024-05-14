@@ -2700,12 +2700,16 @@
                     const mtl_filename = `${filename}.mtl`;
 
                     const data = exporter.parse(obj_to_export, mtl_filename);
-
                     const obj_blob = new Blob([data.obj], {type: 'text/plain'});
-                    download(obj_filename, URL.createObjectURL(obj_blob));
-
                     const mtl_blob = new Blob([data.mtl], {type: 'text/plain'});
-                    download(mtl_filename, URL.createObjectURL(mtl_blob));
+
+                    const zip = new JSZip();
+                    zip.file(obj_filename, obj_blob);
+                    zip.file(mtl_filename, mtl_blob);
+
+                    zip.generateAsync({type: "blob"}).then(function (content) {
+                        save_as(content, `${filename}_obj_mtl.zip`);
+                    });
                 },
                 download_gltf() {
                     const exporter = new THREE.GLTFExporter();
