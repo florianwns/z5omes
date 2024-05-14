@@ -207,16 +207,16 @@
                 const mat = materials[mat_name];
 
                 mtl_output += 'newmtl ' + mat_name + '\n';
-                mtl_output += 'Ns 10.0000\n';
-                mtl_output += 'Ni 1.5000\n';
-                mtl_output += 'd 1.0000\n';
-                mtl_output += 'Tr 0.0000\n';
-                mtl_output += 'Tf 1.0000 1.0000 1.0000\n';
+                mtl_output += 'Ns 10.0\n';
+                mtl_output += 'Tr 0.0\n';
+                mtl_output += 'Tf 1.0 1.0 1.0\n';
+                mtl_output += 'Ka 1.0 1.0 1.0\n';
+                mtl_output += 'Kd ' + mat.color.r.toFixed(4) + ' ' + mat.color.g.toFixed(4) + ' ' + mat.color.b.toFixed(4) + ' ' + '\n';
+                mtl_output += 'Ks 0.5 0.5 0.5\n';
+                mtl_output += 'Ke 0.0 0.0 0.0\n';
+                mtl_output += 'Ni 1.0\n';
+                mtl_output += 'd 1.0\n';
                 mtl_output += 'illum 2\n';
-                mtl_output += 'Ka ' + mat.color.r + ' ' + mat.color.g + ' ' + mat.color.b + ' ' + '\n';
-                mtl_output += 'Kd ' + mat.color.r + ' ' + mat.color.g + ' ' + mat.color.b + ' ' + '\n';
-                mtl_output += 'Ks 0.0000 0.0000 0.0000\n';
-                mtl_output += 'Ke 0.0000 0.0000 0.0000\n';
             }
 
             return {
