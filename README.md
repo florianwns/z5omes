@@ -76,7 +76,7 @@ then export the mesh in the format of your choice.
 
 ## 🖼 Designed with Z5omes
 
-<b>2024/04/27 | By Andre Dengin</b>
+<b>2024 | By Andre Dengin</b>
 
 <table>
   <tr>
