@@ -76,7 +76,7 @@ then export the mesh in the format of your choice.
 
 ## 🖼 Designed with Z5omes
 
-<b>2024/04/27 | By Andre Dengin</b>
+<b>2024 | By Andre Dengin</b>
 
 <table>
   <tr>
@@ -88,6 +88,11 @@ then export the mesh in the format of your choice.
     </td>
     <td valign="middle">
         <img src="/img/designed_with/20240427_by_andre_dengin_3.jpg " width="100" height="100">
+    </td>
+    <td valign="middle">
+        <a href="https://florianwns.github.io/z5omes/?q=eyJudW1fc3BpcmFscyI6OCwidGhldGFfZGVnIjo2OC4wNCwiYW5nbGVfdW5pdCI6ImRlZyIsInVzZV9ocl9tb2RlIjpmYWxzZSwiaGVpZ2h0X3JhdGlvIjowLjM3NSwia2l0ZV9yYXRpbyI6MSwibWVhc3VyaW5nX3VuaXQiOiJtbSIsInpvbWVfaGVpZ2h0X2luX21tIjo1MDAsInRpbWJlcl93aWR0aF9pbl9tbSI6MjUsInRpbWJlcl90aGlja25lc3NfaW5fbW0iOjI1LCJ6X3ZhbmlzaGluZ19wb2ludF9pbl9tbSI6LTYxOC42NjY2NjY3LCJhc3NlbWJseV9tZXRob2QiOjEsImFzc2VtYmx5X2RpcmVjdGlvbiI6MCwieHBhbnNpb25fZGlyZWN0aW9uIjoxLCJhZGRfZm9vdGluZyI6MSwicm9vZl9vdmVyZmxvd19pbl9tbSI6MCwiZmFjZV9kaXZpc2lvbnNfYnlfY3Jvd25zX3N0ciI6IjAsMCwwIiwiYmluZHVfcmF0aW9zX3N0ciI6IjEsMSwxIiwibGFuZ3VhZ2UiOiJlbiIsImhlbHBfaXNfZGlzcGxheWVkIjpmYWxzZX0%3D">
+            <img src="/img/designed_with/20240515_by_andre_dengin_4.jpg " width="100" height="100">
+        </a>
     </td>
   </tr>
 </table>
