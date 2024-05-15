@@ -6,7 +6,7 @@
 
 <b>Z5omes</b> allows you to create 3D models for free.
 You can now create your models with 'GoodKarma', 'Beleved' or 'Xpansion' assembly method.
-You can export 3d models them in 'GLTF', 'OBJ', 'STL' (mm unit, inverted YZ) or 'PLY' formats.
+You can export 3d models in 'GLTF', 'OBJ', 'STL' (mm unit, inverted YZ) or 'PLY' formats.
 
 To make your own Zome, please check the online app [here](https://florianwns.github.io/z5omes/).
 
