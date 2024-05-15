@@ -65,9 +65,11 @@ You can export your zome to different 3D object formats:
 > * <b>STL</b> : Mesh only
 > * <b>PLY</b> : Mesh only
 
-If you need a different format, you can try converting the OBJ file
-with [MeshLab](https://www.meshlab.net/#download) or [Blender](https://www.blender.org/download/).
-<br>I got pretty good results with both software.
+If you need a different format, you can import the OBJ file
+in [FreeCad](https://www.freecad.org/downloads.php), [MeshLab](https://www.meshlab.net/#download) or [Blender](https://www.blender.org/download/),
+then export the mesh in the format of your choice.
+<br>
+<br>I got pretty good results with these free softwares.
 
 
 ## 🖼 Designed with Z5omes
