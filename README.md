@@ -89,6 +89,9 @@ then export the mesh in the format of your choice.
     <td valign="middle">
         <img src="/img/designed_with/20240427_by_andre_dengin_3.jpg " width="100" height="100">
     </td>
+    <td valign="middle">
+        <img src="/img/designed_with/20240515_by_andre_dengin_4.jpg " width="100" height="100">
+    </td>
   </tr>
 </table>
 
