@@ -56,6 +56,19 @@ Please, fork the project, commit your changes and pull a new request. 🙏
 > * [Zome Building Network | Facebook](https://www.facebook.com/groups/1130103323709157)
 > * [Z5omes | Youtube Channel](https://www.youtube.com/@Z5omes)
 
+## ▲ 3D Objects
+
+You can export your zome to different 3D object formats:
+
+> * <b>GLTF</b> : Mesh and texture
+> * <b>OBJ</b> : Mesh and texture (MTL file)
+> * <b>STL</b> : Mesh only
+> * <b>PLY</b> : Mesh only
+
+If you need a different format, you can try converting the OBJ file
+with [MeshLab](https://www.meshlab.net/#download) or [Blender](https://www.blender.org/download/).
+<br>I got pretty good results with both software.
+
 
 ## 🖼 Designed with Z5omes
 
