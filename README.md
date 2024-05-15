@@ -70,7 +70,8 @@ in [FreeCad](https://www.freecad.org/downloads.php), [MeshLab](https://www.meshl
 then export the mesh in the format of your choice.
 <br>
 <br>I got pretty good results with these free softwares.
-<br>Take a look at the '[conversion](conversion)' folder if you want to see some examples.
+
+> 👁 Take a look at the '[conversion](conversion)' folder if you want to see some examples.
 
 
 ## 🖼 Designed with Z5omes
