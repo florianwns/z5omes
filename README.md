@@ -71,7 +71,7 @@ then export the mesh in the format of your choice.
 <br>
 <br>I got pretty good results with these free softwares.
 
-> 👁 Take a look at the '[conversion](conversion)' folder if you want to see some examples.
+> 👁 Take a look at the '[meshes](meshes)' folder if you want to see some examples.
 
 
 ## 🖼 Designed with Z5omes
