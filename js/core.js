@@ -17,6 +17,7 @@ const TAU = 2 * Math.PI;    // 360° in rad
 const TAU_Q = Math.PI / 2;  // 90° in rad
 const FLOAT_PRECISION = 7;
 const FLOAT_2_STR_PRECISION = 2;
+const ANGLE_PRECISION = 1;
 
 // const WORLD_HEIGHT = 3810;       // or 3D HEIGHT OF ZOME in mm
 const WORLD_HEIGHT = 1980;       // or 3D HEIGHT OF ZOME in mm
@@ -861,7 +862,7 @@ function humanize_area(d, num_digits = FLOAT_2_STR_PRECISION) {
     }
 }
 
-function humanize_angle(a, num_digits = FLOAT_2_STR_PRECISION) {
+function humanize_angle(a, num_digits = ANGLE_PRECISION) {
     // Helper to display angle in degrees
 
     return !isNaN(a) && a > 0 ? a.toFixed(num_digits) + "°" : "";
