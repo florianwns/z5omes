@@ -1852,11 +1852,17 @@
 
                             const red = "#d00f0f";
                             const blue = "#1431c1";
+
+                            // We display the angle information according to the side
                             const angles_params = (i < 2)
                                 ? [
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, F), points_2_plane(B, C, G))),
                                         point_between(c, b, dist(b, c) / 3), 'middle', red, '∠'
+                                    ],
+                                    [
+                                        Math.abs(TAU_Q - angle_between_planes(points_2_plane(C, D, G), points_2_plane(A, D, E))),
+                                        point_between(d, a, dist(d, a) / 3), 'middle', red, '∠'
                                     ],
                                 ] : [
                                     [
