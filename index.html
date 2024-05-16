@@ -1942,7 +1942,7 @@
                                 const [theta, text_pos, anchor, color, icon] = params;
 
                                 // Do not display angle if it's equal to 0
-                                if (to_decimal(theta, 1) === 0) return;
+                                if (to_decimal(rad2deg(theta), 1) === 0) return;
 
                                 const theta_deg = humanize_angle(rad2deg(theta));
                                 const angle_text = svg_text(`${icon}${theta_deg}`,
