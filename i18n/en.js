@@ -41,9 +41,11 @@ const I18N_EN = {
         bottom: "bottom",
         front: "front",
         back: "back",
-        not_allowed: 'Not Allowed',
-        valid: 'Valid',
-        print: 'Print',
+        not_allowed: "Not Allowed",
+        valid: "Valid",
+        print: "Print",
+        bevel: "Bevel",
+        no_bevel: "No bevel",
 
         // Tooltips
         tooltip_display_help: "Display help",

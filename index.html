@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.12b09"/>
+    <link rel="manifest" href="manifest.json?v=1.0.13b01"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.12b09" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.13b01" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -427,7 +427,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.12b09</span>
+                              style="font-size: 10px; top:0px">v1.0.13b01</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1471,15 +1471,15 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/es.js?v=1.0.12b09"></script>
-<script src="i18n/en.js?v=1.0.12b09"></script>
-<script src="i18n/it.js?v=1.0.12b09"></script>
-<script src="i18n/fr.js?v=1.0.12b09"></script>
-<script src="i18n/pl.js?v=1.0.12b09"></script>
-<script src="i18n/sv.js?v=1.0.12b09"></script>
+<script src="i18n/es.js?v=1.0.13b01"></script>
+<script src="i18n/en.js?v=1.0.13b01"></script>
+<script src="i18n/it.js?v=1.0.13b01"></script>
+<script src="i18n/fr.js?v=1.0.13b01"></script>
+<script src="i18n/pl.js?v=1.0.13b01"></script>
+<script src="i18n/sv.js?v=1.0.13b01"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.12b09"></script>
+<script src="js/core.js?v=1.0.13b01"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1752,24 +1752,28 @@
                             const polygon_front = svg_polygon(front_points_2D, this.stroke_width, prism.color.hex, 0.7);
                             svg_elements_with_priority.push([polygon_front, 10]);
 
-                            const behind_points_2D = convert_3D_to_2D(drawing_points.slice(4, 8));
-                            const polygon_behind = svg_polygon(behind_points_2D, this.stroke_width, prism.color.hex);
-                            polygon_behind.setAttribute('stroke-dasharray', this.stroke_dash_arr);
-                            svg_elements_with_priority.push([polygon_behind, 9]);
+                            if(i >= 2){
+                                const behind_points_2D = convert_3D_to_2D(drawing_points.slice(4, 8));
+                                const polygon_behind = svg_polygon(behind_points_2D, this.stroke_width, prism.color.hex);
+                                polygon_behind.setAttribute('stroke-dasharray', this.stroke_dash_arr);
+                                svg_elements_with_priority.push([polygon_behind, 9]);
+                            }
 
-                            // Add label of the polygon
-                            const centroid = average(front_points_3D);
-                            const side_label = svg_text(`${side.label}`,
-                                centroid[0],
-                                centroid[1],
-                                this.title_font_size,
-                                'white',
-                            );
-                            side_label.setAttribute('text-anchor', 'middle');
-                            side_label.setAttribute('alignment-baseline', 'center');
-                            side_label.setAttribute('font-weight', 'bold');
-                            add_stroke_behind(side_label, 3 * this.stroke_width);
-                            svg_elements_with_priority.push([side_label, 15]);
+                            // Add label of the polygon only on the front side
+                            if(i === 2){
+                                const centroid = average(front_points_3D);
+                                const side_label = svg_text(`${side.label}`,
+                                    centroid[0],
+                                    centroid[1],
+                                    this.title_font_size,
+                                    'white',
+                                );
+                                side_label.setAttribute('text-anchor', 'middle');
+                                side_label.setAttribute('alignment-baseline', 'center');
+                                side_label.setAttribute('font-weight', 'bold');
+                                add_stroke_behind(side_label, 3 * this.stroke_width);
+                                svg_elements_with_priority.push([side_label, 15]);
+                            }
 
                             // Add dotted line at the center to show
                             // that it's a truncated view of the timber profile
@@ -1801,13 +1805,29 @@
                             }
 
                             let rounded_xs = [];
-                            _.forEach(drawing_points, (p, j) => {
+                            for(let j = 0; j < drawing_points.length; j++){
+                                const pt = drawing_points[j];
+                                // Connects the opposite vertices of the prism
+                                if (i >= 2 && j < 4) {
+                                    const vertices_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                    const opposite_pt = drawing_points[(j + 4) % 8]
+                                    vertices_line.setAttribute('x1', pt[0]);
+                                    vertices_line.setAttribute('y1', pt[1]);
+                                    vertices_line.setAttribute('x2', opposite_pt[0]);
+                                    vertices_line.setAttribute('y2', opposite_pt[1]);
+                                    vertices_line.setAttribute('stroke', 'black');
+                                    vertices_line.setAttribute('stroke-opacity', '0.5');
+                                    vertices_line.setAttribute('stroke-dasharray', this.stroke_dash_arr);
+                                    vertices_line.setAttribute('stroke-width', `${this.stroke_width}px`);
+                                    svg_elements_with_priority.push([vertices_line, 9]);
+                                }
+
                                 // Draw vertical lines to get a visual alignment
                                 if (i === 3) {
                                     const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                                    vertical_line.setAttribute('x1', p[0]);
+                                    vertical_line.setAttribute('x1', pt[0]);
                                     vertical_line.setAttribute('y1', `${vertical_line_start}`);
-                                    vertical_line.setAttribute('x2', p[0]);
+                                    vertical_line.setAttribute('x2', pt[0]);
                                     vertical_line.setAttribute('y2', `${vertical_line_end}`);
                                     vertical_line.setAttribute('stroke', 'black');
                                     vertical_line.setAttribute('stroke-opacity', '0.5');
@@ -1818,16 +1838,18 @@
 
                                 const real_pt = fitted_points[j];
                                 const rounded_x = Math.round(real_pt[0]);
+                                // const rounded_x = ["A", "B", "C", "D", "E", "F", "G", "H"][j];
+                                // const rounded_x = j;
                                 if (!rounded_xs.includes(rounded_x)) {
                                     const is_boundary = rounded_x === 0 || rounded_x === Math.round(side.width);
 
                                     // Avoid overlapping text
                                     const side_text_padding = (j < 4) ? this.text_padding : this.text_padding * 3;
                                     const measurement_text = svg_text(rounded_x,
-                                        p[0],
+                                        pt[0],
                                         (real_pt[1] < side.height / 2)
-                                            ? p[1] - side_text_padding
-                                            : p[1] + this.font_size + side_text_padding,
+                                            ? draw_y_start - side_text_padding
+                                            : draw_y_end + this.font_size + side_text_padding,
                                         this.font_size,
                                     );
                                     measurement_text.setAttribute('text-anchor', 'middle');
@@ -1839,7 +1861,7 @@
                                     // add the rounded value to avoid multiple texts
                                     rounded_xs.push(rounded_x);
                                 }
-                            });
+                            }
 
                             // Compute angles
                             //    [0, 1, 2, 3, 4, 5, 6, 7]
@@ -1881,21 +1903,46 @@
                                         Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))),
                                         point_between(c, d, dist(d, c) / 2), 'middle', blue, '∟'
                                     ],
-                                    [
-                                        Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))),
-                                        add(y_shift_up, point_between(d, a, dist(d, a) / 2)), 'middle', blue, '∟'
-                                    ],
-                                    [
-                                        Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))),
-                                        add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)), 'middle', blue, '∟'
-                                    ],
                                 ];
+
+
+                            if (i >= 2) {
+                                if (prism.dihedral_angle) {
+                                    const no_bevel = prism.dihedral_angle >= TAU_Q;
+                                    angles_params.push(
+                                        [
+                                            Math.abs(TAU_Q - prism.dihedral_angle),
+                                            add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)),
+                                            'middle',
+                                            no_bevel ? red : blue,
+                                            `${no_bevel ? this.i18n("no_bevel") : this.i18n("bevel")} : ∟`
+                                        ],
+                                    )
+                                } else {
+                                    angles_params.push(
+                                        [
+                                            Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))),
+                                            add(y_shift_up, point_between(d, a, dist(d, a) / 2)),
+                                            'middle',
+                                            blue,
+                                            `${this.i18n("bevel")} : ∟`
+                                        ],
+                                        [
+                                            Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))),
+                                            add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)),
+                                            'middle',
+                                            blue,
+                                            `${this.i18n("bevel")} : ∟`
+                                        ],
+                                    )
+                                }
+                            }
 
                             _.forEach(angles_params, params => {
                                 const [theta, text_pos, anchor, color, icon] = params;
 
-                                // Do not display angle if 0
-                                if (to_decimal(theta, 1) === 0) return;
+                                // Do not display angle if it's equal to 0
+                                if (to_decimal(rad2deg(theta), 1) === 0) return;
 
                                 const theta_deg = humanize_angle(rad2deg(theta));
                                 const angle_text = svg_text(`${icon}${theta_deg}`,
@@ -1910,7 +1957,6 @@
                                 angle_text.setAttribute('paint-order', 'stroke');
                                 svg_elements_with_priority.push([angle_text, 21]);
                             });
-
                         });
 
                         // Sort svg elements by priority
@@ -2818,10 +2864,10 @@
                     const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
 
                     // Add zome reflection
-                    if(this.clone_and_rotate_items && this.add_zome_reflection){
+                    if (this.clone_and_rotate_items && this.add_zome_reflection) {
                         const mirror_vec = new THREE.Vector3(1, -1, 1);
                         const num_children = zome_meshes.children.length;
-                        for(let i = 0; i < num_children; i++){
+                        for (let i = 0; i < num_children; i++) {
                             const cloned_child = clone_3D_obj(zome_meshes.children[i]);
                             cloned_child.scale.multiply(mirror_vec);
                             cloned_child.translateY(2 * delta_y);
@@ -2844,7 +2890,7 @@
                         obj_to_export.translateZ(-delta_y)
                         obj_to_export.rotateX(TAU_Q);
                         obj_to_export.rotateY(-TAU_Q);
-                    }else{
+                    } else {
                         obj_to_export.translateY(-delta_y)
                     }
                     obj_to_export.updateMatrixWorld(true);
@@ -2987,7 +3033,7 @@
                     const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
 
                     // Add zome reflection
-                    if(this.clone_and_rotate_items && this.add_zome_reflection){
+                    if (this.clone_and_rotate_items && this.add_zome_reflection) {
                         const mirror_vec = new THREE.Vector3(1, -1, 1);
                         _.forEach(meshes, (mesh, name) => {
                             // Don't clone axes
@@ -3016,7 +3062,7 @@
                             mesh.translateZ(-delta_y)
                             mesh.rotateX(TAU_Q);
                             mesh.rotateY(-TAU_Q);
-                        }else{
+                        } else {
                             mesh.translateY(-delta_y)
                         }
                     });
@@ -4067,6 +4113,17 @@
                             face.color,
                             face.crown_index,
                         );
+
+                        // Add a dihedral angle for Goodkarma, because we need face plane to compute it
+                        if(ASSEMBLY_METHOD === 0){
+                            for (let k = 0; k < face.framework_timbers.length; k++) {
+                                const timber = face.framework_timbers[k];
+                                timber.dihedral_angle = Math.PI - angle_between_planes(
+                                    timber.get_face("bottom").plane,
+                                    face.plane,
+                                );
+                            }
+                        }
                     }
 
                     // Build Footing timbers

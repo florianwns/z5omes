@@ -942,6 +942,9 @@ class Base3DGeometry {
         // Add crown and spiral index to retrieve the object
         this.crown_index = crown_index || 0;
 
+        // Add a dihedral angle
+        this.dihedral_angle = null;
+
         // Store points
         this.points = points || [];
         this.reset_geometry_params();
@@ -1419,9 +1422,6 @@ class Polygon3D extends Base3DGeometry {
 
         // A property used to flatten bottom part of bindu faces (divided horizontally)
         this.part = part;
-
-        // Add a dihedral angle
-        this.dihedral_angle = null;
 
         this._plane = null;
         this._radius = null;
