@@ -1,11 +1,5 @@
 # TODO-LIST
 
-* [ ] Ajouter les angles de biseau pour le GoodKarma 
-  - Pas de biseau si Angle > à 90°. pas d'affichage
-  - Biseau si angle < à 90
-  
-* [ ] Rajouter le trait de fermeture des prismes de pointe à pointe.
-
 * [ ] Ajouter différent paramètre en gardant la même méthode de calcul
 
 * [ ] Changer l'aide du kite ratio 
