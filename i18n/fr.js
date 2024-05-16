@@ -15,7 +15,7 @@ const I18N_FR = {
         vertices: "Sommets",
         fullscreen: "Plein écran",
         keyboard_shortcuts: "Raccourcis clavier",
-        skeleton: 'Squelette',
+        skeleton: "Squelette",
         outer: "Extérieur",
         inner: "Intérieur",
         outer_faces: "Faces extérieures",
@@ -41,9 +41,11 @@ const I18N_FR = {
         bottom: "dessous",
         front: "devant",
         back: "derrière",
-        not_allowed: 'Interdit',
-        valid: 'Valide',
-        print: 'Imprimer',
+        not_allowed: "Interdit",
+        valid: "Valide",
+        print: "Imprimer",
+        bevel: "Biseau",
+        no_bevel: "Pas de biseau",
 
         // Tooltips
         tooltip_display_help: "Afficher l'aide",
