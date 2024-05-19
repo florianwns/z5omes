@@ -102,7 +102,7 @@ then export the mesh in the format of your choice.
   </tr>
 </table>
 
-<b>2024 | By Robeto Linazasoro</b>
+<b>2024 | By Roberto Linazasoro</b>
 
 <table>
   <tr>
