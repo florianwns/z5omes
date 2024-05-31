@@ -76,6 +76,24 @@ then export the mesh in the format of your choice.
 
 ## 🖼 Designed with Z5omes
 
+<b>2024 | By La tanière à Mémé</b>
+
+
+<table>
+  <tr>
+    <td valign="middle">
+        <img src="/img/designed_with/20240531_by_la_taniere_a_meme_1.jpg" width="100" height="100">
+    </td>
+    <td valign="middle">
+        <img src="/img/designed_with/20240531_by_la_taniere_a_meme_2.jpg" width="100" height="100">
+    </td>
+    <td valign="middle">
+        <img src="/img/designed_with/20240531_by_la_taniere_a_meme_3.jpg" width="100" height="100">
+    </td>
+  </tr>
+</table>
+
+
 <b>2024 | By Andre Dengin</b>
 
 <table>
