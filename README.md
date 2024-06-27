@@ -90,6 +90,26 @@ then export the mesh in the format of your choice.
     <td valign="middle">
         <img src="/img/designed_with/20240531_by_la_taniere_a_meme_3.jpg" width="100" height="100">
     </td>
+    <td valign="middle">
+        <img src="/img/designed_with/20240627_by_la_taniere_a_meme_4.jpg" width="100" height="100">
+    </td>
+  </tr>
+</table>
+
+
+<b>2024 | By MaThieu Imbert</b>
+
+<table>
+  <tr>
+    <td valign="middle">
+        <img src="/img/designed_with/20240627_by_mathieu_imbert_1.jpg" width="100" height="100">
+    </td>
+    <td valign="middle">
+        <img src="/img/designed_with/20240627_by_mathieu_imbert_2.jpg" width="100" height="100">
+    </td>
+    <td valign="middle">
+        <img src="/img/designed_with/20240627_by_mathieu_imbert_3.jpg" width="100" height="100">
+    </td>
   </tr>
 </table>
 
