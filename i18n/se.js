@@ -1,5 +1,5 @@
-const I18N_SV = {
-    name: "Svenska",
+const I18N_SE = {
+    name: "Swedish",
     dictionary: {
         // Common Vocabulary / Words
         zome: "zome",
