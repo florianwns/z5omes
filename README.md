@@ -97,6 +97,16 @@ then export the mesh in the format of your choice.
 </table>
 
 
+<b>2024 | By Leo Scolaro/b>
+
+<table>
+  <tr>
+    <td valign="middle">
+        <img src="/img/designed_with/20240705_by_leo_scolaro_1.jpg" width="100" height="100">
+    </td>
+  </tr>
+</table>
+
 <b>2024 | By MaThieu Imbert</b>
 
 <table>
