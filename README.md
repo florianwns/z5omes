@@ -166,6 +166,18 @@ then export the mesh in the format of your choice.
   </tr>
 </table>
 
+
+<b>2024 | By Juan Ignacio Patetta</b>
+
+<table>
+  <tr>
+    <td valign="middle">
+        <img src="/img/designed_with/20240719_by_juan_ignacio_patetta_1.jpg" width="100" height="100">
+    </td>
+  </tr>
+</table>
+
+
 ## 🙏 Thanks To :
 
 This project would never have been possible without the valuable support of a few people. 
