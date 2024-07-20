@@ -55,7 +55,7 @@ const I18N_ES = {
         tooltip_save_settings: "Guardar ajustes",
         tooltip_copy_link: "Copiar enlace",
         tooltip_link_buymeacoffee: "¡Invítame a un café ☕ si te encanta Z5omes 🙏 !",
-        tooltip_link_facebook: "Ven y chatea con la comunidad 'Zome Network Building' 📢",
+        tooltip_link_facebook: "Ven y chatea con la comunidad 'Zome Building Network' 📢",
         tooltip_link_youtube: "Visita el canal de YouTube 🎥 para aprender más acerca de z5omes",
         tooltip_link_github: "Ve a Github 🐈 si tienes alguna pregunta",
         tooltip_link_linkedin: "Visita mi perfil en Linkedin",

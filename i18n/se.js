@@ -27,7 +27,7 @@ const I18N_SE = {
         tooltip_save_settings: "Spara inställningar",
         tooltip_copy_link: "Kopiera länk",
         tooltip_link_buymeacoffee: "Bjud mig på en kaffe ☕ om du gillar Z5omes 🙏",
-        tooltip_link_facebook: "Kom och chatta med 📢 med 'Zome Network Building' community",
+        tooltip_link_facebook: "Kom och chatta med 📢 med 'Zome Building Network' community",
         tooltip_link_github: "Gå till Github 🐈 om du har några frågor",
         tooltip_link_linkedin: "Besök min profil på Linkedin",
         tooltip_export_2_format: "Exporters till format $1",
