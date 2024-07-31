@@ -101,7 +101,7 @@ const I18N_BR = {
         help_m_param: "Número de coroas dos losanglos de cima até embaixo",
         help_f_param: "Ângulo de forma(Θ) | Número(F) que permite de calcular a inclinação do zome. F = tan(Θ)",
         help_hr_param: "Proporção da altura visível do zome em relação a sua altura total (Colocar o HR no valor de 1 para o zome inteiro)",
-        help_magnetize_param: "Juntar a ponta do último losanglo ao chäo",
+        help_magnetize_param: "Juntar a ponta do losanglo truncado ao solo",
         help_kr_param: " Proporção do comprimento dos lados inferiores em relação aos lados superiores de um losanglo",
         help_set_rhombus_param: "Ajustar no formato losanglo (equilateral)",
         help_painting_param: "Colorir os lados em função do label ou colorir as espirais com cores diferentes",
@@ -113,7 +113,7 @@ const I18N_BR = {
         help_am_param_2: "Método de definição do corte da madeira e do regrupamento das lenhas",
         help_am_param_3: "Direção do regrupamentos das lenhas : Sentido horário, anti-horário ou sem nenhum sentido (SemiCone)",
         help_vp_param: "Altura do ponto de fuga (utilizados com os métódos 'GoodKarma' et 'Beveled')",
-        help_zc_param: "Definir o ponto de fuga no centro de gravidade do zome na sua integralidade",
+        help_zc_param: "Definir o ponto de fuga no centro de gravidade (baseando-se na integralidade do zome)",
         help_ft_param: "Incluir uma palmilha basada na espessura da estrutura",
         help_ro_param: "Sobreposição do telhado",
 
