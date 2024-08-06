@@ -2,7 +2,7 @@ const I18N_PL = {
     name: "Polski",
     dictionary: {
         // Common Vocabulary / Words
-        zome: "zome",
+        zome: "Zome",
         shape: "kształt",
         framework: "rama",
         origami: "origami",
