@@ -67,7 +67,7 @@ const I18N_EN = {
         tooltip_show_keyboard_shortcuts: "Show keyboard shortcuts",
         tooltip_download_3D_view_in_png_format: "Capture 3D view and export to PNG format",
         tooltip_inversion_Y_Z_axes: "Inversion of Y and Z axes",
-        tooltip_bindu_ratio: "'Bindu' ratio for the selected crown (Available only if the rhombus is split horizontally)",
+        tooltip_bindu_ratio: "'Bindu' ratio for the selected crown (Available only if the rhombus is split horizontally or vertically)",
         tooltip_illuminate_object: "Illuminate 3D Object",
         tooltip_decrease_spiral_rotations: "Decrease spiral rotations",
         tooltip_increase_spiral_rotations: "Increase spiral rotations",

@@ -2,7 +2,7 @@ const I18N_IT = {
     name: "Italiano",
     dictionary: {
         // Common Vocabulary / Words
-        zome: "zome",
+        zome: "Zome",
         shape: "Forma",
         framework: "Carpenteria",
         origami: "Origami",

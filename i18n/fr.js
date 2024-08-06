@@ -2,7 +2,7 @@ const I18N_FR = {
     name: "Français",
     dictionary: {
         // Common Vocabulary / Words
-        zome: "zome",
+        zome: "Zome",
         shape: "Forme",
         faces: "Faces",
         timbers: "Montants",
@@ -20,8 +20,8 @@ const I18N_FR = {
         inner: "Intérieur",
         outer_faces: "Faces extérieures",
         inner_faces: "Faces intérieures",
-        outer_faces_on_the_ground: "Faces extérieures au sol",
-        inner_faces_on_the_ground: "Faces intérieures au sol",
+        outer_faces_on_the_ground: "Faces extérieures posées au sol",
+        inner_faces_on_the_ground: "Faces intérieures posées au sol",
         timber_profiles: "Profils des montants",
         timbers_of_each_face: "Montants de chaque face",
         profile: "Profil",
@@ -67,7 +67,7 @@ const I18N_FR = {
         tooltip_show_keyboard_shortcuts: "Afficher les raccourcis clavier",
         tooltip_download_3D_view_in_png_format: "Capturer la vue 3D et l'exporter au format PNG",
         tooltip_inversion_Y_Z_axes: "Inversion des axes Y et Z",
-        tooltip_bindu_ratio: "Rapport 'Bindu' pour la couronne sélectionnée (disponible uniquement si le losange est divisé horizontalement)",
+        tooltip_bindu_ratio: "Rapport 'Bindu' pour la couronne sélectionnée (disponible uniquement si le losange est divisé horizontalement ou verticalement)",
         tooltip_illuminate_object: "Illuminer l'objet 3D",
         tooltip_decrease_spiral_rotations: "Diminuer les rotations de spirales",
         tooltip_increase_spiral_rotations: "Augmenter les rotations de spirales",

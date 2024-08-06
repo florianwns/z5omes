@@ -2,7 +2,7 @@ const I18N_SE = {
     name: "Swedish",
     dictionary: {
         // Common Vocabulary / Words
-        zome: "zome",
+        zome: "Zome",
         shape: "Form",
         framework: "Framework",
         origami: "Origami",
