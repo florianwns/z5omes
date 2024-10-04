@@ -138,7 +138,7 @@ const I18N_ES = {
         timber_lengths: "Longitudes de vigas (maderas)",
         total_length_of_timbers: "Longitud total de las vigas (maderas)",
         floor_perimeter: "Perímetro del suelo",
-        floor_diameter: "Diámetro del suelo",
+        floor_radius: "Radio de la base",
         floor_area: "Área del suelo",
 
         // Toast message
