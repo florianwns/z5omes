@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.14b04"/>
+    <link rel="manifest" href="manifest.json?v=1.0.15b01"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.14b04" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.15b01" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -427,7 +427,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.14b04</span>
+                              style="font-size: 10px; top:0px">v1.0.15b01</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1471,16 +1471,16 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/br.js?v=1.0.14b04"></script>
-<script src="i18n/es.js?v=1.0.14b04"></script>
-<script src="i18n/en.js?v=1.0.14b04"></script>
-<script src="i18n/it.js?v=1.0.14b04"></script>
-<script src="i18n/fr.js?v=1.0.14b04"></script>
-<script src="i18n/pl.js?v=1.0.14b04"></script>
-<script src="i18n/se.js?v=1.0.14b04"></script>
+<script src="i18n/br.js?v=1.0.15b01"></script>
+<script src="i18n/es.js?v=1.0.15b01"></script>
+<script src="i18n/en.js?v=1.0.15b01"></script>
+<script src="i18n/it.js?v=1.0.15b01"></script>
+<script src="i18n/fr.js?v=1.0.15b01"></script>
+<script src="i18n/pl.js?v=1.0.15b01"></script>
+<script src="i18n/se.js?v=1.0.15b01"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.14b04"></script>
+<script src="js/core.js?v=1.0.15b01"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1874,72 +1874,59 @@
                             const y_shift_bottom = [0, this.font_size * 1.25, 0],
                                 y_shift_up = [0, -this.font_size * 0.5, 0];
 
-                            const red = "#d00f0f";
-                            const blue = "#1431c1";
-
                             // We display the angle information according to the side
                             const angles_params = (i < 2)
                                 ? [
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(points_2_plane(A, B, F), points_2_plane(B, C, G))),
-                                        point_between(c, b, dist(b, c) / 3), 'middle', red, '∠'
+                                        point_between(c, b, dist(b, c) / 3), 'middle', GREEN, '∠'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(points_2_plane(C, D, G), points_2_plane(A, D, E))),
-                                        point_between(d, a, dist(d, a) / 3), 'middle', red, '∠'
+                                        point_between(d, a, dist(d, a) / 3), 'middle', GREEN, '∠'
                                     ],
                                 ] : [
                                     [
                                         Math.abs(TAU_Q - angle_between_points(A, B, C)),
-                                        point_between(b, a, dist(b, a) / 5), 'middle', red, '∠'
+                                        point_between(b, a, dist(b, a) / 5), 'middle', RED, '∠'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_points(D, C, B)),
-                                        point_between(c, d, dist(d, c) / 5), 'middle', red, '∠'
+                                        point_between(c, d, dist(d, c) / 5), 'middle', RED, '∠'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, B, E))),
-                                        point_between(b, a, dist(b, a) / 2), 'middle', blue, '∟'
+                                        point_between(b, a, dist(b, a) / 2), 'middle', BLUE, '∟'
                                     ],
                                     [
                                         Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(C, D, H))),
-                                        point_between(c, d, dist(d, c) / 2), 'middle', blue, '∟'
+                                        point_between(c, d, dist(d, c) / 2), 'middle', BLUE, '∟'
                                     ],
                                 ];
 
+                            if (i >= 2 && prism.dihedral_angle) {
+                                const use_goodkarma_method = ZOME.assembly_method === 0;
+                                const no_bevel = use_goodkarma_method && prism.dihedral_angle >= TAU_Q;
+                                const bevel_color = no_bevel ? ORANGE : GREEN;
+                                angles_params.push(
+                                    [
+                                        Math.abs(TAU_Q - prism.dihedral_angle),
+                                        add([0, this.font_size * 2, 0], point_between(b, c, dist(b, c) / 2)),
+                                        'middle',
+                                        bevel_color,
+                                        `${no_bevel ? this.i18n("no_bevel") : this.i18n("bevel")} : ∟`
+                                    ],
+                                )
 
-                            if (i >= 2) {
-                                if (prism.dihedral_angle) {
-                                    const no_bevel = prism.dihedral_angle >= TAU_Q;
-                                    angles_params.push(
-                                        [
-                                            Math.abs(TAU_Q - prism.dihedral_angle),
-                                            (i === 2)
-                                                ? add(y_shift_bottom, point_between(b, c, dist(b, c) / 2))
-                                                : add(y_shift_up, point_between(d, a, dist(d, a) / 2)),
-                                            'middle',
-                                            no_bevel ? red : blue,
-                                            `${no_bevel ? this.i18n("no_bevel") : this.i18n("bevel")} : ∟`
-                                        ],
-                                    )
-                                } else {
-                                    angles_params.push(
-                                        [
-                                            Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(A, D, E))),
-                                            add(y_shift_up, point_between(d, a, dist(d, a) / 2)),
-                                            'middle',
-                                            blue,
-                                            `${this.i18n("bevel")} : ∟`
-                                        ],
-                                        [
-                                            Math.abs(TAU_Q - angle_between_planes(base_plane, points_2_plane(B, C, F))),
-                                            add(y_shift_bottom, point_between(b, c, dist(b, c) / 2)),
-                                            'middle',
-                                            blue,
-                                            `${this.i18n("bevel")} : ∟`
-                                        ],
-                                    )
-                                }
+                                const bevel_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                bevel_line.setAttribute('x1', b[0]);
+                                bevel_line.setAttribute('y1', b[1]);
+                                bevel_line.setAttribute('x2', c[0]);
+                                bevel_line.setAttribute('y2', c[1]);
+                                bevel_line.setAttribute('stroke', bevel_color);
+                                bevel_line.setAttribute('stroke-opacity', '1');
+                                bevel_line.setAttribute('stroke-width', `${this.stroke_width * 2}px`);
+                                svg_elements_with_priority.push([bevel_line, 11]);
                             }
 
                             _.forEach(angles_params, params => {
@@ -1959,6 +1946,7 @@
                                 angle_text.setAttribute('stroke', 'white');
                                 angle_text.setAttribute('stroke-width', '4px');
                                 angle_text.setAttribute('paint-order', 'stroke');
+                                angle_text.setAttribute('font-weight', 'bold');
                                 svg_elements_with_priority.push([angle_text, 21]);
                             });
                         });
@@ -2006,210 +1994,273 @@
                     const draw_y_start = this.y_padding * 1.5;
 
                     _.forIn(timbers_grouped_by_face, group => {
-                        // Take the item and compute height
-                        const item = items_put_on_the_ground[item_index]
-                        const svg_height = item.depth * pixel_ratio + 3 * this.y_padding;
+                            // Take the item and compute height
+                            const item = items_put_on_the_ground[item_index]
+                            const svg_height = item.depth * pixel_ratio + 3 * this.y_padding;
 
-                        // Draw one svg for all sides
-                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
-                        svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
+                            // Draw one svg for all sides
+                            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                            svg.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/2000/svg');
+                            svg.setAttribute('viewBox', `0 0 ${svg_width} ${svg_height}`);
 
-                        let svg_elements_with_priority = [];
+                            let svg_elements_with_priority = [];
 
-                        const num_children = item.children.length;
-                        const draw_x_start = (svg_width - (item.width * pixel_ratio)) / 2;
+                            const num_children = item.children.length;
+                            const draw_x_start = (svg_width - (item.width * pixel_ratio)) / 2;
 
-                        // Compute boundaries
-                        let top_pt = [null, Number.MAX_VALUE],
-                            right_pt = [Number.MIN_VALUE, null],
-                            bottom_pt = [null, Number.MIN_VALUE],
-                            left_pt = [Number.MAX_VALUE, null];
+                            // Compute boundaries
+                            let top_pt = [null, Number.MAX_VALUE],
+                                right_pt = [Number.MIN_VALUE, null],
+                                bottom_pt = [null, Number.MIN_VALUE],
+                                left_pt = [Number.MAX_VALUE, null];
 
-                        for (let child_index = 0; child_index < num_children; child_index++) {
-                            const front_face = item.children[child_index].get_face("front");
+                            for (let child_index = 0; child_index < num_children; child_index++) {
+                                const prism = item.children[child_index];
+                                const front_face = prism.get_face("front");
 
-                            // fit points
-                            const fitted_points = swap_axes(
-                                fit_points(front_face.points, item.x_min, item.y_min, item.z_min),
-                                "XZY"
-                            );
+                                // fit points
+                                const fitted_points = swap_axes(
+                                    fit_points(front_face.points, item.x_min, item.y_min, item.z_min),
+                                    "XZY"
+                                );
 
-                            // Get min max from all faces
-                            for (let i = 0; i < front_face.num_points; i++) {
-                                const [x, y] = fitted_points[i];
+                                // Compute boundary points for all front faces
+                                for (let i = 0; i < front_face.num_points; i++) {
+                                    const [x, y] = fitted_points[i];
 
-                                if (y < top_pt[1]) top_pt = fitted_points[i];
-                                if (x > right_pt[0]) right_pt = fitted_points[i];
-                                if (y > bottom_pt[1]) bottom_pt = fitted_points[i];
-                                if (x < left_pt[0]) left_pt = fitted_points[i];
+                                    if (y < top_pt[1]) top_pt = fitted_points[i];
+                                    if (x > right_pt[0]) right_pt = fitted_points[i];
+                                    if (y > bottom_pt[1]) bottom_pt = fitted_points[i];
+                                    if (x < left_pt[0]) left_pt = fitted_points[i];
+                                }
+
+                                const drawing_points = fitted_points.map(p => [
+                                    draw_x_start + p[0] * pixel_ratio,
+                                    draw_y_start + p[1] * pixel_ratio,
+                                    0,
+                                ]);
+
+                                // Draw polygons
+                                const front_points_2D = convert_3D_to_2D(drawing_points);
+                                const polygon_front = svg_polygon(front_points_2D, this.stroke_width, front_face.color.hex, 0.7);
+                                svg_elements_with_priority.push([polygon_front, 10]);
+
+                                // Compute text rotation angle
+                                const [a, b, c, d] = drawing_points;
+                                const d_is_below_a = c[1] > b[1];
+                                let rotation_angle = rad2deg(
+                                    angle_between_points(
+                                        [c[0], c[1], 0],
+                                        [b[0], b[1], 0],
+                                        [b[0] + (d_is_below_a ? 10 : -10), b[1], 0],
+                                    ) + (d_is_below_a ? 0 : Math.PI)
+                                )
+
+                                // Add label of the polygon
+                                const label_position = get_midpoint(front_face.centroid,
+                                    get_midpoint(front_face.points[0], front_face.points[2]),
+                                );
+                                const x = draw_x_start + (label_position[0] - item.x_min) * pixel_ratio;
+                                const y = draw_y_start + (label_position[2] - item.z_min) * pixel_ratio; // swap Y <-> Z
+                                const face_label = svg_text(`${front_face.label}`,
+                                    0, 0,
+                                    this.title_font_size * 0.9,
+                                    'white',
+                                );
+                                face_label.setAttribute('text-anchor', 'middle');
+                                face_label.setAttribute('alignment-baseline', 'middle');
+                                face_label.setAttribute('font-weight', 'bold');
+                                face_label.setAttribute('transform', `translate(${x}, ${y}) rotate(${rotation_angle})`);
+
+                                add_stroke_behind(face_label, 3 * this.stroke_width);
+                                svg_elements_with_priority.push([face_label, 15]);
+
+                                // Add dihedral angle
+                                const use_goodkarma_method = ZOME.assembly_method === 0;
+                                const no_bevel = use_goodkarma_method && prism.dihedral_angle >= TAU_Q;
+                                const theta = Math.abs(TAU_Q - prism.dihedral_angle);
+
+                                // Do not display angle if it's equal to 0
+                                if (to_decimal(rad2deg(theta), 1) !== 0) {
+                                    const [bevel_anchor, bevel_color, bevel_icon] = [
+                                        'middle',
+                                        no_bevel ? ORANGE : GREEN,
+                                        `∟`
+                                    ]
+
+                                    const middle_of_bc = get_midpoint(b, c);
+                                    const b_to_c = sub(c, b);
+
+                                    const perpendicular_vec = [-b_to_c[1], b_to_c[0], b_to_c[2]];
+                                    const text_pos = point_to(
+                                        middle_of_bc,
+                                        perpendicular_vec,
+                                        this.text_padding * 3
+                                    )
+
+
+                                    const theta_deg = humanize_angle(rad2deg(theta));
+                                    const angle_text = svg_text(`${bevel_icon}${theta_deg}`, 0, 0,
+                                        this.font_size,
+                                        bevel_color
+                                    );
+                                    angle_text.setAttribute('text-anchor', bevel_anchor);
+                                    angle_text.setAttribute('stroke', 'white');
+                                    angle_text.setAttribute('stroke-width', '4px');
+                                    angle_text.setAttribute('paint-order', 'stroke');
+                                    angle_text.setAttribute('transform', `translate(${text_pos[0]}, ${text_pos[1]}) rotate(${rotation_angle})`);
+                                    angle_text.setAttribute('font-weight', 'bold');
+                                    svg_elements_with_priority.push([angle_text, 21]);
+
+
+                                    const bevel_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                    bevel_line.setAttribute('x1', b[0]);
+                                    bevel_line.setAttribute('y1', b[1]);
+                                    bevel_line.setAttribute('x2', c[0]);
+                                    bevel_line.setAttribute('y2', c[1]);
+                                    bevel_line.setAttribute('stroke', bevel_color);
+                                    bevel_line.setAttribute('stroke-opacity', '1');
+                                    bevel_line.setAttribute('stroke-width', `${this.stroke_width * 2}px`);
+                                    svg_elements_with_priority.push([bevel_line, 11]);
+                                }
                             }
 
-                            const drawing_points = fitted_points.map(p => [
-                                draw_x_start + p[0] * pixel_ratio,
-                                draw_y_start + p[1] * pixel_ratio,
+                            // Compute drawing boundary points
+                            const drawing_boundary_pts = [
+                                top_pt, right_pt, bottom_pt, left_pt
+                            ].map(p => [
+                                p[0] * pixel_ratio,
+                                p[1] * pixel_ratio,
                                 0,
                             ]);
 
-                            // Draw polygons
-                            const front_points_2D = convert_3D_to_2D(drawing_points);
-                            const polygon_front = svg_polygon(front_points_2D, this.stroke_width, front_face.color.hex, 0.7);
-                            svg_elements_with_priority.push([polygon_front, 10]);
+                            const top_left_corner_pt = [
+                                this.x_padding / 4,
+                                draw_y_start
+                            ]
+                            const bottom_right_corner_pt = [
+                                svg_width - this.x_padding / 4,
+                                svg_height - this.y_padding / 2
+                            ]
 
-                            // Add label of the polygon
-                            const label_position = get_midpoint(front_face.centroid,
-                                get_midpoint(front_face.points[0], front_face.points[2]),
-                            );
-                            const x = draw_x_start + (label_position[0] - item.x_min) * pixel_ratio;
-                            const y = draw_y_start + (label_position[2] - item.z_min) * pixel_ratio; // swap Y <-> Z
-                            const face_label = svg_text(`${front_face.label}`,
-                                x, y,
-                                this.title_font_size * 0.9,
-                                'white',
-                            );
-                            face_label.setAttribute('text-anchor', 'middle');
-                            face_label.setAttribute('alignment-baseline', 'middle');
-                            face_label.setAttribute('font-weight', 'bold');
+                            // Add measurements dashed lines
+                            for (let i = 0; i < drawing_boundary_pts.length; i++) {
+                                const measurement_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                const pt = drawing_boundary_pts[i];
 
+                                measurement_line.setAttribute('x1', draw_x_start + pt[0]);
+                                measurement_line.setAttribute('y1', draw_y_start + pt[1]);
+                                if (i % 2 === 0) {
+                                    measurement_line.setAttribute('x2', bottom_right_corner_pt[0]);
+                                    measurement_line.setAttribute('y2', draw_y_start + pt[1]);
+                                } else {
+                                    measurement_line.setAttribute('x2', draw_x_start + pt[0]);
+                                    measurement_line.setAttribute('y2', bottom_right_corner_pt[1]);
+                                }
 
-                            add_stroke_behind(face_label, 3 * this.stroke_width);
-                            svg_elements_with_priority.push([face_label, 15]);
-                        }
-
-                        // Compute drawing boundary points
-                        const drawing_boundary_pts = [
-                            top_pt, right_pt, bottom_pt, left_pt
-                        ].map(p => [
-                            p[0] * pixel_ratio,
-                            p[1] * pixel_ratio,
-                            0,
-                        ]);
-
-                        const top_left_corner_pt = [
-                            this.x_padding / 4,
-                            draw_y_start
-                        ]
-                        const bottom_right_corner_pt = [
-                            svg_width - this.x_padding / 4,
-                            svg_height - this.y_padding / 4
-                        ]
-
-                        // Add measurements dashed lines
-                        for (let i = 0; i < drawing_boundary_pts.length; i++) {
-                            const measurement_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                            const pt = drawing_boundary_pts[i];
-
-                            measurement_line.setAttribute('x1', draw_x_start + pt[0]);
-                            measurement_line.setAttribute('y1', draw_y_start + pt[1]);
-                            if (i % 2 === 0) {
-                                measurement_line.setAttribute('x2', bottom_right_corner_pt[0]);
-                                measurement_line.setAttribute('y2', draw_y_start + pt[1]);
-                            } else {
-                                measurement_line.setAttribute('x2', draw_x_start + pt[0]);
-                                measurement_line.setAttribute('y2', bottom_right_corner_pt[1]);
+                                measurement_line.setAttribute('stroke', 'gray');
+                                measurement_line.setAttribute('stroke-opacity', '0.5');
+                                measurement_line.setAttribute('stroke-dasharray', this.stroke_dash_arr);
+                                measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
+                                svg_elements_with_priority.push([measurement_line, 9]);
                             }
 
-                            measurement_line.setAttribute('stroke', 'gray');
-                            measurement_line.setAttribute('stroke-opacity', '0.5');
-                            measurement_line.setAttribute('stroke-dasharray', this.stroke_dash_arr);
-                            measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
-                            svg_elements_with_priority.push([measurement_line, 9]);
-                        }
+                            // Add vertical line and height text
+                            {
+                                const measurement_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
 
-                        // Add vertical line and height text
-                        {
-                            const measurement_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                measurement_line.setAttribute('x1', bottom_right_corner_pt[0]);
+                                measurement_line.setAttribute('y1', draw_y_start + drawing_boundary_pts[0][1]);
+                                measurement_line.setAttribute('x2', bottom_right_corner_pt[0]);
+                                measurement_line.setAttribute('y2', draw_y_start + drawing_boundary_pts[2][1]);
 
-                            measurement_line.setAttribute('x1', bottom_right_corner_pt[0]);
-                            measurement_line.setAttribute('y1', draw_y_start + drawing_boundary_pts[0][1]);
-                            measurement_line.setAttribute('x2', bottom_right_corner_pt[0]);
-                            measurement_line.setAttribute('y2', draw_y_start + drawing_boundary_pts[2][1]);
+                                measurement_line.setAttribute('stroke', 'gray');
+                                measurement_line.setAttribute('stroke-opacity', '0.5');
+                                measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
+                                svg_elements_with_priority.push([measurement_line, 9]);
 
-                            measurement_line.setAttribute('stroke', 'gray');
-                            measurement_line.setAttribute('stroke-opacity', '0.5');
-                            measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
-                            svg_elements_with_priority.push([measurement_line, 9]);
+                                const height = Math.round(bottom_pt[1]);
 
-                            const height = Math.round(bottom_pt[1]);
+                                const text_pt = [
+                                    bottom_right_corner_pt[0] - this.text_padding / 2,
+                                    draw_y_start + drawing_boundary_pts[2][1] / 2 + this.text_padding / 2,
+                                ]
+                                const measurement_text = svg_text(`${height}`, 0, 0, this.font_size); // position
+                                measurement_text.setAttribute('text-anchor', 'middle');
+                                measurement_text.setAttribute('font-weight', 'normal');
+                                measurement_text.setAttribute('stroke', 'white');
+                                measurement_text.setAttribute('paint-order', 'stroke');
+                                measurement_text.setAttribute('transform', `translate(${text_pt[0]}, ${text_pt[1]}) rotate(270)`);
+                                measurement_text.setAttribute('font-weight', 'bold');
 
-                            const text_pt = [
-                                bottom_right_corner_pt[0] - this.text_padding,
-                                draw_y_start + drawing_boundary_pts[2][1] / 2 + this.text_padding / 2,
-                            ]
-                            const measurement_text = svg_text(`${height}`, 0, 0, this.font_size); // position
-                            measurement_text.setAttribute('text-anchor', 'middle');
-                            measurement_text.setAttribute('font-weight', 'normal');
-                            measurement_text.setAttribute('stroke', 'white');
-                            measurement_text.setAttribute('paint-order', 'stroke');
-                            measurement_text.setAttribute('transform', `translate(${text_pt[0]}, ${text_pt[1]}) rotate(270)`);
-                            measurement_text.setAttribute('font-weight', 'bold');
+                                svg_elements_with_priority.push([measurement_text, 10]);
+                            }
 
-                            svg_elements_with_priority.push([measurement_text, 10]);
-                        }
+                            // Add horizontal line and width text
+                            {
+                                const measurement_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
 
-                        // Add horizontal line and width text
-                        {
-                            const measurement_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                measurement_line.setAttribute('x1', draw_x_start + drawing_boundary_pts[3][0]);
+                                measurement_line.setAttribute('y1', bottom_right_corner_pt[1]);
+                                measurement_line.setAttribute('x2', draw_x_start + drawing_boundary_pts[1][0]);
+                                measurement_line.setAttribute('y2', bottom_right_corner_pt[1]);
 
-                            measurement_line.setAttribute('x1', draw_x_start + drawing_boundary_pts[3][0]);
-                            measurement_line.setAttribute('y1', bottom_right_corner_pt[1]);
-                            measurement_line.setAttribute('x2', draw_x_start + drawing_boundary_pts[1][0]);
-                            measurement_line.setAttribute('y2', bottom_right_corner_pt[1]);
-
-                            measurement_line.setAttribute('stroke', 'gray');
-                            measurement_line.setAttribute('stroke-opacity', '0.5');
-                            measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
-                            svg_elements_with_priority.push([measurement_line, 9]);
+                                measurement_line.setAttribute('stroke', 'gray');
+                                measurement_line.setAttribute('stroke-opacity', '0.5');
+                                measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
+                                svg_elements_with_priority.push([measurement_line, 9]);
 
 
-                            const width = Math.round(right_pt[0]);
-                            const measurement_text = svg_text(`${width}`,
-                                draw_x_start + drawing_boundary_pts[1][0] / 2,
-                                bottom_right_corner_pt[1] - this.text_padding,
-                                this.font_size,
+                                const width = Math.round(right_pt[0]);
+                                const measurement_text = svg_text(`${width}`,
+                                    draw_x_start + drawing_boundary_pts[1][0] / 2,
+                                    bottom_right_corner_pt[1] - this.text_padding / 2,
+                                    this.font_size,
+                                );
+                                measurement_text.setAttribute('text-anchor', 'middle');
+                                measurement_text.setAttribute('font-weight', 'normal');
+                                measurement_text.setAttribute('stroke', 'white');
+                                measurement_text.setAttribute('paint-order', 'stroke');
+                                measurement_text.setAttribute('font-weight', 'bold');
+
+                                svg_elements_with_priority.push([measurement_text, 10]);
+                            }
+
+
+                            // Add count text
+                            const text_color = item.color.add(0, -10, -10).hex;
+                            const count_text = svg_text(`X ${group.count}`,
+                                svg_width - this.x_padding,
+                                this.y_padding,
+                                this.title_font_size,
+                                text_color,
                             );
-                            measurement_text.setAttribute('text-anchor', 'middle');
-                            measurement_text.setAttribute('font-weight', 'normal');
-                            measurement_text.setAttribute('stroke', 'white');
-                            measurement_text.setAttribute('paint-order', 'stroke');
-                            measurement_text.setAttribute('font-weight', 'bold');
+                            count_text.setAttribute('text-anchor', 'end');
+                            count_text.setAttribute('font-weight', 'bold');
+                            svg_elements_with_priority.push([count_text, 5]);
 
-                            svg_elements_with_priority.push([measurement_text, 10]);
+                            // Add label title vertically at the left of the svg
+                            const label_title = svg_text(`${this.i18n('face')} ${item.label}`,
+                                this.x_padding,
+                                this.y_padding,
+                                this.title_font_size,
+                                text_color,
+                            );
+                            label_title.setAttribute('text-anchor', 'start');
+                            label_title.setAttribute('font-weight', 'bold');
+                            label_title.setAttribute('style', 'text-transform: capitalize');
+                            svg_elements_with_priority.push([label_title, 19]);
+
+                            // Sort svg elements by priority
+                            const svg_elements_sorted_by_priority = _.sortBy(svg_elements_with_priority, item => item[1]);
+                            _.forEach(svg_elements_sorted_by_priority, item => {
+                                svg.appendChild(item[0]);
+                            });
+                            this.timbers_grouped_by_face_svg_container.appendChild(svg);
+                            item_index++;
                         }
-
-
-                        // Add count text
-                        const text_color = item.color.add(0, -10, -10).hex;
-                        const count_text = svg_text(`X ${group.count}`,
-                            svg_width - this.x_padding,
-                            this.y_padding,
-                            this.title_font_size,
-                            text_color,
-                        );
-                        count_text.setAttribute('text-anchor', 'end');
-                        count_text.setAttribute('font-weight', 'bold');
-                        svg_elements_with_priority.push([count_text, 5]);
-
-                        // Add label title vertically at the left of the svg
-                        const label_title = svg_text(`${this.i18n('face')} ${item.label}`,
-                            this.x_padding,
-                            this.y_padding,
-                            this.title_font_size,
-                            text_color,
-                        );
-                        label_title.setAttribute('text-anchor', 'start');
-                        label_title.setAttribute('font-weight', 'bold');
-                        label_title.setAttribute('style', 'text-transform: capitalize');
-                        svg_elements_with_priority.push([label_title, 19]);
-
-                        // Sort svg elements by priority
-                        const svg_elements_sorted_by_priority = _.sortBy(svg_elements_with_priority, item => item[1]);
-                        _.forEach(svg_elements_sorted_by_priority, item => {
-                            svg.appendChild(item[0]);
-                        });
-                        this.timbers_grouped_by_face_svg_container.appendChild(svg);
-                        item_index++;
-                    });
+                    )
+                    ;
                 },
             };
         });
@@ -3371,8 +3422,8 @@
                     // Framework Parameters
                     measuring_unit: "cm",                               // Measuring unit by default is cm
                     zome_height_in_mm: WORLD_HEIGHT,    // Height in mm
-                    timber_width_in_mm: 60,                             // Timber width in mm
-                    timber_thickness_in_mm: 40,                         // Timber thickness in mm
+                    timber_width_in_mm: 80,                             // Timber width in mm
+                    timber_thickness_in_mm: 60,                         // Timber thickness in mm
                     z_vanishing_point_in_mm: null,
                     assembly_method: 1,
                     assembly_direction: 0,
@@ -4134,7 +4185,7 @@
                         // Add roof overflow points on outer face
                         const outer_face_points = face.framework_outer_points;
                         let outer_face = Polygon3D.copy(face, outer_face_points);
-                        if (face.crown_index + 2 < num_crowns   // dont use roof overflow on last crowns
+                        if (face.crown_index + 2 < num_crowns   // don't use roof overflow on last crowns
                             && face.slope < TAU_Q               // if slope is superior thant TAU_Q
                             && ROOF_OVERFLOW_DISTANCE > 0       // if there is not a minimal distance
                             && !face.is_top_part                // and not on top part of divided face (bindu option)
@@ -4225,6 +4276,15 @@
                             footing_params.push([B, D, F, H]);
                         }
 
+                        // Add a dihedral angle to timber, because we need face plane to compute it
+                        for (let k = 0; k < face.framework_timbers.length; k++) {
+                            const timber = face.framework_timbers[k];
+                            timber.dihedral_angle = Math.PI - angle_between_planes(
+                                timber.get_face("bottom").plane,
+                                face.plane,
+                            );
+                        }
+
                         // Add skeleton crown
                         skeleton_crowns[face_index] = new Base3DGeometryCrown(
                             face,
@@ -4238,17 +4298,6 @@
                             face.color,
                             face.crown_index,
                         );
-
-                        // Add a dihedral angle for Goodkarma, because we need face plane to compute it
-                        if (ASSEMBLY_METHOD === 0) {
-                            for (let k = 0; k < face.framework_timbers.length; k++) {
-                                const timber = face.framework_timbers[k];
-                                timber.dihedral_angle = Math.PI - angle_between_planes(
-                                    timber.get_face("bottom").plane,
-                                    face.plane,
-                                );
-                            }
-                        }
                     }
 
                     // Build Footing timbers
@@ -4430,7 +4479,7 @@
                         }
 
 
-                        // Swap y axis with z axis for 3D display
+                        // Swap y-axis with z axis for 3D display
                         flattened_faces[face_index] = Polygon3D.copy(face, flattened_points);
                     }
 
@@ -4451,6 +4500,7 @@
                         rotation_angles: rotation_angles,
                         rotated_colors: rotated_colors,
 
+                        assembly_method: ASSEMBLY_METHOD,
                         skeleton: skeleton,
                         timber_profiles_grouped_by_hash: timber_profiles_grouped_by_hash,
                         timbers_grouped_by_face: timbers_grouped_by_face,
@@ -4485,7 +4535,8 @@
                 },
             };
         });
-    });
+    })
+    ;
 </script>
 <!-- Custom Javascript -->
 </body>
