@@ -338,11 +338,15 @@ svg.svg_rhombus_customizer use.clickable:hover {
 
 #timbers_grouped_by_face_svg_container {
     width: 300px;
+    max-height: 1200px;
+    overflow-y: auto;
 }
 
 
 #timber_profiles_svg_container {
     width: 800px;
+    max-height: 1200px;
+    overflow-y: auto;
 }
 
 #timbers_grouped_by_face_svg_container > div > svg,
@@ -366,25 +370,25 @@ svg.svg_rhombus_customizer use.clickable:hover {
 }
 
 @media print and (orientation: landscape) {
-    #timber_profiles_svg_container  {
-        width: 95vw!important;
+    #timber_profiles_svg_container {
+        width: 95vw !important;
         page-break-before: always !important;
     }
 
-    #timbers_grouped_by_face_svg_container{
-        width: 37vw!important;
+    #timbers_grouped_by_face_svg_container {
+        width: 37vw !important;
         page-break-after: always !important;
     }
 }
 
 @media print and (orientation: portrait) {
-    #timber_profiles_svg_container  {
-        width: 95vw!important;
+    #timber_profiles_svg_container {
+        width: 95vw !important;
         page-break-before: always !important;
     }
 
-    #timbers_grouped_by_face_svg_container{
-        width: 60vw!important;
+    #timbers_grouped_by_face_svg_container {
+        width: 60vw !important;
         page-break-after: always !important;
     }
 }
