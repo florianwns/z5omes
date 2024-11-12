@@ -38,6 +38,12 @@ const FOOTING_CHAR = '~';
 const FLOOR_CHAR = '⬢';
 const XYZ = ["X", "Y", "Z"];
 
+
+const RED = "#8f0101";
+const BLUE = "#00148a";
+const ORANGE = "#cc5402";
+const GREEN = "#0c7304";
+
 const ASSEMBLY_DIRECTION_ICONS = ["fa-rotate-right", "fa-rotate-left", "fa-slash-back"]
 const FRAMEWORK_CUSTOMIZER_SVG_IDS = [
     "#svg_vertical_bar_at_top",
@@ -347,8 +353,8 @@ function get_boundaries(points) {
     }
 
     // Compute width and height from 2D boundaries
-    const width = Math.abs(x_max - x_min);      // X Axis
-    const height = Math.abs(y_max - y_min);     // Y Axis
+    const width = Math.abs(x_max - x_min);      // x-axis
+    const height = Math.abs(y_max - y_min);     // y-axis
     const depth = Math.abs(z_max - z_min);      // Z AXis
 
     return [x_min, x_max, y_min, y_max, z_min, z_max, width, height, depth];
@@ -477,7 +483,7 @@ function rotate_point_around_y_axis(vec, angle, origin = [0, 0, 0]) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
-    // Rotate an 2D vector around y axis with an origin
+    // Rotate an 2D vector around y-axis with an origin
     let delta = sub(vec, origin);
     return [
         delta[0] * cos_theta + delta[2] * sin_theta + origin[0],
@@ -490,7 +496,7 @@ function rotate_points_around_y_axis(points, angle) {
     const sin_theta = (angle instanceof Angle) ? angle.sin : Math.sin(angle);
     const cos_theta = (angle instanceof Angle) ? angle.cos : Math.cos(angle);
 
-    // Rotate 2D points around y axis
+    // Rotate 2D points around y-axis
     const rotated_points = new Array(points.length);
     for (let i = 0; i < points.length; i++) {
         const [x, y, z] = points[i];
@@ -535,7 +541,7 @@ function apply_3D_transformations(points, quaternion, translation) {
 
 function put_points_on_the_ground(points, pt1, pt2, pt3, horizontally = true) {
     // Put 3D points on the ground with the pt2 at zero to 2D points
-    // and the pt1 is aligned on x axis if horizontally is true, y axis otherwise
+    // and the pt1 is aligned on x-axis if horizontally is true, y-axis otherwise
     // Use quaternion method to put points on the ground
 
     // Compute the angle/distances with the pt2 point
@@ -934,7 +940,7 @@ class Color {
 const COLOR_BASE = Color.from_angles(0, 0);
 
 class Base3DGeometry {
-    constructor(points, label, color, crown_index) {
+    constructor(points, label, color, crown_index, dihedral_angle) {
         // With color, label flag it's more fun
         this._label = label || "";
         this._color = color || COLOR_BASE;
@@ -943,7 +949,7 @@ class Base3DGeometry {
         this.crown_index = crown_index || 0;
 
         // Add a dihedral angle
-        this.dihedral_angle = null;
+        this.dihedral_angle = dihedral_angle || null;
 
         // Store points
         this.points = points || [];
@@ -1154,13 +1160,13 @@ class Base3DGeometry {
     }
 
     get width() {
-        // X Axis
+        // x-axis
         if (this._width === null) this.compute_boundaries();
         return this._width;
     }
 
     get height() {
-        // Y Axis
+        // y-axis
         if (this._height === null) this.compute_boundaries();
         return this._height;
     }
@@ -1212,7 +1218,7 @@ class Base3DGeometry {
 
     static copy(obj, points) {
         return new Base3DGeometry(
-            points || obj.points, obj.label, obj.color, obj.crown_index, obj.part
+            points || obj.points, obj.label, obj.color, obj.crown_index, obj.dihedral_angle
         );
     }
 
@@ -1495,7 +1501,7 @@ class Polygon3D extends Base3DGeometry {
     }
 
     compute_points_on_the_ground() {
-        // Flattens the points with the origin at zero and the start_pt1 on the y axis, only 2D points
+        // Flattens the points with the origin at zero and the start_pt1 on the y-axis, only 2D points
         let A, B, C;
         switch (this.part) {
             case "left":
@@ -2072,9 +2078,9 @@ class Polygon3D extends Base3DGeometry {
 
 
 class Base3DGeometryGroup extends Base3DGeometry {
-    constructor(children, points, label, color, crown_index) {
+    constructor(children, points, label, color, crown_index, dihedral_angle) {
         // Call parent constructor
-        super(points, label, color, crown_index);
+        super(points, label, color, crown_index, dihedral_angle);
 
         // Empty children
         this._children = children || [];
@@ -2147,9 +2153,9 @@ class Base3DGeometryGroup extends Base3DGeometry {
 }
 
 class TrapezoidalPrism extends Base3DGeometryGroup {
-    constructor(points, label, color, crown_index) {
+    constructor(points, label, color, crown_index, dihedral_angle) {
         // Call parent constructor without children
-        super(null, points, label, color, crown_index);
+        super(null, points, label, color, crown_index, dihedral_angle);
 
         if (this.num_points !== 8) {
             console.error("TrapezoidalPrism must have 8 point");
@@ -2162,7 +2168,7 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
 
     static copy(obj, points) {
         return new TrapezoidalPrism(
-            points || obj.points, obj.label, obj.color, obj.crown_index
+            points || obj.points, obj.label, obj.color, obj.crown_index, obj.dihedral_angle
         );
     }
 
@@ -2399,6 +2405,7 @@ class Zome {
             rotation_angles = null,
             rotated_colors = null,
 
+            assembly_method = null,
             skeleton = null,
             timber_profiles_grouped_by_hash = null,
             timbers_grouped_by_face = null,
@@ -2424,6 +2431,7 @@ class Zome {
         this.rotation_angles = rotation_angles || [];
         this.rotated_colors = rotated_colors || [];
 
+        this.assembly_method = assembly_method || 0;
         this.skeleton = skeleton || [];
         this.timber_profiles_grouped_by_hash = timber_profiles_grouped_by_hash || [];
         this.timbers_grouped_by_face = timbers_grouped_by_face || [];
