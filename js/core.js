@@ -1231,7 +1231,7 @@ class Base3DGeometry {
         }
 
         // Get top face
-        const side = "front";
+        const side = "top";
         const face_on_the_ground = this.put_face_on_the_ground(side);
 
         if (face_on_the_ground && face_on_the_ground.label) {
@@ -2188,17 +2188,17 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
 
     init_children() {
         this._children = [
-            this.get_face("top"),
-            this.get_face("bottom"),
+            this.get_face("back"),
+            this.get_face("front"),
             this.get_face("left"),
             this.get_face("right"),
-            this.get_face("front"),
-            this.get_face("back"),
+            this.get_face("top"),
+            this.get_face("bottom"),
         ];
     }
 
     compute_points_on_the_ground() {
-        // Flattens point with the bottom side at zero
+        // Flattens point with the front side at zero
         const [A, B, D] = [this.points[0], this.points[1], this.points[3]];
         [this._points_on_the_ground, this._quaternion, this._translation] = put_points_on_the_ground(this.points, D, B, A, true);
     }
@@ -2211,7 +2211,7 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         super.compute_meshes(true);
     }
 
-    get_face(side = "front") {
+    get_face(side = "top") {
         // return a Polygon 3D of a specific side
         return Polygon3D.copy(this, this.filter_points_by_side(side));
     }
@@ -2220,32 +2220,32 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         // Filter the 6 sides points of TrapezoidalPrism for Polygon construction
         const [A, B, C, D, E, F, G, H] = points || this.points;
         switch (side) {
-            case "front":
-                return [B, A, C, D];     // Front side
-            case "back":
-                return [F, E, G, H];     // Back side
             case "top":
-                return [B, F, H, D];     // Top side
+                return [B, A, C, D];     // Top side
             case "bottom":
-                return [A, E, G, C];     // Bottom side
+                return [F, E, G, H];     // Bottom side
+            case "back":
+                return [B, F, H, D];     // Back side
+            case "front":
+                return [A, E, G, C];     // Front side
             case "right":
                 return [D, C, G, H];     // Right side
             case "left":
                 return [B, A, E, F];     // Left side
         }
     }
-
+    
     get_opposite_side(side) {
         // Filter the 6 sides points of TrapezoidalPrism for Polygon construction
         switch (side) {
-            case "front":
-                return "back";
-            case "back":
-                return "front";
             case "top":
                 return "bottom";
             case "bottom":
                 return "top";
+            case "back":
+                return "front";
+            case "front":
+                return "back";
             case "right":
                 return "left";
             case "left":
@@ -2264,18 +2264,18 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
         return TrapezoidalPrism.copy(this, this.points_on_the_ground);
     }
 
-    put_face_on_the_ground(side = "front", swap_yz = false, add_opposite_side = false, rotation_angle = null) {
-        // Flatten side (or pair of sides if add_opposite_side is true)
-        // with three choices "front", "bottom" and "left";
-        // Because svg display is different than three.js display, we reverse some axes.
+    put_face_on_the_ground(side = "top", swap_yz = false, add_opposite_side = false, rotation_angle = null) {
+        // Flatten side (or a pair of sides if add_opposite_side is true)
+        // with three choices "top", "front" and "left";
+        // Because svg display is different from three.js display, we reverse some axes.
         let points_on_the_ground;
         switch (side) {
-            case "front":
-            case "back":
+            case "top":
+            case "bottom":
                 points_on_the_ground = this.points_on_the_ground
                 break;
-            case "bottom":
-            case "top":
+            case "front":
+            case "back":
                 points_on_the_ground = swap_axes(this.points_on_the_ground, "XZY").map(p => [p[0], p[1], -p[2]]);
                 break;
             case "left":
