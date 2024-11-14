@@ -1,8 +1,9 @@
 # TODO-LIST
 
-* [x] Ajouter les angles de biseaux et les mesures sur les courrones de losanges
+* [ ] Ajoûter un warning les les pièces ne sont pas usinables , dans le cas d'abérattions de projection,
+  ou de mauvais paramètres d'épaisseur par exemple.
 
-* [ ] Ajouter différent paramètre en gardant la même méthode de calcul
+* [ ] Ajouter différent paramètres en gardant la même méthode de calcul
 
 * [ ] Changer l'aide du kite ratio
   car ce n'est pas exactement ça
