@@ -414,7 +414,7 @@
     </div>
 
     <div class="auto-shift position-relative">
-        <div class="container-xl row m-auto" style="max-width: 980px;">
+        <div class="container-xxl row m-auto">
             <div class="col mb-3 mt-3 px-1">
                 <div class="d-flex align-items-center">
                     <a href="https://florianwns.github.io/z5omes/"
@@ -1387,7 +1387,9 @@
                     </div>
                 </div>
 
-                <div class="col-12 break-before mb-5" x-data="framework_measurements" @zome-is-made.window="__process">
+                <div class="col-12 break-before mb-5" x-data="framework_measurements"
+                     @resize.window="__auto_size"
+                     @zome-is-made.window="__process">
                     <div class="d-flex flex-column flex-sm-row align-items-center mb-3 justify-content-between">
                         <span class="me-auto"></span>
                         <!-- ZIP and Print Buttons -->
@@ -1408,12 +1410,15 @@
                         </div>
                     </div>
 
-                    <div class="table-responsive-lg">
+
+                    <div class="table-responsive-lg" x-ref="framework_measurement_svgs_container">
                         <div class="gap-3 d-flex flex-column flex-lg-row justify-content-center">
-                            <div class="mx-auto" id="timbers_grouped_by_face_svg_container">
+                            <div class="mx-auto" id="timbers_grouped_by_face_svg_container"
+                                 :style="`width:${timbers_grouped_by_face_svg_width}px`">
                                 <div class="bg-white rounded border"></div>
                             </div>
-                            <div class="mx-auto" id="timber_profiles_svg_container">
+                            <div class="mx-auto" id="timber_profiles_svg_container"
+                                 :style="`width:${timber_profiles_svg_width}px`">
                                 <div class="bg-white rounded border"></div>
                             </div>
                         </div>
@@ -1502,26 +1507,33 @@
     let ZOME = new Zome({});
 
     document.addEventListener('alpine:init', () => {
+        let framework_measurement_svgs_container;
 
         Alpine.data('framework_measurements', () => {
                 return {
                     timber_profiles_svg_container: null,
                     timbers_grouped_by_face_svg_container: null,
 
+                    timbers_grouped_by_face_svg_width: 300,
+                    timber_profiles_svg_width: 800,
+
                     // Properties
                     title_font_size: 14,
                     x_padding: 40,
                     font_size: 12,
-                    stroke_dash_arr: '2, 2',
+                    stroke_dash_arr: '4, 4',
+                    measurement_line_stroke_dash_arr: '3, 3',
 
                     // Dynamic properties
                     y_padding: 1,
                     stroke_width: 1,
                     text_padding: 1,
 
+                    __auto_size: null,
                     __process: null,
                     async init() {
                         this.__process = _.debounce(this.process, 1);
+                        this.__auto_size = _.debounce(this.auto_size, 1);
 
                         // Init dynamic properties
                         this.y_padding = this.font_size * 4;
@@ -1531,6 +1543,20 @@
                         // Get ref elements
                         this.timber_profiles_svg_container = document.getElementById('timber_profiles_svg_container').getElementsByTagName('div')[0];
                         this.timbers_grouped_by_face_svg_container = document.getElementById('timbers_grouped_by_face_svg_container').getElementsByTagName('div')[0];
+
+                        // Call autosize method
+                        framework_measurement_svgs_container = this.$refs.framework_measurement_svgs_container;
+                        this.auto_size()
+                    },
+                    auto_size() {
+                        const width = framework_measurement_svgs_container.offsetWidth;
+                        if (width >= 992) {
+                            this.timbers_grouped_by_face_svg_width = width / 3;
+                            this.timber_profiles_svg_width = (width / 3) * 2
+                        } else {
+                            this.timbers_grouped_by_face_svg_width = Math.max(400, width / 2);
+                            this.timber_profiles_svg_width = width;
+                        }
                     },
                     get_labels() {
                         return [
@@ -1793,7 +1819,7 @@
                                             dotted_line_at_the_center.setAttribute('y2', dotted_line_end[1]);
                                             dotted_line_at_the_center.setAttribute('stroke', 'white');
                                             dotted_line_at_the_center.setAttribute('stroke-opacity', '0.5');
-                                            dotted_line_at_the_center.setAttribute('stroke-dasharray', '5 5');
+                                            dotted_line_at_the_center.setAttribute('stroke-dasharray', '6 6');
                                             dotted_line_at_the_center.setAttribute('stroke-width', `${2 * this.stroke_width}px`);
                                             svg_elements_with_priority.push([dotted_line_at_the_center, 12]);
                                         }
@@ -1832,9 +1858,9 @@
                                             vertical_line.setAttribute('x2', pt[0]);
                                             vertical_line.setAttribute('y2', `${vertical_line_end}`);
                                             vertical_line.setAttribute('stroke', 'gray');
-                                            vertical_line.setAttribute('stroke-opacity', '0.5');
-                                            vertical_line.setAttribute('stroke-dasharray', this.stroke_dash_arr);
-                                            vertical_line.setAttribute('stroke-width', `${this.stroke_width}px`);
+                                            vertical_line.setAttribute('stroke-opacity', '0.4');
+                                            vertical_line.setAttribute('stroke-dasharray', this.measurement_line_stroke_dash_arr);
+                                            vertical_line.setAttribute('stroke-width', `${this.stroke_width / 2}px`);
                                             svg_elements_with_priority.push([vertical_line, 11]);
                                         }
 
@@ -1933,7 +1959,7 @@
                                             ] : [
                                                 [1, 2],         // left of top view
                                                 [1, 2],         // left of front view
-                                                [1, 5, 6, 2],   // top view
+                                                [1, 2],   // top view
                                                 [0, 1, 2, 3],   // front view
                                             ]
 
@@ -1954,7 +1980,7 @@
                                                 bevel_line.setAttribute('y2', pt2[1]);
                                                 bevel_line.setAttribute('stroke', bevel_color);
                                                 bevel_line.setAttribute('stroke-opacity', '1');
-                                                bevel_line.setAttribute('stroke-width', `${this.stroke_width * 2}px`);
+                                                bevel_line.setAttribute('stroke-width', `${this.stroke_width * 2.5}px`);
                                                 svg_elements_with_priority.push([bevel_line, 11]);
                                             }
                                         }
@@ -2172,7 +2198,7 @@
                                                     bevel_line.setAttribute('y2', pt2[1]);
                                                     bevel_line.setAttribute('stroke', bevel_color);
                                                     bevel_line.setAttribute('stroke-opacity', '1');
-                                                    bevel_line.setAttribute('stroke-width', `${this.stroke_width * 2}px`);
+                                                    bevel_line.setAttribute('stroke-width', `${this.stroke_width * 2.5}px`);
                                                     svg_elements_with_priority.push([bevel_line, 11]);
                                                 }
                                             }
@@ -2213,9 +2239,9 @@
                                         }
 
                                         measurement_line.setAttribute('stroke', 'gray');
-                                        measurement_line.setAttribute('stroke-opacity', '0.5');
-                                        measurement_line.setAttribute('stroke-dasharray', this.stroke_dash_arr);
-                                        measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
+                                        measurement_line.setAttribute('stroke-opacity', '0.4');
+                                        measurement_line.setAttribute('stroke-dasharray', this.measurement_line_stroke_dash_arr);
+                                        measurement_line.setAttribute('stroke-width', `${this.stroke_width / 2}px`);
                                         svg_elements_with_priority.push([measurement_line, 9]);
                                     }
 
@@ -2229,7 +2255,7 @@
                                         measurement_line.setAttribute('y2', draw_y_start + drawing_boundary_pts[2][1]);
 
                                         measurement_line.setAttribute('stroke', 'gray');
-                                        measurement_line.setAttribute('stroke-opacity', '0.5');
+                                        measurement_line.setAttribute('stroke-opacity', '0.4');
                                         measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
                                         svg_elements_with_priority.push([measurement_line, 9]);
 
@@ -2260,7 +2286,7 @@
                                         measurement_line.setAttribute('y2', bottom_right_corner_pt[1]);
 
                                         measurement_line.setAttribute('stroke', 'gray');
-                                        measurement_line.setAttribute('stroke-opacity', '0.5');
+                                        measurement_line.setAttribute('stroke-opacity', '0.4');
                                         measurement_line.setAttribute('stroke-width', `${this.stroke_width}px`);
                                         svg_elements_with_priority.push([measurement_line, 9]);
 
