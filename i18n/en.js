@@ -24,6 +24,7 @@ const I18N_EN = {
         inner_faces_on_the_ground: "Inner faces on the ground",
         timber_profiles: "Timber profiles",
         timbers_of_each_face: "Timbers of each face",
+        timber_is_not_machinable: "This profile is not machinable. Try changing some settings like 'Thickness' or 'Vanishing Point' !",
         profile: "Profile",
         face: "Face",
         spirals: "Spirals",

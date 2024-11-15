@@ -344,17 +344,17 @@ svg.svg_rhombus_customizer use.clickable:hover {
 /*    width: 800px;*/
 /*}*/
 
-@media screen and (min-width: 992px) {
-    #timbers_grouped_by_face_svg_container {
-        max-height: 1200px;
-        overflow-y: auto;
-    }
+/*@media screen and (min-width: 992px) {*/
+/*    #timbers_grouped_by_face_svg_container {*/
+/*        max-height: 1200px;*/
+/*        overflow-y: auto;*/
+/*    }*/
 
-    #timber_profiles_svg_container {
-        max-height: 1200px;
-        overflow-y: auto;
-    }
-}
+/*    #timber_profiles_svg_container {*/
+/*        max-height: 1200px;*/
+/*        overflow-y: auto;*/
+/*    }*/
+/*}*/
 
 
 #timbers_grouped_by_face_svg_container > div > svg,

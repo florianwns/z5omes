@@ -24,6 +24,7 @@ const I18N_ES = {
         inner_faces_on_the_ground: "Caras internas en la base",
         timber_profiles: "Perfiles de viga",
         timbers_of_each_face: "Vigas de cada cara",
+        timber_is_not_machinable: "Este perfil no es mecanizable. ¡Intenta cambiar algunas configuraciones como la 'Grosor' o el 'Punto de fuga'!",
         profile: "Perfil",
         face: "Cara",
         spirals: "Espirales",

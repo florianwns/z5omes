@@ -9,7 +9,7 @@
 
     <!-- Mobile Capability -->
     <meta name="application-name" content="Z5omes"/>
-    <link rel="manifest" href="manifest.json?v=1.0.15b05"/>
+    <link rel="manifest" href="manifest.json?v=1.0.15b06"/>
     <meta name="apple-mobile-web-app-title" content="Z5omes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,7 +27,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
-    <link href="css/custom.css?v=1.0.15b05" rel="stylesheet">
+    <link href="css/custom.css?v=1.0.15b06" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -427,7 +427,7 @@
                             <span class="d-none d-sm-inline-block d-md-none">Z5omes</span>
                         </h2>
                         <span class="d-none d-sm-inline-block text-muted position-absolute end-0"
-                              style="font-size: 10px; top:0px">v1.0.15b05</span>
+                              style="font-size: 10px; top:0px">v1.0.15b06</span>
                     </a>
 
                     <a href="https://www.paypal.com/paypalme/z5omes"
@@ -1476,16 +1476,16 @@
 <script src="js/jszip.min.js"></script>
 
 <!-- i18n Dictionaries -->
-<script src="i18n/br.js?v=1.0.15b05"></script>
-<script src="i18n/es.js?v=1.0.15b05"></script>
-<script src="i18n/en.js?v=1.0.15b05"></script>
-<script src="i18n/it.js?v=1.0.15b05"></script>
-<script src="i18n/fr.js?v=1.0.15b05"></script>
-<script src="i18n/pl.js?v=1.0.15b05"></script>
-<script src="i18n/se.js?v=1.0.15b05"></script>
+<script src="i18n/br.js?v=1.0.15b06"></script>
+<script src="i18n/es.js?v=1.0.15b06"></script>
+<script src="i18n/en.js?v=1.0.15b06"></script>
+<script src="i18n/it.js?v=1.0.15b06"></script>
+<script src="i18n/fr.js?v=1.0.15b06"></script>
+<script src="i18n/pl.js?v=1.0.15b06"></script>
+<script src="i18n/se.js?v=1.0.15b06"></script>
 
 <!-- Core JS -->
-<script src="js/core.js?v=1.0.15b05"></script>
+<script src="js/core.js?v=1.0.15b06"></script>
 
 <!-- Alpine JS -->
 <script defer src="js/alpine.min.js"></script>
@@ -1850,19 +1850,6 @@
                                             svg_elements_with_priority.push([vertices_line, 9]);
                                         }
 
-                                        // Draw vertical lines to get a visual alignment
-                                        if (i === 3) {
-                                            const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                                            vertical_line.setAttribute('x1', pt[0]);
-                                            vertical_line.setAttribute('y1', `${vertical_line_start}`);
-                                            vertical_line.setAttribute('x2', pt[0]);
-                                            vertical_line.setAttribute('y2', `${vertical_line_end}`);
-                                            vertical_line.setAttribute('stroke', 'gray');
-                                            vertical_line.setAttribute('stroke-opacity', '0.4');
-                                            vertical_line.setAttribute('stroke-dasharray', this.measurement_line_stroke_dash_arr);
-                                            vertical_line.setAttribute('stroke-width', `${this.stroke_width / 2}px`);
-                                            svg_elements_with_priority.push([vertical_line, 11]);
-                                        }
 
                                         const real_pt = fitted_points[j];
                                         const rounded_x = Math.round(real_pt[0]);
@@ -1886,19 +1873,55 @@
                                             measurement_text.setAttribute('paint-order', 'stroke');
                                             svg_elements_with_priority.push([measurement_text, 20]);
 
+                                            // Draw vertical lines to get a visual alignment
+                                            if (i === 3) {
+                                                const vertical_line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                                vertical_line.setAttribute('x1', pt[0]);
+                                                vertical_line.setAttribute('y1', `${vertical_line_start}`);
+                                                vertical_line.setAttribute('x2', pt[0]);
+                                                vertical_line.setAttribute('y2', `${vertical_line_end}`);
+                                                vertical_line.setAttribute('stroke', 'gray');
+                                                vertical_line.setAttribute('stroke-opacity', '0.4');
+                                                vertical_line.setAttribute('stroke-dasharray', this.measurement_line_stroke_dash_arr);
+                                                vertical_line.setAttribute('stroke-width', `${this.stroke_width / 2}px`);
+                                                svg_elements_with_priority.push([vertical_line, 11]);
+                                            }
+
                                             // add the rounded value to avoid multiple texts
                                             rounded_xs.push(rounded_x);
                                         }
                                     }
 
-                                    // Compute angles
+                                    // Unpack points
                                     //    [0, 1, 2, 3, 4, 5, 6, 7]
                                     const [a, b, c, d] = drawing_points;                // with z axis equals to 0
                                     const [A, B, C, D, E, F, G, H] = fitted_points;
 
+                                    // Check if timber profile is machinable
+                                    if (i === 1) {
+                                        // we check that the edges do not cross
+                                        let is_machinable = A[0] < B[0] && D[0] < C[0]
+                                            && E[0] < F[0] && H[0] < G[0]
+                                            && A[1] < D[1] && B[1] < C[1]
+                                            && E[1] < H[1] && F[1] < G[1]
+
+                                        if (is_machinable === false) {
+                                            // Add Warning text
+                                            const label_title = svg_text(
+                                                `⚠️ ${this.i18n("timber_is_not_machinable")}`,
+                                                this.x_padding,
+                                                this.y_padding - this.text_padding * 2.5,
+                                                this.title_font_size,
+                                                ORANGE,
+                                            );
+                                            label_title.setAttribute('text-anchor', 'start');
+                                            label_title.setAttribute('font-weight', 'bold');
+                                            svg_elements_with_priority.push([label_title, 19]);
+                                        }
+                                    }
+
+                                    // Compute angles from real points
                                     const base_plane = points_2_plane(A, B, C);
-                                    const y_shift_bottom = [0, this.font_size * 1.25, 0],
-                                        y_shift_up = [0, -this.font_size * 0.5, 0];
 
                                     // We display the angle information according to the side
                                     const angles_params = (i < 2)
