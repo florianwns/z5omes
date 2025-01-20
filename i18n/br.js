@@ -123,6 +123,7 @@ const I18N_BR = {
         quantity: "Quantidade",
         width: "Largura",
         height: "Altura",
+        length: "Comprimento",
         edges: "Comprimento das linhas",
         angles: "Ângulos",
         slope_angle: "Ângulo de inclinação",
