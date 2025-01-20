@@ -124,6 +124,7 @@ const I18N_EN = {
         quantity: "Quantity",
         width: "Width",
         height: "Height",
+        length: "Length",
         thickness: "Thickness",
         edges: "Edges",
         angles: "Angles",

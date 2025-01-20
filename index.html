@@ -1599,13 +1599,9 @@
                         const num_items = Object.keys(timber_profiles_grouped_by_hash).length;
                         const rows = new Array(num_items);
                         let i = 0;
-                        console.log(timber_profiles_grouped_by_hash)
                         _.forIn(timber_profiles_grouped_by_hash, group => {
                             const timber = group.item;
                             const timber_on_the_ground = timber.put_on_the_ground()
-
-                            console.log(timber_on_the_ground)
-
                             rows[i] = [
                                 timber.label,
                                 to_decimal_str(timber_on_the_ground.width, 0),
