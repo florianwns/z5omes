@@ -124,6 +124,7 @@ const I18N_ES = {
         quantity: "Cantidad",
         width: "Ancho",
         height: "Altura",
+        length: "Longitud",
         edges: "Bordes",
         angles: "Ángulos",
         slope_angle: "Ángulo de pendiente",
