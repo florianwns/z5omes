@@ -1396,6 +1396,14 @@
                         <div>
                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                   data-bs-toggle="tooltip"
+                                  title="Export to CSV format"
+                                  :title="i18n('tooltip_export_2_format', 'CSV')"
+                                  @click="download_csv()">
+                                <i class="fa-solid fa-file"></i>
+                                <span class="fa-icon-file-type">CSV</span>
+                            </span>
+                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                  data-bs-toggle="tooltip"
                                   :title="i18n('tooltip_export_2_format', 'ZIP')"
                                   @click="download_zip()">
                                 <i class="fa-solid fa-file"></i>
@@ -1569,6 +1577,57 @@
                             ...this.timbers_grouped_by_face_svg_container.getElementsByTagName('svg'),
                             ...this.timber_profiles_svg_container.getElementsByTagName('svg'),
                         ];
+                    },
+                    get table_column_names() {
+                        return [
+                            this.i18n('profile'),
+                            this.i18n('length'),
+                            this.i18n('width'),
+                            this.i18n('thickness'),
+                            this.i18n('quantity'),
+                        ]
+                    },
+                    get table_rows() {
+                        const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
+                        const num_items = Object.keys(timber_profiles_grouped_by_hash).length;
+                        const rows = new Array(num_items);
+                        let i = 0;
+                        console.log(timber_profiles_grouped_by_hash)
+                        _.forIn(timber_profiles_grouped_by_hash, group => {
+                            const timber = group.item;
+                            const timber_on_the_ground = timber.put_on_the_ground()
+
+                            console.log(timber_on_the_ground)
+
+                            rows[i] = [
+                                timber.label,
+                                to_decimal_str(timber_on_the_ground.width, 0),
+                                to_decimal_str(timber_on_the_ground.depth, 0),
+                                to_decimal_str(timber_on_the_ground.height, 0),
+                                group.count,
+                            ]
+                            i++;
+                        });
+                        return rows;
+                    },
+                    download_csv(sep = ";", fmt = "csv") {
+                        const hr = "# ------------------------------\n"
+
+                        // Add comments
+                        let obj = hr;
+                        obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
+                        obj += `# https://florianwns.github.io/z5omes/\n`;
+                        obj += hr;
+                        obj += `# Distance: mm/\n`;
+                        obj += hr;
+                        obj += _.join(this.table_column_names, sep) + "\n"
+                        const rows = this.table_rows;
+                        _.forEach(rows, row => {
+                            obj += _.join(row, sep) + "\n"
+                        });
+
+                        const filename = this.gen_filename(`_zome_profile_measurements.${fmt}`);
+                        download(filename, `data:text/${fmt}; charset=utf-8,` + encodeURIComponent(obj));
                     },
                     download_zip() {
                         const zip = new JSZip();

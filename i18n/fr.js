@@ -125,6 +125,7 @@ const I18N_FR = {
         width: "Largeur",
         height: "Hauteur",
         length: "Longueur",
+        thickness: "Profondeur",
         edges: "Longueur des arêtes",
         angles: "Angles",
         slope_angle: "Angle d'inclinaison",
