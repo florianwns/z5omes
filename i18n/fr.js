@@ -61,6 +61,7 @@ const I18N_FR = {
         tooltip_link_github: "Allez sur Github 🐈 si vous avez des questions",
         tooltip_link_linkedin: "Visitez mon profil Linkedin",
         tooltip_export_2_format: "Exporter au format $1",
+        tooltip_parts_are_stored_in_separate_files: "Les pièces sont stockées dans des fichiers séparés lors de l'exportation",
         tooltip_draw_face_colors: "Dessine les couleurs des faces",
         tooltip_draw_face_centroids: "Dessine les centroïdes des faces",
         tooltip_split_drawing: "Diviser le dessin en plusieurs feuilles A4 pour l'export au format PDF",

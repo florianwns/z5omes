@@ -36,6 +36,7 @@ const I18N_IT = {
         tooltip_link_github: "Vai su Github 🐈 se hai domande",
         tooltip_link_linkedin: "Visita il mio profilo Linkedin",
         tooltip_export_2_format: "Esportare nel format $1",
+        tooltip_parts_are_stored_in_separate_files: "Le parti vengono memorizzate in file separati quando vengono esportate",
         tooltip_draw_fig_color: "Disegnare i colori",
         tooltip_draw_fig_centroid: "Disegnare il centro di gravità",
         tooltip_split_drawing: "Dividi il disegno in più fogli A4 per esportarlo in formato PDF",
