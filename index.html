@@ -498,6 +498,7 @@
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
+                                                  x-show="!parts_are_separated_for_export"
                                                   :title="i18n('tooltip_export_2_format', 'GLTF (Meters)')"
                                                   @click="download_gltf()">
                                                 <i class="fa-solid fa-file"></i>
@@ -3107,21 +3108,50 @@
                     const exporter = new THREE.OBJExporter();
                     const obj_to_export = this.compute_obj_to_export();
 
-                    const filename = this.gen_filename(`_${this.type_of_3D_objects}`);
-                    const obj_filename = `${filename}.obj`;
-                    const mtl_filename = `${filename}.mtl`;
+                    if (this.parts_are_separated_for_export === true) {
+                        const obj_list_to_exports = [
+                            ...obj_to_export.children[0].children,
+                            ...obj_to_export.children[1].children
+                        ];
 
-                    const data = exporter.parse(obj_to_export, mtl_filename);
-                    const obj_blob = new Blob([data.obj], {type: 'text/plain'});
-                    const mtl_blob = new Blob([data.mtl], {type: 'text/plain'});
+                        const zip = new JSZip();
 
-                    const zip = new JSZip();
-                    zip.file(obj_filename, obj_blob);
-                    zip.file(mtl_filename, mtl_blob);
+                        const num_children = obj_list_to_exports.length;
+                        for (let i = 0; i < num_children; i++) {
 
-                    zip.generateAsync({type: "blob"}).then(function (content) {
-                        save_as(content, `${filename}_obj_mtl.zip`);
-                    });
+                            const obj_filename = `${obj_list_to_exports[i].name}.obj`;
+                            const mtl_filename = `${obj_list_to_exports[i].name}.mtl`;
+
+                            const data = exporter.parse(obj_list_to_exports[i], mtl_filename);
+                            const obj_blob = new Blob([data.obj], {type: 'text/plain'});
+                            const mtl_blob = new Blob([data.mtl], {type: 'text/plain'});
+
+                            zip.file(obj_filename, obj_blob);
+                            zip.file(mtl_filename, mtl_blob);
+                        }
+
+                        const filename = this.gen_filename(`_${this.type_of_3D_objects}_obj_parts.zip`);
+                        zip.generateAsync({type: "blob"}).then(function (content) {
+                            save_as(content, filename);
+                        });
+                    } else {
+                        const filename = this.gen_filename(`_${this.type_of_3D_objects}`);
+                        const obj_filename = `${filename}.obj`;
+                        const mtl_filename = `${filename}.mtl`;
+
+                        const data = exporter.parse(obj_to_export, mtl_filename);
+                        const obj_blob = new Blob([data.obj], {type: 'text/plain'});
+                        const mtl_blob = new Blob([data.mtl], {type: 'text/plain'});
+
+                        const zip = new JSZip();
+                        zip.file(obj_filename, obj_blob);
+                        zip.file(mtl_filename, mtl_blob);
+
+                        zip.generateAsync({type: "blob"}).then(function (content) {
+                            save_as(content, `${filename}_obj.zip`);
+                        });
+                    }
+
                 },
                 download_gltf() {
                     const exporter = new THREE.GLTFExporter();
@@ -3146,11 +3176,35 @@
                 export_to(cls, ext) {
                     const exporter = new cls();
                     const obj_to_export = this.compute_obj_to_export();
-                    const str = exporter.parse(obj_to_export);
-                    const blob = new Blob([str], {type: 'text/plain'});
 
-                    const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
-                    download(filename, URL.createObjectURL(blob));
+                    if (this.parts_are_separated_for_export === true) {
+                        const obj_list_to_exports = [
+                            ...obj_to_export.children[0].children,
+                            ...obj_to_export.children[1].children
+                        ];
+
+                        const zip = new JSZip();
+
+                        const num_children = obj_list_to_exports.length;
+                        for (let i = 0; i < num_children; i++) {
+                            const str = exporter.parse(obj_list_to_exports[i]);
+                            const mesh_blob = new Blob([str], {type: 'text/plain'});
+                            const mesh_filename = `${obj_list_to_exports[i].name}.${ext}`;
+
+                            zip.file(mesh_filename, mesh_blob);
+                        }
+
+                        const filename = this.gen_filename(`_${this.type_of_3D_objects}_${ext}_parts.zip`);
+                        zip.generateAsync({type: "blob"}).then(function (content) {
+                            save_as(content, filename);
+                        });
+                    } else {
+                        const str = exporter.parse(obj_to_export);
+                        const blob = new Blob([str], {type: 'text/plain'});
+
+                        const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
+                        save_as(blob, filename);
+                    }
                 },
 
                 compute_obj_to_export() {
