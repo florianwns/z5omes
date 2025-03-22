@@ -552,12 +552,12 @@
 
                                     <!-- Canvas for Zome 3D rendering -->
                                     <div x-ref="rendering_container_3D" class="position-relative">
-                                        <div x-ref="canvas_container_3D" style="min-height:500px; cursor: move;"
-                                             :style="(is_fullscreen)? `height:100%;` : `height:500px;`"
+                                        <div x-ref="canvas_container_3D" style="min-height:580px; cursor: move;"
+                                             :style="(is_fullscreen)? `height:100%;` : `height:580px;`"
                                              class="shadow bg-dark rounded mb-2 overflow-hidden">
                                         </div>
 
-                                        <div class="position-absolute end-0 bottom-0 p-2 d-grid flex-column gap-3">
+                                        <div class="position-absolute end-0 top-0 p-2 d-grid flex-column gap-3">
                                             <!-- Draw Labels -->
                                             <button class="btn btn-primary"
                                                     @click="draw_labels = !draw_labels"
@@ -602,23 +602,6 @@
                                                 <i class="fa fa-hexagon"></i>
                                             </button>
 
-                                            <!-- Draw Vanishing Lines -->
-                                            <button x-show="show_vanishing_lines_toggle_btn" class="btn btn-primary"
-                                                    @click="draw_vanishing_lines = !draw_vanishing_lines"
-                                                    :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip"
-                                                    :title="i18n('tooltip_draw_vanishing_lines')">
-                                                <i class="fa fa-arrows-to-circle"></i>
-                                            </button>
-
-                                            <!-- Draw Axes -->
-                                            <button class="btn btn-primary"
-                                                    @click="draw_axes = !draw_axes"
-                                                    :class="(draw_axes) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_axes')">
-                                                <i class="fa fa-chart-scatter-3d"></i>
-                                            </button>
-
                                             <!-- Inversion of Z and Y axes -->
                                             <button class="btn px-0 btn-primary"
                                                     @click="inverse_Y_Z_axes = !inverse_Y_Z_axes"
@@ -638,6 +621,34 @@
                                                 <i class="fa fa-caret-up position-absolute top-0 start-50 translate-middle-x"></i>
                                                 <i class="fa fa-caret-down position-absolute bottom-0 start-50 translate-middle-x"></i>
                                                 <i class="fa fa-horizontal-rule"></i>
+                                            </button>
+
+                                            <!-- Parts are stored in separate files -->
+                                            <button class="btn btn-primary"
+                                                    @click="parts_are_separated_for_export = !parts_are_separated_for_export"
+                                                    :class="(parts_are_separated_for_export) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip"
+                                                    :title="i18n('tooltip_parts_are_stored_in_separate_files')">
+                                                <i class="fa fa-scalpel-line-dashed"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="position-absolute end-0 bottom-0 p-2 d-grid flex-column gap-3">
+                                            <!-- Draw Vanishing Lines -->
+                                            <button x-show="show_vanishing_lines_toggle_btn" class="btn btn-primary"
+                                                    @click="draw_vanishing_lines = !draw_vanishing_lines"
+                                                    :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip"
+                                                    :title="i18n('tooltip_draw_vanishing_lines')">
+                                                <i class="fa fa-arrows-to-circle"></i>
+                                            </button>
+
+                                            <!-- Draw Axes -->
+                                            <button class="btn btn-primary"
+                                                    @click="draw_axes = !draw_axes"
+                                                    :class="(draw_axes) ? `btn-primary` : `btn-secondary`"
+                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_axes')">
+                                                <i class="fa fa-chart-scatter-3d"></i>
                                             </button>
 
                                             <!-- Spin on/off -->
@@ -2942,6 +2953,7 @@
                 is_spinning: false,
                 speed: 0.001,
                 type_of_3D_objects: "skeleton",
+                parts_are_separated_for_export: false,
 
                 draw_zome: true,
                 draw_labels: true,
