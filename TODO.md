@@ -1,10 +1,9 @@
 # TODO-LIST
 
+* [ ] Ajoûter le lien de l'url exacte avec paramètre dans les export de fichiers
+
 * [ ] Ajoûter les slider de manière dynamique avec un toggle pour pouvoir défiler les profil et garder la vue des
   losanges
-
-* [x] Ajoûter un warning les les pièces ne sont pas usinables , dans le cas d'abérattions de projection,
-  ou de mauvais paramètres d'épaisseur par exemple.
 
 * [ ] Ajouter différent paramètres en gardant la même méthode de calcul
 
