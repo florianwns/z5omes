@@ -3198,7 +3198,9 @@
                         for (let i = 0; i < num_children; i++) {
                             const str = exporter.parse(obj_list_to_exports[i]);
                             const mesh_blob = new Blob([str], {type: 'text/plain'});
-                            const mesh_filename = `${obj_list_to_exports[i].name}.${ext}`;
+
+                            const obj_name = `${i}_${obj_list_to_exports[i].name}`
+                            const mesh_filename = `${obj_name}.${ext}`;
 
                             zip.file(mesh_filename, mesh_blob);
                         }
