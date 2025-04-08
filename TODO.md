@@ -1,7 +1,5 @@
 # TODO-LIST
 
-* [ ] Ajoûter le lien de l'url exacte avec paramètre dans les export de fichiers
-
 * [ ] Ajoûter les slider de manière dynamique avec un toggle pour pouvoir défiler les profil et garder la vue des
   losanges
 
