@@ -1644,7 +1644,7 @@
                         // Add comments
                         let obj = hr;
                         obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
-                        obj += `# https://florianwns.github.io/z5omes/\n`;
+                        obj += `# ${window.location.href}\n`;
                         obj += hr;
                         obj += `# Distance: mm\n`;
                         obj += hr;
@@ -2521,7 +2521,7 @@
                     // Add comments
                     let obj = hr;
                     obj += `# ${this.i18n('zome_made_with')} Z5omes\n`;
-                    obj += `# https://florianwns.github.io/z5omes/\n`;
+                    obj += `# ${window.location.href}\n`;
                     obj += hr;
                     obj += `# ${this.i18n('actual_zome_height')} : ${this.actual_zome_height}\n`;
                     obj += `# ${this.i18n('floor_area')} : ${this.floor_area}\n`;
@@ -3125,12 +3125,11 @@
                         ];
 
                         const zip = new JSZip();
-
                         const num_children = obj_list_to_exports.length;
                         for (let i = 0; i < num_children; i++) {
-
-                            const obj_filename = `${obj_list_to_exports[i].name}.obj`;
-                            const mtl_filename = `${obj_list_to_exports[i].name}.mtl`;
+                            const obj_name = `${i}_${obj_list_to_exports[i].name}`
+                            const obj_filename = `${obj_name}.obj`;
+                            const mtl_filename = `${obj_name}.mtl`;
 
                             const data = exporter.parse(obj_list_to_exports[i], mtl_filename);
                             const obj_blob = new Blob([data.obj], {type: 'text/plain'});
