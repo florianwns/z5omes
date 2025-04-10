@@ -26,6 +26,8 @@ Pour créer votre propre Zome, veuillez utiliser l'application en ligne :
 </p>
 <br>
 
+> 🇬🇧Version anglaise de ce [README.md](README.md).
+
 ## Parlons un peu des Zomes.
 
 #### 🔷 Un Zome est-il un Zonoèdre ?
