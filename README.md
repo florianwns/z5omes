@@ -2,11 +2,20 @@
 <img src="/img/z5omes_title.png" height="119">
 </p>
 
-# Z5omes | A Zome Maker
+# Welcome to Z5omes
 
-<b>Z5omes</b> allows you to create 3D models for free.
-You can now create your models with 'GoodKarma', 'Beleved' or 'Xpansion' assembly method.
-You can export 3d models in 'GLTF', 'OBJ', 'STL' (mm unit, inverted YZ) or 'PLY' formats.
+Z5omes is a CAD tool designed to assist in the creation of polyhedral frames and structures.
+
+Whether you're a carpenter, maker, designer, or geometry enthusiast, Z5omes helps you explore and build polyhedral
+shapes — like the [rhombic icosahedron](https://en.wikipedia.org/wiki/Rhombic_icosahedron) known as
+the [Zome](https://en.wikipedia.org/wiki/Zome_(architecture)) — with
+precision and ease.
+
+Originally developed with timber framing in mind,
+Z5omes provides practical support for crafting unique architectural
+and artistic projects based on polyhedral geometry.
+
+It's a creative and technical companion for anyone working at the intersection of craftsmanship and design.
 
 To make your own Zome, please check the online app [here](https://florianwns.github.io/z5omes/).
 
@@ -16,19 +25,20 @@ To make your own Zome, please check the online app [here](https://florianwns.git
 </p>
 <br>
 
-## The Project
+## About the Project
 
-This project was designed to be free and will never be charged for. 
-However, you have the right to [offer me a coffee](https://www.paypal.com/paypalme/z5omes) ☕ if you want to help me in my approach.
+This project was designed to be free and will never be charged for.
+That said, if you'd like to support the journey, you’re welcome
+to [buy me a coffee](https://www.paypal.com/paypalme/z5omes) ☕.
 
-🙏 I would first like to thank [Tim Hutton](https://github.com/timhutton/) from whom I took inspiration 
+🙏 I would first like to thank [Tim Hutton](https://github.com/timhutton/) from whom I took inspiration
 for the trigonometry calculations ◁ and who allowed me to launch this project. 🚀
 
-While I wasn't a big fan originally and need to check what he writes, 
+While I wasn't a big fan originally and need to check what he writes,
 🤖 ChatGPT has helped me a lot with understanding vector calculations and the intersection of planes.
 
-Sylvain Huet from [La tanière à mémé](https://www.domegeodesique-yourte.com/) called me one day 
-to create a 3D model with the "GoodKarma" method. 
+Sylvain Huet from [La tanière à mémé](https://www.domegeodesique-yourte.com/) called me one day
+to create a 3D model with the "GoodKarma" method.
 <br>Thanks to his knowledge, we were able to improve the app.
 
 You can now to print the dimensions of the timbers, print origami stuffs, etc...
@@ -40,39 +50,40 @@ And if you have any requests/questions, see any bugs, ✍ feel free to write an 
 
 🌟
 
-
 ## 🌎 Translations
 
 I prefered use an homemade version of i18n, to make the app faster and lighter.
 
-So if you want add a new language to Z5omes, 
+So if you want add a new language to Z5omes,
 you can copy the [i18n/en.js](i18n/en.js) file and modify the new file.
 
 Please, fork the project, commit your changes and pull a new request. 🙏
 
-
-## 🗣 Community 
+## 🗣 Community
 
 > * [Zome Building Network | Facebook](https://www.facebook.com/groups/1130103323709157)
 > * [Z5omes | Youtube Channel](https://www.youtube.com/@Z5omes)
 
-## ▲ 3D Objects
+## ▲ 3D Modeling
 
-You can export your zome to different 3D object formats:
+<b>Z5omes</b> allows you to create 3D models for free.
+You can now create your models with 'GoodKarma', 'Beleved' or 'Xpansion' assembly method.
+
+You can export your Zome to different 3D object formats:
 
 > * <b>GLTF</b> : Mesh and texture
 > * <b>OBJ</b> : Mesh and texture (MTL file)
-> * <b>STL</b> : Mesh only
+> * <b>STL</b> : Mesh only (mm unit, inverted YZ)
 > * <b>PLY</b> : Mesh only
 
 If you need a different format, you can import the OBJ file
-in [FreeCad](https://www.freecad.org/downloads.php), [MeshLab](https://www.meshlab.net/#download) or [Blender](https://www.blender.org/download/),
+in [FreeCad](https://www.freecad.org/downloads.php), [MeshLab](https://www.meshlab.net/#download)
+or [Blender](https://www.blender.org/download/),
 then export the mesh in the format of your choice.
 <br>
 <br>I got pretty good results with these free softwares.
 
 > 👁 Take a look at the '[meshes](meshes)' folder if you want to see some examples.
-
 
 ## 🖼 Designed with Z5omes
 
@@ -217,18 +228,17 @@ then export the mesh in the format of your choice.
   </tr>
 </table>
 
-
 ## 🙏 Thanks To :
 
-This project would never have been possible without the valuable support of a few people. 
+This project would never have been possible without the valuable support of a few people.
 So, I would like to say a big thank you 🙏
 
-> * [Tim Hutton](https://github.com/timhutton/) whose github project inspired me for trigonometry and zome envelop calculation.
+> * [Tim Hutton](https://github.com/timhutton/) whose github project inspired me for trigonometry and zome envelop
+    calculation.
 > * [Dims Zomes](http://www.rusticdomes.com/software.html) who allowed me to check my data.
-> * [La tanière à mémé](https://www.domegeodesique-yourte.com/) for sharing knowledge particularly on the GoodKarma understanding.
+> * [La tanière à mémé](https://www.domegeodesique-yourte.com/) for sharing knowledge particularly on the GoodKarma
+    understanding.
 > * Every donors and members of the 'Zomes' community
-
-
 
 ## ⚡ Powered by :
 
