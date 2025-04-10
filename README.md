@@ -7,7 +7,7 @@
 Z5omes is a CAD tool designed to assist in the creation of polyhedral frames and structures.
 
 Whether you're a carpenter, maker, designer, or geometry enthusiast, Z5omes helps you explore and build polyhedral
-shapes — like the [rhombic icosahedron](https://en.wikipedia.org/wiki/Rhombic_icosahedron) known as
+shapes — like the [zonohedron](https://en.wikipedia.org/wiki/Zonohedron) known as
 the [Zome](https://en.wikipedia.org/wiki/Zome_(architecture)) — with
 precision and ease.
 
