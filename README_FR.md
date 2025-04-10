@@ -26,7 +26,7 @@ Pour créer votre propre Zome, veuillez utiliser l'application en ligne :
 </p>
 <br>
 
-> 🇬🇧Version anglaise de ce [README.md](README.md).
+> 🇬🇧Cliquer [ici](README.md) pour lire la [version Anglaise](README.md) du README.
 
 ## Parlons un peu des Zomes.
 
