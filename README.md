@@ -6,8 +6,9 @@
 
 Z5omes is a CAD tool designed to assist in the creation of polyhedral frames and structures.
 
-Whether you're a carpenter, maker, designer, or geometry enthusiast, Z5omes helps you explore and build polyhedral
-shapes — like the [zonohedron](https://en.wikipedia.org/wiki/Zonohedron) known as
+Whether you're a carpenter, maker, designer, or geometry enthusiast, Z5omes helps you explore and build a specific
+polyhedral
+shape — a kind of [zonohedron](https://en.wikipedia.org/wiki/Zonohedron) known as
 the [Zome](https://en.wikipedia.org/wiki/Zome_(architecture)) — with
 precision and ease.
 
@@ -17,7 +18,9 @@ and artistic projects based on polyhedral geometry.
 
 It's a creative and technical companion for anyone working at the intersection of craftsmanship and design.
 
-To make your own Zome, please check the online app [here](https://florianwns.github.io/z5omes/).
+To make your own Zome, please check the online app :
+
+<b>[https://florianwns.github.io/z5omes/](https://florianwns.github.io/z5omes/)</b>
 
 <br>
 <p align="center">
@@ -25,7 +28,35 @@ To make your own Zome, please check the online app [here](https://florianwns.git
 </p>
 <br>
 
-## About the Project
+## Let's talk a little bit about Zome.
+
+#### 🔷 Is a Zome a Zonohedron?
+
+Yes, absolutely! 💡
+
+#### 🔍 Quick Definition:
+
+The word <b>"Zome"</b> comes from combining <b>"zonohedron"</b> and <b>"dome"</b>. It refers to a geometric and
+architectural structure built
+using the principles of zonohedron, often involving symmetry, spirals, and sacred geometry patterns like rhombuses and
+pentagons.
+
+#### ✅ Characteristics of a Zome:
+
+* It's a special type of zonohedron, often built with rhombic (diamond-shaped) faces.
+* The structure can twist or spiral, with each level rotated slightly from the one below.
+* It’s both geometric and aesthetic, with uses in:
+
+    * Alternative architecture (eco-buildings, organic design),
+    * Meditation or wellness spaces,
+    * Designs inspired by sacred geometry.
+
+#### 🧠 Summary:
+
+* ✅ All Zomes are zonohedra.
+* 🚫 But not all zonohedra are Zomes.
+
+# About the Project
 
 This project was designed to be free and will never be charged for.
 That said, if you'd like to support the journey, you’re welcome
