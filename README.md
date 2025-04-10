@@ -28,7 +28,7 @@ To make your own Zome, please check the online app :
 </p>
 <br>
 
-> 🇫🇷French version of this [README](README_FR.md).
+> 🇫🇷Visit this [link](README.md) to read the [French version](README_FR.md) of this README.
 
 ## Let's talk a little bit about Zomes.
 
