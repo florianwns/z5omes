@@ -25,7 +25,7 @@ const I18N_EN = {
         timber_profiles: "Timber profiles",
         timbers_of_each_face: "Timbers of each face",
         timber_is_not_machinable: "This profile is not machinable. Try changing some settings like 'Thickness' or 'Vanishing Point' !",
-        zome_is_not_machinable: "This zome is not machinable. Try changing some settings like 'Thickness' or 'Vanishing Point' !",
+        framework_is_not_machinable: "This framework is not machinable. Try changing some settings like 'Thickness' or 'Vanishing Point' !",
         profile: "Profile",
         face: "Face",
         spirals: "Spirals",

@@ -488,13 +488,14 @@
                         </ul>
                     </nav>
                     <div class="tab-content h-100 mt-3">
-                        <p x-show="!zome_is_machinable" class="text-center mb-2">
-                            <span class="fa fa-warning me-r text-warning"></span>
-                            <span x-text="i18n('zome_is_not_machinable')"></span>
-                        </p>
                         <div class="tab-pane show active" id="nav-3D" role="tabpanel" aria-labelledby="nav-3D-tab"
                              tabindex="0" x-data="renderer_3D" @resize.window="__auto_size"
                              @zome-is-made.window="__process">
+
+                            <p x-show="!framework_is_machinable" class="text-center mb-2">
+                                <span class="fa fa-warning me-r text-warning"></span>
+                                <span x-text="i18n('framework_is_not_machinable')"></span>
+                            </p>
                             <div class="d-flex justify-content-left justify-content-lg-center">
                                 <div style="width:calc(100% - 36px); max-width:850px;" class="position-relative">
                                     <!-- Export to -->
@@ -1727,7 +1728,7 @@
                     },
                     compute_drawing_of_timber_profiles: function () {
                         const timber_profiles_grouped_by_hash = ZOME.timber_profiles_grouped_by_hash;
-                        let zome_is_machinable = true;
+                        let framework_is_machinable = true;
 
                         // Clear content
                         this.timber_profiles_svg_container.innerHTML = "";
@@ -1997,7 +1998,7 @@
                                             && E[1] < H[1] && F[1] < G[1]
 
                                         if (is_machinable === false) {
-                                            zome_is_machinable = false;
+                                            framework_is_machinable = false;
 
                                             // Add Warning text
                                             const label_title = svg_text(
@@ -2136,7 +2137,7 @@
                             this.timber_profiles_svg_container.appendChild(svg);
                         });
 
-                        this.zome_is_machinable = zome_is_machinable;
+                        this.framework_is_machinable = framework_is_machinable;
                     },
 
                     compute_drawing_of_timbers_grouped_by_face:
@@ -3716,7 +3717,7 @@
                 // Common properties
                 show_splash_screen: true,
                 is_computing: true,
-                zome_is_machinable: true,
+                framework_is_machinable: true,
 
                 colors: [],
                 i18n_dictionary: {},
