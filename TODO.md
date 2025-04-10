@@ -3,13 +3,9 @@
 * [ ] Ajoûter les slider de manière dynamique avec un toggle pour pouvoir défiler les profil et garder la vue des
   losanges
 
-* [x] Ajoûter un warning les les pièces ne sont pas usinables , dans le cas d'abérattions de projection,
-  ou de mauvais paramètres d'épaisseur par exemple.
-
 * [ ] Ajouter différent paramètres en gardant la même méthode de calcul
 
-* [ ] Changer l'aide du kite ratio
-  car ce n'est pas exactement ça
+* [ ] Changer l'aide du kite ratio car ce n'est pas exactement ça
 
 * [ ] Ajouter la direction d'assemblage automatique pour éviter les découpes trop aigus
   D'abord essayer de remettre l'assemble semicone pour le beveled
