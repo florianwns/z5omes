@@ -1,4 +1,3 @@
-
 <p align="center">
 <img src="/img/z5omes_title.png" height="119">
 </p>
@@ -8,15 +7,16 @@
 Z5omes est un outil CAO conçu pour aider à la création de structures et de cadres polyhédriques.
 
 Que vous soyez menuisier, bricoleur, designer ou passionné de géométrie, Z5omes vous aide à explorer et construire
-une forme polyédrique spécifique — un type de [zonoèdre](https://fr.wikipedia.org/wiki/Zono%C3%A8dre) connu sous le nom de
+une forme polyédrique spécifique — un type de [zonoèdre](https://fr.wikipedia.org/wiki/Zono%C3%A8dre) bien connu sous le
+nom de
 [Zome](https://fr.wikipedia.org/wiki/Zome_(architecture)) — avec précision et facilité.
 
-Développé à l'origine pour la charpente en bois, Z5omes apporte un soutien pratique à la création de projets architecturaux
-et artistiques basés sur la géométrie polyédrique.
+Développé à l'origine pour la charpente en bois, Z5omes apporte un nouveau logiciel à la création des projets
+architecturaux et artistiques basés sur la géométrie polyédrique.
 
 C'est un compagnon créatif et technique pour toute personne travaillant à l'intersection de l'artisanat et du design.
 
-Pour créer votre propre Zome, veuillez consulter l'application en ligne :
+Pour créer votre propre Zome, veuillez utiliser l'application en ligne :
 
 <b>[https://florianwns.github.io/z5omes/](https://florianwns.github.io/z5omes/)</b>
 
@@ -26,7 +26,7 @@ Pour créer votre propre Zome, veuillez consulter l'application en ligne :
 </p>
 <br>
 
-## Parlons un peu de Zome.
+## Parlons un peu des Zomes.
 
 #### 🔷 Un Zome est-il un Zonoèdre ?
 
@@ -34,8 +34,10 @@ Oui, absolument ! 💡
 
 #### 🔍 Définition rapide :
 
-Le mot <b>"Zome"</b> provient de la combinaison de <b>"Zonoèdre"</b> et <b>"Dôme"</b>. Il fait référence à une structure géométrique
-et architecturale construite à l'aide des principes des Zonoèdres, impliquant souvent de la symétrie, des spirales, et des motifs de géométrie sacrée tels que des losanges et des pentagones.
+Le mot <b>"Zome"</b> provient de la combinaison de <b>"Zonoèdre"</b> et <b>"Dôme"</b>. Il fait référence à une structure
+géométrique
+et architecturale construite à l'aide des principes des Zonoèdres, impliquant souvent de la symétrie, des spirales, et
+des motifs de géométrie sacrée tels que des losanges et des pentagones.
 
 #### ✅ Caractéristiques d'un Zome :
 
@@ -55,17 +57,17 @@ et architecturale construite à l'aide des principes des Zonoèdres, impliquant 
 # À propos du projet
 
 Ce projet a été conçu pour être gratuit et ne sera jamais payant.
-Cela dit, si vous souhaitez soutenir le projet, vous êtes invités à
-[acheter un café](https://www.paypal.com/paypalme/z5omes) ☕.
+Cela dit, si vous souhaitez soutenir le projet, vous pouvez toujours me
+[payer un café](https://www.paypal.com/paypalme/z5omes) ☕.
 
-🙏 Je tiens d'abord à remercier [Tim Hutton](https://github.com/timhutton/) dont je me suis inspiré pour les calculs trigonométriques ◁
-et qui m'a permis de lancer ce projet. 🚀
+🙏 Je tiens d'abord à remercier [Tim Hutton](https://github.com/timhutton/) dont je me suis inspiré pour les calculs
+trigonométriques ◁ et qui m'a permis de lancer ce projet. 🚀
 
-Bien que je n'étais pas un grand fan à l'origine et que je devais vérifier ce qu'il écrit,
-🤖 ChatGPT m'a beaucoup aidé à comprendre les calculs vectoriels et l'intersection des plans.
+Bien que je n'étais pas mega fan de ChatGPT car il faut vraiment vérifier ce qu'il écrit,
+🤖 cela m'a beaucoup aidé à comprendre les calculs vectoriels et l'intersection des plans en 3D.
 
 Sylvain Huet de [La tanière à mémé](https://www.domegeodesique-yourte.com/) m'a appelé un jour
-pour créer un modèle 3D avec la méthode "GoodKarma".
+pour créer un modèle 3D de charpente avec la méthode "GoodKarma".
 <br>Grâce à ses connaissances, nous avons pu améliorer l'application.
 
 Vous pouvez désormais imprimer les dimensions des bois, imprimer des éléments d'origami, etc...
@@ -73,7 +75,8 @@ Vous pouvez désormais imprimer les dimensions des bois, imprimer des éléments
 J'espère que cette application aidera les amoureux des Zomes à construire leur cabane/maison de rêve. 🏠
 
 Amusez-vous bien et n'hésitez pas à partager la création de votre Zome.<br>
-Et si vous avez des demandes/questions, si vous voyez des bugs, ✍ n'hésitez pas à écrire un problème.
+Et si vous avez des demandes/questions, si vous voyez des bugs, ✍ n'hésitez pas à écrire
+une [issue](https://github.com/florianwns/z5omes/issues/new) dans GitHub.
 
 🌟
 
@@ -84,7 +87,7 @@ J'ai préféré utiliser une version maison de i18n, pour rendre l'application p
 Si vous souhaitez ajouter une nouvelle langue à Z5omes,
 vous pouvez copier le fichier [i18n/en.js](i18n/en.js) et modifier le nouveau fichier.
 
-Merci de forker le projet, de valider vos modifications et de faire une nouvelle demande de fusion. 🙏
+Merci de 'forker' le projet, de valider vos modifications et de faire une nouvelle demande de 'pull request'. 🙏
 
 ## 🗣 Communauté
 
@@ -258,9 +261,11 @@ puis exporter le maillage dans le format de votre choix.
 Ce projet n'aurait jamais été possible sans le soutien précieux de quelques personnes.
 Alors, je tiens à dire un grand merci 🙏
 
-> * [Tim Hutton](https://github.com/timhutton/) dont le projet github m'a inspiré pour les calculs trigonométriques et le calcul de l'enveloppe de zome.
+> * [Tim Hutton](https://github.com/timhutton/) dont le projet github m'a inspiré pour les calculs trigonométriques et
+    le calcul de l'enveloppe de zome.
 > * [Dims Zomes](http://www.rusticdomes.com/software.html) qui m'a permis de vérifier mes données.
-> * [La tanière à mémé](https://www.domegeodesique-yourte.com/) pour avoir partagé des connaissances, particulièrement sur la compréhension de GoodKarma.
+> * [La tanière à mémé](https://www.domegeodesique-yourte.com/) pour avoir partagé des connaissances, particulièrement
+    sur la compréhension du GoodKarma.
 > * Tous les donateurs et membres de la communauté 'Zomes'
 
 ## ⚡ Propulsé par :
@@ -271,5 +276,6 @@ je me suis appuyé sur plusieurs bibliothèques.
 
 > * [Lodash](https://lodash.com/) : La boîte à outils JS géniale. 🧰
 > * [ThreeJS](https://threejs.org/) : Pour la visualisation 3D.
-> * [AlpineJS](https://alpinejs.dev/) : Un excellent framework minimal pour composer du comportement directement dans le HTML.
+> * [AlpineJS](https://alpinejs.dev/) : Un excellent framework minimal pour composer du comportement directement dans le
+    HTML.
 > * [Flag-Icons](https://github.com/lipis/flag-icons) : Pour les drapeaux des langues
