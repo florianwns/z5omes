@@ -36,9 +36,9 @@ Yes, absolutely! 💡
 
 #### 🔍 Quick Definition:
 
-The word <b>"Zome"</b> comes from combining <b>"zonohedron"</b> and <b>"dome"</b>. It refers to a geometric and
+The word <b>"Zome"</b> comes from combining <b>"Zonohedron"</b> and <b>"Dome"</b>. It refers to a geometric and
 architectural structure built
-using the principles of zonohedron, often involving symmetry, spirals, and sacred geometry patterns like rhombuses and
+using the principles of Zonohedra, often involving symmetry, spirals, and sacred geometry patterns like rhombuses and
 pentagons.
 
 #### ✅ Characteristics of a Zome:
