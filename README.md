@@ -13,7 +13,7 @@ the [Zome](https://en.wikipedia.org/wiki/Zome_(architecture)) — with
 precision and ease.
 
 Originally developed with timber framing in mind,
-Z5omes provides practical support for crafting unique architectural
+Z5omes provides a new software for crafting unique architectural
 and artistic projects based on polyhedral geometry.
 
 It's a creative and technical companion for anyone working at the intersection of craftsmanship and design.
@@ -28,7 +28,7 @@ To make your own Zome, please check the online app :
 </p>
 <br>
 
-## Let's talk a little bit about Zome.
+## Let's talk a little bit about Zomes.
 
 #### 🔷 Is a Zome a Zonohedron?
 
@@ -77,7 +77,8 @@ You can now to print the dimensions of the timbers, print origami stuffs, etc...
 I hope this app will help zome lovers to build their dream cabin/house. 🏠
 
 Have fun and don't hesitate to share the creation of your Zome.<br>
-And if you have any requests/questions, see any bugs, ✍ feel free to write an issue.
+And if you have any requests/questions, see any bugs, ✍ feel free to write
+an [issue](https://github.com/florianwns/z5omes/issues/new) inside GitHub.
 
 🌟
 
