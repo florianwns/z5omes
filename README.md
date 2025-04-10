@@ -28,6 +28,8 @@ To make your own Zome, please check the online app :
 </p>
 <br>
 
+> 🇫🇷French version of this [README](README_FR.md).
+
 ## Let's talk a little bit about Zomes.
 
 #### 🔷 Is a Zome a Zonohedron?
