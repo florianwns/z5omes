@@ -25,6 +25,7 @@ const I18N_BR = {
         timber_profiles: "Perfis das madeiras",
         timbers_of_each_face: "Madeiras de cada lado",
         timber_is_not_machinable: "Este perfil não pode ser usinado. Tente alterar algumas configurações, como 'Espessura' ou 'Ponto de Fuga'!",
+        framework_is_not_machinable: "Esta estrutura não pode ser usinada. Tente alterar algumas configurações como 'Espessura' ou 'Ponto de fuga'!",
         profile: "Perfil",
         face: "Lado",
         spirals: "Espirais",

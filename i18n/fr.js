@@ -25,6 +25,7 @@ const I18N_FR = {
         timber_profiles: "Profils des montants",
         timbers_of_each_face: "Montants de chaque face",
         timber_is_not_machinable: "Ce profil n'est pas usinable. Essayez de modifier certains paramètres tel que 'Épaisseur' ou 'Point de fuite' !",
+        framework_is_not_machinable: "Cette charpente n'est pas usinable. Essayez de modifier certains paramètres tel que 'Épaisseur' ou 'Point de fuite' !",
         profile: "Profil",
         face: "Face",
         spirals: 'Spirales',

@@ -25,6 +25,7 @@ const I18N_ES = {
         timber_profiles: "Perfiles de viga",
         timbers_of_each_face: "Vigas de cada cara",
         timber_is_not_machinable: "Este perfil no es mecanizable. ¡Intenta cambiar algunas configuraciones como la 'Grosor' o el 'Punto de fuga'!",
+        framework_is_not_machinable: "Esta estructura no se puede mecanizar. Intenta cambiar algunos ajustes como 'Grosor' o 'Punto de fuga'.",
         profile: "Perfil",
         face: "Cara",
         spirals: "Espirales",
