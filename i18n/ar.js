@@ -1,7 +1,7 @@
 const I18N_AR = {
     name: "العربية",
     dictionary: {
-        // الكلمات الشائعة
+        // Common Vocabulary / Words
         zome: "الزوم",
         shape: "الشكل",
         faces: "الوجوه",
@@ -49,7 +49,7 @@ const I18N_AR = {
         bevel: "شطف",
         no_bevel: "بدون شطف",
 
-        // التلميحات
+        // Tooltips
         tooltip_display_help: "عرض المساعدة",
         tooltip_close: "إغلاق",
         tooltip_randomize_shape: "إنشاء شكل عشوائي",
@@ -82,7 +82,7 @@ const I18N_AR = {
         tooltip_spin: "تشغيل/إيقاف الدوران",
         tooltip_selected_crown: "التاج المحدد",
 
-        // اختصارات لوحة المفاتيح
+        // Keyboard shortcuts
         key_H_3D_view: "إعادة ضبط عرض الكاميرا",
         key_left_3D_view: "عرض الجانب الأيسر",
         key_up_3D_view: "عرض علوي",
@@ -92,13 +92,13 @@ const I18N_AR = {
         key_mul_3D_view: "زيادة سرعة الدوران",
         key_div_3D_view: "تقليل سرعة الدوران",
 
-        // الخيارات
+        // Options
         opt_none: "لا شيء",
         opt_horizontal: "أفقي",
         opt_vertical: "رأسي",
         opt_footing: "القاعدة",
 
-        // المساعدة
+        // Help
         help_shape: "يتم تحديد شكل الزوم بواسطة:",
         help_n_param: "عدد المعينات التي تدور حول المحور الرأسي، يُعرف أيضًا بتردد الزوم",
         help_m_param: "عدد تيجان المعينات من الأعلى إلى الأسفل",
@@ -120,7 +120,7 @@ const I18N_AR = {
         help_ft_param: "إضافة قاعدة بناءً على سُمك الأخشاب",
         help_ro_param: "امتداد السقف",
 
-        // جدول القياسات
+        // Measurements table
         measurements: "القياسات",
         id: "المعرف",
         quantity: "الكمية",
@@ -146,7 +146,7 @@ const I18N_AR = {
         floor_radius: "نصف قطر الأرضية",
         floor_area: "مساحة الأرضية",
 
-        // الرسائل المنبثقة
+        // Toast message
         toast_settings_restored: "تمت استعادة الإعدادات!",
         toast_settings_save: "تم حفظ الإعدادات!",
         toast_link_copied: "تم نسخ الرابط إلى الحافظة!",

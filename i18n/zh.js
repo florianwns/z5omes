@@ -25,6 +25,7 @@ const I18N_ZH = {
         timber_profiles: "木材剖面",
         timbers_of_each_face: "每个面的木材",
         timber_is_not_machinable: "此剖面无法加工。尝试更改一些设置，如“厚度”或“消失点”！",
+        framework_is_not_machinable: "此框架无法加工。尝试更改一些设置，如“厚度”或“消失点”！",
         profile: "剖面",
         face: "面",
         spirals: "螺旋",

@@ -1,7 +1,7 @@
 const I18N_JA = {
     name: "日本語",
     dictionary: {
-        // 一般用語
+        // Common Vocabulary / Words
         zome: "ゾーム",
         shape: "形状",
         faces: "面",
@@ -25,6 +25,7 @@ const I18N_JA = {
         timber_profiles: "木材プロファイル",
         timbers_of_each_face: "各面の木材",
         timber_is_not_machinable: "このプロファイルは加工できません。「厚さ」や「消失点」などの設定を変更してみてください！",
+        framework_is_not_machinable: "この骨組みは加工できません。'厚さ'や'消失点'などの設定を変更してみてください！",
         profile: "プロファイル",
         face: "面",
         spirals: "スパイラル",
@@ -48,7 +49,7 @@ const I18N_JA = {
         bevel: "面取り",
         no_bevel: "面取りなし",
 
-        // ツールチップ
+        // Tooltips
         tooltip_display_help: "ヘルプを表示",
         tooltip_close: "閉じる",
         tooltip_randomize_shape: "ランダムな形状を生成",
@@ -81,7 +82,7 @@ const I18N_JA = {
         tooltip_spin: "回転オン/オフ",
         tooltip_selected_crown: "選択されたクラウン",
 
-        // キーボードショートカット
+        // Keyboard shortcuts
         key_H_3D_view: "カメラビューをリセット",
         key_left_3D_view: "左側ビュー",
         key_up_3D_view: "上面ビュー",
@@ -91,13 +92,13 @@ const I18N_JA = {
         key_mul_3D_view: "回転速度を上げる",
         key_div_3D_view: "回転速度を下げる",
 
-        // オプション
+        // Options
         opt_none: "なし",
         opt_horizontal: "水平",
         opt_vertical: "垂直",
         opt_footing: "基礎",
 
-        // ヘルプ
+        // Help
         help_shape: "ゾームの形状は次の要素によって決まります:",
         help_n_param: "垂直軸を中心に回転する菱形の数（ゾームの周波数とも呼ばれる）",
         help_m_param: "上から下までの菱形のクラウン数",
@@ -110,12 +111,16 @@ const I18N_JA = {
         help_zh_param: "木材を生成する前のゾームの可視部分の高さ",
         help_tw_param: "木材の幅",
         help_tt_param: "木材の厚さ",
+        help_am_param: "左から右へ :",
+        help_am_param_1: "骨組みの拡張方向 : ↑ 外向き または ↓ 内向き",
+        help_am_param_2: "組み立て方法",
+        help_am_param_3: "組み立て方向 : 時計回り、反時計回り、または方向なし (SemiCone)",
         help_vp_param: "消失点の高さ（「GoodKarma」や「Beveled」メソッドで使用）",
         help_zc_param: "消失点を重心に配置（ゾーム全体を基準）",
         help_ft_param: "木材の厚さに基づいて基礎を追加",
         help_ro_param: "屋根のオーバーフロー",
 
-        // 測定表
+        // Measurements table
         measurements: "測定値",
         id: "ID",
         quantity: "数量",
@@ -141,7 +146,7 @@ const I18N_JA = {
         floor_radius: "床の半径",
         floor_area: "床面積",
 
-        // トーストメッセージ
+        // Toast message
         toast_settings_restored: "設定が復元されました！",
         toast_settings_save: "設定が保存されました！",
         toast_link_copied: "リンクがクリップボードにコピーされました！",

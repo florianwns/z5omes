@@ -1,7 +1,7 @@
 const I18N_RU = {
     name: "Русский",
     dictionary: {
-        // Общая лексика
+        // Common Vocabulary / Words
         zome: "Зом",
         shape: "Форма",
         faces: "Грани",
@@ -49,7 +49,7 @@ const I18N_RU = {
         bevel: "Фаска",
         no_bevel: "Без фаски",
 
-        // Подсказки
+        // Tooltips
         tooltip_display_help: "Показать справку",
         tooltip_close: "Закрыть",
         tooltip_randomize_shape: "Сгенерировать случайную форму",
@@ -82,7 +82,7 @@ const I18N_RU = {
         tooltip_spin: "Включить/выключить вращение",
         tooltip_selected_crown: "Выбранный уровень",
 
-        // Горячие клавиши
+        // Keyboard shortcuts
         key_H_3D_view: "Сбросить вид камеры",
         key_left_3D_view: "Вид слева",
         key_up_3D_view: "Вид сверху",
@@ -92,13 +92,13 @@ const I18N_RU = {
         key_mul_3D_view: "Увеличить скорость вращения",
         key_div_3D_view: "Уменьшить скорость вращения",
 
-        // Опции
+        // Options
         opt_none: "Нет",
         opt_horizontal: "Горизонтально",
         opt_vertical: "Вертикально",
         opt_footing: "Основание",
 
-        // Справка
+        // Help
         help_shape: "Форма зома определяется следующими параметрами:",
         help_n_param: "Количество ромбов, вращающихся вокруг вертикальной оси (частота зома)",
         help_m_param: "Количество уровней ромбов от верха до низа",
@@ -111,6 +111,10 @@ const I18N_RU = {
         help_zh_param: "Высота видимой части зома перед генерацией брусьев",
         help_tw_param: "Ширина брусьев",
         help_tt_param: "Толщина брусьев",
+        help_am_param: "Слева направо :",
+        help_am_param_1: "Направление расширения каркаса : ↑ наружу или ↓ внутрь",
+        help_am_param_2: "Метод сборки",
+        help_am_param_3: "Направление сборки : По часовой стрелке, Против часовой стрелки или без направления (SemiCone)",
         help_vp_param: "Высота точки схода (используется в методах 'GoodKarma' и 'Beveled')",
         help_zc_param: "Размещение точки схода в центре тяжести (по всему зому)",
         help_ft_param: "Добавление основания, исходя из толщины брусьев",
