@@ -6,7 +6,7 @@
 
 **Z5omes** est un outil gratuit de [CAO](https://fr.wikipedia.org/wiki/Conception_assist%C3%A9e_par_ordinateur) conçu pour aider à la création de structures et de charpentes polyédriques 🔺🔷.
 
-Que vous soyez **menuisier**, **bricoleur** 🔧, **designer** 🎨 ou **passionné de géométrie** 📐, Z5omes vous aide à découvrir, à mieux appréhender et surtout à **construire votre [Zome](https://fr.wikipedia.org/wiki/Zome_(architecture))**, vous évitant ainsi une foule de calculs compliqués 🧮.
+Que vous soyez **menuisier**, **bricoleur** 🔧, **designer** 🎨 ou **passionné de géométrie** 📐, Z5omes vous aide à découvrir, à mieux appréhender et surtout à **construire votre [Zome](https://fr.wikipedia.org/wiki/Zome_(architecture))**, vous évitant ainsi une foule de calculs compliqués.
 
 Développé à l'origine pour la **charpente bois** 🌲, **Z5omes** apporte un nouveau logiciel d'aide à la création de projets **architecturaux** et **artistiques** basés sur la géométrie polyédrique.
 
