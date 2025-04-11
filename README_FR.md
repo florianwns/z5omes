@@ -2,21 +2,26 @@
 <img src="/img/z5omes_title.png" height="119">
 </p>
 
-# Bienvenue sur Z5omes
+# Bienvenue sur **Z5omes** 
 
-Z5omes est un outil CAO conçu pour aider à la création de structures et de cadres polyhédriques.
+**Z5omes** est un outil gratuit de [CAO](https://fr.wikipedia.org/wiki/Conception_assist%C3%A9e_par_ordinateur) conçu pour aider à la création de structures et de charpentes polyédriques 🔺🔷.
 
-Que vous soyez menuisier, bricoleur, designer ou passionné de géométrie, Z5omes vous aide à explorer et construire
-une forme polyédrique spécifique — un type de [zonoèdre](https://fr.wikipedia.org/wiki/Zono%C3%A8dre) bien connu sous le
-nom de
-[Zome](https://fr.wikipedia.org/wiki/Zome_(architecture)) — avec précision et facilité.
+Que vous soyez **menuisier**, **bricoleur** 🔧, **designer** 🎨 ou **passionné de géométrie** 📐, Z5omes vous aide à découvrir, à mieux appréhender et surtout à **construire votre [Zome](https://fr.wikipedia.org/wiki/Zome_(architecture))**, vous évitant ainsi une foule de calculs compliqués 🧮.
 
-Développé à l'origine pour la charpente en bois, Z5omes apporte un nouveau logiciel à la création des projets
-architecturaux et artistiques basés sur la géométrie polyédrique.
+Développé à l'origine pour la **charpente bois** 🌲, **Z5omes** apporte un nouveau logiciel d'aide à la création de projets **architecturaux** et **artistiques** basés sur la géométrie polyédrique.
 
-C'est un compagnon créatif et technique pour toute personne travaillant à l'intersection de l'artisanat et du design.
+Ce logiciel vous fournit :
+- les **plans de découpe** 📏 de chaque montant,
+- les **losanges** 🔶,
+- et vous pouvez même faire de l’**origami** 📄 pour mieux visualiser votre Zome avec simplement du papier, de la colle et des ciseaux ✂️ !
 
-Pour créer votre propre Zome, veuillez utiliser l'application en ligne :
+L’**export 3D** de votre Zome ou de chaque montant est possible dans différents formats, afin que vous puissiez **l'importer** et le **modifier** dans votre propre logiciel de CAO 🖥️.
+
+Cela vous permet également :
+- de **vérifier les côtes** ✔️,
+- et même de l’**imprimer en 3D** 🖨️.
+
+👉 Pour créer votre propre Zome, il vous suffit d’utiliser l’application en ligne :
 
 <b>[https://florianwns.github.io/z5omes/](https://florianwns.github.io/z5omes/)</b>
 
