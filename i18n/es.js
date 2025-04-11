@@ -36,7 +36,7 @@ const I18N_ES = {
         dihedral_angle: "Ángulo Dihedral",
         wedge_angle: "Ángulo de cuña",
         face_angles: "Ángulos de caras",
-        roof: "Roof",
+        roof: "Techo",
         left: "izquierda",
         right: "derecha",
         top: "superior (arriba)",
