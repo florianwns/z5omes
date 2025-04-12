@@ -2,23 +2,26 @@
 <img src="/img/z5omes_title.png" height="119">
 </p>
 
-# Welcome to Z5omes
+# Welcome to **Z5omes**
 
-Z5omes is a CAD tool designed to assist in the creation of polyhedral frames and structures.
+**Z5omes** is a free [CAD](https://en.wikipedia.org/wiki/Computer-aided_design) tool designed to assist in the creation of polyhedral structures and frameworks 🔺🔷.
 
-Whether you're a carpenter, maker, designer, or geometry enthusiast, Z5omes helps you explore and build a specific
-polyhedral
-shape — a kind of [zonohedron](https://en.wikipedia.org/wiki/Zonohedron) known as
-the [Zome](https://en.wikipedia.org/wiki/Zome_(architecture)) — with
-precision and ease.
+Whether you're a **carpenter**, a **DIY enthusiast** 🔧, a **designer** 🎨, or simply **passionate about geometry** 📐, Z5omes helps you explore, understand, and most importantly **build your own [Zome](https://en.wikipedia.org/wiki/Zome)**—saving you from a bunch of complex calculations.
 
-Originally developed with timber framing in mind,
-Z5omes provides a new software for crafting unique architectural
-and artistic projects based on polyhedral geometry.
+Originally developed for **timber framing** 🌲, **Z5omes** offers a new kind of software to support the creation of **architectural** and **artistic** projects based on polyhedral geometry.
 
-It's a creative and technical companion for anyone working at the intersection of craftsmanship and design.
+This software provides you with:
+- **cutting plans** 📏 for each beam,
+- the **rhombuses** dimensions 🔶,
+- and you can even do **origami** 📄 to better visualize your Zome using just paper, glue, and scissors ✂️!
 
-To make your own Zome, please check the online app :
+You can **export your Zome or each beam in 3D** in various formats, so you can **import** and **edit** it in your favorite CAD software 🖥️.
+
+This also allows you to:
+- **check dimensions** ✔️,
+- and even **3D print** it 🖨️.
+
+👉 To create your own Zome, simply use the online application:
 
 <b>[https://florianwns.github.io/z5omes/](https://florianwns.github.io/z5omes/)</b>
 
