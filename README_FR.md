@@ -12,7 +12,7 @@ Développé à l'origine pour la **charpente bois** 🌲, **Z5omes** apporte un 
 
 Ce logiciel vous fournit :
 - les **plans de découpe** 📏 de chaque montant,
-- les **losanges** 🔶,
+- les dimensions des **losanges** 🔶,
 - et vous pouvez même faire de l’**origami** 📄 pour mieux visualiser votre Zome avec simplement du papier, de la colle et des ciseaux ✂️ !
 
 L’**export 3D** de votre Zome ou de chaque montant est possible dans différents formats, afin que vous puissiez **l'importer** et le **modifier** dans votre propre logiciel de CAO 🖥️.
