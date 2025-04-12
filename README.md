@@ -6,7 +6,7 @@
 
 **Z5omes** is a free [CAD](https://en.wikipedia.org/wiki/Computer-aided_design) tool designed to assist in the creation of polyhedral structures and frameworks 🔺🔷.
 
-Whether you're a **carpenter**, a **DIY enthusiast** 🔧, a **designer** 🎨, or simply **passionate about geometry** 📐, Z5omes helps you explore, understand, and most importantly **build your own [Zome](https://en.wikipedia.org/wiki/Zome)**—saving you from a bunch of complex calculations.
+Whether you're a **carpenter**, a **DIY enthusiast** 🔧, a **designer** 🎨, or simply **passionate about geometry** 📐, Z5omes helps you explore, understand, and most importantly **build your own [Zome](https://en.wikipedia.org/wiki/Zome)**, saving you from a bunch of complex calculations.
 
 Originally developed for **timber framing** 🌲, **Z5omes** offers a new kind of software to support the creation of **architectural** and **artistic** projects based on polyhedral geometry.
 
