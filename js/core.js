@@ -999,6 +999,21 @@ class Base3DGeometry {
         this._mesh_material = null; // reset the mesh material
     }
 
+    get scad_points(){
+        return swap_axes(this.points, "XZY").map(p => round_values(p));
+    }
+
+    get scad_geometry(){
+        const faces = [
+            [0, 1, 2, 3],     // Left side
+        ];
+        return `polyhedron(${JSON.stringify(this.scad_points)}, ${JSON.stringify(faces)})`
+    }
+
+    to_scad(){
+        return `color("${this.color.hex}") ${this.scad_geometry};`;
+    }
+
     get points_2D() {
         if (this._points_2D === null) {
             // Points without the z axis for 2D drawing
@@ -2095,6 +2110,20 @@ class Base3DGeometryGroup extends Base3DGeometry {
         return this._children;
     }
 
+    get scad_geometry(){
+        let geometry_str = "union() {\n";
+        for (let i = 0; i < this.children.length; i++) {
+            const item = this.children[i];
+            geometry_str += `    ${item.to_scad()}\n`;
+        }
+        geometry_str += `}\n`;
+        return geometry_str;
+    }
+
+    to_scad(){
+        return this.scad_geometry;
+    }
+
     compute_geometry_parameters() {
         this._area = 0;
         this._perimeter = 0;
@@ -2214,6 +2243,23 @@ class TrapezoidalPrism extends Base3DGeometryGroup {
     get_face(side = "top") {
         // return a Polygon 3D of a specific side
         return Polygon3D.copy(this, this.filter_points_by_side(side));
+    }
+
+
+    get scad_geometry(){
+        const faces = [
+            [1, 0, 2, 3],     // Top side
+            [5, 4, 6, 7],     // Bottom side
+            [1, 5, 7, 3],     // Back side
+            [0, 4, 6, 2],     // Front side
+            [3, 2, 6, 7],     // Right side
+            [1, 0, 4, 5],     // Left side
+        ];
+        return `polyhedron(${JSON.stringify(this.scad_points)}, ${JSON.stringify(faces)})`
+    }
+
+    to_scad(){
+        return `color("${this.color.hex}") ${this.scad_geometry};`;
     }
 
     filter_points_by_side(side, points) {

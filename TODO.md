@@ -1,5 +1,8 @@
 # TODO-LIST
 
+* [ ] Générer le script SCAD, à partir du UserData en utilisant les outils de openscad, translate, rotate, etc.... 
+  * [ ] Sauver les transformations de l'Item ainsi que l'item dans le userData, puis les réporter dans le script.
+
 * [ ] Ajoûter les slider de manière dynamique avec un toggle pour pouvoir défiler les profil et garder la vue des
   losanges
 
