@@ -3314,8 +3314,6 @@
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
 
                         const deg_rotation_angles = ZOME.rotation_angles.slice(0, this.num_spirals_to_display).map((a) => a.deg);
-                        output_str += `rot_angles = ${JSON.stringify(deg_rotation_angles)};\n`;
-
                         for (let i = 0; i < items_3D.length; i++) {
                             const item = items_3D[i];
 
