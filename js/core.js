@@ -1246,7 +1246,7 @@ class Base3DGeometry {
 
             geometry.translate(xMid, yMid, 2);
             this._label_mesh = new THREE.Mesh(geometry, THREE_LABELS_MATERIAL);
-            this._label_mesh.name = `${face_on_the_ground.label}_label`;
+            this._label_mesh.name = `${face_on_the_ground.label}_Label`;
 
             const face = this.get_face(side);
 
@@ -2339,7 +2339,7 @@ class Base3DGeometryCrown extends Base3DGeometryGroup {
 
     compute_label_mesh(font, translation_vec = [0, 0, 0]) {
         this._label_mesh = new THREE.Group();
-        this._label_mesh.name = `${this.parent.label}_label`;
+        this._label_mesh.name = `${this.parent.label}_Label`;
 
         for (let i = 0; i < this.children.length; i++) {
             const item = this.children[i];
