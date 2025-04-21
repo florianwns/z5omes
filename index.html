@@ -741,9 +741,9 @@
                                             <div class="position-absolute bottom-0 start-0 w-100"
                                                 x-show="!openscad_panel_is_hidden">
                                                 <pre class="d-flex m-0">
-                                                    <code class="language-scad rounded w-100 overflow-auto bg-transparent"
+                                                    <code class="language-scad rounded w-100 overflow-auto bg-transparent text-white"
                                                           style="height:580px;"
-                                                        x-text="openscad_content">
+                                                          x-html="highlighted_openscad_content">
                                                     </code>
                                                 </pre>
                                             </div>
@@ -1558,7 +1558,6 @@
 <!-- Highlight.js JS -->
 <script src="js/highlight/highlight.min.js"></script>
 <script src="js/highlight/languages/openscad.min.js"></script>
-<script>hljs.highlightAll();</script>
 
 <!-- i18n Dictionaries -->
 <script src="i18n/ar.js?v=1.0.16b05"></script>
@@ -3288,8 +3287,84 @@
                     const export_name = this.gen_filename(`_${this.type_of_3D_objects}`);
                     output_str += `// File: ${export_name}\n`;
 
+                    if (this.items_are_grouped) {
+                        const groups = eval(`ZOME.${this.type_of_3D_objects}`);
+                        let z_origin = 0;
+                        _.forIn(groups, group => {
+                            const item = group.item.put_on_the_ground();
+
+                            // Compute a translation vec to align and spread items
+                            const translation_vec = round_values([-item.x_min, -item.z_min + z_origin, -item.y_min]);
+                            output_str += `translate(${JSON.stringify(translation_vec)}) ${item.to_scad()}\n`;
+
+                            // Add Label
+                            // if (this.draw_labels) {
+                            //     item.compute_label_mesh(font);
+                            //     if (item.label_mesh) {
+                            //         add_to_group(label_meshes, clone_3D_obj(item.label_mesh, translation_vec))
+                            //     }
+                            // }
+                            //
+
+                            // Increase origin on Z axis
+                            z_origin += item.depth + 50;
+                        });
+                    }
+                    else {
+                        const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
+
+                        const deg_rotation_angles = ZOME.rotation_angles.slice(0, this.num_spirals_to_display).map((a) => a.deg);
+                        output_str += `rot_angles = ${JSON.stringify(deg_rotation_angles)};\n`;
+
+                        for (let i = 0; i < items_3D.length; i++) {
+                            const item = items_3D[i];
+
+                            // if (this.draw_labels) {
+                            //     item.compute_label_mesh(font);
+                            //     if (item.label_mesh) {
+                            //         add_to_group(label_meshes, clone_3D_obj(item.label_mesh));
+                            //     }
+                            // }
+                            _.forEach(deg_rotation_angles, angle => {
+                                output_str += `rotate([0, 0, ${angle}]) ${item.to_scad()}\n`;
+                            });
+                        }
+                    }
+
+                    const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
+                    // Add Zome reflection
+                    // if (this.clone_and_rotate_items && this.add_zome_reflection) {
+                    //     const mirror_vec = [0, 0, 1]
+                    //     const num_children = zome_meshes.children.length;
+                    //     for (let i = 0; i < num_children; i++) {
+                    //         const reflected_mesh = clone_3D_obj(zome_meshes.children[i]);
+                    //         reflected_mesh.scale.multiply(mirror_vec);
+                    //         reflected_mesh.translateY(2 * delta_y);
+                    //         add_to_group(zome_meshes, reflected_mesh);
+                    //     }
+                    // }
+                    //
+                    let floor_3D = this.get_floor_3D();
+                    if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
+                        output_str += `${floor_3D.to_scad()}\n`;
+                    }
+                    // obj_to_export.add(zome_meshes);
+                    // obj_to_export.add(label_meshes);
+                    //
+                    // // Inverse Y and Z axes
+                    // if (this.inverse_Y_Z_axes) {
+                    //     obj_to_export.translateZ(-delta_y)
+                    //     obj_to_export.rotateX(TAU_Q);
+                    //     obj_to_export.rotateY(-TAU_Q);
+                    // } else {
+                    //     obj_to_export.translateY(-delta_y)
+                    // }
 
                     return output_str;
+                },
+
+                get highlighted_openscad_content(){
+                    return hljs.highlight(this.openscad_content, { language: 'scad' }).value;
                 },
                 compute_obj_to_export() {
                     // Build 3D faces and edges
