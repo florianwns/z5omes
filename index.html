@@ -3193,7 +3193,7 @@
                         const zip = new JSZip();
                         const num_children = obj_list_to_exports.length;
                         for (let i = 0; i < num_children; i++) {
-                            const obj_name = `${i}_${obj_list_to_exports[i].name}`
+                            const obj_name = obj_list_to_exports[i].name
                             const obj_filename = `${obj_name}.obj`;
                             const mtl_filename = `${obj_name}.mtl`;
 
@@ -3259,13 +3259,12 @@
                         ];
 
                         const zip = new JSZip();
-
                         const num_children = obj_list_to_exports.length;
                         for (let i = 0; i < num_children; i++) {
                             const str = exporter.parse(obj_list_to_exports[i]);
                             const mesh_blob = new Blob([str], {type: 'text/plain'});
 
-                            const obj_name = `${i}_${obj_list_to_exports[i].name}`
+                            const obj_name = obj_list_to_exports[i].name
                             const mesh_filename = `${obj_name}.${ext}`;
 
                             zip.file(mesh_filename, mesh_blob);
@@ -3283,66 +3282,14 @@
                         save_as(blob, filename);
                     }
                 },
-
                 get openscad_content(){
-                    return "// Socle de la pièce\n" +
-                        "module Socle() {\n" +
-                        "    cube([40, 40, 5], center = true);\n" +
-                        "}\n" +
-                        "\n" +
-                        "// Pilier central\n" +
-                        "module Pilier() {\n" +
-                        "    translate([0, 0, 5])\n" +
-                        "        cylinder(h = 30, r = 5);\n" +
-                        "}\n" +
-                        "\n" +
-                        "// Assemblage complet\n" +
-                        "module Assemblage() {\n" +
-                        "    Socle();\n" +
-                        "    Pilier();\n" +
-                        "}\n" +
-                        "\n" +
-                        "Assemblage();\n" +
-                        "// Pilier central\n" +
-                        "module Pilier() {\n" +
-                        "    translate([0, 0, 5])\n" +
-                        "        cylinder(h = 30, r = 5);\n" +
-                        "}\n" +
-                        "\n" +
-                        "Assemblage();\n" +
-                        "// Pilier central\n" +
-                        "module Pilier() {\n" +
-                        "    translate([0, 0, 5])\n" +
-                        "        cylinder(h = 30, r = 5);\n" +
-                        "}\n" +
-                        "\n" +
-                        "Assemblage();\n" +
-                        "// Pilier central\n" +
-                        "module Pilier() {\n" +
-                        "    translate([0, 0, 5])\n" +
-                        "        cylinder(h = 30, r = 5);\n" +
-                        "}\n" +
-                        "\n" +
-                        "Assemblage();\n" +
-                        "// Pilier central\n" +
-                        "module Pilier() {\n" +
-                        "    translate([0, 0, 5])\n" +
-                        "        cylinder(h = 30, r = 5);\n" +
-                        "}\n" +
-                        "\n" +
-                        "Assemblage();\n" +
-                        "// Pilier central\n" +
-                        "module Pilier() {\n" +
-                        "    translate([0, 0, 5])\n" +
-                        "        cylinder(h = 30, r = 5);\n" +
-                        "}\n" +
-                        "\n" +
-                        "Assemblage();\n" +
-                        "// Pilier central\n" +
-                        "module Pilier() {\n" +
-                        "    translate([0, 0, 5])\n" +
-                        "        cylinder(h = 30, r = 5);\n" +
-                        "}\n"
+                    let output_str = "";
+                    // Build 3D faces and edges
+                    const export_name = this.gen_filename(`_${this.type_of_3D_objects}`);
+                    output_str += `// File: ${export_name}\n`;
+
+
+                    return output_str;
                 },
                 compute_obj_to_export() {
                     // Build 3D faces and edges
@@ -3350,10 +3297,18 @@
                     obj_to_export.name = this.gen_filename(`_${this.type_of_3D_objects}`);
 
                     const zome_meshes = new THREE.Group();
-                    zome_meshes.name = "zome";
+                    zome_meshes.name = "Zome";
 
                     const label_meshes = new THREE.Group();
-                    label_meshes.name = "labels";
+                    label_meshes.name = "Labels";
+
+                    function add_to_group(group, mesh){
+                        const mesh_uuid = mesh.uuid.replaceAll("-", "");
+                        mesh.traverse(o => {
+                            o.name = `${o.name}_${mesh_uuid}`;
+                        });
+                        group.add(mesh);
+                    }
 
                     if (this.items_are_grouped) {
                         const groups = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -3365,17 +3320,13 @@
                             const translation_vec = [-item.x_min, -item.y_min, -item.z_min + z_origin];
 
                             // Apply translation vector
-                            zome_meshes.add(
-                                clone_3D_obj(item.mesh, translation_vec)
-                            );
+                            add_to_group(zome_meshes, clone_3D_obj(item.mesh, translation_vec))
 
                             // Add Label
                             if (this.draw_labels) {
                                 item.compute_label_mesh(font);
                                 if (item.label_mesh) {
-                                    label_meshes.add(
-                                        clone_3D_obj(item.label_mesh, translation_vec)
-                                    );
+                                    add_to_group(label_meshes, clone_3D_obj(item.label_mesh, translation_vec))
                                 }
                             }
 
@@ -3388,25 +3339,21 @@
                         // Same as above but for spirals with geometry cloning for more efficiency
                         for (let i = 0; i < items_3D.length; i++) {
                             const item = items_3D[i];
+
+                            if (this.draw_labels) {
+                                item.compute_label_mesh(font);
+                                if (item.label_mesh) {
+                                    add_to_group(label_meshes, clone_3D_obj(item.label_mesh));
+                                }
+                            }
+
                             for (let spiral_index = 0; spiral_index < ZOME.num_spirals; spiral_index++) {
                                 const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
 
                                 if (spiral_index < this.num_spirals_to_display) {
                                     const rotated_mesh = clone_3D_obj(item.mesh);
-                                    rotated_mesh.traverse(o => {
-                                        o.name = `${o.name}_${spiral_index + 1}`;
-                                    });
                                     rotated_mesh.rotateY(rotation_angle);
-                                    zome_meshes.add(rotated_mesh);
-                                }
-                            }
-
-                            if (this.draw_labels) {
-                                item.compute_label_mesh(font);
-                                if (item.label_mesh) {
-                                    label_meshes.add(
-                                        clone_3D_obj(item.label_mesh)
-                                    );
+                                    add_to_group(zome_meshes, rotated_mesh);
                                 }
                             }
                         }
@@ -3414,24 +3361,21 @@
 
                     const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
 
-                    // Add zome reflection
+                    // Add Zome reflection
                     if (this.clone_and_rotate_items && this.add_zome_reflection) {
                         const mirror_vec = new THREE.Vector3(1, -1, 1);
                         const num_children = zome_meshes.children.length;
                         for (let i = 0; i < num_children; i++) {
-                            const cloned_child = clone_3D_obj(zome_meshes.children[i]);
-                            cloned_child.scale.multiply(mirror_vec);
-                            cloned_child.translateY(2 * delta_y);
-                            cloned_child.traverse(o => {
-                                o.name = `${o.name}_reflection`;
-                            });
-                            zome_meshes.add(cloned_child);
+                            const reflected_mesh = clone_3D_obj(zome_meshes.children[i]);
+                            reflected_mesh.scale.multiply(mirror_vec);
+                            reflected_mesh.translateY(2 * delta_y);
+                            add_to_group(zome_meshes, reflected_mesh);
                         }
                     }
 
                     let floor_3D = this.get_floor_3D();
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                        zome_meshes.add(clone_3D_obj(floor_3D.mesh));
+                        add_to_group(zome_meshes, clone_3D_obj(floor_3D.mesh));
                     }
                     obj_to_export.add(zome_meshes);
                     obj_to_export.add(label_meshes);
@@ -3454,25 +3398,21 @@
                         scene.remove(meshes.vanishing_lines)
                     }
                     meshes.vanishing_lines = new THREE.Group();
-                    meshes.vanishing_lines.name = "vanishing_lines";
 
                     if (meshes.zome instanceof THREE.Group) {
                         scene.remove(meshes.zome)
                     }
                     meshes.zome = new THREE.Group();
-                    meshes.zome.name = "zome";
 
                     if (meshes.edges instanceof THREE.Group) {
                         scene.remove(meshes.edges)
                     }
                     meshes.edges = new THREE.Group();
-                    meshes.edges.name = "edges";
 
                     if (meshes.labels instanceof THREE.Group) {
                         scene.remove(meshes.labels)
                     }
                     meshes.labels = new THREE.Group();
-                    meshes.labels.name = "labels";
                 },
 
                 process() {
@@ -3608,7 +3548,7 @@
                     // Inverse Y and Z axes
                     _.forEach(meshes, (mesh, name) => {
                         // Don't rotate axes
-                        if (name == "axes") return;
+                        if (name === "axes") return;
                         if (this.inverse_Y_Z_axes) {
                             mesh.translateZ(-delta_y)
                             mesh.rotateX(TAU_Q);
@@ -3817,7 +3757,7 @@
                     face_divisions_by_crowns_str: "",
                     bindu_ratios_str: "",
 
-                    // Commons parameters, Not  zome params, but we save them
+                    // Commons parameters, Not Zome params, but we save them
                     language: null,
                     help_is_displayed: false,
                 },
