@@ -29,6 +29,8 @@ const I18N_EN = {
         profile: "Profile",
         face: "Face",
         spirals: "Spirals",
+        openscad: "OpenSCAD",
+        show_openscad_script: "Show OpenSCAD script",
         flattened_zome: "Flattened zome",
         flattened_faces: "Flattened faces",
         zome_made_with: "This zome was made with",
