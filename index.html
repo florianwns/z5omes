@@ -3773,6 +3773,11 @@
                         case "ArrowRight":
                             this.move(this.right);
                             break;
+                        case "Escape":
+                            if(this.openscad_panel_is_hidden) return false;
+
+                            this.openscad_panel_is_hidden = !this.openscad_panel_is_hidden;
+                            break;
                         default:
                             return false;
                     }
