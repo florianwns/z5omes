@@ -514,7 +514,7 @@
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
                                                   :title="i18n('tooltip_export_2_format', 'SCAD')"
-                                                  @click="download_sca()">
+                                                  @click="download_scad()">
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">SCAD</span>
                                             </span>
@@ -3246,6 +3246,12 @@
                         (error) => console.error(error),
                         {binary: false},
                     );
+                },
+                download_scad() {
+                    const ext = "scad";
+                    const blob = new Blob([this.openscad_content], {type: 'text/plain'});
+                    const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
+                    save_as(blob, filename);
                 },
                 export_to(cls, ext) {
                     const exporter = new cls();
