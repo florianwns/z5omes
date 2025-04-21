@@ -28,6 +28,9 @@
     <link href="css/fa.min.css" rel="stylesheet">
     <link href="css/flag-icons.css" rel="stylesheet">
     <link href="css/custom.css?v=1.0.16b05" rel="stylesheet">
+
+    <!-- Highlight.js CSS -->
+    <link href="js/highlight/styles/atom-one-dark-reasonable.min.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -41,7 +44,7 @@
          style="height:100%;width:100%;z-index: 9998;">
         <div class=" d-flex align-items-center" style="height:100%;width:100%;">
             <div class="d-flex align-items-center text-decoration-none m-auto position-relative d-flex">
-                <img src="img/logo_zome.svg" width="80" title="Z5omes" class="me-2">
+                <img src="img/logo_zome.svg" width="80" title="Z5omes" class="me-2" alt="Z5omes">
                 <h1 class="text-primary mb-0 ">
                     Z<span class="fs-4">o</span>oOo<span class="fs-4">o</span>mes
                 </h1>
@@ -503,7 +506,6 @@
                                         <div class="vstack">
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  x-show="!parts_are_separated_for_export"
                                                   :title="i18n('tooltip_export_2_format', 'GLTF (Meters)')"
                                                   @click="download_gltf()">
                                                 <i class="fa-solid fa-file"></i>
@@ -511,25 +513,40 @@
                                             </span>
                                             <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                   data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'OBJ (Millimeters)')"
-                                                  @click="download_obj()">
+                                                  :title="i18n('tooltip_export_2_format', 'SCAD')"
+                                                  @click="download_sca()">
                                                 <i class="fa-solid fa-file"></i>
-                                                <span class="fa-icon-file-type">OBJ</span>
+                                                <span class="fa-icon-file-type">SCAD</span>
                                             </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'STL (Millimeters)')"
-                                                  @click="download_stl()">
-                                                <i class="fa-solid fa-file"></i>
-                                                <span class="fa-icon-file-type">STL</span>
-                                            </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'PLY (Millimeters)')"
-                                                  @click="download_ply()">
-                                                <i class="fa-solid fa-file"></i>
-                                                <span class="fa-icon-file-type">PLY</span>
-                                            </span>
+                                            <div class="vstack position-relative">
+                                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                      data-bs-toggle="tooltip"
+                                                      :title="i18n('tooltip_export_2_format', 'OBJ (Millimeters)')"
+                                                      @click="download_obj()">
+                                                    <i class="fa-solid fa-file"></i>
+                                                    <span class="fa-icon-file-type">OBJ</span>
+                                                </span>
+                                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                      data-bs-toggle="tooltip"
+                                                      :title="i18n('tooltip_export_2_format', 'STL (Millimeters)')"
+                                                      @click="download_stl()">
+                                                    <i class="fa-solid fa-file"></i>
+                                                    <span class="fa-icon-file-type">STL</span>
+                                                </span>
+                                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                      data-bs-toggle="tooltip"
+                                                      :title="i18n('tooltip_export_2_format', 'PLY (Millimeters)')"
+                                                      @click="download_ply()">
+                                                    <i class="fa-solid fa-file"></i>
+                                                    <span class="fa-icon-file-type">PLY</span>
+                                                </span>
+                                                <div
+                                                     class="position-absolute end-0 align-items-center"
+                                                     :class="(parts_are_separated_for_export) ? 'd-flex' : 'd-none'"
+                                                     style="height: 143px; top:12px; right: -22px !important;padding-left: 4px;border-style: none none none dashed;border-color: #80808052;color: #80808052;">
+                                                    <i class="fa fa-scalpel-line-dashed"></i>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -558,160 +575,192 @@
 
                                     <!-- Canvas for Zome 3D rendering -->
                                     <div x-ref="rendering_container_3D" class="position-relative">
-                                        <div x-ref="canvas_container_3D" style="min-height:580px; cursor: move;"
+                                        <div x-ref="canvas_container_3D" style="height:580px; cursor: move;"
                                              :style="(is_fullscreen)? `height:100%;` : `height:580px;`"
                                              class="shadow bg-dark rounded mb-2 overflow-hidden">
                                         </div>
 
-                                        <div class="position-absolute end-0 top-0 p-2 d-grid flex-column gap-3">
-                                            <!-- Draw Labels -->
-                                            <button class="btn btn-primary"
-                                                    @click="draw_labels = !draw_labels"
-                                                    :class="(draw_labels) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_labels')">
-                                                <i class="fa fa-tag"></i>
-                                            </button>
-
-                                            <!-- Num Spirals to display -->
-                                            <div class="vstack">
+                                        <div x-show="openscad_panel_is_hidden">
+                                            <div class="position-absolute end-0 top-0 p-2 d-grid flex-column gap-3">
+                                                <!-- Draw Labels -->
                                                 <button class="btn btn-primary"
-                                                        @click="draw_zome = !draw_zome"
-                                                        :class="(draw_zome) ? `btn-primary` : `btn-secondary`"
+                                                        @click="draw_labels = !draw_labels"
+                                                        :class="(draw_labels) ? `btn-primary` : `btn-secondary`"
+                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_draw_labels')">
+                                                    <i class="fa fa-tag"></i>
+                                                </button>
+
+                                                <!-- Num Spirals to display -->
+                                                <div class="vstack">
+                                                    <button class="btn btn-primary"
+                                                            @click="draw_zome = !draw_zome"
+                                                            :class="(draw_zome) ? `btn-primary` : `btn-secondary`"
+                                                            data-bs-toggle="tooltip"
+                                                            :title="i18n('tooltip_illuminate_object')">
+                                                        <i class="fa"
+                                                           :class="(draw_zome) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
+                                                    </button>
+                                                    <div class="mt-1" x-show="draw_zome && clone_and_rotate_items">
+                                                        <button class="btn btn-sm btn-small-padding"
+                                                                @click="num_spirals_to_display = Math.max(num_spirals_to_display - 1, 1)"
+                                                                :class="(num_spirals_to_display <= 1) ? `btn-secondary` : `btn-primary`"
+                                                                data-bs-toggle="tooltip"
+                                                                :title="i18n('tooltip_decrease_spiral_rotations')">
+                                                            <i class="fa fa-minus"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-small-padding"
+                                                                @click="num_spirals_to_display = Math.min(num_spirals_to_display + 1, params.num_spirals)"
+                                                                :class="(num_spirals_to_display >= params.num_spirals) ? `btn-secondary` : `btn-primary`"
+                                                                data-bs-toggle="tooltip"
+                                                                :title="i18n('tooltip_increase_spiral_rotations')">
+                                                            <i class="fa fa-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Add floor -->
+                                                <button x-show="show_add_floor_btn" class="btn btn-primary"
+                                                        @click="add_floor = !add_floor"
+                                                        :class="(add_floor) ? `btn-primary` : `btn-secondary`"
+                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_add_floor')">
+                                                    <i class="fa fa-hexagon"></i>
+                                                </button>
+
+                                                <!-- Inversion of Z and Y axes -->
+                                                <button class="btn px-0 btn-primary"
+                                                        @click="inverse_Y_Z_axes = !inverse_Y_Z_axes"
+                                                        :class="(inverse_Y_Z_axes) ? `btn-primary` : `btn-secondary`"
                                                         data-bs-toggle="tooltip"
-                                                        :title="i18n('tooltip_illuminate_object')">
-                                                    <i class="fa"
-                                                       :class="(draw_zome) ? `fa-lightbulb-on` : `fa-lightbulb`"></i>
+                                                        :title="i18n('tooltip_inversion_Y_Z_axes')">
+                                                    <small>Y⬄Z</small>
                                                 </button>
-                                                <div class="mt-1" x-show="draw_zome && clone_and_rotate_items">
-                                                    <button class="btn btn-sm btn-small-padding"
-                                                            @click="num_spirals_to_display = Math.max(num_spirals_to_display - 1, 1)"
-                                                            :class="(num_spirals_to_display <= 1) ? `btn-secondary` : `btn-primary`"
-                                                            data-bs-toggle="tooltip"
-                                                            :title="i18n('tooltip_decrease_spiral_rotations')">
-                                                        <i class="fa fa-minus"></i>
+
+                                                <!-- Zome reflection -->
+                                                <button x-show="clone_and_rotate_items"
+                                                        class="btn px-0 position-relative btn-primary"
+                                                        @click="add_zome_reflection = !add_zome_reflection"
+                                                        :class="(add_zome_reflection) ? `btn-primary` : `btn-secondary`"
+                                                        data-bs-toggle="tooltip"
+                                                        :title="i18n('tooltip_add_zome_reflection')">
+                                                    <i class="fa fa-caret-up position-absolute top-0 start-50 translate-middle-x"></i>
+                                                    <i class="fa fa-caret-down position-absolute bottom-0 start-50 translate-middle-x"></i>
+                                                    <i class="fa fa-horizontal-rule"></i>
+                                                </button>
+
+                                                <!-- Parts are stored in separate files -->
+                                                <button x-show="!is_fullscreen"
+                                                        class="btn btn-primary"
+                                                        @click="parts_are_separated_for_export = !parts_are_separated_for_export"
+                                                        :class="(parts_are_separated_for_export) ? `btn-primary` : `btn-secondary`"
+                                                        data-bs-toggle="tooltip"
+                                                        :title="i18n('tooltip_parts_are_stored_in_separate_files')">
+                                                    <i class="fa fa-scalpel-line-dashed"></i>
+                                                </button>
+
+                                                <!-- Spin on/off -->
+                                                <div class="vstack">
+                                                    <button class="btn btn-primary"
+                                                            @click="is_spinning = !is_spinning"
+                                                            :class="(is_spinning) ? `btn-primary` : `btn-secondary`"
+                                                            data-bs-toggle="tooltip" :title="i18n('tooltip_spin')">
+                                                        <i class="fa "
+                                                           :class="(speed < 0) ? `fa-rotate-left` : `fa-rotate-right`"
+                                                        ></i>
                                                     </button>
-                                                    <button class="btn btn-sm btn-small-padding"
-                                                            @click="num_spirals_to_display = Math.min(num_spirals_to_display + 1, params.num_spirals)"
-                                                            :class="(num_spirals_to_display >= params.num_spirals) ? `btn-secondary` : `btn-primary`"
-                                                            data-bs-toggle="tooltip"
-                                                            :title="i18n('tooltip_increase_spiral_rotations')">
-                                                        <i class="fa fa-plus"></i>
-                                                    </button>
+
+                                                    <!-- Rotation Speed -->
+                                                    <div class="mt-1" x-show="is_spinning">
+                                                        <button class="btn btn-sm btn-primary btn-small-padding"
+                                                                @click="decrease_speed"
+                                                                data-bs-toggle="tooltip"
+                                                                :title="i18n('key_div_3D_view')">
+                                                            <i class="fa fa-minus"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-primary btn-small-padding"
+                                                                @click="increase_speed"
+                                                                data-bs-toggle="tooltip"
+                                                                :title="i18n('key_mul_3D_view')">
+                                                            <i class="fa fa-plus"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Add floor -->
-                                            <button x-show="show_add_floor_btn" class="btn btn-primary"
-                                                    @click="add_floor = !add_floor"
-                                                    :class="(add_floor) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_add_floor')">
-                                                <i class="fa fa-hexagon"></i>
-                                            </button>
+                                            <div class="position-absolute bottom-0 p-2 d-flex justify-content-center w-100">
+                                                <div class="hstack gap-3">
+                                                    <!-- Draw Vanishing Lines -->
+                                                    <button x-show="show_vanishing_lines_toggle_btn" class="btn btn-primary"
+                                                            @click="draw_vanishing_lines = !draw_vanishing_lines"
+                                                            :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
+                                                            data-bs-toggle="tooltip"
+                                                            :title="i18n('tooltip_draw_vanishing_lines')">
+                                                        <i class="fa fa-arrows-to-circle"></i>
+                                                    </button>
 
-                                            <!-- Inversion of Z and Y axes -->
-                                            <button class="btn px-0 btn-primary"
-                                                    @click="inverse_Y_Z_axes = !inverse_Y_Z_axes"
-                                                    :class="(inverse_Y_Z_axes) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip"
-                                                    :title="i18n('tooltip_inversion_Y_Z_axes')">
-                                                <small>Y⬄Z</small>
-                                            </button>
+                                                    <!-- Draw Axes -->
+                                                    <button class="btn btn-primary"
+                                                            @click="draw_axes = !draw_axes"
+                                                            :class="(draw_axes) ? `btn-primary` : `btn-secondary`"
+                                                            data-bs-toggle="tooltip" :title="i18n('tooltip_draw_axes')">
+                                                        <i class="fa fa-chart-scatter-3d"></i>
+                                                    </button>
+                                                </div>
 
-                                            <!-- Zome reflection -->
-                                            <button x-show="clone_and_rotate_items"
-                                                    class="btn px-0 position-relative btn-primary"
-                                                    @click="add_zome_reflection = !add_zome_reflection"
-                                                    :class="(add_zome_reflection) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip"
-                                                    :title="i18n('tooltip_add_zome_reflection')">
-                                                <i class="fa fa-caret-up position-absolute top-0 start-50 translate-middle-x"></i>
-                                                <i class="fa fa-caret-down position-absolute bottom-0 start-50 translate-middle-x"></i>
-                                                <i class="fa fa-horizontal-rule"></i>
-                                            </button>
+                                            </div>
 
-                                            <!-- Parts are stored in separate files -->
-                                            <button class="btn btn-primary"
-                                                    @click="parts_are_separated_for_export = !parts_are_separated_for_export"
-                                                    :class="(parts_are_separated_for_export) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip"
-                                                    :title="i18n('tooltip_parts_are_stored_in_separate_files')">
-                                                <i class="fa fa-scalpel-line-dashed"></i>
-                                            </button>
-                                        </div>
-
-                                        <div class="position-absolute end-0 bottom-0 p-2 d-grid flex-column gap-3">
-                                            <!-- Draw Vanishing Lines -->
-                                            <button x-show="show_vanishing_lines_toggle_btn" class="btn btn-primary"
-                                                    @click="draw_vanishing_lines = !draw_vanishing_lines"
-                                                    :class="(draw_vanishing_lines) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip"
-                                                    :title="i18n('tooltip_draw_vanishing_lines')">
-                                                <i class="fa fa-arrows-to-circle"></i>
-                                            </button>
-
-                                            <!-- Draw Axes -->
-                                            <button class="btn btn-primary"
-                                                    @click="draw_axes = !draw_axes"
-                                                    :class="(draw_axes) ? `btn-primary` : `btn-secondary`"
-                                                    data-bs-toggle="tooltip" :title="i18n('tooltip_draw_axes')">
-                                                <i class="fa fa-chart-scatter-3d"></i>
-                                            </button>
-
-                                            <!-- Spin on/off -->
-                                            <div class="vstack">
+                                            <div class="position-absolute start-0 bottom-0 p-2 d-grid flex-column gap-3">
+                                                <!-- Capture image -->
                                                 <button class="btn btn-primary"
-                                                        @click="is_spinning = !is_spinning"
-                                                        :class="(is_spinning) ? `btn-primary` : `btn-secondary`"
-                                                        data-bs-toggle="tooltip" :title="i18n('tooltip_spin')">
-                                                    <i class="fa "
-                                                       :class="(speed < 0) ? `fa-rotate-left` : `fa-rotate-right`"
-                                                    ></i>
+                                                        @click="capture"
+                                                        data-bs-toggle="tooltip"
+                                                        :title="i18n('tooltip_download_3D_view_in_png_format')">
+                                                    <i class="fa fa-camera-retro"></i>
                                                 </button>
 
-                                                <!-- Rotation Speed -->
-                                                <div class="mt-1" x-show="is_spinning">
-                                                    <button class="btn btn-sm btn-primary btn-small-padding"
-                                                            @click="decrease_speed"
-                                                            data-bs-toggle="tooltip"
-                                                            :title="i18n('key_div_3D_view')">
-                                                        <i class="fa fa-minus"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-primary btn-small-padding"
-                                                            @click="increase_speed"
-                                                            data-bs-toggle="tooltip"
-                                                            :title="i18n('key_mul_3D_view')">
-                                                        <i class="fa fa-plus"></i>
-                                                    </button>
+                                                <!-- Keyboard shortcuts -->
+                                                <div data-bs-toggle="modal"
+                                                     data-bs-target="#shortcuts-modal">
+                                                    <div class="btn btn-primary" data-bs-toggle="tooltip"
+                                                         :title="i18n('tooltip_show_keyboard_shortcuts')">
+                                                        <i class="fa-solid fa-keyboard"></i>
+                                                    </div>
                                                 </div>
+
+                                                <!-- Fullscreen Toggle btn -->
+                                                <button class="btn btn-primary"
+                                                        x-show="can_use_screenfull"
+                                                        @click="toggle_fullscreen"
+                                                        data-bs-toggle="tooltip" :title="i18n('fullscreen')">
+                                                    <i class="fa fa-expand"></i>
+                                                </button>
                                             </div>
                                         </div>
 
-                                        <div class="position-absolute start-0 bottom-0 p-2 d-grid flex-column gap-3">
-                                            <!-- Capture image -->
-                                            <button class="btn btn-primary"
-                                                    @click="capture"
-                                                    data-bs-toggle="tooltip"
-                                                    :title="i18n('tooltip_download_3D_view_in_png_format')">
-                                                <i class="fa fa-camera-retro"></i>
-                                            </button>
-
-                                            <!-- Keyboard shortcuts -->
-                                            <div class="btn btn-primary p-0"
-                                                 data-bs-toggle="modal"
-                                                 data-bs-target="#shortcuts-modal">
-                                                <div class="btn btn-primary" data-bs-toggle="tooltip"
-                                                     :title="i18n('tooltip_show_keyboard_shortcuts')">
-                                                    <i class="fa-solid fa-keyboard"></i>
-                                                </div>
+                                        <div x-show="!is_fullscreen">
+                                            <!-- OpenSCAD Script -->
+                                            <div class="position-absolute bottom-0 start-0 w-100"
+                                                x-show="!openscad_panel_is_hidden">
+                                                <pre class="d-flex m-0">
+                                                    <code class="language-scad rounded w-100 overflow-auto bg-transparent"
+                                                          style="height:580px;"
+                                                        x-text="openscad_content">
+                                                    </code>
+                                                </pre>
                                             </div>
 
-                                            <!-- Fullscreen Toggle btn -->
-                                            <button class="btn btn-primary"
-                                                    x-show="can_use_screenfull"
-                                                    @click="toggle_fullscreen"
-                                                    data-bs-toggle="tooltip" :title="i18n('fullscreen')">
-                                                <i class="fa fa-expand"></i>
-                                            </button>
+                                            <div class="position-absolute end-0 bottom-0 p-2 d-grid flex-column gap-3">
+                                                <!-- OpenSCAD Btn -->
+                                                <div data-bs-toggle="modal"
+                                                     data-bs-target="#openscad-modal">
+                                                    <div class="btn btn-primary position-relative"
+                                                         data-bs-toggle="tooltip"
+                                                         @click="openscad_panel_is_hidden = !openscad_panel_is_hidden"
+                                                         :class="(!openscad_panel_is_hidden) ? `bg-primary`: `bg-secondary`"
+                                                         :title="i18n('show_openscad_script')">
+                                                        <img src="img/openscad.svg" alt="openscad" style="width:20px">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <!-- Keyboard shortcuts Modal -->
@@ -1505,6 +1554,11 @@
 
 <!-- JSZip -->
 <script src="js/jszip.min.js"></script>
+
+<!-- Highlight.js JS -->
+<script src="js/highlight/highlight.min.js"></script>
+<script src="js/highlight/languages/openscad.min.js"></script>
+<script>hljs.highlightAll();</script>
 
 <!-- i18n Dictionaries -->
 <script src="i18n/ar.js?v=1.0.16b05"></script>
@@ -2973,6 +3027,7 @@
                 num_spirals_to_display: 1,
                 last_num_spirals: 1,
                 is_spinning: false,
+                openscad_panel_is_hidden: true,
                 speed: 0.001,
                 type_of_3D_objects: "skeleton",
                 parts_are_separated_for_export: false,
@@ -3229,6 +3284,66 @@
                     }
                 },
 
+                get openscad_content(){
+                    return "// Socle de la pièce\n" +
+                        "module Socle() {\n" +
+                        "    cube([40, 40, 5], center = true);\n" +
+                        "}\n" +
+                        "\n" +
+                        "// Pilier central\n" +
+                        "module Pilier() {\n" +
+                        "    translate([0, 0, 5])\n" +
+                        "        cylinder(h = 30, r = 5);\n" +
+                        "}\n" +
+                        "\n" +
+                        "// Assemblage complet\n" +
+                        "module Assemblage() {\n" +
+                        "    Socle();\n" +
+                        "    Pilier();\n" +
+                        "}\n" +
+                        "\n" +
+                        "Assemblage();\n" +
+                        "// Pilier central\n" +
+                        "module Pilier() {\n" +
+                        "    translate([0, 0, 5])\n" +
+                        "        cylinder(h = 30, r = 5);\n" +
+                        "}\n" +
+                        "\n" +
+                        "Assemblage();\n" +
+                        "// Pilier central\n" +
+                        "module Pilier() {\n" +
+                        "    translate([0, 0, 5])\n" +
+                        "        cylinder(h = 30, r = 5);\n" +
+                        "}\n" +
+                        "\n" +
+                        "Assemblage();\n" +
+                        "// Pilier central\n" +
+                        "module Pilier() {\n" +
+                        "    translate([0, 0, 5])\n" +
+                        "        cylinder(h = 30, r = 5);\n" +
+                        "}\n" +
+                        "\n" +
+                        "Assemblage();\n" +
+                        "// Pilier central\n" +
+                        "module Pilier() {\n" +
+                        "    translate([0, 0, 5])\n" +
+                        "        cylinder(h = 30, r = 5);\n" +
+                        "}\n" +
+                        "\n" +
+                        "Assemblage();\n" +
+                        "// Pilier central\n" +
+                        "module Pilier() {\n" +
+                        "    translate([0, 0, 5])\n" +
+                        "        cylinder(h = 30, r = 5);\n" +
+                        "}\n" +
+                        "\n" +
+                        "Assemblage();\n" +
+                        "// Pilier central\n" +
+                        "module Pilier() {\n" +
+                        "    translate([0, 0, 5])\n" +
+                        "        cylinder(h = 30, r = 5);\n" +
+                        "}\n"
+                },
                 compute_obj_to_export() {
                     // Build 3D faces and edges
                     const obj_to_export = new THREE.Group();
