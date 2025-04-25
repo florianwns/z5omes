@@ -3262,15 +3262,6 @@
                             const translation_vec = [-item.x_min, -item.z_min + z_origin, -item.y_min];
                             obj_to_export[`${item.label}_${generate_uuid()}`] = `translate(${JSON.stringify(translation_vec)}) ${item.to_scad()}\n`;
 
-                            // Add Label
-                            // if (this.draw_labels) {
-                            //     item.compute_label_mesh(font);
-                            //     if (item.label_mesh) {
-                            //         add_to_group(label_meshes, clone_3D_obj(item.label_mesh, translation_vec))
-                            //     }
-                            // }
-                            //
-
                             // Increase origin on Z axis
                             z_origin += item.depth + 50;
                         });
@@ -3279,57 +3270,43 @@
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
 
                         const deg_rotation_angles = ZOME.rotation_angles.slice(0, this.num_spirals_to_display).map((a) => a.deg);
-                            // if (this.draw_labels) {
-                            //     item.compute_label_mesh(font);
-                            //     if (item.label_mesh) {
-                            //         add_to_group(label_meshes, clone_3D_obj(item.label_mesh));
-                            //     }
-                            // }
-
-
-                            _.forEach(deg_rotation_angles, angle => {
-                                for (let i = 0; i < items_3D.length; i++) {
-                                    const item = items_3D[i];
-                                    obj_to_export[`${item.label}_${generate_uuid()}`] = `rotate([0, 0, ${angle}]) ${item.to_scad()};\n`;
-                                }
-                            });
+                        _.forEach(deg_rotation_angles, angle => {
+                            for (let i = 0; i < items_3D.length; i++) {
+                                const item = items_3D[i];
+                                obj_to_export[`${item.label}_ROT${angle}_${generate_uuid()}`] = `rotate([0, 0, ${angle}]) ${item.to_scad()};\n`;
+                            }
+                        });
                     }
 
                     const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
                     // Add Zome reflection
-                    // if (this.clone_and_rotate_items && this.add_zome_reflection) {
-                    //     const mirror_vec = [0, 0, 1]
-                    //     const num_children = zome_meshes.children.length;
-                    //     for (let i = 0; i < num_children; i++) {
-                    //         const reflected_mesh = clone_3D_obj(zome_meshes.children[i]);
-                    //         reflected_mesh.scale.multiply(mirror_vec);
-                    //         reflected_mesh.translateY(2 * delta_y);
-                    //         add_to_group(zome_meshes, reflected_mesh);
-                    //     }
-                    // }
-                    //
+                    if (this.clone_and_rotate_items && this.add_zome_reflection) {
+                        for (let obj_name in obj_to_export) {
+                            const scad_content = obj_to_export[obj_name]; // ou n'importe quelle transformation
+                            obj_to_export[`SYM_${obj_name}`] = `translate(${JSON.stringify([0, 0, 2 * delta_y])}) mirror([0, 0, 1]) ${scad_content}`
+                        }
+                    }
 
                     let floor_3D = this.get_floor_3D();
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
                         obj_to_export[`${floor_3D.label}_${generate_uuid()}`] = `${floor_3D.to_scad()}\n`;
                     }
-                    // obj_to_export.add(zome_meshes);
-                    // obj_to_export.add(label_meshes);
-                    //
-                    // // Inverse Y and Z axes
-                    // if (this.inverse_Y_Z_axes) {
-                    //     obj_to_export.translateZ(-delta_y)
-                    //     obj_to_export.rotateX(TAU_Q);
-                    //     obj_to_export.rotateY(-TAU_Q);
-                    // } else {
-                    //     obj_to_export.translateY(-delta_y)
-                    // }
+
+                    // Inverse Y and Z axes
+                    for (let obj_name in obj_to_export) {
+                        const scad_content = obj_to_export[obj_name]; // ou n'importe quelle transformation
+                        if (this.inverse_Y_Z_axes) {
+                            obj_to_export[obj_name] = `rotate([90,0,-90]) translate(${JSON.stringify([0, 0, -delta_y])}) ${scad_content}`;
+                        } else {
+                            obj_to_export[obj_name] = `translate(${JSON.stringify([0, 0, -delta_y])}) ${scad_content}`;
+                        }
+                    }
 
                     // Generate Zip file with all SCAD
                     const zip = new JSZip();
-                    Object.entries(obj_to_export).forEach(([filename, scad_content]) => {
+                    Object.entries(obj_to_export).forEach(([obj_name, scad_content]) => {
                         const scad_blob = new Blob([scad_content], {type: 'text/plain'});
-                        zip.file(`${filename}.scad`, scad_blob);
+                        zip.file(`${obj_name}.scad`, scad_blob);
                     });
 
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}`)
