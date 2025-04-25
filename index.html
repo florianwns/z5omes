@@ -736,33 +736,6 @@
                                             </div>
                                         </div>
 
-                                        <div x-show="!is_fullscreen">
-                                            <!-- OpenSCAD Script -->
-                                            <div class="position-absolute bottom-0 start-0 w-100"
-                                                x-show="!openscad_panel_is_hidden">
-                                                <pre class="d-flex m-0">
-                                                    <code class="language-scad rounded w-100 overflow-auto bg-transparent text-white"
-                                                          style="height:580px;"
-                                                          x-html="highlighted_openscad_content">
-                                                    </code>
-                                                </pre>
-                                            </div>
-
-                                            <div class="position-absolute end-0 bottom-0 p-2 d-grid flex-column gap-3">
-                                                <!-- OpenSCAD Btn -->
-                                                <div data-bs-toggle="modal"
-                                                     data-bs-target="#openscad-modal">
-                                                    <div class="btn btn-primary position-relative"
-                                                         data-bs-toggle="tooltip"
-                                                         @click="openscad_panel_is_hidden = !openscad_panel_is_hidden"
-                                                         :class="(!openscad_panel_is_hidden) ? `bg-primary`: `bg-secondary`"
-                                                         :title="i18n('show_openscad_script')">
-                                                        <img src="img/openscad.svg" alt="openscad" style="width:20px">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <!-- Keyboard shortcuts Modal -->
                                         <div class="modal fade" id="shortcuts-modal" tabindex="-1"
                                              aria-labelledby="shortcuts-modal-title" aria-hidden="true">
@@ -1554,10 +1527,6 @@
 
 <!-- JSZip -->
 <script src="js/jszip.min.js"></script>
-
-<!-- Highlight.js JS -->
-<script src="js/highlight/highlight.min.js"></script>
-<script src="js/highlight/languages/openscad.min.js"></script>
 
 <!-- i18n Dictionaries -->
 <script src="i18n/ar.js?v=1.0.16b05"></script>
@@ -3247,12 +3216,6 @@
                         {binary: false},
                     );
                 },
-                download_scad() {
-                    const ext = "scad";
-                    const blob = new Blob([this.openscad_content], {type: 'text/plain'});
-                    const filename = this.gen_filename(`_${this.type_of_3D_objects}.${ext}`);
-                    save_as(blob, filename);
-                },
                 export_to(cls, ext) {
                     const exporter = new cls();
                     const obj_to_export = this.compute_obj_to_export();
@@ -3287,12 +3250,8 @@
                         save_as(blob, filename);
                     }
                 },
-                get openscad_content(){
-                    let output_str = "";
-                    // Build 3D faces and edges
-                    const export_name = this.gen_filename(`_${this.type_of_3D_objects}`);
-                    output_str += `// File: ${export_name}\n`;
-
+                download_scad() {
+                    const obj_to_export = [];
                     if (this.items_are_grouped) {
                         const groups = eval(`ZOME.${this.type_of_3D_objects}`);
                         let z_origin = 0;
@@ -3300,8 +3259,8 @@
                             const item = group.item.put_on_the_ground();
 
                             // Compute a translation vec to align and spread items
-                            const translation_vec = round_values([-item.x_min, -item.z_min + z_origin, -item.y_min]);
-                            output_str += `translate(${JSON.stringify(translation_vec)}) ${item.to_scad()}\n`;
+                            const translation_vec = [-item.x_min, -item.z_min + z_origin, -item.y_min];
+                            obj_to_export[`${item.label}_${generate_uuid()}`] = `translate(${JSON.stringify(translation_vec)}) ${item.to_scad()}\n`;
 
                             // Add Label
                             // if (this.draw_labels) {
@@ -3320,19 +3279,20 @@
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
 
                         const deg_rotation_angles = ZOME.rotation_angles.slice(0, this.num_spirals_to_display).map((a) => a.deg);
-                        for (let i = 0; i < items_3D.length; i++) {
-                            const item = items_3D[i];
-
                             // if (this.draw_labels) {
                             //     item.compute_label_mesh(font);
                             //     if (item.label_mesh) {
                             //         add_to_group(label_meshes, clone_3D_obj(item.label_mesh));
                             //     }
                             // }
+
+
                             _.forEach(deg_rotation_angles, angle => {
-                                output_str += `rotate([0, 0, ${angle}]) ${item.to_scad()}\n`;
+                                for (let i = 0; i < items_3D.length; i++) {
+                                    const item = items_3D[i];
+                                    obj_to_export[`${item.label}_${generate_uuid()}`] = `rotate([0, 0, ${angle}]) ${item.to_scad()};\n`;
+                                }
                             });
-                        }
                     }
 
                     const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
@@ -3348,9 +3308,10 @@
                     //     }
                     // }
                     //
+
                     let floor_3D = this.get_floor_3D();
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                        output_str += `${floor_3D.to_scad()}\n`;
+                        obj_to_export[`${floor_3D.label}_${generate_uuid()}`] = `${floor_3D.to_scad()}\n`;
                     }
                     // obj_to_export.add(zome_meshes);
                     // obj_to_export.add(label_meshes);
@@ -3364,11 +3325,17 @@
                     //     obj_to_export.translateY(-delta_y)
                     // }
 
-                    return output_str;
-                },
+                    // Generate Zip file with all SCAD
+                    const zip = new JSZip();
+                    Object.entries(obj_to_export).forEach(([filename, scad_content]) => {
+                        const scad_blob = new Blob([scad_content], {type: 'text/plain'});
+                        zip.file(`${filename}.scad`, scad_blob);
+                    });
 
-                get highlighted_openscad_content(){
-                    return hljs.highlight(this.openscad_content, { language: 'scad' }).value;
+                    const filename = this.gen_filename(`_${this.type_of_3D_objects}`)
+                    zip.generateAsync({type: "blob"}).then(function (content) {
+                        save_as(content, `${filename}_scad.zip`);
+                    });
                 },
                 compute_obj_to_export() {
                     // Build 3D faces and edges
@@ -4722,7 +4689,7 @@
 
                         if (this.params.add_footing === 1) {
                             // Add a tilde to the Footing label
-                            const timber_label = `~${footing_index + 1}`;
+                            const timber_label = `${FOOTING_CHAR}${footing_index + 1}`;
                             const timber_prism = new TrapezoidalPrism([A, B, C, D, E, F, G, H], timber_label);
 
                             // Add Footing timber to the global skeleton
