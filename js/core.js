@@ -88,6 +88,11 @@ function encode_params(params) {
     return btoa(JSON.stringify(params));
 }
 
+
+function generate_uuid(){
+    return THREE.Math.generateUUID().replaceAll("-", "");
+}
+
 function small_hash(params) {
     const param_values = _.map(params, value => {
         switch (typeof value) {
@@ -1000,14 +1005,15 @@ class Base3DGeometry {
     }
 
     get scad_points(){
-        return swap_axes(this.points, "XZY").map(p => round_values(p));
+        return swap_axes(this.points, "XZY");
     }
 
     get scad_geometry(){
+        const scad_points = this.scad_points;
         const faces = [
-            [0, 1, 2, 3],     // Left side
+            [...scad_points.keys()]
         ];
-        return `polyhedron(${JSON.stringify(this.scad_points)}, ${JSON.stringify(faces)})`
+        return `polyhedron(${JSON.stringify(scad_points)}, ${JSON.stringify(faces)})`
     }
 
     to_scad(){
