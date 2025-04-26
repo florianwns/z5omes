@@ -601,13 +601,20 @@ function check_is_coplanar(points) {
 // ========== 3D Helpers ==========
 // --------------------------------
 
-function clone_3D_obj(obj, translation_vec = [0, 0, 0]) {
+function clone_3D_obj({obj = null, translation_vec = [0, 0, 0], name = ""} = {}) {
     if (!(obj instanceof THREE.Object3D)) return;
 
     const cloned_obj = obj.clone();
-    cloned_obj.position.x += translation_vec[0];
-    cloned_obj.position.y += translation_vec[1];
-    cloned_obj.position.z += translation_vec[2];
+    const new_name = `${(name !== "") ? name: cloned_obj.name }_${generate_uuid()}`;
+    // Rename all children
+    cloned_obj.traverse(o => {
+        o.name = new_name;
+    });
+    if(translation_vec !== [0, 0, 0] && translation_vec.length === 3){
+        cloned_obj.position.x += translation_vec[0];
+        cloned_obj.position.y += translation_vec[1];
+        cloned_obj.position.z += translation_vec[2];
+    }
     return cloned_obj;
 }
 

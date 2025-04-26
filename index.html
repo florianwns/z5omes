@@ -636,7 +636,7 @@
                                                 </button>
 
                                                 <!-- Zome reflection -->
-                                                <button x-show="clone_and_rotate_items"
+                                                <button x-show="can_add_zome_reflection"
                                                         class="btn px-0 position-relative btn-primary"
                                                         @click="add_zome_reflection = !add_zome_reflection"
                                                         :class="(add_zome_reflection) ? `btn-primary` : `btn-secondary`"
@@ -3113,8 +3113,16 @@
                     });
                 },
 
+                get can_add_zome_reflection(){
+                    return ["skeleton", "inner_faces", "outer_faces"].includes(this.type_of_3D_objects);
+                },
+
+                get adjust_vertical_position(){
+                    return !this.items_are_grouped && this.type_of_3D_objects !== "flattened_faces";
+                },
+
                 get clone_and_rotate_items() {
-                    return !this.items_are_grouped;
+                    return ["skeleton", "inner_faces", "outer_faces", "flattened_faces"].includes(this.type_of_3D_objects);
                 },
 
                 get items_are_grouped() {
@@ -3124,7 +3132,7 @@
                 capture() {
                     if (!canvas) return;
 
-                    // here is the most important part because if you dont replace you will get a DOM 18 exception.
+                    // here is the most important part because if you don't replace you will get a DOM 18 exception.
                     const img_url = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
                     const filename = this.gen_filename(`_${this.type_of_3D_objects}_3D_view.png`);
                     download(filename, img_url);
@@ -3252,6 +3260,8 @@
                 },
                 download_scad() {
                     const obj_to_export = [];
+                    const delta_y = (this.adjust_vertical_position) ? ZOME.y_min : 0;
+
                     if (this.items_are_grouped) {
                         const groups = eval(`ZOME.${this.type_of_3D_objects}`);
                         let z_origin = 0;
@@ -3265,26 +3275,25 @@
                             // Increase origin on Z axis
                             z_origin += item.depth + 50;
                         });
-                    }
-                    else {
+                    } else {
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
+                        const add_mesh_reflection = this.can_add_zome_reflection && this.add_zome_reflection;
 
                         const deg_rotation_angles = ZOME.rotation_angles.slice(0, this.num_spirals_to_display).map((a) => a.deg);
                         _.forEach(deg_rotation_angles, angle => {
+                            const rotation_suffix = (angle > 0) ? `_ROT${to_decimal(angle)}` : "";
                             for (let i = 0; i < items_3D.length; i++) {
                                 const item = items_3D[i];
-                                obj_to_export[`${item.label}_ROT${angle}_${generate_uuid()}`] = `rotate([0, 0, ${angle}]) ${item.to_scad()};\n`;
+                                const scad_content = `rotate([0, 0, ${angle}]) ${item.to_scad()};\n`;
+                                const obj_name_without_uuid = `${item.label}${rotation_suffix}`;
+                                obj_to_export[`${obj_name_without_uuid}_${generate_uuid()}`] = scad_content;
+
+                                // Add Zome reflection
+                                if (add_mesh_reflection) {
+                                    obj_to_export[`${obj_name_without_uuid}_SYM_${generate_uuid()}`] = `translate(${JSON.stringify([0, 0, 2 * delta_y])}) mirror([0, 0, 1]) ${scad_content}`
+                                }
                             }
                         });
-                    }
-
-                    const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
-                    // Add Zome reflection
-                    if (this.clone_and_rotate_items && this.add_zome_reflection) {
-                        for (let obj_name in obj_to_export) {
-                            const scad_content = obj_to_export[obj_name]; // ou n'importe quelle transformation
-                            obj_to_export[`SYM_${obj_name}`] = `translate(${JSON.stringify([0, 0, 2 * delta_y])}) mirror([0, 0, 1]) ${scad_content}`
-                        }
                     }
 
                     let floor_3D = this.get_floor_3D();
@@ -3327,11 +3336,10 @@
 
                     function add_to_group(group, mesh){
                         const mesh_uuid = mesh.uuid.replaceAll("-", "");
-                        mesh.traverse(o => {
-                            o.name = `${o.name}_${mesh_uuid}`;
-                        });
                         group.add(mesh);
                     }
+
+                    const delta_y = (this.adjust_vertical_position) ? ZOME.y_min : 0;
 
                     if (this.items_are_grouped) {
                         const groups = eval(`ZOME.${this.type_of_3D_objects}`);
@@ -3343,13 +3351,13 @@
                             const translation_vec = [-item.x_min, -item.y_min, -item.z_min + z_origin];
 
                             // Apply translation vector
-                            add_to_group(zome_meshes, clone_3D_obj(item.mesh, translation_vec))
+                            add_to_group(zome_meshes, clone_3D_obj({obj: item.mesh, translation_vec: translation_vec}))
 
                             // Add Label
                             if (this.draw_labels) {
                                 item.compute_label_mesh(font);
                                 if (item.label_mesh) {
-                                    add_to_group(label_meshes, clone_3D_obj(item.label_mesh, translation_vec))
+                                    add_to_group(label_meshes, clone_3D_obj({obj: item.label_mesh, translation_vec: translation_vec}))
                                 }
                             }
 
@@ -3360,45 +3368,44 @@
                         const items_3D = eval(`ZOME.${this.type_of_3D_objects}`);
 
                         // Same as above but for spirals with geometry cloning for more efficiency
+
+                        // Add Zome reflection
+                        const add_mesh_reflection = this.can_add_zome_reflection && this.add_zome_reflection;
+                        const mirror_vec = new THREE.Vector3(1, -1, 1);
+
                         for (let i = 0; i < items_3D.length; i++) {
                             const item = items_3D[i];
 
                             if (this.draw_labels) {
                                 item.compute_label_mesh(font);
                                 if (item.label_mesh) {
-                                    add_to_group(label_meshes, clone_3D_obj(item.label_mesh));
+                                    add_to_group(label_meshes, clone_3D_obj({obj: item.label_mesh}));
                                 }
                             }
 
                             for (let spiral_index = 0; spiral_index < ZOME.num_spirals; spiral_index++) {
-                                const rotation_angle = ZOME.rotation_angles[spiral_index].rad;
+                                const rotation_angle = ZOME.rotation_angles[spiral_index];
+                                const rotation_suffix = (rotation_angle.deg > 0) ? `_ROT${to_decimal(rotation_angle.deg)}` : "";
 
                                 if (spiral_index < this.num_spirals_to_display) {
-                                    const rotated_mesh = clone_3D_obj(item.mesh);
-                                    rotated_mesh.rotateY(rotation_angle);
+                                    const rotated_mesh = clone_3D_obj({obj: item.mesh, name: `${item.label}${rotation_suffix}`});
+                                    rotated_mesh.rotateY(rotation_angle.rad);
                                     add_to_group(zome_meshes, rotated_mesh);
+
+                                    if (add_mesh_reflection) {
+                                        const reflected_mesh = clone_3D_obj({obj: rotated_mesh, name: `${item.label}${rotation_suffix}_SYM`});
+                                        reflected_mesh.scale.multiply(mirror_vec);
+                                        reflected_mesh.translateY(2 * delta_y);
+                                        add_to_group(zome_meshes, reflected_mesh);
+                                    }
                                 }
                             }
-                        }
-                    }
-
-                    const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
-
-                    // Add Zome reflection
-                    if (this.clone_and_rotate_items && this.add_zome_reflection) {
-                        const mirror_vec = new THREE.Vector3(1, -1, 1);
-                        const num_children = zome_meshes.children.length;
-                        for (let i = 0; i < num_children; i++) {
-                            const reflected_mesh = clone_3D_obj(zome_meshes.children[i]);
-                            reflected_mesh.scale.multiply(mirror_vec);
-                            reflected_mesh.translateY(2 * delta_y);
-                            add_to_group(zome_meshes, reflected_mesh);
                         }
                     }
 
                     let floor_3D = this.get_floor_3D();
                     if (this.add_floor && floor_3D != null && floor_3D.mesh != null) {
-                        add_to_group(zome_meshes, clone_3D_obj(floor_3D.mesh));
+                        add_to_group(zome_meshes, clone_3D_obj({obj: floor_3D.mesh}));
                     }
                     obj_to_export.add(zome_meshes);
                     obj_to_export.add(label_meshes);
@@ -3487,7 +3494,7 @@
                             item.compute_label_mesh(font);
                             if (item.label_mesh) {
                                 meshes.labels.add(
-                                    clone_3D_obj(item.label_mesh, translation_vec)
+                                    clone_3D_obj({obj: item.label_mesh, translation_vec: translation_vec})
                                 );
                             }
 
@@ -3512,8 +3519,6 @@
                     mesh_geometry.setAttribute('color', new THREE.Float32BufferAttribute(mesh_colors, 3));
                     mesh_geometry.computeVertexNormals()
                     let mesh = new THREE.Mesh(mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
-                    const item_type = this.clone_and_rotate_items ? 'Spiral' : 'Item';
-                    mesh.name = `${item_type} 1`;
                     meshes.zome.add(mesh)
 
                     const edge_geometry = new THREE.BufferGeometry().setFromPoints(edge_points);
@@ -3531,7 +3536,6 @@
                                 rotated_mesh_geometry.rotateY(angle);
 
                                 const rotated_mesh = new THREE.Mesh(rotated_mesh_geometry, THREE_VERTEX_COLOR_MATERIAL);
-                                rotated_mesh.name = `${item_type} ${spiral_index + 1}`;
                                 meshes.zome.add(rotated_mesh)
                             }
 
@@ -3544,16 +3548,16 @@
                         }
                     }
 
-                    const delta_y = (this.clone_and_rotate_items) ? ZOME.y_min : 0;
+                    const delta_y = (this.adjust_vertical_position) ? ZOME.y_min : 0;
 
-                    // Add zome reflection
-                    if (this.clone_and_rotate_items && this.add_zome_reflection) {
+                    // Add Zome reflection
+                    if (this.can_add_zome_reflection && this.add_zome_reflection) {
                         const mirror_vec = new THREE.Vector3(1, -1, 1);
                         _.forEach(meshes, (mesh, name) => {
                             // Don't clone axes
                             if (["axes", "vanishing_lines", "labels"].includes(name)) return;
 
-                            const cloned_mesh = clone_3D_obj(mesh);
+                            const cloned_mesh = clone_3D_obj({obj: mesh});
                             cloned_mesh.scale.multiply(mirror_vec);
                             cloned_mesh.translateY(2 * delta_y)
                             mesh.add(cloned_mesh);
@@ -3716,7 +3720,7 @@
                             break;
                         case "s":
                         case "S":
-                        case "s":
+                        case "z":
                         case "Z":
                             this.type_of_3D_objects = "skeleton";
                             break;
