@@ -3044,7 +3044,7 @@
                         })
                     );
 
-                    // Screenfull lister
+                    // 'Screenfull' library listener
                     if (this.can_use_screenfull) {
                         screenfull.on('change', () => {
                             this.is_fullscreen = screenfull.isFullscreen;
@@ -4297,7 +4297,7 @@
                         faces[1].part = (horizontal_split) ? "bottom" : "right";
                         zome_faces_3D.push(faces[1]);
 
-                        // Then we reset bitwise flags... not perfect but it's working
+                        // Then we reset bitwise flags... not perfect, but it's working
                         face_divisions_bitwise_flags[zome_faces_3D.length - 2] = 0;
                         face_divisions_bitwise_flags.splice(zome_faces_3D.length - 1, 0, 0);
                     } else {
@@ -4781,7 +4781,7 @@
                         let flattened_points = face.put_face_on_the_ground().points;
                         const num_points = flattened_points.length;
 
-                        // Move to an custom origin and rotate to match with previous piece
+                        // Move to a custom origin and rotate to match with previous piece
                         if (face_index > 0) {
                             flattened_points = flattened_points.map(p => {
                                 return add(p, hook_pt);
