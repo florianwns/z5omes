@@ -511,13 +511,6 @@
                                                 <i class="fa-solid fa-file"></i>
                                                 <span class="fa-icon-file-type">GLTF</span>
                                             </span>
-                                            <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
-                                                  data-bs-toggle="tooltip"
-                                                  :title="i18n('tooltip_export_2_format', 'SCAD')"
-                                                  @click="download_scad()">
-                                                <i class="fa-solid fa-file"></i>
-                                                <span class="fa-icon-file-type">SCAD</span>
-                                            </span>
                                             <div class="vstack position-relative">
                                                 <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
                                                       data-bs-toggle="tooltip"
@@ -543,9 +536,19 @@
                                                 <div
                                                      class="position-absolute end-0 align-items-center"
                                                      :class="(parts_are_separated_for_export) ? 'd-flex' : 'd-none'"
-                                                     style="height: 143px; top:12px; right: -22px !important;padding-left: 4px;border-style: none none none dashed;border-color: #80808052;color: #80808052;">
+                                                     style="height: 143px; top:14px; right: -19px !important;padding-left: 4px;border-style: none none none dashed;border-color: #80808052;color: #80808052;">
                                                     <i class="fa fa-scalpel-line-dashed"></i>
                                                 </div>
+                                            </div>
+                                            <div class="vstack position-relative"
+                                                 style="border-style: dashed none none none ;border-color: #80808052;">
+                                                <span class="text-primary btn btn-sm fs-2 px-2 position-relative"
+                                                      data-bs-toggle="tooltip"
+                                                      :title="i18n('tooltip_export_2_format', 'SCAD (Millimeters)')"
+                                                      @click="download_scad()">
+                                                    <i class="fa-solid fa-file"></i>
+                                                    <span class="fa-icon-file-type">SCAD</span>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
