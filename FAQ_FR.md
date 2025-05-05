@@ -27,7 +27,7 @@ Les dessins sont inspirés d’**Acidome**, une référence dans les dômes géo
 Même si ce n’est pas du dessin « industriel/conventionnel » à proprement parler, ces plans permettent de passer rapidement à l'usinage sans rajouter une couche de calculs.
 
 
-👉 **Les plans peuvent être utilisés tels quels** et sont d’ailleurs utilisés en production par **La Tanière à Mémé** dans le Jura.
+👉 **Les plans peuvent être utilisés tels quels** et sont d’ailleurs utilisés en production par **La Tanière à Mémé**.
 
 ---
 
