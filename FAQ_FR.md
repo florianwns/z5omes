@@ -36,7 +36,7 @@ Même si ce n’est pas du dessin « industriel/conventionnel » à proprement p
 **Réponse :**  
 Oui, c’est tout à fait **normal** ! Le modèle **GoodKarma** ne « matche » pas parfaitement, et il y a une **subtilité dans les coupes** :
 
-- Certains assemblent le GoodKarma tel quel, d’autres ajustent avec une **toupie ou un rabot**, en enlevant la matière des montants qui dépasse du plan de face, afin de poser un **panneau OSB** ensuite.
+- Certains assemblent le GoodKarma tel quel, d’autres ajustent avec une **toupie ou un rabot**, en enlevant la matière des montants qui dépasse du plan des faces extérieures, afin de poser un **panneau OSB** ensuite.
 - Pour améliorer l'ajustement, on peut **jouer sur la hauteur du "point de fuite" (paramètre `VP`)**.
 
 📌 Vous pouvez comparer la vue des **faces extérieures** avec celle des **montants** pour mieux comprendre.  
