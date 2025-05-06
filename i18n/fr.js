@@ -61,6 +61,7 @@ const I18N_FR = {
         tooltip_link_youtube: "Visitez la chaîne YouTube 🎥 pour en savoir plus sur l'utilisation de z5omes.",
         tooltip_link_github: "Allez sur Github 🐈 si vous avez des questions",
         tooltip_link_linkedin: "Visitez mon profil Linkedin",
+        tooltip_link_wiki: "Visitez la page Wikipedia de Z5omes",
         tooltip_export_2_format: "Exporter au format $1",
         tooltip_parts_are_stored_in_separate_files: "Les pièces sont stockées dans des fichiers séparés lors de l'exportation",
         tooltip_draw_face_colors: "Dessine les couleurs des faces",
