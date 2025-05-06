@@ -1,9 +1,9 @@
-# Z5omes : la Foire Aux Questions 
+# Foire Aux Questions (FAQ)
 
 ### **À quoi sert exactement Z5omes ? Est-ce un simple outil de modélisation ?**
 
 **Réponse :**  
-Z5omes ne se limite pas à un simple outil de modélisation. Il possède **plusieurs facettes** :
+Z5omes ne se limite pas à être un simple outil de modélisation. Il possède **plusieurs facettes** :
 
 - Un **aspect pédagogique**, pour jouer avec les paramètres du Zome, faire de l’origami et apprivoiser ce type de volume géométrique.
 - Un **aspect pratique**, qui permet à des non-mathématiciens de concevoir ce type de structure et de l’exporter dans des **formats 3D**.
