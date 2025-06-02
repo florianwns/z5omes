@@ -86,11 +86,11 @@ Certains montants sont marqués "**Biseau**" ou "**Pas de Biseau**", indiquant l
 
 ## 🧰 Comparatif des Méthodes de Coupe
 
-| Méthode      | Illustration | Avantages                                                                 | Inconvénients                                                                                 |
-|--------------|--------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| **GoodKarma** | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/goodkarma_zome.png" alt="GoodKarma Zome" width="400"/></p> | - Découpe simplifiée (pas de biseau dans la longueur)  <br> - Fixation perpendiculaire facile | - Nécessite un **enlèvement de matière** pour un bon ajustement                              |
-| **Beveled**   | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/beveled_zome.png" alt="Beveled Zome" width="400"/></p>     | - Résultat final **très propre et précis** <br> - Projection parfaite                         | - Très difficile à débiter <br> - Biseau dans la longueur peut **fragiliser** la structure   |
-| **Xpansion** / **Jean Soum** | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/xpansion_zome.png" alt="Xpansion Zome" width="400"/></p> | - Très facile à couper <br> - Méthode la plus **accessible**                                 | - Montage plus hasardeux <br> - Nécessite cales triangulaires ou tordre les filetages        |
+| Méthode      | Illustration                                                                                                                       | Avantages                                                                 | Inconvénients                                                                                 |
+|--------------|------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| **GoodKarma** | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/goodkarma_zome.png" alt="GoodKarma Zome" width="180"/></p> | - Découpe simplifiée (pas de biseau dans la longueur)  <br> - Fixation perpendiculaire facile | - Nécessite un **enlèvement de matière** pour un bon ajustement                              |
+| **Beveled**   | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/beveled_zome.png" alt="Beveled Zome" width="180"/></p>     | - Résultat final **très propre et précis** <br> - Projection parfaite                         | - Très difficile à débiter <br> - Biseau dans la longueur peut **fragiliser** la structure   |
+| **Xpansion** / **Jean Soum** | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/xpansion_zome.png" alt="Xpansion Zome" width="180"/></p>   | - Très facile à couper <br> - Méthode la plus **accessible**                                 | - Montage plus hasardeux <br> - Nécessite cales triangulaires ou tordre les filetages        |
 
 📎 **Note :**  
 Aucune méthode n’est parfaite pour l’instant.  
