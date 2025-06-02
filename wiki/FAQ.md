@@ -1,6 +1,6 @@
 # Frequently Asked Questions (FAQ)
 
-### **What exactly is Z5omes? Is it just a modeling tool?**
+## **What exactly is Z5omes? Is it just a modeling tool?**
 
 Z5omes is much more than just a modeling tool. It has **multiple dimensions**:
 
@@ -12,44 +12,49 @@ Z5omes is aimed at curious minds, hobbyists, and professionals ready to move int
 
 ---
 
-## What is a dihedral angle?
+## 📐 What is a dihedral angle?
 
 A **dihedral angle** is the angle formed between two flat faces that meet along an edge.  
 In a Zome, it is the angle between two adjacent panels.
 
+<p align="center">
+  <img src="https://florianwns.github.io/z5omes/img/faq/dihedral_angle.svg" alt="Angle dièdre entre deux plans" width="300"/>
+</p>
+
 ---
 
-## Why is it important to know the dihedral angle in a Zome?
+### Why is it important to know the dihedral angle in a Zome?
 
 The dihedral angle helps to:
 - Cut the panels accurately.
-- Make spacers with the correct inclination.
+- Make wedges with the correct inclination.
 - Ensure proper fit and structural stability.
 
 ---
 
-## How is the dihedral angle calculated in a Zome?
+### How is the dihedral angle calculated in a Zome?
 
 The dihedral angle depends on the geometric shape of the Zome. If the orientation of the two meeting faces is known, the dihedral angle can be calculated from their directions.
 
-One method is to calculate the angle between the perpendicular (normal) vectors of the two faces. If these vectors are known, the cosine of the angle between them can be used to find the dihedral angle.
+One method is to calculate the angle between the perpendicular (normal) vectors of the two faces. 
+<br>If these vectors are known, the cosine of the angle between them can be used to find the dihedral angle.
 
 ---
 
-## What is the relation between the dihedral angle and the spacer angle?
+### What is the relation between the dihedral angle and the Wedge angle?
 
-**Spacers** are angled pieces used to bridge the gap between two panels.
+**Wedges** are angled pieces used to bridge the gap between two panels.
 
 The relation is simple:
 
-**Spacer angle = 180 degrees - dihedral angle**
+**Wedge angle = 180 degrees - dihedral angle**
 
 Example:
-- If the dihedral angle is 140 degrees, the spacer angle will be 40 degrees.
+- If the dihedral angle is 140 degrees, the Wedge angle will be 40 degrees.
 
 ---
 
-### **The angles in the plans don't match the ones I measure on the actual pieces — is that normal?**
+## **The angles in the plans don't match the ones I measure on the actual pieces — is that normal?**
 
 The angles provided are **machine-facing cutting angles**, because carpenters and woodworkers don’t want to deal with extra calculations during machining 😉.  
 It’s not always easy to grasp at first, and this question comes up frequently.
@@ -65,7 +70,7 @@ Although not technically "industrial/conventional" drawings, these plans are rea
 
 ---
 
-### **With the GoodKarma model, the struts don’t fit together very well. Is that normal? Is it a flaw in the model?**
+## **With the GoodKarma model, the struts don’t fit together very well. Is that normal? Is it a flaw in the model?**
 
 Yes, that’s **completely normal**! The **GoodKarma** model isn’t a perfect match — there’s a **subtlety in the cuts**:
 
