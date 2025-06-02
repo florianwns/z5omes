@@ -84,11 +84,12 @@ Some struts are marked "**Bevel**" or "**No Bevel**", indicating where material 
 
 ## 🧰 Comparison of Cutting Methods
 
-| Method         | Advantages                                                                | Disadvantages                                                                                  |
-|----------------|---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| **GoodKarma**  | - Simplified cuts (no bevels along the length) <br> - Easy perpendicular fastening | - Requires **material removal** for a good fit                                                |
-| **Beveled**    | - **Very clean and precise** result <br> - Perfect projection              | - Very difficult to cut <br> - Long bevels can **weaken** the structure                       |
-| **Xpansion** / **Jean Soum** | - Very easy to cut <br> - Most **accessible** method             | - Less precise assembly <br> - Requires triangular shims or bent threads                     |
+| Method         | Illustration                                                                                         | Advantages                                                                | Disadvantages                                                                                  |
+|----------------|------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| **GoodKarma**  | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/goodkarma_zome.png" alt="GoodKarma Zome" width="180"/></p> | - Simplified cuts (no bevels along the length) <br> - Easy perpendicular fastening | - Requires **material removal** for a good fit                                                |
+| **Beveled**    | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/beveled_zome.png" alt="Beveled Zome" width="180"/></p>     | - **Very clean and precise** result <br> - Perfect projection              | - Very difficult to cut <br> - Long bevels can **weaken** the structure                       |
+| **Xpansion** / **Jean Soum** | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/xpansion_zome.png" alt="Xpansion Zome" width="180"/></p> | - Very easy to cut <br> - Most **accessible** method             | - Less precise assembly <br> - Requires triangular shims or bent threads                     |
+
 
 📎 **Note:**  
 No method is perfect at the moment.  
