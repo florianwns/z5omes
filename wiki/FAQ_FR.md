@@ -1,6 +1,6 @@
 # Foire Aux Questions (FAQ)
 
-### **À quoi sert exactement Z5omes ? Est-ce un simple outil de modélisation ?**
+## **À quoi sert exactement Z5omes ? Est-ce un simple outil de modélisation ?**
 
 Z5omes ne se limite pas à être un simple outil de modélisation. Il possède **plusieurs facettes** :
 
@@ -12,10 +12,14 @@ Z5omes s’adresse donc autant aux curieux qu’aux bricoleurs ou professionnels
 
 ---
 
-## Qu'est-ce qu'un angle dièdre ?
+## 📐 Qu'est-ce qu'un angle dièdre ?
 
 Un **angle dièdre** est l'angle formé entre deux faces planes qui se rejoignent le long d'une arête.
 <br>Dans un Zome, c’est l’angle entre deux panneaux qui se touchent.
+
+<p align="center">
+  <img src="https://florianwns.github.io/z5omes/img/faq/dihedral_angle.svg" alt="Angle dièdre entre deux plans" width="300"/>
+</p>
 
 ---
 
@@ -32,7 +36,8 @@ L’angle dièdre permet :
 
 L’angle dièdre dépend de la forme géométrique du Zome. Si on connaît la direction des deux faces qui se rejoignent, on peut calculer l’angle dièdre à partir de leurs orientations.
 
-Une méthode consiste à calculer l’angle entre les vecteurs perpendiculaires (normaux) à ces deux faces. Si les vecteurs sont connus, on peut calculer le cosinus de l’angle entre eux, puis en déduire l’angle dièdre.
+Une méthode consiste à calculer l’angle entre les vecteurs perpendiculaires (normaux) à ces deux faces. 
+<br>Si les vecteurs sont connus, on peut calculer le cosinus de l’angle entre eux, puis en déduire l’angle dièdre.
 
 ---
 
@@ -49,7 +54,7 @@ Par exemple :
 
 ---
 
-### **Les angles des plans ne correspondent pas à ceux que je trouve en mesurant les angles des pièces ?**
+## **Les angles des plans ne correspondent pas à ceux que je trouve en mesurant les angles des pièces ?**
 
 Les angles donnés sont les **angles de coupe face machine**, car les charpentiers/menuisiers ne veulent pas se rajouter une couche des calculs au moment de l'usinage 😉.  
 Ce n’est pas toujours évident à comprendre au premier abord, et ce genre de question revient régulièrement.
@@ -66,7 +71,7 @@ Même si ce n’est pas du dessin « industriel/conventionnel » à proprement p
 
 ---
 
-### **Avec le modèle GoodKarma, les montants ne jointent pas très bien. Est-ce normal ? Est-ce dû au modèle GoodKarma ?**
+## **Avec le modèle GoodKarma, les montants ne jointent pas très bien. Est-ce normal ? Est-ce dû au modèle GoodKarma ?**
 
 
 Oui, c’est tout à fait **normal** ! Le modèle **GoodKarma** ne « matche » pas parfaitement, et il y a une **subtilité dans les coupes** :
@@ -81,11 +86,11 @@ Certains montants sont marqués "**Biseau**" ou "**Pas de Biseau**", indiquant l
 
 ## 🧰 Comparatif des Méthodes de Coupe
 
-| Méthode      | Avantages                                                                 | Inconvénients                                                                                 |
-|--------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| **GoodKarma** | - Découpe simplifiée (pas de biseau dans la longueur)  <br> - Fixation perpendiculaire facile | - Nécessite un **enlèvement de matière** pour un bon ajustement                              |
-| **Beveled**   | - Résultat final **très propre et précis** <br> - Projection parfaite      | - Très difficile à débiter <br> - Biseau dans la longueur peut **fragiliser** la structure   |
-| **Xpansion** / **Jean Soum** | - Très facile à couper <br> - Méthode la plus **accessible** | - Montage plus hasardeux <br> - Nécessite cales triangulaires ou tordre les filetages        |
+| Méthode      | Illustration | Avantages                                                                 | Inconvénients                                                                                 |
+|--------------|--------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| **GoodKarma** | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/goodkarma_zome.png" alt="GoodKarma Zome" width="400"/></p> | - Découpe simplifiée (pas de biseau dans la longueur)  <br> - Fixation perpendiculaire facile | - Nécessite un **enlèvement de matière** pour un bon ajustement                              |
+| **Beveled**   | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/beveled_zome.png" alt="Beveled Zome" width="400"/></p>     | - Résultat final **très propre et précis** <br> - Projection parfaite                         | - Très difficile à débiter <br> - Biseau dans la longueur peut **fragiliser** la structure   |
+| **Xpansion** / **Jean Soum** | <p align="center"><img src="https://florianwns.github.io/z5omes/img/faq/xpansion_zome.png" alt="Xpansion Zome" width="400"/></p> | - Très facile à couper <br> - Méthode la plus **accessible**                                 | - Montage plus hasardeux <br> - Nécessite cales triangulaires ou tordre les filetages        |
 
 📎 **Note :**  
 Aucune méthode n’est parfaite pour l’instant.  
