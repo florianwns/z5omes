@@ -2,7 +2,6 @@
 
 ### **À quoi sert exactement Z5omes ? Est-ce un simple outil de modélisation ?**
 
-**Réponse :**  
 Z5omes ne se limite pas à être un simple outil de modélisation. Il possède **plusieurs facettes** :
 
 - Un **aspect pédagogique**, pour jouer avec les paramètres du Zome, faire de l’origami et apprivoiser ce type de volume géométrique.
@@ -13,9 +12,45 @@ Z5omes s’adresse donc autant aux curieux qu’aux bricoleurs ou professionnels
 
 ---
 
+## Qu'est-ce qu'un angle dièdre ?
+
+Un **angle dièdre** est l'angle formé entre deux faces planes qui se rejoignent le long d'une arête.
+<br>Dans un Zome, c’est l’angle entre deux panneaux qui se touchent.
+
+---
+
+## Pourquoi est-il important de connaître l’angle dièdre dans un Zome ?
+
+L’angle dièdre permet :
+- De couper correctement les panneaux.
+- De fabriquer des cales à la bonne inclinaison.
+- D’assurer un bon ajustement et la stabilité de la structure.
+
+---
+
+## Comment calcule-t-on l’angle dièdre dans un Zome ?
+
+L’angle dièdre dépend de la forme géométrique du Zome. Si on connaît la direction des deux faces qui se rejoignent, on peut calculer l’angle dièdre à partir de leurs orientations.
+
+Une méthode consiste à calculer l’angle entre les vecteurs perpendiculaires (normaux) à ces deux faces. Si les vecteurs sont connus, on peut calculer le cosinus de l’angle entre eux, puis en déduire l’angle dièdre.
+
+---
+
+## Quelle est la relation entre l’angle dièdre et l’angle des cales ?
+
+Les **cales** sont les pièces inclinées qui permettent de combler l’écart entre deux panneaux.
+
+La relation est simple :
+  
+**Angle des cales = 180 degrés - angle dièdre**
+
+Par exemple :
+- Si l’angle dièdre est de 140 degrés, l’angle des cales sera de 40 degrés.
+
+---
+
 ### **Les angles des plans ne correspondent pas à ceux que je trouve en mesurant les angles des pièces ?**
 
-**Réponse :**  
 Les angles donnés sont les **angles de coupe face machine**, car les charpentiers/menuisiers ne veulent pas se rajouter une couche des calculs au moment de l'usinage 😉.  
 Ce n’est pas toujours évident à comprendre au premier abord, et ce genre de question revient régulièrement.
 
@@ -33,7 +68,7 @@ Même si ce n’est pas du dessin « industriel/conventionnel » à proprement p
 
 ### **Avec le modèle GoodKarma, les montants ne jointent pas très bien. Est-ce normal ? Est-ce dû au modèle GoodKarma ?**
 
-**Réponse :**  
+
 Oui, c’est tout à fait **normal** ! Le modèle **GoodKarma** ne « matche » pas parfaitement, et il y a une **subtilité dans les coupes** :
 
 - Certains assemblent le GoodKarma tel quel, d’autres ajustent avec une **toupie ou un rabot**, en enlevant la matière des montants qui dépasse du plan des faces extérieures, afin de poser un **panneau OSB** ensuite.
